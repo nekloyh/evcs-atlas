@@ -193,3 +193,47 @@ def test_front_suy_ra_dung_13_cot_dau_cua_n09():
         "pop_source",
     ]
     assert GRID.names()[:13] == cu
+
+
+# ── bảng XÃ — đơn vị đọc thứ hai ─────────────────────────────────────────
+from evcs.schema import COMMUNE  # noqa: E402
+from evcs.schema.commune import GEOMETRY_COLUMN  # noqa: E402
+
+
+def test_commune_dung_21_cot_phat_hanh():
+    assert len(COMMUNE.columns) == 21
+    assert COMMUNE.key == "commune_code"
+
+
+def test_hinh_hoc_khong_thuoc_ban_khai():
+    """`geometry_wkb` là hình học, không phải một trường đọc được — n11 biến nó thành GeoJSON."""
+    assert not COMMUNE.has(GEOMETRY_COLUMN)
+
+
+def test_commune_va_grid_khong_lan_khai_niem():
+    """Hai bảng có cột TRÙNG TÊN nhưng khác NGHĨA — `population` của xã là toàn xã, của ô
+    là trên ~0,74 km². Trùng tên là bình thường; trộn hai bảng thì không."""
+    chung = set(COMMUNE.names()) & set(GRID.names())
+    assert "population" in chung and "n_stations" in chung
+    assert COMMUNE.get("population").unit != GRID.get("population").unit
+
+
+def test_moi_cot_commune_measure_deu_co_mo_ta():
+    assert [c.name for c in COMMUNE.measures() if not c.desc] == []
+
+
+def test_commune_khong_cot_nao_len_man_hinh_ca_nuoc():
+    """Màn hình cả nước gộp theo Ô r6 và theo TỈNH, không theo xã."""
+    assert COMMUNE.where(national=True) == []
+
+
+@pytest.mark.skipif(not TINH, reason="chưa có store")
+@pytest.mark.parametrize("pdir", TINH, ids=lambda p: p.name)
+def test_commune_khop_bang_that(pdir: Path):
+    f = pdir / "commune.parquet"
+    if not f.exists():
+        pytest.skip("tỉnh chưa có bảng xã")
+    s = pq.read_schema(f)
+    co = [n for n in s.names if n != GEOMETRY_COLUMN]
+    ty = {n: str(t) for n, t in zip(s.names, s.types) if n != GEOMETRY_COLUMN}
+    assert COMMUNE.validate(co, ty) == []

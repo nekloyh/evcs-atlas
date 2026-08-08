@@ -24,8 +24,6 @@ from __future__ import annotations
 
 import json
 import os
-import time
-import traceback
 from datetime import UTC, datetime
 from pathlib import Path
 

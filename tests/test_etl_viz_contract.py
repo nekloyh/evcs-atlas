@@ -143,3 +143,32 @@ def test_lop_gop_toan_quoc_khong_cho_dai_luong_khong_gop_duoc():
     # Và nó PHẢI chở đủ các cột đã khai là `national`.
     can = {c.name for c in GRID.where(national=True)}
     assert can - co == set(), f"thiếu cột national: {sorted(can - co)}"
+
+
+# ── bảng XÃ: manifest phải khai đúng thuộc tính có thật ───────────────────
+from evcs.schema import COMMUNE  # noqa: E402
+
+
+@pytest.mark.parametrize("pdir", TINH, ids=lambda p: p.name)
+def test_available_commune_columns_dung_bang_ban_khai(pdir: Path):
+    """Giao diện lọc trường của XÃ theo danh sách này — nhánh riêng, không dùng cột lưới.
+
+    Trước đây nó suy từ ``sorted(feats[0]["properties"].keys())``: một xã có `quality_flag`
+    null ở dòng đầu vẫn khai đủ cột (vì GeoJSON giữ khoá null), nhưng hợp đồng dựa vào
+    "dòng đầu tiên tình cờ có mặt" là hợp đồng không kiểm được.
+    """
+    khai = set(_manifest(pdir)["available_commune_columns"])
+    assert khai == set(COMMUNE.names())
+
+
+@pytest.mark.parametrize("pdir", TINH, ids=lambda p: p.name)
+def test_commune_geojson_khong_mang_thuoc_tinh_la(pdir: Path):
+    f = pdir / "commune.geojson"
+    if not f.exists():
+        pytest.skip("tỉnh chưa có commune.geojson")
+    fc = json.loads(f.read_text(encoding="utf-8"))
+    feats = fc.get("features") or []
+    if not feats:
+        pytest.skip("không có xã nào")
+    la = set(feats[0]["properties"]) - set(COMMUNE.names())
+    assert la == set(), f"thuộc tính chưa khai: {sorted(la)}"

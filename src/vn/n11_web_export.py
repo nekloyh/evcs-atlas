@@ -37,7 +37,7 @@ import pyarrow.parquet as pq
 from shapely import wkb
 from shapely.geometry import mapping
 
-from evcs.schema import GRID
+from evcs.schema import COMMUNE, GRID
 
 from . import admin, paths, qa
 from .n10_quality import MIN_OCC_MEASURED_SHARE
@@ -98,7 +98,15 @@ def _commune_geojson(code: str) -> tuple[str, int, list[str]]:
         geom = {"type": m["type"], "coordinates": _round_coords(m["coordinates"], GEO_DECIMALS)}
         props = {k: (None if pd.isna(v) else v) for k, v in row.items()}
         feats.append({"type": "Feature", "geometry": geom, "properties": props})
-    keys = sorted(feats[0]["properties"].keys()) if feats else []
+    # Danh sách thuộc tính lấy từ BẢN KHAI, không từ dòng đầu tiên tình cờ có mặt: một xã
+    # có `quality_flag` null vẫn phải khai rằng cột đó tồn tại. Giao diện lọc trường của XÃ
+    # theo danh sách này (`fieldAvailable` nhánh `readAs === "commune"`), nên suy nó từ dữ
+    # liệu là để một giá trị null quyết định một trường có hiện hay không.
+    thuc_te = set(feats[0]["properties"].keys()) if feats else set()
+    la = sorted(thuc_te - set(COMMUNE.names()))
+    if la:
+        raise SystemExit(f"Tỉnh {code}: commune.geojson có thuộc tính chưa khai ở schema: {la}")
+    keys = sorted(COMMUNE.names())
     return _fc(feats), len(feats), keys
 
 

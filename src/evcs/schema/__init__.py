@@ -12,8 +12,9 @@ Thêm một cột nghĩa là thêm MỘT dòng ở ``grid.py``. Test sau đó n�
 """
 
 from .column import ARROW, Column, Table
+from .commune import COMMUNE
 from .grid import GRID
 
-__all__ = ["ARROW", "GRID", "Column", "Table", "TABLES"]
+__all__ = ["ARROW", "COMMUNE", "GRID", "Column", "Table", "TABLES"]
 
-TABLES: dict[str, Table] = {GRID.name: GRID}
+TABLES: dict[str, Table] = {GRID.name: GRID, COMMUNE.name: COMMUNE}

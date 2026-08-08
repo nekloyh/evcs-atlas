@@ -23,7 +23,8 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from evcs.schema import GRID
+from evcs.schema import COMMUNE, GRID
+from evcs.schema.commune import GEOMETRY_COLUMN
 
 from . import admin, paths, qa
 from .runner import Step
@@ -184,9 +185,24 @@ def run(province_code: str) -> None:
         )
     )
     adm["dist_station_m_pop_weighted"] = adm.commune_code.map(dt)
-    cols = [c for c in adm.columns if c != "geometry_wkb"] + ["geometry_wkb"]
+    # Thứ tự cột do `evcs.schema.COMMUNE` quyết định; hình học đi cuối và KHÔNG thuộc bản
+    # khai — nó là hình học, không phải một trường đọc được.
+    front = [c for c in COMMUNE.names() if c in adm.columns]
+    cols = front + [c for c in adm.columns if c not in front and c != GEOMETRY_COLUMN]
+    if GEOMETRY_COLUMN in adm.columns:
+        cols.append(GEOMETRY_COLUMN)
     adm = adm[cols].sort_values("commune_code").reset_index(drop=True)
     pq.write_table(pa.Table.from_pandas(adm, preserve_index=False), pdir / "commune.parquet")
+
+    # Cổng chặn thứ hai, cùng luật với cổng của lưới: bảng XÃ ghi ra phải đúng bằng bảng đã
+    # khai. Đây là đơn vị đọc thứ hai của giao diện, và `available_commune_columns` của
+    # manifest suy ra từ chính nó — trước đây nó được suy từ dòng đầu tiên tình cờ có mặt.
+    lech_cm = COMMUNE.validate([c for c in adm.columns if c != GEOMETRY_COLUMN])
+    r.check(
+        "schema_commune_khop_khai_bao",
+        not lech_cm,
+        "; ".join(lech_cm) if lech_cm else f"{len(COMMUNE.columns)} cột, đúng thứ tự",
+    )
 
     # --- QA ------------------------------------------------------------------
     r.stat(

@@ -83,6 +83,11 @@
       "detail": "61 cột, đúng thứ tự"
     },
     {
+      "name": "schema_commune_khop_khai_bao",
+      "status": "PASS",
+      "detail": "21 cột, đúng thứ tự"
+    },
+    {
       "name": "h3_unique",
       "status": "PASS",
       "detail": "14020 ô"
