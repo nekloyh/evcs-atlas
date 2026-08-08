@@ -187,25 +187,22 @@ def run(province_code: str) -> None:
     )
 
 
-def outputs(province_code: str) -> list:
-    return [paths.PROV / province_code / "screening_cell.parquet"]
-
-
-def upstream(province_code: str) -> list:
-    d = paths.PROV / province_code
-    return [
-        d / "traveltime_cell.parquet",
-        d / "population_cell.parquet",
-        d / "station_occupancy.parquet",
-    ]
-
-
 STEP = Step(
     name="n08_screening",
     scope="province",
     version=VERSION,
     run=run,
-    outputs=outputs,
-    province_sources=upstream,
+    reads=(
+        "src_vnsdi",
+        "traveltime_cell",
+        "population_cell",
+        "station_occupancy",
+        "grid_cell",
+        "admin_communes",
+        "stations",
+    ),
+    writes=(
+        "screening_cell",
+    ),
     desc="engine sàng lọc đơn xin đặt trạm, dựng thành lớp bản đồ theo tỉnh",
 )

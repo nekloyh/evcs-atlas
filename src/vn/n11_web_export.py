@@ -566,10 +566,20 @@ STEP = Step(
     scope="global",
     version=VERSION,
     run=run,
-    outputs=outputs,
-    # `paths.QA` có mặt vì bước này đọc `store/qa/provinces.parquet` (khối `quality` và cờ
-    # `unusable_layers` của manifest). Thiếu nó thì sửa ngưỡng ở n10 sẽ KHÔNG làm manifest
-    # hết hạn, và web sẽ phục vụ một khối chất lượng đã cũ mà không ai biết.
-    sources=(paths.PROV, paths.ADMIN, paths.QA),
+    reads=(
+        "admin_provinces",
+        "admin_communes",
+        "admin_boundary",
+        "qa_provinces",
+        "grid_h3_r8",
+        "commune",
+        "stations",
+        "connectors",
+        "station_occupancy",
+        "station_profile_168h",
+        "roads",
+        "poi_visual",
+    ),
+    extra_writes=lambda _p: outputs(),
     desc="xuất store cho web theo tỉnh + chỉ mục toàn quốc, đo ngân sách dung lượng",
 )

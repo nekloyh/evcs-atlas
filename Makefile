@@ -1,4 +1,4 @@
-.PHONY: all setup clean layers docs help web web-data vn vn-plan vn-web vn-quocgia golden golden-ghi schema schema-kiem kiem
+.PHONY: all setup clean layers docs help web web-data vn vn-plan vn-web vn-quocgia golden golden-ghi schema schema-kiem kiem clean-cache
 PY := uv run python -m hanoi
 
 help:
@@ -16,6 +16,16 @@ help:
 	@echo "make vn-plan            — in kế hoạch, không chạy (cặp nào sẽ chạy, cặp nào bỏ qua)"
 	@echo "make vn-web             — chỉ xuất lại store cho web (34 bộ theo tỉnh)"
 	@echo "make vn-quocgia         — chỉ dựng lại lớp gộp TOÀN QUỐC + 4 file GeoJSON POI"
+	@echo ""
+	@echo "  ── cổng chặn (xem docs/adr/) ──"
+	@echo "make kiem      — schema + test Python + test web + golden. Chạy trước mọi commit."
+	@echo "make golden    — DỪNG nếu một con số của 801 bảng sản phẩm đổi"
+	@echo "make schema    — sinh lại khai báo cột cho web từ src/evcs/schema/grid.py"
+	@echo ""
+	@echo "  ── soi pipeline ──"
+	@echo "uv run python -m vn --do-thi              — in DAG suy từ reads/writes"
+	@echo "uv run python -m vn all --tinh 01 --soi   — chạy VÀ đo bản khai reads có đúng không"
+	@echo "make clean-cache — xoá store/cache (dựng lại được), giữ nguyên sản phẩm"
 
 setup:
 	uv sync
@@ -48,6 +58,11 @@ layers:
 
 clean:
 	rm -rf data/processed data/qa
+
+# Cache dựng lại được từ PBF: xoá không mất sản phẩm nào. Đây là cả điểm của việc tách tier —
+# "xoá cache" phải là một lệnh, không phải một cuộc rà soát bằng mắt.
+clean-cache:
+	rm -rf store/cache
 
 # --- web app (xem web/DESIGN.md) -------------------------------------------
 .PHONY: web web-data

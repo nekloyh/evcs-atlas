@@ -245,21 +245,21 @@ def run() -> None:
     r.write()
 
 
-def outputs() -> list:
-    return [
-        paths.ADMIN / "provinces.parquet",
-        paths.ADMIN / "communes.parquet",
-        paths.ADMIN / "crosswalk_province_legacy.parquet",
-    ]
-
-
 STEP = Step(
     name="n01_admin",
     scope="global",
     version=VERSION,
     run=run,
-    outputs=outputs,
-    sources=(paths.SRC_VNSDI_COMMUNES, paths.SRC_CANON_STATIONS),
+    reads=(
+        "src_vnsdi",
+        "src_canon_stations",
+    ),
+    writes=(
+        "admin_provinces",
+        "admin_communes",
+        "admin_crosswalk",
+        "admin_boundary",
+    ),
     desc="bảng tỉnh/xã toàn quốc + crosswalk + ranh giới từng tỉnh",
 )
 

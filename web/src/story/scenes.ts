@@ -311,3 +311,17 @@ export function sceneState(id: SceneId): SceneState {
     select: s.select,
   };
 }
+
+/**
+ * Bộ lọc ô của nhịp đang mở — nguồn DUY NHẤT của khoá `filtered` trong render plan.
+ *
+ * `MapView` và `Legend` đều cần biết "tập ô có đang bị thu hẹp không". Để mỗi bên tự suy
+ * là mở cửa cho chúng suy khác nhau, và chúng ĐÃ suy khác nhau: `MapView` truyền
+ * `Boolean(beat?.filter)`, `Legend` không truyền gì cả.
+ */
+export function activeCellFilter(
+  scene: SceneId | null,
+  beatId: string | null,
+): CellFilter | undefined {
+  return scene ? beatOf(scene, beatId).filter : undefined;
+}

@@ -264,23 +264,22 @@ def run(province_code: str) -> None:
     )
 
 
-def outputs(province_code: str) -> list:
-    d = paths.PROV / province_code
-    return [d / "population_cell.parquet", d / "population_commune.parquet"]
-
-
-def upstream(province_code: str) -> list:
-    d = paths.PROV / province_code
-    return [d / "grid_cell.parquet", d / "grid_cell_commune.parquet"]
-
-
 STEP = Step(
     name="n05_population",
     scope="province",
     version=VERSION,
     run=run,
-    outputs=outputs,
-    sources=(paths.SRC_WORLDPOP_2025, paths.SRC_VNSDI_COMMUNES),
-    province_sources=upstream,
+    reads=(
+        "src_worldpop",
+        "src_vnsdi",
+        "admin_communes",
+        "grid_cell",
+        "grid_cell_commune",
+    ),
+    writes=(
+        "population_cell",
+        "population_commune",
+        "qa_n05_population",
+    ),
     desc="dân số theo ô — dasymetric WorldPop neo VNSDI, phát cả bản không neo",
 )

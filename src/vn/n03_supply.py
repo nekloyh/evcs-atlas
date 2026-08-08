@@ -324,28 +324,25 @@ def run(province_code: str) -> None:
     )
 
 
-def outputs(province_code: str) -> list:
-    d = paths.PROV / province_code
-    return [
-        d / "stations.parquet",
-        d / "connectors.parquet",
-        d / "station_occupancy.parquet",
-        d / "station_occupancy_profile_168h.parquet",
-    ]
-
-
 STEP = Step(
     name="n03_supply",
     scope="province",
     version=VERSION,
     run=run,
-    outputs=outputs,
-    sources=(
-        paths.SRC_CANON_STATIONS,
-        paths.SRC_CANON_CONNECTORS,
-        paths.SRC_OCC_STATION,
-        paths.SRC_OCC_PROFILE_168,
-        paths.SRC_VNSDI_COMMUNES,
+    reads=(
+        "src_canon_stations",
+        "src_canon_connectors",
+        "src_occ_station",
+        "src_occ_profile",
+        "src_vnsdi",
+        "admin_communes",
+    ),
+    writes=(
+        "stations",
+        "connectors",
+        "station_occupancy",
+        "station_profile_168h",
+        "qa_n03_supply",
     ),
     desc="trạm · cổng · occupancy · hồ sơ 168h theo tỉnh",
 )

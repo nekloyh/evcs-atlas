@@ -9,7 +9,8 @@ import {
 import { pct, type Manifest } from "../data/manifest";
 import { SURFACE_CELL_M } from "../data/queries";
 import { useStore } from "../state/store";
-import { HEX_MIN_ZOOM, hexPixelWidth, renderPlan } from "../viz/render-plan";
+import { activeCellFilter } from "../story/scenes";
+import { HEX_MIN_ZOOM, hexPixelWidth, planFor } from "../viz/render-plan";
 import {
   HATCH_HEX,
   RAMP_HEX,
@@ -44,12 +45,15 @@ export function Legend({
   const paintOn = useStore((s) => s.paintOn);
   const setPaintOn = useStore((s) => s.setPaintOn);
   const scene = useStore((s) => s.scene);
-  // Cùng bốn đầu vào với `MapView` — legend mô tả CHÍNH mặt tô đang vẽ, nên thiếu `inStory`
-  // ở đây sẽ cho một dải chú giải "mặt độ cầu · ô gộp 3 km" trên một bản đồ đang vẽ ô H3.
-  const plan = renderPlan({
-    unit: field.readAs,
-    zoom,
+  const beatId = useStore((s) => s.beat);
+  // Legend mô tả CHÍNH mặt tô đang vẽ, nên nó phải đi qua đúng một cửa với `MapView` —
+  // xem `planFor`. Trước đây hai bên tự gọi `renderPlan` và bỏ sót `filtered`, cho ra một
+  // dải chú giải "không vẽ vì zoom" trên một bản đồ đang vẽ ô H3.
+  const plan = planFor({
+    readAs: field.readAs,
     hasSurface: Boolean(field.surface),
+    zoom,
+    filtered: Boolean(activeCellFilter(scene, beatId)),
     inStory: scene !== null,
   });
 

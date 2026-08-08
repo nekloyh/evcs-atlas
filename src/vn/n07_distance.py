@@ -199,21 +199,19 @@ def run(province_code: str) -> None:
     )
 
 
-def outputs(province_code: str) -> list:
-    return [paths.PROV / province_code / "traveltime_cell.parquet"]
-
-
-def upstream(province_code: str) -> list:
-    d = paths.PROV / province_code
-    return [d / "road_graph.parquet", d / "stations.parquet", d / "grid_cell.parquet"]
-
-
 STEP = Step(
     name="n07_distance",
     scope="province",
     version=VERSION,
     run=run,
-    outputs=outputs,
-    province_sources=upstream,
+    reads=(
+        "src_vnsdi",
+        "road_graph",
+        "stations",
+        "grid_cell",
+    ),
+    writes=(
+        "traveltime_cell",
+    ),
     desc="khoảng cách theo mạng đường tới trạm gần nhất (Dijkstra), theo tỉnh",
 )

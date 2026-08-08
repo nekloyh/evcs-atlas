@@ -204,10 +204,57 @@ tính trọng tâm. `has_polygon` nói ra loại hình học của từng cái.
 
 | file | nội dung |
 |---|---|
+| `CONTEXT.md` | **từ vựng của dự án** — nghĩa của những từ dễ trượt, và ba từ không dùng |
+| `docs/adr/` | quyết định KIẾN TRÚC, kèm điều kiện để lật lại |
 | `AUDIT_TOAN_QUOC.md` | mọi chỗ giả định "chỉ có Hà Nội": file:line, vỡ thế nào, cách sửa |
 | `QUYET_DINH_TOAN_QUOC.md` | niên bản địa giới đã chốt, crosswalk, ngân sách, và vì sao chiều tỉnh không dùng kênh màu |
 | `store/qa/provinces.parquet` | bảng thống kê theo tỉnh + cờ chất lượng |
 | `store/qa/exclusions.json` | tỉnh ĐỀ NGHỊ loại khỏi phân tích, kèm lý do đo được |
+
+---
+
+## Hình dạng codebase
+
+Ba gói, và ranh giới giữa chúng là ranh giới về **quyền đọc đĩa** (`docs/adr/0002`):
+
+```
+src/evcs/core/      nguyên hàm miền — THUẦN, không IO. Test không cần store.
+src/evcs/schema/    khai 61 cột của bảng chính. Một chỗ, mọi thứ khác suy ra.
+src/evcs/pipeline/  Dataset · Step · DAG · resume · audit. Chỗ DUY NHẤT đọc/ghi đĩa.
+src/vn/             12 bước ETL + registry dataset của pipeline toàn quốc.
+src/hanoi/          ĐÓNG BĂNG — bộ Hà Nội cũ. Điều kiện xoá ở `docs/adr/0003`.
+golden/             vân tay 801 bảng sản phẩm — cổng chặn của mọi đợt refactor.
+```
+
+Một bước ETL khai **đọc gì / ghi gì bằng TÊN dataset**, không bằng đường dẫn. Đường dẫn,
+vân tay resume, thứ tự chạy và phép kiểm "thượng nguồn đã có chưa" đều suy ra:
+
+```bash
+make kiem              # schema + 171 test Python + 271 test web + golden
+uv run python -m vn --do-thi          # in DAG suy từ reads/writes
+uv run python -m vn all --tinh 01 --soi   # chạy VÀ đo bản khai reads có đúng không
+```
+
+`--soi` ghi lại file mà mỗi bước **thật sự mở** rồi đối chiếu với bản khai. Đây là chỗ bản
+cũ hỏng: 7/12 bước đọc file mà không khai, nên chạy lại một bước thượng nguồn để lại bước
+hạ nguồn ở trạng thái "đã xong" với dữ liệu cũ.
+
+### Thêm một nguồn dữ liệu mới
+
+1. thêm một dòng `Dataset(...)` ở `src/vn/datasets.py`
+2. thêm cột mới vào `src/evcs/schema/grid.py` (nếu nó vào bảng chính)
+3. viết bước, khai `reads=(...)` / `writes=(...)`
+4. `make schema` sinh lại khai báo TypeScript · `make kiem` nói còn thiếu gì
+
+Bước 4 là chỗ vòng ETL→viz khép lại: cột có dữ liệu mà chưa có mục trong danh mục trường
+thì test **DỪNG** và nói tên cột, thay vì để nó nằm im trong parquet và không ai biết.
+
+### Hai tier trong store
+
+```
+store/p/<code>/       252 MB  sản phẩm + bảng trung gian — ship, backup
+store/cache/<code>/   603 MB  road_graph — dựng lại từ PBF, KHÔNG ship, KHÔNG backup
+```
 
 Web mở một tỉnh bằng khoá hash `tinh`: `#tinh=79`. Không có khoá đó thì mở đúng bộ Hà Nội
 cũ, không đổi một hành vi nào. Đo p95 truy vấn DuckDB-WASM: `pnpm dev` rồi mở `/bench.html`.

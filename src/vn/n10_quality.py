@@ -601,20 +601,30 @@ def run() -> None:
     r.write()
 
 
-def outputs() -> list:
-    return [
-        paths.QA / "provinces.parquet",
-        paths.QA / "exclusions.json",
-        paths.QA / "BAO_CAO_TINH.md",
-    ]
-
-
 STEP = Step(
     name="n10_quality",
     scope="global",
     version=VERSION,
     run=run,
-    outputs=outputs,
-    sources=(paths.PROV, paths.SRC_SECONDARY_STATIONS),
+    reads=(
+        "src_canon_stations",
+        "src_secondary_stations",
+        "admin_communes",
+        "admin_provinces",
+        "grid_h3_r8",
+        "commune",
+        "stations",
+        "poi_commune",
+        "qa_n03_supply",
+        "qa_n05_population",
+        "poi_visual",
+        "roads",
+        "station_occupancy",
+    ),
+    writes=(
+        "qa_provinces",
+        "qa_exclusions",
+        "qa_report",
+    ),
     desc="bảng thống kê theo tỉnh + độ phủ POI + cờ chất lượng + đề nghị loại trừ",
 )

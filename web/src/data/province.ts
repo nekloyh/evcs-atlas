@@ -39,16 +39,40 @@ const CODE_RE = /^[0-9]{2}$/;
  */
 export const NATIONAL = "vn";
 
+/**
+ * Bộ dữ liệu nào đang mở, suy từ MỘT chuỗi hash. Hàm THUẦN.
+ *
+ * Tách ra vì đây là hạt nhân của chiều tỉnh và nó không có test nào: `PROVINCE` là một
+ * `const` đọc `window` lúc nạp module, nên không có cách nào gọi nó với một đầu vào khác.
+ * Ba giá trị, ba bộ, loại trừ nhau — và "loại trừ nhau" là thứ cần assert, không phải thứ
+ * cần tin.
+ */
+export function parseDataset(hash: string): { province: string | null; national: boolean } {
+  const raw = new URLSearchParams(hash.replace(/^#/, "")).get(PROVINCE_KEY);
+  if (raw === NATIONAL) return { province: null, national: true };
+  // Mã hỏng ⇒ về bộ mặc định, KHÔNG nổ. Cùng luật với mọi khoá hash khác (§9): một ký tự
+  // gõ sai không được biến thành màn hình lỗi.
+  return { province: raw && CODE_RE.test(raw) ? raw : null, national: false };
+}
+
+/**
+ * Tên file → đường dẫn tương đối, với một tỉnh CHO TRƯỚC. Hàm THUẦN.
+ *
+ * `dataPath` bọc nó bằng `PROVINCE` toàn cục; ở đây tỉnh là THAM SỐ, nên test gọi được
+ * với mọi tỉnh mà không cần dựng `window`.
+ */
+export function pathIn(province: string | null, name: string): string {
+  return province ? `p/${province}/${name}` : name;
+}
+
 function readRaw(): string | null {
   if (typeof window === "undefined") return null;
   return new URLSearchParams(window.location.hash.replace(/^#/, "")).get(PROVINCE_KEY);
 }
 
 function readProvince(): string | null {
-  const raw = readRaw();
-  // Mã hỏng ⇒ về bộ mặc định, KHÔNG nổ. Cùng luật với mọi khoá hash khác (§9): một ký tự
-  // gõ sai không được biến thành màn hình lỗi.
-  return raw && CODE_RE.test(raw) ? raw : null;
+  if (typeof window === "undefined") return null;
+  return parseDataset(window.location.hash).province;
 }
 
 /** Đang xem lớp gộp TOÀN QUỐC (34 tỉnh một màn hình) chứ không phải một bộ dữ liệu tỉnh. */
@@ -65,9 +89,9 @@ export const PROVINCE: string | null = readProvince();
 /** Đang xem một tỉnh của store toàn quốc (chứ không phải bộ Hà Nội gốc)? */
 export const isProvinceMode = PROVINCE !== null;
 
-/** Tên file → đường dẫn tương đối trong `public/data/`. */
+/** Tên file → đường dẫn tương đối trong `public/data/`, theo tỉnh đang mở. */
 export function dataPath(name: string): string {
-  return PROVINCE ? `p/${PROVINCE}/${name}` : name;
+  return pathIn(PROVINCE, name);
 }
 
 /**

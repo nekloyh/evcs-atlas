@@ -226,23 +226,26 @@ def run(province_code: str) -> None:
     )
 
 
-def outputs(province_code: str) -> list:
-    d = paths.PROV / province_code
-    return [d / "grid_h3_r8.parquet", d / "commune.parquet"]
-
-
-def upstream(province_code: str) -> list:
-    return [paths.PROV / province_code / f for f in LAYERS] + [
-        paths.PROV / province_code / "station_occupancy.parquet"
-    ]
-
-
 STEP = Step(
     name="n09_assemble",
     scope="province",
     version=VERSION,
     run=run,
-    outputs=outputs,
-    province_sources=upstream,
+    reads=(
+        "grid_cell",
+        "population_cell",
+        "landcover_cell",
+        "traveltime_cell",
+        "screening_cell",
+        "station_occupancy",
+        "stations",
+        "admin_communes",
+        "population_commune",
+        "grid_cell_commune",
+    ),
+    writes=(
+        "grid_h3_r8",
+        "commune",
+    ),
     desc="ghép mọi lớp thành một bảng ô + bảng xã cho mỗi tỉnh",
 )

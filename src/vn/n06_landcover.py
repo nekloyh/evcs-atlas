@@ -173,21 +173,18 @@ def run(province_code: str) -> None:
     )
 
 
-def outputs(province_code: str) -> list:
-    return [paths.PROV / province_code / "landcover_cell.parquet"]
-
-
-def upstream(province_code: str) -> list:
-    return [paths.PROV / province_code / "grid_cell.parquet"]
-
-
 STEP = Step(
     name="n06_landcover",
     scope="province",
     version=VERSION,
     run=run,
-    outputs=outputs,
-    sources=(paths.SRC_VNSDI_COMMUNES,),
-    province_sources=upstream,
+    reads=(
+        "src_worldcover",
+        "src_vnsdi",
+        "grid_cell",
+    ),
+    writes=(
+        "landcover_cell",
+    ),
     desc="lớp phủ ESA WorldCover 10 m theo ô, đọc theo dải để bộ nhớ bị chặn",
 )

@@ -39,7 +39,12 @@ SRC_SECONDARY_STATIONS = (
 ROOT = Path(__file__).resolve().parents[2]
 STORE = Path(os.environ.get("EVCS_STORE", ROOT / "store"))
 ADMIN = STORE / "admin"
-PROV = STORE / "p"  # store/p/<province_code>/…
+PROV = STORE / "p"  # store/p/<province_code>/…  — SẢN PHẨM
+# store/cache/<province_code>/… — DỰNG LẠI ĐƯỢC, không ship, không backup.
+# `road_graph.parquet` một mình chiếm 626/714 MB của store. Nó cần cho Dijkstra và giữ lại
+# là có chủ ý (chạy lại Dijkstra không phải quét lại PBF 325 MB), nhưng nó phải nằm ở một
+# tier CÓ TÊN, để "xoá cache" là một lệnh chứ không phải một cuộc rà soát bằng mắt.
+CACHE = STORE / "cache"
 QA = STORE / "qa"
 STATE_FILE = STORE / "_state.json"
 
@@ -50,8 +55,14 @@ def province_dir(code: str) -> Path:
     return d
 
 
+def cache_dir(code: str) -> Path:
+    d = CACHE / code
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
 def ensure_dirs() -> None:
-    for d in (STORE, ADMIN, ADMIN / "boundary", PROV, QA):
+    for d in (STORE, ADMIN, ADMIN / "boundary", PROV, CACHE, QA):
         d.mkdir(parents=True, exist_ok=True)
 
 

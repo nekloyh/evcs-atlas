@@ -131,8 +131,17 @@ POI_VISUAL_SCHEMA = pa.schema(
 class ShardWriter:
     """Ghi theo tỉnh, xả đệm theo lô — bộ nhớ bị chặn, không phụ thuộc quy mô đầu vào."""
 
-    def __init__(self, filename: str, schema: pa.Schema, flush_rows: int = FLUSH_ROWS):
+    def __init__(
+        self,
+        filename: str,
+        schema: pa.Schema,
+        flush_rows: int = FLUSH_ROWS,
+        tier: str = "product",
+    ):
         self.filename, self.schema, self.flush_rows = filename, schema, flush_rows
+        # `road_graph` là CACHE, không phải sản phẩm: dựng lại được từ PBF, không ship cho
+        # web, và một mình chiếm 626/714 MB của store. Xem `paths.CACHE`.
+        self.dir_of = paths.cache_dir if tier == "cache" else paths.province_dir
         self.buf: dict[str, list[dict]] = {}
         self.writers: dict[str, pq.ParquetWriter] = {}
         self.counts: dict[str, int] = {}
@@ -152,7 +161,7 @@ class ShardWriter:
         w = self.writers.get(code)
         if w is None:
             w = pq.ParquetWriter(
-                paths.province_dir(code) / self.filename, self.schema, compression="zstd"
+                self.dir_of(code) / self.filename, self.schema, compression="zstd"
             )
             self.writers[code] = w
         w.write_table(tbl)
@@ -166,7 +175,7 @@ class ShardWriter:
         # Tỉnh không có dòng nào vẫn phải có FILE RỖNG. Thiếu file và "có file, 0 dòng" là
         # hai chuyện khác nhau ở tầng đọc: cái đầu trông như bước chưa chạy.
         for code in admin.province_codes():
-            p = paths.province_dir(code) / self.filename
+            p = self.dir_of(code) / self.filename
             if not p.exists():
                 pq.write_table(self.schema.empty_table(), p, compression="zstd")
         return dict(self.counts)
@@ -221,7 +230,7 @@ def _pass_nodes_ways(inside: ProvinceIndex, buf: ProvinceIndex, r: qa.Report) ->
     road_w = ShardWriter("roads.parquet", ROADS_SCHEMA)
     # Đệm nhỏ hơn: một dòng đồ thị mang hai danh sách dài (node_ids + toạ độ nguyên), nặng
     # gấp bội một dòng hiển thị. Cùng ngưỡng dòng thì đỉnh bộ nhớ tăng theo.
-    graph_w = ShardWriter("road_graph.parquet", GRAPH_SCHEMA, flush_rows=40_000)
+    graph_w = ShardWriter("road_graph.parquet", GRAPH_SCHEMA, flush_rows=40_000, tier="cache")
     n_node = n_way = 0
     n_poi_outside = n_road_outside = 0
     pts_before = pts_after = 0
@@ -505,7 +514,7 @@ def run() -> None:
         all(
             (paths.province_dir(c) / f).exists()
             for c in admin.province_codes()
-            for f in ("poi_demand.parquet", "poi_visual.parquet", "roads.parquet", "road_graph.parquet")
+            for f in ("poi_demand.parquet", "poi_visual.parquet", "roads.parquet")
         ),
         "tỉnh không có dòng nào vẫn có file rỗng, không phải thiếu file",
     )
@@ -523,21 +532,21 @@ def run() -> None:
     r.write()
 
 
-def outputs() -> list:
-    return [
-        paths.PROV / c / f
-        for c in admin.province_codes()
-        for f in ("poi_demand.parquet", "poi_visual.parquet", "roads.parquet", "road_graph.parquet")
-    ]
-
-
 STEP = Step(
     name="n02_osm",
     scope="global",
     version=VERSION,
     run=run,
-    outputs=outputs,
-    sources=(paths.SRC_OSM_PBF, paths.SRC_VNSDI_COMMUNES),
+    reads=(
+        "src_pbf",
+        "src_vnsdi",
+    ),
+    writes=(
+        "poi_demand",
+        "poi_visual",
+        "roads",
+        "road_graph",
+    ),
     desc="quét PBF toàn quốc HAI lượt → POI đếm-cầu · POI visual · đường (hiển thị) theo tỉnh",
 )
 

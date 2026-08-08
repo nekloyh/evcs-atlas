@@ -133,3 +133,40 @@ export function renderPlan({ unit, zoom, hasSurface, filtered, inStory }: PlanIn
   // đúng của §13a-1: nói ra rằng đang đọc thô.
   return { paint: "hex", coarse: true };
 }
+
+/**
+ * Đầu vào tối thiểu của một plan, lấy thẳng từ state ứng dụng.
+ *
+ * Có kiểu riêng vì đó là cả điểm: hai chỗ gọi `renderPlan` PHẢI đi qua đây, nên chúng
+ * không thể truyền hai bộ tham số khác nhau.
+ */
+export interface PlanSource {
+  readAs: ReadingUnit;
+  hasSurface: boolean;
+  zoom: number;
+  filtered: boolean;
+  inStory: boolean;
+}
+
+/**
+ * Plan mà BẢN ĐỒ và LEGEND cùng dùng — một hàm, một bộ đầu vào.
+ *
+ * Trước đây hai bên tự gọi `renderPlan` với hai bộ tham số khác nhau: `MapView` truyền
+ * `filtered: Boolean(filter)`, `Legend` bỏ hẳn khoá đó. Trong một nhịp CÂU CHUYỆN có lọc ô
+ * ở zoom < 11, bản đồ nhận `{paint:"hex"}` còn legend nhận `{paint:"none", reason:"zoom"}` —
+ * legend nói "không vẽ" trong khi bản đồ đang vẽ. Đúng cái desync mà chú thích ở `Legend`
+ * nói nó tồn tại để chặn.
+ *
+ * Nguyên nhân là HÌNH DẠNG: hai call site cùng *tính lại* một plan thay vì *chia nhau* một
+ * plan. Hàm này biến việc truyền lệch nhau thành không thể — thêm một đầu vào là thêm vào
+ * `PlanSource`, và cả hai bên nhận nó cùng lúc.
+ */
+export function planFor(src: PlanSource): Plan {
+  return renderPlan({
+    unit: src.readAs,
+    zoom: src.zoom,
+    hasSurface: src.hasSurface,
+    filtered: src.filtered,
+    inStory: src.inStory,
+  });
+}

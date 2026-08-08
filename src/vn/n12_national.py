@@ -470,7 +470,13 @@ STEP = Step(
     scope="global",
     version=VERSION,
     run=run,
-    outputs=outputs,
-    sources=(paths.PROV, paths.ADMIN, paths.QA),
+    reads=(
+        "admin_provinces",
+        "qa_provinces",
+        "grid_h3_r8",
+        "stations",
+        "poi_visual",
+    ),
+    extra_writes=lambda _p: outputs(),
     desc="gộp 34 phân mảnh thành một lớp cả nước xem một lần (H3 r6 + trạm + POI)",
 )

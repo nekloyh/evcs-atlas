@@ -19,11 +19,17 @@ import type {
 import { SURFACE_CELL_M } from "../data/queries";
 import type { FieldMeta } from "../fields";
 import { useStore } from "../state/store";
-import { SCENE_BY_ID, beatOf, type CellFilter, type SceneMark } from "../story/scenes";
+import {
+  SCENE_BY_ID,
+  activeCellFilter,
+  beatOf,
+  type CellFilter,
+  type SceneMark,
+} from "../story/scenes";
 import { majorBridges } from "../story/bridges";
 import type { Mode, OverlayId } from "../state/types";
 import { HatchExtension } from "../viz/hatch-extension";
-import { renderPlan } from "../viz/render-plan";
+import { planFor } from "../viz/render-plan";
 import { cellIdOf, communeCodeOf, poiRefOf, serializeSelection, stationIdOf } from "../data/h3";
 import { dacKhuLabels, type DacKhuLabel } from "../data/dackhu";
 import {
@@ -199,7 +205,7 @@ export function MapView(props: Props) {
   const beatId = useStore((s) => s.beat);
   const sceneDef = scene ? SCENE_BY_ID.get(scene) : undefined;
   const beat = scene ? beatOf(scene, beatId) : undefined;
-  const filter = beat?.filter;
+  const filter = activeCellFilter(scene, beatId);
   const marks = beat?.marks;
   const wantRiver = sceneDef?.basemapLayer === "river";
 
@@ -360,7 +366,7 @@ interface BuildInput extends Props {
  * Đó không phải thứ tự tuỳ tiện: vùng che được điểm, nên vùng phải nằm dưới. Cùng lý do
  * với §4d cho overlay điểm giữ opacity đầy đủ.
  */
-function buildLayers({
+export function buildLayers({
   field,
   cells,
   communes,
@@ -384,13 +390,13 @@ function buildLayers({
   brush,
   inStory,
 }: BuildInput): Layer[] {
-  const plan = renderPlan({
-    unit: field.readAs,
-    zoom,
+  // `inStory` KHÔNG suy từ `marks`: cảnh A không có mark riêng nào, nên `marks` rỗng ở
+  // đúng cảnh duy nhất mà cờ này quan trọng.
+  const plan = planFor({
+    readAs: field.readAs,
     hasSurface: Boolean(field.surface),
+    zoom,
     filtered: Boolean(filter),
-    // KHÔNG suy từ `marks`: cảnh A không có mark riêng nào, nên `marks` rỗng ở đúng cảnh
-    // duy nhất mà cờ này quan trọng.
     inStory,
   });
   const out: Layer[] = [];

@@ -46,7 +46,7 @@ def scale_for(province_code: str) -> tuple[float, float]:
 
 def load_ways(province_code: str) -> tuple[pd.DataFrame, int]:
     """Đọc phân mảnh đồ thị của tỉnh, áp bộ lọc ``access``. Trả (df, tổng trước lọc)."""
-    t = pq.read_table(paths.PROV / province_code / "road_graph.parquet").to_pandas()
+    t = pq.read_table(paths.cache_dir(province_code) / "road_graph.parquet").to_pandas()
     n_all = len(t)
     return t[~t.access.isin(ACCESS_BLOCKED)].reset_index(drop=True), n_all
 

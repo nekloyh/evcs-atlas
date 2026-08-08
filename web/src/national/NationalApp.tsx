@@ -26,6 +26,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { parseNationalHash, serializeNationalHash } from "./hash";
+
 import { POI_GROUPS, POI_GROUP_BY_KEY, type PoiShape } from "../data/poi";
 import { switchProvince } from "../data/province";
 import { zoomForBbox } from "../map/positron";
@@ -48,6 +50,7 @@ import {
   CELL_FIELDS,
   DEFAULT_NATIONAL_FIELD,
   FIELD_BY_ID,
+  NATIONAL_FIELDS,
   PROVINCE_FIELDS,
   formatValue,
   type NationalField,
@@ -61,24 +64,26 @@ const shapeOf = (group: string): PoiShape => POI_GROUP_BY_KEY.get(group)?.shape 
 
 // ── hash ──────────────────────────────────────────────────────────────────────
 //
-// Cùng hợp đồng với bậc tỉnh (§9): link là lời hứa. Khoá `tinh=vn` đã do `province.ts`
-// giữ; ở đây chỉ thêm `f` (trường) và `l` (lớp chồng đang bật).
-function readHash(): { field: string; layers: Set<string> } {
-  const p = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-  const f = p.get("f");
-  return {
-    field: f && FIELD_BY_ID.has(f) ? f : DEFAULT_NATIONAL_FIELD,
-    layers: new Set((p.get("l") ?? "").split(",").filter(Boolean)),
-  };
+// Cùng hợp đồng với bậc tỉnh (§9): link là lời hứa. Luật đọc/ghi ở `./hash` — thuần và có
+// test; ở đây chỉ nối nó với danh mục trường và danh sách lớp thật.
+const KNOWN_FIELDS = new Set<string>(NATIONAL_FIELDS.map((f) => f.id));
+const KNOWN_LAYERS = new Set<string>(["stations", "poi"]);
+
+function readHash() {
+  return parseNationalHash(
+    window.location.hash,
+    DEFAULT_NATIONAL_FIELD,
+    KNOWN_FIELDS,
+    KNOWN_LAYERS,
+  );
 }
 
 function writeHash(field: string, layers: Set<string>) {
-  const p = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-  p.set("tinh", "vn");
-  p.set("f", field);
-  if (layers.size) p.set("l", [...layers].join(","));
-  else p.delete("l");
-  history.replaceState(null, "", `#${p.toString()}`);
+  history.replaceState(
+    null,
+    "",
+    serializeNationalHash(window.location.hash, { field, layers }),
+  );
 }
 
 export default function NationalApp() {

@@ -157,7 +157,7 @@ def run(province_code: str) -> None:
     # Đo trên hình học NGUYÊN của `road_graph.parquet`, không trên bản hiển thị đã đơn giản
     # hoá ~10 m: đơn giản hoá cắt góc, và cắt góc thì tổng chiều dài NGẮN đi một cách có hệ
     # thống. Sai số đó nhỏ ở một đoạn nhưng cộng dồn trên 3,4 triệu đoạn thì không còn nhỏ.
-    rg = pq.read_table(pdir / "road_graph.parquet", columns=["road_class", "coords"]).to_pandas()
+    rg = pq.read_table(paths.cache_dir(province_code) / "road_graph.parquet", columns=["road_class", "coords"]).to_pandas()
     m_lat, m_lon = admin.scale_for(province_code)
     road_m = np.zeros((len(cells), len(ROAD_CLASSES)))
     road_in = np.zeros(len(cells))
@@ -323,23 +323,21 @@ def run(province_code: str) -> None:
     )
 
 
-def outputs(province_code: str) -> list:
-    d = paths.PROV / province_code
-    return [d / "grid_cell.parquet", d / "grid_cell_commune.parquet", d / "poi_commune.parquet"]
-
-
-def upstream(province_code: str) -> list:
-    d = paths.PROV / province_code
-    return [d / "stations.parquet", d / "poi_demand.parquet", d / "road_graph.parquet"]
-
-
 STEP = Step(
     name="n04_grid",
     scope="province",
     version=VERSION,
     run=run,
-    outputs=outputs,
-    sources=(paths.SRC_VNSDI_COMMUNES,),
-    province_sources=upstream,
+    reads=(
+        "src_vnsdi",
+        "stations",
+        "poi_demand",
+        "road_graph",
+    ),
+    writes=(
+        "grid_cell",
+        "grid_cell_commune",
+        "poi_commune",
+    ),
     desc="khung lưới H3 r8 + nhãn xã + cung/POI theo ô, theo tỉnh",
 )
