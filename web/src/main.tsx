@@ -1,12 +1,9 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
+import { UNKNOWN, apply, factsFrom } from "./data/bootstrap";
 import { loadManifest } from "./data/manifest";
-import { setUnavailableOverlays, unavailableOverlayPairs } from "./data/overlays";
 import { PROVINCE, isNationalMode } from "./data/province";
-import { setAvailableColumns, setUnusableLayers } from "./fields";
-import { setInitialViewFromBbox } from "./map/positron";
-import { setStoryEnabled } from "./story/scenes";
 import "./index.css";
 
 /**
@@ -43,29 +40,21 @@ async function boot() {
     );
     return;
   }
+  // Năm biến module-level phải được ghi TRƯỚC `import("./App")`. Chúng đi cùng nhau trong
+  // `bootstrap.apply` — xem docstring ở đó để biết vì sao đây là một hàm chứ không phải
+  // năm dòng kèm một comment.
+  let title: string | null = null;
   try {
-    const m = await loadManifest();
-    setAvailableColumns(m.available_columns, m.available_commune_columns);
-    setUnusableLayers(m.unusable_layers?.map((l) => l.layer));
-    // Hai cờ cùng họ với hai dòng trên, và cùng phải đặt TRƯỚC `import("./App")`: chúng
-    // quyết định khoá `s` và khoá `l` của hash đọc ra cái gì, mà `store.ts` đọc hash ngay
-    // lúc nạp module. Đặt muộn hơn là để một cảnh Hà Nội mở ra trên một tỉnh trong đúng
-    // một nhịp render — và một nhịp là đủ để nó chụp ảnh được.
-    setStoryEnabled(m.story_enabled !== false);
-    setUnavailableOverlays(unavailableOverlayPairs(m));
-    if (m.province) {
-      document.title = `EVCS · ${m.province.province_name}`;
-      setInitialViewFromBbox(m.province.bbox);
-    }
+    const f = factsFrom(await loadManifest());
+    apply(f);
+    title = f.title;
   } catch {
-    setAvailableColumns(undefined);
-    setUnusableLayers(undefined);
-    // Thoái lui về "không lọc gì", đúng như hai dòng trên: manifest hỏng là chưa biết bộ
-    // dữ liệu thiếu gì, mà "chưa biết" không được biến thành "biết là thiếu".
-    setStoryEnabled(true);
-    setUnavailableOverlays([]);
-    if (PROVINCE) document.title = `EVCS · tỉnh ${PROVINCE}`;
+    // Manifest hỏng là CHƯA BIẾT bộ dữ liệu thiếu gì, mà "chưa biết" không được biến thành
+    // "biết là thiếu". Bộ Hà Nội gốc không có `available_columns` và phải chạy y như trước.
+    apply(UNKNOWN);
+    title = PROVINCE ? `EVCS · tỉnh ${PROVINCE}` : null;
   }
+  if (title) document.title = title;
   // Import ĐỘNG, sau khi manifest đã về: `store.ts` đọc `INITIAL_VIEW` và `fields.ts` ngay
   // lúc nạp module, nên nạp `App` sớm hơn là khoá trạng thái trước khi biết dữ liệu có gì.
   const { default: App } = await import("./App");

@@ -288,6 +288,11 @@ export function setStoryEnabled(on: boolean): void {
   STORY_ON = on;
 }
 
+/** Chế độ CÂU CHUYỆN có dựng được trên bộ dữ liệu đang mở không. Đọc, không suy. */
+export function storyEnabled(): boolean {
+  return STORY_ON;
+}
+
 /** `s` của hash → cảnh, hoặc `null`. Slug lạ bị bỏ, và bỏ nó CHÍNH LÀ về BẢN ĐỒ (§9a). */
 export function parseScene(raw: string | null | undefined): SceneId | null {
   if (!STORY_ON) return null;
