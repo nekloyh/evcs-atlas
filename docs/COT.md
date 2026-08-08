@@ -111,3 +111,40 @@ Một dòng một xã/phường/đặc khu trong một tỉnh
 | 19 | `ports_per_10k_pop` | f64 | số đo | supply | súng trên 10.000 dân ↑tốt | — |  | Phép chia của hai số đo. Trường mặc định của màn hình đầu. **· null =** xã không có dân trong bản đồ dân số — mẫu số bằng 0 |
 | 20 | `util_mean_port_weighted` | f64 | số đo | occupancy | tỉ lệ cổng-giờ bận, 0–1 | — |  | Trung bình trọng số SỐ CỔNG — trạm 30 cổng nói nhiều hơn trạm 2 cổng **· null =** xã không có trạm nào đo được — KHÔNG phải bận bằng 0 |
 | 21 | `dist_station_m_pop_weighted` | f64 | số đo | distance | mét theo mạng đường, trọng số dân ↓xấu | — |  | Trọng số DÂN chứ không phải diện tích: câu hỏi là 'người ở đây phải đi bao xa', không phải 'đất ở đây cách bao xa'. **· null =** không ô nào trong xã tới được trạm bằng đường bộ |
+
+### `grid_h3_r6` — 30 cột
+
+Lưới gộp toàn quốc cho màn hình CẢ NƯỚC XEM MỘT LẦN
+
+| # | cột | kiểu | vai | lớp | đơn vị | gộp | cả nước | nghĩa |
+|--:|---|---|---|---|---|---|:-:|---|
+| 1 | `h3_r6` | str | khoá | national | — | — |  | Mã ô H3 r6, ~36 km² |
+| 2 | `province_code` | str | định danh | national | — | — |  | Tỉnh CHỦ của ô — tỉnh chiếm nhiều ô r8 nhất trong ô gộp này |
+| 3 | `n_provinces` | i32 | định danh | national | tỉnh | — |  | Số tỉnh mà ô gộp chạm vào. Lớn hơn 1 nghĩa là ô nằm vắt qua biên. |
+| 4 | `n_cells_r8` | i32 | định danh | national | ô | — |  | Số ô r8 gộp vào — MẪU SỐ của mọi tỉ số ở bậc này, và nó KHÔNG đều giữa các ô |
+| 5 | `lat` | f32 | định danh | national | độ | — |  | Vĩ độ tâm ô gộp |
+| 6 | `lng` | f32 | định danh | national | độ | — |  | Kinh độ tâm ô gộp |
+| 7 | `area_km2` | f32 | định danh | national | km² | — |  | Diện tích phần ô gộp nằm trong lãnh thổ đã dựng — không phải 36 km² tròn |
+| 8 | `population` | f32 | số đo | population | người trên ô ~0,74 km² | cộng |  | Dân số dasymetric: bề mặt WorldPop 2025 R2024B neo theo `danso` từng xã của VNSDI |
+| 9 | `n_stations` | i32 | số đo | grid | trạm | cộng |  | Trạm sạc công cộng trong ô |
+| 10 | `n_stations_operational` | i32 | số đo | grid | trạm | cộng |  | Trong đó đang vận hành |
+| 11 | `n_ports` | i32 | số đo | grid | súng | cộng |  | Tổng số cổng sạc |
+| 12 | `power_kw_site` | f32 | số đo | grid | kW | cộng |  | Tổng công suất trên trụ |
+| 13 | `n_fuel` | i32 | số đo | grid | điểm | cộng |  | Cây xăng |
+| 14 | `n_parking_off` | i32 | số đo | grid | điểm | cộng |  | Bãi đỗ ngoài đường |
+| 15 | `n_parking_street` | i32 | số đo | grid | điểm | cộng |  | Chỗ đỗ ven đường |
+| 16 | `n_mall` | i32 | số đo | grid | điểm | cộng |  | Trung tâm thương mại |
+| 17 | `n_dept_store` | i32 | số đo | grid | điểm | cộng |  | Cửa hàng bách hoá |
+| 18 | `n_supermarket` | i32 | số đo | grid | điểm | cộng |  | Siêu thị |
+| 19 | `n_market` | i32 | số đo | grid | điểm | cộng |  | Chợ |
+| 20 | `n_apartment` | i32 | số đo | grid | toà | cộng |  | Toà chung cư |
+| 21 | `n_poi_total` | i32 | số đo | grid | điểm | cộng |  | Tổng 8 lớp POI trong ô |
+| 22 | `road_len_arterial_m` | f32 | số đo | grid | mét | cộng |  | Cao tốc + trục xuyên tâm + quốc lộ + liên khu vực |
+| 23 | `road_len_in_province_m` | f32 | số đo | grid | mét | cộng |  | Chiều dài đường CẮT ĐÚNG ranh giới tỉnh. Khác `road_len_m`, thứ đo trên toàn ô kể cả phần nằm ngoài tỉnh — hai quy ước cắt biên, hai cột, không trộn. |
+| 24 | `apartment_levels_sum` | f32 | số đo | grid | tầng | cộng |  | Tổng số tầng khai báo của các toà chung cư trong ô |
+| 25 | `population_wp` | f32 | số đo | population | người trên ô ~0,74 km² | cộng |  | WorldPop THÔ, chưa neo. Phát riêng vì tổng `danso` toàn quốc lệch ~12% và lệch KHÔNG ĐỀU giữa các tỉnh — neo mù sẽ thổi phồng đúng những tỉnh sai nhiều nhất. |
+| 26 | `tree_frac` | f32 | số đo | landcover | tỉ lệ, 0–1 | TB theo diện tích |  | Cây thân gỗ |
+| 27 | `crop_frac` | f32 | số đo | landcover | tỉ lệ, 0–1 | TB theo diện tích |  | Đất trồng trọt |
+| 28 | `built_frac` | f32 | số đo | landcover | tỉ lệ, 0–1 | TB theo diện tích |  | Đất đã xây dựng |
+| 29 | `water_frac` | f32 | số đo | landcover | tỉ lệ, 0–1 | TB theo diện tích |  | Mặt nước |
+| 30 | `pop_density_ppkm2` | f32 | số đo | national | người/km² | — |  | `population` gộp chia `area_km2` gộp. TÍNH LẠI, không phải trung bình của các tỉ số con — trung bình của tỉ số không phải tỉ số của trung bình. |

@@ -237,3 +237,49 @@ def test_commune_khop_bang_that(pdir: Path):
     co = [n for n in s.names if n != GEOMETRY_COLUMN]
     ty = {n: str(t) for n, t in zip(s.names, s.types) if n != GEOMETRY_COLUMN}
     assert COMMUNE.validate(co, ty) == []
+
+
+# ── ô gộp r6 — SUY RA từ GRID, không khai lại ────────────────────────────
+from evcs.schema import NATIONAL_R6  # noqa: E402
+
+
+def test_r6_cho_dung_moi_cot_national_cua_grid():
+    """Đây là bất biến mà việc SUY RA mua được: 'lớp cả nước chở đúng những cột đã đánh dấu
+    là cả-nước' đúng theo CẤU TRÚC, không theo kỷ luật."""
+    can = {c.name for c in GRID.where(national=True)}
+    co = set(NATIONAL_R6.names())
+    assert can - co == set(), f"thiếu: {sorted(can - co)}"
+
+
+def test_r6_khong_cho_cot_khong_gop_duoc():
+    khong = {c.name for c in GRID.columns if c.agg == "none" and c.role == "measure"}
+    la = set(NATIONAL_R6.names()) & khong
+    # `pop_density_ppkm2` trùng tên nhưng ở r6 nó được TÍNH LẠI, không gộp — nên nó hợp lệ.
+    assert la <= {"pop_density_ppkm2"}, f"chở lớp tính toán lên r6: {sorted(la - {'pop_density_ppkm2'})}"
+
+
+def test_r6_ha_xuong_32_bit():
+    """Ngân sách tải của màn hình cả nước đã đo và đã chốt — hạ độ chính xác là quyết định."""
+    for c in NATIONAL_R6.columns:
+        assert c.dtype not in ("f64", "i64"), f"{c.name} còn 64-bit"
+
+
+def test_r6_khoa_la_h3_r6_khong_phai_h3_r8():
+    assert NATIONAL_R6.key == "h3_r6"
+    assert not NATIONAL_R6.has("h3_r8")
+
+
+def test_r6_them_mot_cot_national_o_GRID_la_tu_dong_len_r6():
+    """Kiểm quan hệ, không kiểm một con số: đổi `national` ở GRID phải đổi r6 theo."""
+    n_sum = len(GRID.where(agg="sum", national=True))
+    n_mean = len(GRID.where(agg="area_mean", national=True))
+    # 7 cột danh tính + 1 cột tính lại
+    assert len(NATIONAL_R6.columns) == 7 + n_sum + n_mean + 1
+
+
+def test_r6_khop_bang_that():
+    f = ROOT / "web/public/data/vn/grid_h3_r6.parquet"
+    if not f.exists():
+        pytest.skip("chưa dựng lớp toàn quốc")
+    s = pq.read_schema(f)
+    assert NATIONAL_R6.validate(list(s.names), {n: str(t) for n, t in zip(s.names, s.types)}) == []

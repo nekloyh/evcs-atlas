@@ -14,7 +14,8 @@ Thêm một cột nghĩa là thêm MỘT dòng ở ``grid.py``. Test sau đó n�
 from .column import ARROW, Column, Table
 from .commune import COMMUNE
 from .grid import GRID
+from .national import NATIONAL_R6
 
-__all__ = ["ARROW", "COMMUNE", "GRID", "Column", "Table", "TABLES"]
+__all__ = ["ARROW", "COMMUNE", "GRID", "NATIONAL_R6", "Column", "Table", "TABLES"]
 
-TABLES: dict[str, Table] = {GRID.name: GRID, COMMUNE.name: COMMUNE}
+TABLES: dict[str, Table] = {t.name: t for t in (GRID, COMMUNE, NATIONAL_R6)}

@@ -42,6 +42,11 @@
   },
   "checks": [
     {
+      "name": "schema_r6_khop_khai_bao",
+      "status": "PASS",
+      "detail": "30 cột, suy ra từ GRID"
+    },
+    {
       "name": "stations_khop_bang_tinh",
       "status": "PASS",
       "detail": "r6 6380 · tỉnh 6380 · bảng trạm 6380"

@@ -26,7 +26,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import COMMUNE, GRID
+from . import COMMUNE, GRID, NATIONAL_R6
 from .column import Table
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -151,6 +151,8 @@ bình khoảng cách của các ô trong nó.
 {_md_table(GRID)}
 
 {_md_table(COMMUNE)}
+
+{_md_table(NATIONAL_R6)}
 """
 
 
@@ -173,7 +175,8 @@ def main(argv: list[str] | None = None) -> int:
     for f, w in can:
         f.parent.mkdir(parents=True, exist_ok=True)
         f.write_text(w, encoding="utf-8")
-    print(f"✓ {OUT.name} · {OUT_MD.name} — {len(GRID.columns)} + {len(COMMUNE.columns)} cột")
+    n = len(GRID.columns) + len(COMMUNE.columns) + len(NATIONAL_R6.columns)
+    print(f"✓ {OUT.name} · {OUT_MD.name} — 3 bảng, {n} cột")
     return 0
 
 

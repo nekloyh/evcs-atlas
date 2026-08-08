@@ -29,7 +29,7 @@ from typing import Literal
 
 Role = Literal["key", "identity", "measure"]
 Agg = Literal["sum", "area_mean", "none"]
-Dtype = Literal["str", "f64", "i64", "bool"]
+Dtype = Literal["str", "f64", "f32", "i64", "i32", "bool"]
 Polarity = Literal["high-bad", "high-good"]
 
 # Kiểu logic → kiểu pyarrow đọc được từ đĩa. Một chỗ, để phép kiểm schema so được kiểu
@@ -37,9 +37,17 @@ Polarity = Literal["high-bad", "high-good"]
 ARROW = {
     "str": ("string", "large_string"),
     "f64": ("double",),
+    "f32": ("float",),
     "i64": ("int64",),
+    "i32": ("int32",),
     "bool": ("bool",),
 }
+
+# Hạ độ chính xác khi chở lên bậc gộp — CÓ CHỦ Ý, không phải mất mát tình cờ.
+#
+# Màn hình CẢ NƯỚC có ngân sách tải đã đo và đã chốt (0,52 MB lần đầu). Ở bậc ô gộp 36 km²,
+# `float32` cho ~7 chữ số có nghĩa — thừa cho một con số hiển thị ở mức phóng toàn quốc.
+DOWNCAST = {"f64": "f32", "i64": "i32"}
 
 
 @dataclass(frozen=True)

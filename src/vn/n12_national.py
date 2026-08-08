@@ -62,7 +62,7 @@ import pyarrow.parquet as pq
 from shapely import wkb
 from shapely.geometry import mapping
 
-from evcs.schema import GRID
+from evcs.schema import GRID, NATIONAL_R6
 
 from . import admin, paths, qa
 
@@ -328,6 +328,20 @@ def run() -> None:
     g, gmeta = _grid_r6()
     gp = WEB_VN / "grid_h3_r6.parquet"
     pq.write_table(pa.Table.from_pandas(g, preserve_index=False), gp, compression="zstd")
+
+    # Cổng chặn thứ ba. Bảng r6 KHÔNG được khai lại ở schema — nó SUY RA từ `GRID`:
+    # danh tính của ô gộp + mọi cột `national=True` + một tỉ số tính lại. Nên phép kiểm này
+    # trả lời một câu mạnh hơn "có đủ cột không": nó nói lớp cả nước chở ĐÚNG những cột đã
+    # được đánh dấu là cả-nước, không thừa một cột nào, và đúng thứ tự lẫn độ chính xác.
+    _s = pq.read_schema(gp)
+    lech = NATIONAL_R6.validate(
+        list(_s.names), {n: str(t) for n, t in zip(_s.names, _s.types)}
+    )
+    r.check(
+        "schema_r6_khop_khai_bao",
+        not lech,
+        "; ".join(lech) if lech else f"{len(NATIONAL_R6.columns)} cột, suy ra từ GRID",
+    )
 
     st = _stations()
     sp = WEB_VN / "stations.parquet"
