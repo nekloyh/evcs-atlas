@@ -13,7 +13,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { afterEach, test } from "node:test";
 
-import { UNKNOWN, apply, factsFrom } from "../src/data/bootstrap";
+import { UNKNOWN, apply, factsFrom, storyDataReady } from "../src/data/bootstrap";
 import type { Manifest } from "../src/data/manifest";
 import { overlayUnavailable } from "../src/data/overlays";
 import { FIELDS, fieldAvailable, gridColumnAvailable, layerUsable } from "../src/fields";
@@ -53,7 +53,16 @@ test("apply ghi ĐỦ năm chỗ, không sót chỗ nào", () => {
 });
 
 test("`story_enabled` vắng khoá nghĩa là CHƯA AI TẮT, không phải đã tắt", () => {
-  assert.equal(factsFrom({ ...MANIFEST, story_enabled: undefined } as never).storyEnabled, true);
+  // Chỉ kiểm CỔNG BIÊN TẬP, nên phải cho cổng dữ liệu mở sẵn — `storyEnabled` giờ là
+  // tích của hai cổng, và trộn chúng vào một assert là không kiểm được cái nào.
+  const du = {
+    ...MANIFEST,
+    story_enabled: undefined,
+    available_road_columns: ["dist_station_m"],
+    files: { "routes_showcase.geojson": {} },
+  } as unknown as Manifest;
+  assert.equal(storyDataReady(du), true, "tiền đề: cổng dữ liệu mở");
+  assert.equal(factsFrom(du).storyEnabled, true);
 });
 
 test("UNKNOWN đưa mọi thứ về không-lọc-gì", () => {
@@ -98,3 +107,58 @@ test("main.tsx không còn tự gọi setter nào — chỉ đi qua apply()", ()
 function readSrc(rel: string): string {
   return readFileSync(new URL(`../src/${rel}`, import.meta.url).pathname, "utf8");
 }
+
+
+// ── HAI cổng của chế độ CÂU CHUYỆN ───────────────────────────────────────
+//
+// Cổng biên tập ở `n11` hỏi "văn cảnh có viết cho tỉnh này không"; cổng dữ liệu ở đây hỏi
+// "dữ liệu có đỡ nổi không". Hôm nay hai cổng ĐANG lệch: `story_enabled` bật ở `#tinh=01`
+// nhưng bộ p/01 thiếu `dist_station_m` và thiếu `routes_showcase.geojson`.
+test("cổng dữ liệu chặn khi thiếu cột đường mà cảnh C cần", () => {
+  const m = {
+    ...MANIFEST,
+    story_enabled: true,
+    available_road_columns: ["osm_id", "road_class", "bridge", "coords"],
+    files: { "roads.parquet": {} },
+  } as unknown as Manifest;
+  assert.equal(storyDataReady(m), false);
+  assert.equal(factsFrom(m).storyEnabled, false, "hai cổng phải nhân với nhau");
+});
+
+test("cổng dữ liệu chặn khi thiếu file cặp tuyến", () => {
+  const m = {
+    ...MANIFEST,
+    story_enabled: true,
+    available_road_columns: ["dist_station_m"],
+    files: { "roads.parquet": {} },
+  } as unknown as Manifest;
+  assert.equal(storyDataReady(m), false);
+});
+
+test("đủ dữ liệu thì cổng dữ liệu mở", () => {
+  const m = {
+    ...MANIFEST,
+    story_enabled: true,
+    available_road_columns: ["dist_station_m"],
+    files: { "routes_showcase.geojson": {} },
+  } as unknown as Manifest;
+  assert.equal(storyDataReady(m), true);
+  assert.equal(factsFrom(m).storyEnabled, true);
+});
+
+test("bộ Hà Nội gốc KHÔNG khai available_road_columns ⇒ không bị chặn", () => {
+  // Vắng khoá = CHƯA BIẾT, và "chưa biết" không được biến thành "biết là thiếu".
+  const m = { story_enabled: true, files: { "routes_showcase.geojson": {} } } as unknown as Manifest;
+  assert.equal(storyDataReady(m), true);
+});
+
+test("cổng biên tập vẫn thắng: story_enabled=false thì dữ liệu đủ cũng không mở", () => {
+  const m = {
+    ...MANIFEST,
+    story_enabled: false,
+    available_road_columns: ["dist_station_m"],
+    files: { "routes_showcase.geojson": {} },
+  } as unknown as Manifest;
+  assert.equal(storyDataReady(m), true, "dữ liệu thì đủ");
+  assert.equal(factsFrom(m).storyEnabled, false, "nhưng văn cảnh không viết cho tỉnh này");
+});

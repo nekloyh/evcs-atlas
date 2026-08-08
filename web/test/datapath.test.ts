@@ -64,8 +64,11 @@ function viPham(duoi: string): string[] {
       if (laToanQuoc(ten)) continue;
       const truoc = src.slice(Math.max(0, m.index! - 9), m.index!);
       if (truoc.endsWith("dataPath(")) continue;
-      // `manifest.files["commune.geojson"]` là một KHOÁ tra bảng, không phải đường dẫn.
+      // `manifest.files["commune.geojson"]` và `"x.geojson" in m.files` là tra KHOÁ trên
+      // một bảng, không phải đường dẫn để fetch.
       if (truoc.endsWith("[")) continue;
+      const sau = src.slice(m.index! + m[0].length, m.index! + m[0].length + 4);
+      if (sau.startsWith(" in ")) continue;
       pham.push(`${f}: ${ten}`);
     }
   }

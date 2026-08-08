@@ -52,6 +52,31 @@ export const UNKNOWN: DatasetFacts = {
   title: null,
 };
 
+/**
+ * Dữ liệu có ĐỠ NỔI chế độ CÂU CHUYỆN không — cổng thứ hai, hỏi một câu khác.
+ *
+ * Cổng thứ nhất nằm ở `n11_web_export` (`code == "01"`) và hỏi: **văn cảnh có được viết cho
+ * tỉnh này không?** Cảnh C gọi tên sông Hồng và sáu cây cầu; `scenes.ts` khoá cứng hai mã xã
+ * chỉ tồn tại ở Hà Nội. Cổng ấy KHÔNG được bỏ — bỏ nó là in văn cảnh Hà Nội đè lên bản đồ
+ * Cà Mau, và thứ đó **không trông như lỗi**.
+ *
+ * Cổng này hỏi: **dữ liệu có đỡ nổi không?** Cần thiết vì hai cổng có thể lệch nhau, và
+ * hôm nay chúng ĐANG lệch: `story_enabled` bật ở `#tinh=01`, nhưng bộ `p/01` thiếu
+ * `dist_station_m` (cảnh C tô mạng đường theo cột đó) và thiếu hai khoá `manifest.roads`
+ * mà cột cảnh đọc. Kết quả là một cảnh mở ra được nhưng nửa trống.
+ *
+ * Hệ quả CỐ Ý: sau bản sửa này cảnh CÂU CHUYỆN **tắt** ở `#tinh=01`, và **tự bật lại**
+ * khi lớp cặp tuyến + `dist_station_m` được dựng cho store toàn quốc.
+ */
+export function storyDataReady(m: Manifest): boolean {
+  // Bộ Hà Nội gốc không khai `available_road_columns` ⇒ vắng khoá = KHÔNG BIẾT = không
+  // chặn. Hành vi cũ giữ nguyên tuyệt đối.
+  const road = m.available_road_columns;
+  if (road && !road.includes("dist_station_m")) return false;
+  if (m.files && !("routes_showcase.geojson" in m.files)) return false;
+  return true;
+}
+
 /** Đọc manifest thành các sự thật. Hàm THUẦN — không đụng biến toàn cục nào. */
 export function factsFrom(m: Manifest): DatasetFacts {
   return {
@@ -64,9 +89,8 @@ export function factsFrom(m: Manifest): DatasetFacts {
       station: m.available_station_columns,
     },
     unusableLayers: m.unusable_layers?.map((l) => l.layer),
-    // `!== false` chứ không phải `=== true`: manifest cũ không có khoá này, và vắng khoá
-    // nghĩa là "chưa ai tắt", không phải "đã tắt".
-    storyEnabled: m.story_enabled !== false,
+    // HAI cổng, hỏi hai câu KHÁC NHAU. Cảnh chỉ bật khi cả hai đúng.
+    storyEnabled: m.story_enabled !== false && storyDataReady(m),
     overlayPairs: unavailableOverlayPairs(m) as [string, string][],
     title: m.province ? `EVCS · ${m.province.province_name}` : null,
     bbox: m.province?.bbox,
