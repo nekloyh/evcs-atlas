@@ -4252,6 +4252,75 @@
    "n_cols": 25,
    "n_rows": 939
   },
+  "p/01/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 21.387330603,
+     "min": 20.5666448746,
+     "n_finite": 132,
+     "n_null": 0,
+     "p50": 21.0310351847,
+     "sum": 2775.87078576,
+     "sumsq": 58377.8898386
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 106.061694905,
+     "min": 105.28352423,
+     "n_finite": 132,
+     "n_null": 0,
+     "p50": 105.842606727,
+     "sum": 13965.7001505,
+     "sumsq": 1477585.02146
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "ff8fd46bef749544",
+     "n_null": 91,
+     "n_unique": 40
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 13827995385.0,
+     "min": 251790836.0,
+     "n_finite": 132,
+     "n_null": 0,
+     "p50": 1229927540.0,
+     "sum": 192294475936.0,
+     "sumsq": 7.28813978159e+20
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "300993eee147af52",
+     "n_null": 0,
+     "n_unique": 2
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "0661319aac4ce12d",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 132
+  },
   "p/01/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -6901,6 +6970,75 @@
    "n_cols": 25,
    "n_rows": 31
   },
+  "p/04/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 22.9451346346,
+     "min": 22.5413147701,
+     "n_finite": 12,
+     "n_null": 0,
+     "p50": 22.8202449177,
+     "sum": 273.377682224,
+     "sumsq": 6228.14127601
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 106.833253343,
+     "min": 105.507472383,
+     "n_finite": 12,
+     "n_null": 0,
+     "p50": 106.469510175,
+     "sum": 1275.54163702,
+     "sumsq": 135586.627865
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "d47e024246932ec0",
+     "n_null": 9,
+     "n_unique": 3
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1458074487.0,
+     "min": 144131595.0,
+     "n_finite": 12,
+     "n_null": 0,
+     "p50": 1240377521.5,
+     "sum": 12301806522.0,
+     "sumsq": 1.4448946174e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "c99707f00544a122",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 12
+  },
   "p/04/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -9539,6 +9677,75 @@
    "key_hash": "decc280e8dbcc479",
    "n_cols": 25,
    "n_rows": 110
+  },
+  "p/08/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 23.17188035,
+     "min": 21.7025880431,
+     "n_finite": 27,
+     "n_null": 0,
+     "p50": 22.5422961826,
+     "sum": 606.074120078,
+     "sumsq": 13610.5321878
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 105.4986585,
+     "min": 104.45435733,
+     "n_finite": 27,
+     "n_null": 0,
+     "p50": 105.019395816,
+     "sum": 2835.82714396,
+     "sumsq": 297850.548249
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "5a18ce4606d9d45c",
+     "n_null": 26,
+     "n_unique": 1
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1462548693.0,
+     "min": 853273538.0,
+     "n_finite": 27,
+     "n_null": 0,
+     "p50": 1264593812.0,
+     "sum": 34275765770.0,
+     "sumsq": 4.4214716367e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "9ae209aca831cd5f",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 27
   },
   "p/08/traveltime_cell.parquet": {
    "col": {
@@ -12184,6 +12391,75 @@
    "n_cols": 25,
    "n_rows": 41
   },
+  "p/11/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 21.9679671,
+     "min": 21.2323908666,
+     "n_finite": 12,
+     "n_null": 0,
+     "p50": 21.4251067639,
+     "sum": 258.085626019,
+     "sumsq": 5551.42135391
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 103.42988544,
+     "min": 102.932650674,
+     "n_finite": 12,
+     "n_null": 0,
+     "p50": 103.102365453,
+     "sum": 1237.91347761,
+     "sumsq": 127702.806662
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "e3b0c44298fc1c14",
+     "n_null": 12,
+     "n_unique": 0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1462548671.0,
+     "min": 1318145095.0,
+     "n_finite": 12,
+     "n_null": 0,
+     "p50": 1458074472.5,
+     "sum": 17102115346.0,
+     "sumsq": 2.44186508572e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "e4dda54e86921e36",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 12
+  },
   "p/11/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -14823,6 +15099,75 @@
    "n_cols": 25,
    "n_rows": 28
   },
+  "p/12/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 22.606242842,
+     "min": 21.6566454403,
+     "n_finite": 33,
+     "n_null": 0,
+     "p50": 22.39019435,
+     "sum": 735.979567847,
+     "sumsq": 16415.9723433
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 103.99275325,
+     "min": 102.50887065,
+     "n_finite": 33,
+     "n_null": 0,
+     "p50": 103.09872438,
+     "sum": 3406.99616055,
+     "sumsq": 351753.387135
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "22c02f8eb755f937",
+     "n_null": 32,
+     "n_unique": 1
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1462548681.0,
+     "min": 712584132.0,
+     "n_finite": 33,
+     "n_null": 0,
+     "p50": 1320783853.0,
+     "sum": 42102867114.0,
+     "sumsq": 5.46465576306e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "d189e509a912fc3e",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 33
+  },
   "p/12/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -17456,6 +17801,75 @@
    "key_hash": "878cc9412caf54cd",
    "n_cols": 25,
    "n_rows": 66
+  },
+  "p/14/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 21.6566454403,
+     "min": 20.6118476233,
+     "n_finite": 24,
+     "n_null": 0,
+     "p50": 21.3926720793,
+     "sum": 512.033095633,
+     "sumsq": 10925.4955182
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 104.849134976,
+     "min": 103.40535564,
+     "n_finite": 24,
+     "n_null": 0,
+     "p50": 104.080196405,
+     "sum": 2499.5879374,
+     "sumsq": 260333.729819
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "e3b0c44298fc1c14",
+     "n_null": 24,
+     "n_unique": 0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1462548670.0,
+     "min": 714513856.0,
+     "n_finite": 24,
+     "n_null": 0,
+     "p50": 1329368383.0,
+     "sum": 31117383016.0,
+     "sumsq": 4.11689072799e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "6acdf8126c4c306f",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 24
   },
   "p/14/traveltime_cell.parquet": {
    "col": {
@@ -20106,6 +20520,75 @@
    "n_cols": 25,
    "n_rows": 100
   },
+  "p/15/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 22.7426334267,
+     "min": 21.4974422707,
+     "n_finite": 51,
+     "n_null": 0,
+     "p50": 22.0404802,
+     "sum": 1125.51001564,
+     "sumsq": 24844.9880424
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 105.02486355,
+     "min": 103.6866605,
+     "n_finite": 51,
+     "n_null": 0,
+     "p50": 104.078492562,
+     "sum": 5315.12935571,
+     "sumsq": 553939.724939
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "e3b0c44298fc1c14",
+     "n_null": 51,
+     "n_unique": 0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1462548694.0,
+     "min": 481965040.0,
+     "n_finite": 51,
+     "n_null": 0,
+     "p50": 1320783907.0,
+     "sum": 66305639427.0,
+     "sumsq": 8.79951317942e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "8a09ba1d32f76bb7",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 51
+  },
   "p/15/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -22750,6 +23233,75 @@
    "n_cols": 25,
    "n_rows": 152
   },
+  "p/19/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 22.1994989771,
+     "min": 21.3014425125,
+     "n_finite": 20,
+     "n_null": 0,
+     "p50": 21.522122323,
+     "sum": 432.011166453,
+     "sumsq": 9333.12198231
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 105.932925927,
+     "min": 105.584266178,
+     "n_finite": 20,
+     "n_null": 0,
+     "p50": 105.853624925,
+     "sum": 2116.43625315,
+     "sumsq": 223965.304693
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "befb975c788fd6e1",
+     "n_null": 18,
+     "n_unique": 2
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1458074460.0,
+     "min": 483057097.0,
+     "n_finite": 20,
+     "n_null": 0,
+     "p50": 1240467336.0,
+     "sum": 21572871806.0,
+     "sumsq": 2.51933165137e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "ee387e45749ed6a9",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 20
+  },
   "p/19/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -25383,6 +25935,75 @@
    "key_hash": "9ec398d71c333ccb",
    "n_cols": 25,
    "n_rows": 42
+  },
+  "p/20/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 21.9727240077,
+     "min": 21.5660596,
+     "n_finite": 6,
+     "n_null": 0,
+     "p50": 21.7745837611,
+     "sum": 130.635751637,
+     "sumsq": 2844.41856221
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 106.977341274,
+     "min": 106.4918034,
+     "n_finite": 6,
+     "n_null": 0,
+     "p50": 106.680312997,
+     "sum": 640.134991946,
+     "sumsq": 68295.6118072
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "4a4136854980547e",
+     "n_null": 5,
+     "n_unique": 1
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1458074453.0,
+     "min": 482621639.0,
+     "n_finite": 6,
+     "n_null": 0,
+     "p50": 1360684102.0,
+     "sum": 6837186449.0,
+     "sumsq": 8.7140079455e+18
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "50b78625ea91251f",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "88f230c251923b2d",
+     "n_null": 0,
+     "n_unique": 1
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 6
   },
   "p/20/traveltime_cell.parquet": {
    "col": {
@@ -28033,6 +28654,75 @@
    "n_cols": 25,
    "n_rows": 181
   },
+  "p/22/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 21.5435203902,
+     "min": 20.8003855069,
+     "n_finite": 52,
+     "n_null": 0,
+     "p50": 21.0081532978,
+     "sum": 1094.175149,
+     "sumsq": 23024.9587479
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 107.960884121,
+     "min": 106.398251862,
+     "n_finite": 52,
+     "n_null": 0,
+     "p50": 106.846148258,
+     "sum": 5563.026455,
+     "sumsq": 595146.853427
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "e932630fcb275c8f",
+     "n_null": 40,
+     "n_unique": 12
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1495906646.0,
+     "min": 19032321.0,
+     "n_finite": 52,
+     "n_null": 0,
+     "p50": 1265612886.0,
+     "sum": 56716268368.0,
+     "sumsq": 6.99695199029e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "63d00ad1ac5deaaf",
+     "n_null": 0,
+     "n_unique": 2
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "e61a83a4df784c41",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 52
+  },
   "p/22/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -30682,6 +31372,75 @@
    "n_cols": 25,
    "n_rows": 344
   },
+  "p/24/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 21.6311365488,
+     "min": 20.9341248797,
+     "n_finite": 62,
+     "n_null": 0,
+     "p50": 21.1598969235,
+     "sum": 1312.84058276,
+     "sumsq": 27800.4809032
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 106.801463084,
+     "min": 105.86171328,
+     "n_finite": 62,
+     "n_null": 0,
+     "p50": 106.084447467,
+     "sum": 6579.19384794,
+     "sumsq": 698160.511892
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "14a7192c0a708f29",
+     "n_null": 48,
+     "n_unique": 14
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 6924044149.0,
+     "min": 469414362.0,
+     "n_finite": 62,
+     "n_null": 0,
+     "p50": 1264912330.0,
+     "sum": 74379298955.0,
+     "sumsq": 1.27373560135e+20
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "300993eee147af52",
+     "n_null": 0,
+     "n_unique": 2
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "1c2153bb843599dd",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 62
+  },
   "p/24/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -33320,6 +34079,75 @@
    "key_hash": "d44b7d35d6ca04ea",
    "n_cols": 25,
    "n_rows": 425
+  },
+  "p/25/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 21.6788997879,
+     "min": 20.3137588631,
+     "n_finite": 50,
+     "n_null": 0,
+     "p50": 21.202689815,
+     "sum": 1051.57986827,
+     "sumsq": 22123.6254004
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 105.903172969,
+     "min": 104.83970992,
+     "n_finite": 50,
+     "n_null": 0,
+     "p50": 105.447918693,
+     "sum": 5273.38005227,
+     "sumsq": 556174.337096
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "30f5367a604f467c",
+     "n_null": 43,
+     "n_unique": 7
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1462548622.0,
+     "min": 400591170.0,
+     "n_finite": 50,
+     "n_null": 0,
+     "p50": 1265902480.5,
+     "sum": 59328968303.0,
+     "sumsq": 7.35669668254e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "5a57650459d61e02",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 50
   },
   "p/25/traveltime_cell.parquet": {
    "col": {
@@ -35970,6 +36798,75 @@
    "n_cols": 25,
    "n_rows": 295
   },
+  "p/31/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 21.2016386652,
+     "min": 20.6357212953,
+     "n_finite": 70,
+     "n_null": 0,
+     "p50": 20.9136339884,
+     "sum": 1463.75414316,
+     "sumsq": 30609.2838728
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 107.055677927,
+     "min": 106.111903712,
+     "n_finite": 70,
+     "n_null": 0,
+     "p50": 106.56781898,
+     "sum": 7457.66246701,
+     "sumsq": 794527.855618
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "70a11a5bfd909140",
+     "n_null": 61,
+     "n_unique": 9
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1509687301.0,
+     "min": 241065371.0,
+     "n_finite": 70,
+     "n_null": 0,
+     "p50": 1261043666.5,
+     "sum": 74369644712.0,
+     "sumsq": 8.69677510819e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "283981ff7da17721",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 70
+  },
   "p/31/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -38618,6 +39515,75 @@
    "key_hash": "cfee4c4705dfd7e2",
    "n_cols": 25,
    "n_rows": 360
+  },
+  "p/33/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 21.0305535249,
+     "min": 20.2725913372,
+     "n_finite": 61,
+     "n_null": 0,
+     "p50": 20.8822317165,
+     "sum": 1267.67921331,
+     "sumsq": 26347.3861176
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 106.566051593,
+     "min": 105.854185503,
+     "n_finite": 61,
+     "n_null": 0,
+     "p50": 106.061694905,
+     "sum": 6472.99371114,
+     "sumsq": 686882.130505
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "ac2dfef6f9d77651",
+     "n_null": 49,
+     "n_unique": 12
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 13827995385.0,
+     "min": 153608703.0,
+     "n_finite": 61,
+     "n_null": 0,
+     "p50": 1266260752.0,
+     "sum": 92075360184.0,
+     "sumsq": 4.00691316192e+20
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "300993eee147af52",
+     "n_null": 0,
+     "n_unique": 2
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "674bc9d1ad91b2d8",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 61
   },
   "p/33/traveltime_cell.parquet": {
    "col": {
@@ -41268,6 +42234,75 @@
    "n_cols": 25,
    "n_rows": 274
   },
+  "p/37/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 20.6803158107,
+     "min": 20.084868057,
+     "n_finite": 45,
+     "n_null": 0,
+     "p50": 20.4287236311,
+     "sum": 918.977188783,
+     "sumsq": 18768.1180463
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 106.422700103,
+     "min": 105.733368354,
+     "n_finite": 45,
+     "n_null": 0,
+     "p50": 105.928040749,
+     "sum": 4769.41852511,
+     "sumsq": 505497.654673
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "f15c9096473b6dd0",
+     "n_null": 35,
+     "n_unique": 10
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1463511136.0,
+     "min": 251048155.0,
+     "n_finite": 45,
+     "n_null": 0,
+     "p50": 1279065857.0,
+     "sum": 51526079452.0,
+     "sumsq": 6.24033692376e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "eea6dcf1843cd679",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 45
+  },
   "p/37/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -43917,6 +44952,75 @@
    "n_cols": 25,
    "n_rows": 201
   },
+  "p/38/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 20.6118476233,
+     "min": 19.2656196,
+     "n_finite": 32,
+     "n_null": 0,
+     "p50": 19.8684555116,
+     "sum": 635.266208573,
+     "sumsq": 12616.1455458
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 106.085843982,
+     "min": 104.83970992,
+     "n_finite": 32,
+     "n_null": 0,
+     "p50": 105.672758697,
+     "sum": 3377.98200477,
+     "sumsq": 356589.076356
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "e32e2220b8c44482",
+     "n_null": 27,
+     "n_unique": 5
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1500961241.0,
+     "min": 484052979.0,
+     "n_finite": 32,
+     "n_null": 0,
+     "p50": 1047626360.0,
+     "sum": 35577492904.0,
+     "sumsq": 4.14494892325e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "15b9305c141732f0",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 32
+  },
   "p/38/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -46550,6 +47654,75 @@
    "key_hash": "6863347dc8944f18",
    "n_cols": 25,
    "n_rows": 131
+  },
+  "p/40/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 19.8703259692,
+     "min": 18.5284704718,
+     "n_finite": 33,
+     "n_null": 0,
+     "p50": 19.1793890464,
+     "sum": 630.077909018,
+     "sumsq": 12033.8889118
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 105.798918562,
+     "min": 104.470741261,
+     "n_finite": 33,
+     "n_null": 0,
+     "p50": 105.59216385,
+     "sum": 3478.39097013,
+     "sumsq": 366647.661866
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "32e41dd211c8868f",
+     "n_null": 24,
+     "n_unique": 9
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1500961241.0,
+     "min": 400632258.0,
+     "n_finite": 33,
+     "n_null": 0,
+     "p50": 1050835279.0,
+     "sum": 37716701697.0,
+     "sumsq": 4.56397767855e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "366f6906bd95f6ab",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 33
   },
   "p/40/traveltime_cell.parquet": {
    "col": {
@@ -49200,6 +50373,75 @@
    "n_cols": 25,
    "n_rows": 131
   },
+  "p/42/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 18.685268004,
+     "min": 17.9307090621,
+     "n_finite": 21,
+     "n_null": 0,
+     "p50": 18.3320586,
+     "sum": 384.606317302,
+     "sumsq": 7045.09643019
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 106.496425038,
+     "min": 105.167514774,
+     "n_finite": 21,
+     "n_null": 0,
+     "p50": 105.888151742,
+     "sum": 2224.82009797,
+     "sumsq": 235709.027611
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "6a8dceb727deb656",
+     "n_null": 14,
+     "n_unique": 7
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1500644326.0,
+     "min": 400633260.0,
+     "n_finite": 21,
+     "n_null": 0,
+     "p50": 1267717404.0,
+     "sum": 23965870399.0,
+     "sumsq": 2.95048688667e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "e08de2656532c105",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 21
+  },
   "p/42/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -51844,6 +53086,75 @@
    "n_cols": 25,
    "n_rows": 155
   },
+  "p/44/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 17.9486240022,
+     "min": 16.5228406763,
+     "n_finite": 32,
+     "n_null": 0,
+     "p50": 17.2237778184,
+     "sum": 549.658617286,
+     "sumsq": 9448.27284507
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 107.343149578,
+     "min": 106.031161215,
+     "n_finite": 32,
+     "n_null": 0,
+     "p50": 106.7324259,
+     "sum": 3415.76600699,
+     "sumsq": 364610.995226
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "ed9f0aa698513471",
+     "n_null": 24,
+     "n_unique": 8
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1458087680.0,
+     "min": 400645442.0,
+     "n_finite": 32,
+     "n_null": 0,
+     "p50": 1050762829.5,
+     "sum": 34780269361.0,
+     "sumsq": 3.97873498365e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "9484ca56a023a465",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 32
+  },
   "p/44/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -54487,6 +55798,75 @@
    "key_hash": "cee0c273f0f16945",
    "n_cols": 25,
    "n_rows": 67
+  },
+  "p/46/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 16.6902133346,
+     "min": 16.1350022845,
+     "n_finite": 27,
+     "n_null": 0,
+     "p50": 16.4017507305,
+     "sum": 443.128036181,
+     "sumsq": 7273.25068725
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 108.113233517,
+     "min": 107.199838904,
+     "n_finite": 27,
+     "n_null": 0,
+     "p50": 107.464891273,
+     "sum": 2903.93793226,
+     "sumsq": 312329.614533
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "e3b0c44298fc1c14",
+     "n_null": 27,
+     "n_unique": 0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1488629674.0,
+     "min": 401042492.0,
+     "n_finite": 27,
+     "n_null": 0,
+     "p50": 1318145171.0,
+     "sum": 31501144156.0,
+     "sumsq": 4.00743732635e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "6346ee0797a99ba3",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 27
   },
   "p/46/traveltime_cell.parquet": {
    "col": {
@@ -57137,6 +58517,75 @@
    "n_cols": 25,
    "n_rows": 194
   },
+  "p/48/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 16.1392985977,
+     "min": 15.135270433,
+     "n_finite": 45,
+     "n_null": 0,
+     "p50": 15.7258007844,
+     "sum": 706.450888472,
+     "sumsq": 11093.6554397
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 108.74656135,
+     "min": 107.557147218,
+     "n_finite": 45,
+     "n_null": 0,
+     "p50": 108.126728022,
+     "sum": 4865.49563568,
+     "sumsq": 526071.836944
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "de96546f54a51b38",
+     "n_null": 37,
+     "n_unique": 8
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1488629672.0,
+     "min": 400791086.0,
+     "n_finite": 45,
+     "n_null": 0,
+     "p50": 1270687947.0,
+     "sum": 47997462499.0,
+     "sumsq": 5.83749076844e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "9f5ce5988a92d739",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 45
+  },
   "p/48/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -59770,6 +61219,75 @@
    "key_hash": "e17af716b1b8c9f7",
    "n_cols": 25,
    "n_rows": 86
+  },
+  "p/51/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 15.3885355863,
+     "min": 13.9299739,
+     "n_finite": 51,
+     "n_null": 0,
+     "p50": 14.72996975,
+     "sum": 751.91162837,
+     "sumsq": 11094.1008689
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 109.04463049,
+     "min": 107.4658826,
+     "n_finite": 51,
+     "n_null": 0,
+     "p50": 108.216213913,
+     "sum": 5520.49785114,
+     "sumsq": 597577.211385
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "ac139b84b088d1f9",
+     "n_null": 33,
+     "n_unique": 18
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1509741455.0,
+     "min": 401532710.0,
+     "n_finite": 51,
+     "n_null": 0,
+     "p50": 1271492912.0,
+     "sum": 61482577487.0,
+     "sumsq": 7.78267735435e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "2fec19d9988aa18f",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 51
   },
   "p/51/traveltime_cell.parquet": {
    "col": {
@@ -62420,6 +63938,75 @@
    "n_cols": 25,
    "n_rows": 174
   },
+  "p/52/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 14.4217045746,
+     "min": 13.2097402163,
+     "n_finite": 71,
+     "n_null": 0,
+     "p50": 13.9299739,
+     "sum": 988.447881812,
+     "sumsq": 13766.3225363
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 109.284786147,
+     "min": 107.4658826,
+     "n_finite": 71,
+     "n_null": 0,
+     "p50": 108.228282517,
+     "sum": 7695.58968846,
+     "sumsq": 834133.917245
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "f4f4b07e63067e4d",
+     "n_null": 50,
+     "n_unique": 21
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1492226578.0,
+     "min": 401532710.0,
+     "n_finite": 71,
+     "n_null": 0,
+     "p50": 1309081759.0,
+     "sum": 86595068551.0,
+     "sumsq": 1.11306002489e+20
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "66e34559abce5b04",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 71
+  },
   "p/52/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -65068,6 +66655,75 @@
    "key_hash": "46523c190c12eb43",
    "n_cols": 25,
    "n_rows": 111
+  },
+  "p/56/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 12.9042679403,
+     "min": 11.4001897219,
+     "n_finite": 76,
+     "n_null": 0,
+     "p50": 11.6681585203,
+     "sum": 894.497511985,
+     "sumsq": 10537.9684055
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 109.364896585,
+     "min": 108.681947637,
+     "n_finite": 76,
+     "n_null": 0,
+     "p50": 108.907006794,
+     "sum": 8281.31381988,
+     "sumsq": 902372.203154
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "845c342f12b10580",
+     "n_null": 62,
+     "n_unique": 14
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1524809125.0,
+     "min": 400474243.0,
+     "n_finite": 76,
+     "n_null": 0,
+     "p50": 1273898571.5,
+     "sum": 92985700914.0,
+     "sumsq": 1.16424910793e+20
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "d30b0c7fbcfe0475",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 76
   },
   "p/56/traveltime_cell.parquet": {
    "col": {
@@ -67718,6 +69374,75 @@
    "n_cols": 25,
    "n_rows": 247
   },
+  "p/66/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 13.5744815,
+     "min": 12.2106810557,
+     "n_finite": 55,
+     "n_null": 0,
+     "p50": 12.9042679403,
+     "sum": 708.469647496,
+     "sumsq": 9131.40263005
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 109.364896585,
+     "min": 107.676103052,
+     "n_finite": 55,
+     "n_null": 0,
+     "p50": 108.265321192,
+     "sum": 5964.38283198,
+     "sumsq": 646812.629743
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "d966f6fe0b697691",
+     "n_null": 29,
+     "n_unique": 26
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1492537575.0,
+     "min": 183249722.0,
+     "n_finite": 55,
+     "n_null": 0,
+     "p50": 1273328710.0,
+     "sum": 60207843822.0,
+     "sumsq": 7.35777357988e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "e8171f72e7e78c1c",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 55
+  },
   "p/66/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -70366,6 +72091,75 @@
    "key_hash": "82dbe22e107e9d6e",
    "n_cols": 25,
    "n_rows": 263
+  },
+  "p/68/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 12.8098245802,
+     "min": 10.6207532,
+     "n_finite": 113,
+     "n_null": 0,
+     "p50": 11.45220355,
+     "sum": 1308.59863369,
+     "sumsq": 15185.7284817
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 108.878273936,
+     "min": 107.379269417,
+     "n_finite": 113,
+     "n_null": 0,
+     "p50": 108.119602857,
+     "sum": 12221.87146,
+     "sumsq": 1321915.57381
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "bb9b84523ac372d4",
+     "n_null": 76,
+     "n_unique": 37
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1467920806.0,
+     "min": 183249722.0,
+     "n_finite": 113,
+     "n_null": 0,
+     "p50": 1273898576.0,
+     "sum": 120448335512.0,
+     "sumsq": 1.44655757411e+20
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "b28170f8e18ea382",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 113
   },
   "p/68/traveltime_cell.parquet": {
    "col": {
@@ -73016,6 +74810,75 @@
    "n_cols": 25,
    "n_rows": 518
   },
+  "p/75/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 12.02263675,
+     "min": 10.5773310027,
+     "n_finite": 112,
+     "n_null": 0,
+     "p50": 10.9178624659,
+     "sum": 1235.28812101,
+     "sumsq": 13644.6276044
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 107.483468503,
+     "min": 106.466455368,
+     "n_finite": 112,
+     "n_null": 0,
+     "p50": 106.931531713,
+     "sum": 11976.4668364,
+     "sumsq": 1280681.50946
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "4286566fcd398e2f",
+     "n_null": 32,
+     "n_unique": 79
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1524926253.0,
+     "min": 13938785.0,
+     "n_finite": 112,
+     "n_null": 0,
+     "p50": 1200254927.5,
+     "sum": 117659728438.0,
+     "sumsq": 1.3706382572e+20
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "63d00ad1ac5deaaf",
+     "n_null": 0,
+     "n_unique": 2
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "22bc0a29f004d83a",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 112
+  },
   "p/75/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -75665,6 +77528,75 @@
    "n_cols": 25,
    "n_rows": 1017
   },
+  "p/79/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 11.417395892,
+     "min": 10.3571742141,
+     "n_finite": 182,
+     "n_null": 0,
+     "p50": 10.7985423592,
+     "sum": 1966.93597044,
+     "sumsq": 21265.6553609
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 107.58841295,
+     "min": 106.366728427,
+     "n_finite": 182,
+     "n_null": 0,
+     "p50": 106.745027837,
+     "sum": 19438.1084621,
+     "sumsq": 2076052.8501
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "b73c8c8bcb63bde8",
+     "n_null": 57,
+     "n_unique": 125
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 10837884264.0,
+     "min": 224446807.0,
+     "n_finite": 182,
+     "n_null": 0,
+     "p50": 1199780727.0,
+     "sum": 200188578103.0,
+     "sumsq": 3.40000728479e+20
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "300993eee147af52",
+     "n_null": 0,
+     "n_unique": 2
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "0a9548a6a77b4073",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 182
+  },
   "p/79/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -78303,6 +80235,75 @@
    "key_hash": "1fe45ba0e9e4409d",
    "n_cols": 25,
    "n_rows": 264
+  },
+  "p/80/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 11.625053539,
+     "min": 10.3541211286,
+     "n_finite": 50,
+     "n_null": 0,
+     "p50": 10.9194662827,
+     "sum": 547.025678993,
+     "sumsq": 5990.60535181
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 106.75112755,
+     "min": 106.017214758,
+     "n_finite": 50,
+     "n_null": 0,
+     "p50": 106.380597571,
+     "sum": 5318.666283,
+     "sumsq": 565765.453203
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "263fbded0fb34d0c",
+     "n_null": 29,
+     "n_unique": 21
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1458145425.0,
+     "min": 368245998.0,
+     "n_finite": 50,
+     "n_null": 0,
+     "p50": 1273786480.0,
+     "sum": 60347918219.0,
+     "sumsq": 7.50628102765e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "1761d3251fefab75",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 50
   },
   "p/80/traveltime_cell.parquet": {
    "col": {
@@ -80953,6 +82954,75 @@
    "n_cols": 25,
    "n_rows": 202
   },
+  "p/82/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 10.796896747,
+     "min": 10.1016660908,
+     "n_finite": 33,
+     "n_null": 0,
+     "p50": 10.3609263187,
+     "sum": 342.585293931,
+     "sumsq": 3557.32845671
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 106.760909692,
+     "min": 105.345494132,
+     "n_finite": 33,
+     "n_null": 0,
+     "p50": 105.87151719,
+     "sum": 3497.32484646,
+     "sumsq": 370650.596251
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "dd3751715c4a1576",
+     "n_null": 19,
+     "n_unique": 14
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1484382988.0,
+     "min": 169917851.0,
+     "n_finite": 33,
+     "n_null": 0,
+     "p50": 1178448393.0,
+     "sum": 36760469118.0,
+     "sumsq": 4.43350153832e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "0260b8e994da89e4",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 33
+  },
   "p/82/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -83591,6 +85661,75 @@
    "key_hash": "da4a429e5f2a46ea",
    "n_cols": 25,
    "n_rows": 196
+  },
+  "p/86/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 10.3667948345,
+     "min": 9.58795161938,
+     "n_finite": 29,
+     "n_null": 0,
+     "p50": 10.0931602874,
+     "sum": 290.574470229,
+     "sumsq": 2913.00598517
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 106.774434164,
+     "min": 105.665344557,
+     "n_finite": 29,
+     "n_null": 0,
+     "p50": 106.283469151,
+     "sum": 3079.01685821,
+     "sumsq": 326911.30946
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "3eb1769a567bae90",
+     "n_null": 23,
+     "n_unique": 6
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 5003536554.0,
+     "min": 548829947.0,
+     "n_finite": 29,
+     "n_null": 0,
+     "p50": 1320784118.0,
+     "sum": 38683433658.0,
+     "sumsq": 6.77371373028e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "300993eee147af52",
+     "n_null": 0,
+     "n_unique": 2
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "decce661a92cb87a",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 29
   },
   "p/86/traveltime_cell.parquet": {
    "col": {
@@ -86241,6 +88380,75 @@
    "n_cols": 25,
    "n_rows": 208
   },
+  "p/91/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 10.8302424,
+     "min": 9.52252788377,
+     "n_finite": 28,
+     "n_null": 0,
+     "p50": 10.2414444097,
+     "sum": 286.163060314,
+     "sumsq": 2927.31673743
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 105.56587415,
+     "min": 104.000439727,
+     "n_finite": 28,
+     "n_null": 0,
+     "p50": 105.118853341,
+     "sum": 2940.39102851,
+     "sumsq": 308786.432928
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "72db66a215d79755",
+     "n_null": 9,
+     "n_unique": 19
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1458145421.0,
+     "min": 223156504.0,
+     "n_finite": 28,
+     "n_null": 0,
+     "p50": 1220417889.0,
+     "sum": 30559415248.0,
+     "sumsq": 3.55754796077e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "035f788fc541b00e",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 28
+  },
   "p/91/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -88890,6 +91098,75 @@
    "n_cols": 25,
    "n_rows": 153
   },
+  "p/92/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 10.3107988,
+     "min": 9.25984591618,
+     "n_finite": 28,
+     "n_null": 0,
+     "p50": 9.95653514692,
+     "sum": 276.656341625,
+     "sumsq": 2735.9721119
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 106.186688702,
+     "min": 105.274885437,
+     "n_finite": 28,
+     "n_null": 0,
+     "p50": 105.730537289,
+     "sum": 2961.11103045,
+     "sumsq": 313150.430103
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "6b8e1a14fb60a3e3",
+     "n_null": 15,
+     "n_unique": 13
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 5003536554.0,
+     "min": 548829947.0,
+     "n_finite": 28,
+     "n_null": 0,
+     "p50": 1296520471.5,
+     "sum": 36278259047.0,
+     "sumsq": 6.42099357011e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "300993eee147af52",
+     "n_null": 0,
+     "n_unique": 2
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "4008b01283dd5f86",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 28
+  },
   "p/92/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -91528,6 +93805,75 @@
    "key_hash": "8e44d386c101b33c",
    "n_cols": 25,
    "n_rows": 81
+  },
+  "p/96/substations.parquet": {
+   "col": {
+    "lat": {
+     "dtype": "num",
+     "max": 9.4368882415,
+     "min": 8.73379329832,
+     "n_finite": 20,
+     "n_null": 0,
+     "p50": 9.19747365652,
+     "sum": 182.562895742,
+     "sumsq": 1667.10155735
+    },
+    "lng": {
+     "dtype": "num",
+     "max": 105.820985518,
+     "min": 104.866167106,
+     "n_finite": 20,
+     "n_null": 0,
+     "p50": 105.094142702,
+     "sum": 2104.9356116,
+     "sumsq": 221539.703531
+    },
+    "name": {
+     "dtype": "cat",
+     "hash": "94e43df476e3def7",
+     "n_null": 4,
+     "n_unique": 16
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1458145405.0,
+     "min": 548970101.0,
+     "n_finite": 20,
+     "n_null": 0,
+     "p50": 1052655166.0,
+     "sum": 20342319985.0,
+     "sumsq": 2.21909852768e+19
+    },
+    "osm_type": {
+     "dtype": "cat",
+     "hash": "9bbb01d607a697b1",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "e62a77d7df731c7b",
+     "n_null": 0,
+     "n_unique": 1
+    },
+    "scope": {
+     "dtype": "cat",
+     "hash": "d7e9a90819a59b39",
+     "n_null": 0,
+     "n_unique": 2
+    }
+   },
+   "columns": [
+    "lat",
+    "lng",
+    "name",
+    "osm_id",
+    "osm_type",
+    "province_code",
+    "scope"
+   ],
+   "n_cols": 7,
+   "n_rows": 20
   },
   "p/96/traveltime_cell.parquet": {
    "col": {

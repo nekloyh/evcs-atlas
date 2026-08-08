@@ -44,6 +44,7 @@ TABLES: dict[str, str | None] = {
     "poi_demand.parquet": None,
     "poi_visual.parquet": None,
     "poi_commune.parquet": None,
+    "substations.parquet": None,
     "roads.parquet": None,
 }
 

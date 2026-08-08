@@ -167,6 +167,57 @@ def _roads_parquet(code: str, dst) -> dict:
     }
 
 
+def _substation_geojson(code: str) -> tuple[str, dict]:
+    """Lớp ĐIỂM trạm biến áp của một tỉnh — chỉ ``scope='IN'``.
+
+    Cùng hình dạng với bản Hà Nội, ba property và không hơn. File không mang hình học nào
+    ngoài một cặp toạ độ, nên **không có đường nào để một bán kính phục vụ hay một bậc công
+    suất lẻn vào** — xem ``evcs.core.osm.is_substation``.
+
+    Số đếm đi kèm là SỐ ĐO, không phải một lời hứa về độ phủ: OSM phủ hạ tầng điện rất thưa
+    nên ``n`` là **chặn dưới**. Manifest phát con số, giao diện phát câu chữ.
+    """
+    src = paths.PROV / code / "substations.parquet"
+    if not src.exists():
+        return "", {}
+    df = pq.read_table(src).to_pandas()
+    # Ship CẢ vành đệm, đúng như bộ Hà Nội. Đây là lớp BỐI CẢNH: một trạm biến áp ngay bên
+    # kia ranh giới vẫn nói đúng điều nó nói, và lọc nó đi tạo một mép cứng giả tạo dọc
+    # biên. Khác hẳn bảng trạm SẠC, nơi `scope` quyết định phép cộng dồn — lớp này không
+    # được cộng dồn ở đâu cả, nên không có gì để đếm trùng.
+    #
+    # Đối chứng: 132 dòng ở tỉnh 01 = 98 IN + 34 BUFFER, trùng khít con số của bộ Hà Nội.
+    feats = [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [round(float(r["lng"]), 6), round(float(r["lat"]), 6)],
+            },
+            "properties": {
+                "osm_type": r["osm_type"],
+                "osm_id": int(r["osm_id"]),
+                "name": None if pd.isna(r["name"]) else r["name"],
+            },
+        }
+        for r in df.to_dict("records")
+    ]
+    by_type = {str(k): int(v) for k, v in df.osm_type.value_counts().items()}
+    meta = {
+        "n": int(len(df)),
+        # Bao nhiêu cái được OSM vẽ bằng ĐA GIÁC — ta ship TÂM của chúng. Con số này để tab
+        # LAYER nói được rằng lớp điểm là một LỰA CHỌN của ta, không phải giới hạn của nguồn.
+        "n_mapped_as_area": int(sum(v for k, v in by_type.items() if k in ("way", "relation"))),
+        "n_mapped_as_node": int(by_type.get("node", 0)),
+        "n_named": int(df.name.notna().sum()),
+        "n_in_province": int((df.scope == "IN").sum()),
+        "n_in_buffer": int((df.scope == "BUFFER").sum()),
+        "tag": "power=substation",
+        "aoi": "ranh giới tỉnh + đệm 5 km",
+    }
+    return _fc(feats), meta
+
+
 def _reference_columns() -> set[str]:
     """Tập cột ĐẦY ĐỦ theo khai báo — mốc so sánh để biết tỉnh nào còn thiếu gì.
 
@@ -342,6 +393,11 @@ def export_province(code: str) -> dict:
     road_meta = _roads_parquet(code, d / "roads.parquet")
     note("roads.parquet", d / "roads.parquet", road_meta["ways_shipped"])
 
+    sgj, sub_meta = _substation_geojson(code)
+    if sgj:
+        (d / "substations.geojson").write_text(sgj, encoding="utf-8")
+        note("substations.geojson", d / "substations.geojson", sub_meta["n"])
+
     occ_tbl = pq.read_table(
         src / "station_occupancy.parquet",
         columns=["snapshot_id", "window_start_utc", "window_end_utc"],
@@ -409,6 +465,9 @@ def export_province(code: str) -> dict:
         # ném Binder Error, và màn hình trắng.
         #
         # ĐO, không gõ tay: đọc thẳng schema của chính hai file vừa ghi.
+        # Số đếm trạm biến áp là SỐ ĐO, không phải lời hứa về độ phủ — OSM phủ hạ tầng
+        # điện rất thưa nên `n` là chặn dưới. Giao diện phát câu chữ, manifest phát con số.
+        "source_metrics": {"osm_substations": sub_meta} if sub_meta else {},
         "available_road_columns": road_cols,
         "available_station_columns": station_cols,
         # ĐO, không gõ tay: cột nào bộ Hà Nội có mà tỉnh này không có. Danh sách gõ tay sẽ

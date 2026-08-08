@@ -42,6 +42,7 @@ def _steps() -> list[Step]:
         n10_quality,
         n11_web_export,
         n12_national,
+        n13_substation,
     )
 
     return [
@@ -59,6 +60,7 @@ def _steps() -> list[Step]:
             n10_quality,
             n11_web_export,
             n12_national,
+            n13_substation,
         )
     ]
 

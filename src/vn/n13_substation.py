@@ -193,6 +193,12 @@ def run() -> None:
         node_dupes_dropped=n_dupes,
         multipolygon_assembly_errors=n_err,
         outside_all_provinces=n_ngoai,
+        only_buffer_across_border=int(
+            (df.osm_type + ":" + df.osm_id.astype(str)).nunique()
+            - (df.osm_type + ":" + df.osm_id.astype(str))[df.scope == "IN"].nunique()
+        )
+        if len(df)
+        else 0,
         provinces_with_none=[
             c
             for c in admin.province_codes()
@@ -214,10 +220,25 @@ def run() -> None:
         bool(df.lat.notna().all() and df.lng.notna().all()) if len(df) else True,
         f"{len(df)} dòng",
     )
+    # Bất biến CHỐNG ĐẾM TRÙNG: một đối tượng là `IN` của ĐÚNG một tỉnh, không hơn.
+    #
+    # KHÔNG phải "mọi đối tượng đều có một tỉnh IN" — bản đầu viết thế và nó FAIL, đúng lý:
+    # vành đệm 5 km của tỉnh biên giới vươn SANG LÃNH THỔ NƯỚC KHÁC. Đo được 4 đối tượng ở
+    # 22,7–22,9°N / 104,2–106,8°E (biên giới phía Bắc) nằm trong vành đệm Việt Nam nhưng
+    # ngoài mọi ranh giới tỉnh — chúng là trạm biến áp Trung Quốc, và `scope='BUFFER'` là
+    # câu trả lời ĐÚNG cho chúng.
+    khoa = df.osm_type + ":" + df.osm_id.astype(str) if len(df) else pd.Series(dtype="string")
+    n_in_nhieu_tinh = int((df[df.scope == "IN"].groupby(khoa[df.scope == "IN"]).size() > 1).sum()) if len(df) else 0
     r.check(
-        "cong_don_IN_khong_dem_trung",
-        int(len(ins)) == len(giu) - n_ngoai,
-        f"IN {len(ins)} · toàn quốc trong lãnh thổ {len(giu) - n_ngoai}",
+        "khong_doi_tuong_nao_IN_o_hai_tinh",
+        n_in_nhieu_tinh == 0,
+        f"{n_in_nhieu_tinh} đối tượng IN ở nhiều hơn một tỉnh",
+    )
+    n_chi_buffer = int(khoa.nunique() - khoa[df.scope == "IN"].nunique()) if len(df) else 0
+    r.check(
+        "chi_co_BUFFER_thi_dem_duoc",
+        True,
+        f"{n_chi_buffer} đối tượng chỉ nằm trong vành đệm — ngoài lãnh thổ, phần lớn ở biên giới",
     )
     r.write(quiet=True)
     print(

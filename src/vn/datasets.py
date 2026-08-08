@@ -239,6 +239,16 @@ _PROVINCE = [
         "screening_cell.parquet",
         desc="Đầu ra của RULE sàng lọc, không phải một số đo",
     ),
+    Dataset(
+        "substations",
+        "province",
+        "product",
+        "substations.parquet",
+        desc=(
+            "Trạm biến áp OSM — lớp ĐIỂM để vẽ. KHÔNG có trường khoảng cách, công suất hay "
+            "cấp điện áp: khả năng đấu nối lưới nằm ngoài phạm vi (DECISIONS §8 sửa đổi)."
+        ),
+    ),
     # sản phẩm cuối
     Dataset(
         "grid_h3_r8",

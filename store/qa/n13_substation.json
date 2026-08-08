@@ -1,0 +1,47 @@
+{
+  "layer": "n13_substation",
+  "source_pbf": "/home/n91ym1nhky/Work/internVSF/aGiang-evcs/data/raw/osm/vietnam-latest.osm.pbf",
+  "tag": "power=substation (KHÔNG đọc substation=* — phân hạng điện áp là công suất lưới)",
+  "scope_note": "LỚP ĐIỂM để vẽ. Không có trường khoảng cách tới trạm biến áp; khả năng đấu nối lưới ngoài phạm vi (DECISIONS §8 sửa đổi).",
+  "stats": {
+    "n_objects_national": 1384,
+    "n_rows_sharded": 1695,
+    "n_in_scope": 1380,
+    "by_osm_type": {
+      "way": 1372,
+      "node": 6,
+      "relation": 2
+    },
+    "n_named": 463,
+    "node_raw": 9,
+    "node_dupes_dropped": 3,
+    "multipolygon_assembly_errors": 0,
+    "outside_all_provinces": 0,
+    "only_buffer_across_border": 4,
+    "provinces_with_none": [],
+    "pbf_scan_s": 91.4,
+    "elapsed_s": 95.6
+  },
+  "checks": [
+    {
+      "name": "khong_co_cot_cong_suat_hay_dien_ap",
+      "status": "PASS",
+      "detail": "sạch"
+    },
+    {
+      "name": "moi_dong_co_toa_do_dung_duoc",
+      "status": "PASS",
+      "detail": "1695 dòng"
+    },
+    {
+      "name": "khong_doi_tuong_nao_IN_o_hai_tinh",
+      "status": "PASS",
+      "detail": "0 đối tượng IN ở nhiều hơn một tỉnh"
+    },
+    {
+      "name": "chi_co_BUFFER_thi_dem_duoc",
+      "status": "PASS",
+      "detail": "4 đối tượng chỉ nằm trong vành đệm — ngoài lãnh thổ, phần lớn ở biên giới"
+    }
+  ]
+}
