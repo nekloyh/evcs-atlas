@@ -5,6 +5,32 @@
   "no_time_field": "Không phát trường thời gian: bảng tốc độ giả định chi phối 100% giá trị và 62% ô đổi nhóm ngưỡng phút khi đổi bảng ±30% (DECISIONS §6).",
   "province_code": "96",
   "stats": {
+    "euclid_coverage_error_by_radius": {
+      "1000m": {
+        "cells_covered_euclid": 144,
+        "cells_covered_network": 62,
+        "false_positive_cells": 82,
+        "false_positive_share": 0.5694
+      },
+      "2000m": {
+        "cells_covered_euclid": 455,
+        "cells_covered_network": 167,
+        "false_positive_cells": 288,
+        "false_positive_share": 0.633
+      },
+      "3000m": {
+        "cells_covered_euclid": 886,
+        "cells_covered_network": 346,
+        "false_positive_cells": 540,
+        "false_positive_share": 0.6095
+      },
+      "5000m": {
+        "cells_covered_euclid": 2058,
+        "cells_covered_network": 823,
+        "false_positive_cells": 1235,
+        "false_positive_share": 0.6001
+      }
+    },
     "n_cells": 9267,
     "n_reachable": 7429,
     "share_reachable": 0.8017,

@@ -98,3 +98,63 @@ def classify_poi_visual(tags) -> tuple[str, str] | None:
     if amenity in ("hospital", "school", "university", "college"):
         return "edu_health", f"amenity={amenity}"
     return None
+
+
+# ── TRẠM BIẾN ÁP ──────────────────────────────────────────────────────────────
+#
+# **Ranh giới phạm vi, đọc trước khi sửa** (``DECISIONS.md`` §8 sửa đổi):
+# ``dist_substation_m`` đã bị bỏ và KHÔNG quay lại. Khả năng đấu nối lưới — kVA khả dụng,
+# công suất trạm biến áp — nằm ngoài phạm vi bài toán. Lớp này chỉ xuất **vị trí**, và một
+# trạm biến áp trên bản đồ chỉ nói đúng một điều: *"ở đây có một trạm biến áp trong OSM"*.
+#
+# Vì sao vẫn đáng trích dù trường phái sinh đã bị loại: **n nhỏ giết một TRƯỜNG, không giết
+# một LỚP**. Một trường khoảng cách dựng trên mẫu thưa là bịa ra khác biệt giữa các ô (A12
+# đo: một trạm biến áp làm láng giềng gần nhất cho tới 236 ô); một lớp điểm chỉ khẳng định
+# đúng những điểm nó vẽ.
+
+
+def is_substation(tags) -> bool:
+    """``power=substation`` và chỉ thế.
+
+    Ba thứ cố tình KHÔNG lấy, mỗi thứ một lý do:
+
+    * ``power=transformer`` / ``pole`` / ``portal`` / ``minor_line`` — thiết bị trên cột,
+      không phải trạm. Giữ nguyên phạm vi để con số so được với mũi phản biện A12.
+    * ``substation=transmission|distribution|traction`` — phân hạng theo cấp điện áp. Đọc
+      nó là mã hoá **công suất lưới điện**, thứ đã bị loại khỏi phạm vi. Một trạm biến áp ở
+      đây không có hạng: nó chỉ có mặt.
+    * ``building=transformer_tower`` — nhãn kiến trúc, không phải nhãn hạ tầng điện.
+
+    Cám dỗ này LỚN HƠN ở quy mô toàn quốc, và con số nói ra điều đó: đo trên PBF đã đóng
+    băng, **972/1.387** đối tượng CÓ tag ``voltage`` và **733/1.387** có ``substation=*``.
+    Ở Hà Nội đó là vài chục dòng; ở toàn quốc nó là một cột phân hạng gần như đầy, nằm sẵn
+    trong nguồn, chỉ chờ một lệnh ``.get()``.
+    """
+    return tags.get("power") == "substation"
+
+
+# Self-test của luật phân loại — chạy MỖI lần bước trích chạy, nổ to nếu luật gãy.
+# Ba case đầu khẳng định điều quan trọng nhất: phân hạng CÓ MẶT vẫn không đổi kết quả.
+SUBSTATION_CASES: tuple[tuple[dict, bool], ...] = (
+    ({"power": "substation"}, True),
+    ({"power": "substation", "substation": "transmission"}, True),
+    ({"power": "substation", "substation": "minor_distribution"}, True),
+    ({"power": "substation", "voltage": "110000"}, True),
+    ({"power": "transformer"}, False),
+    ({"power": "pole"}, False),
+    ({"power": "portal"}, False),
+    ({"power": "minor_line"}, False),
+    ({"power": "line"}, False),
+    ({"power": "generator"}, False),
+    ({"building": "transformer_tower"}, False),
+    ({"substation": "distribution"}, False),
+    ({"railway": "substation"}, False),
+    ({"building": "yes"}, False),
+    ({}, False),
+)
+
+
+def selftest_is_substation() -> None:
+    for tags, want in SUBSTATION_CASES:
+        got = is_substation(tags)
+        assert got == want, f"is_substation({tags}) = {got}, muốn {want}"

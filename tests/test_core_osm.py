@@ -105,3 +105,26 @@ def test_hai_taxonomy_khong_dong_nhat():
     assert osm.classify_poi_visual({"amenity": "fuel"}) is None
     assert osm.classify_poi({"amenity": "school"}) is None
     assert osm.classify_poi_visual({"amenity": "school"})[0] == "edu_health"
+
+
+# --- trạm biến áp: hàng rào phạm vi -------------------------------------
+@pytest.mark.parametrize("tags,mong_doi", list(osm.SUBSTATION_CASES))
+def test_is_substation(tags, mong_doi):
+    assert osm.is_substation(tags) is mong_doi
+
+
+def test_selftest_chay_duoc():
+    osm.selftest_is_substation()
+
+
+def test_phan_hang_dien_ap_CO_MAT_van_khong_doi_ket_qua():
+    """Đây là hàng rào của DECISIONS §8, và ở toàn quốc cám dỗ lớn hơn hẳn: đo được
+    972/1.387 đối tượng CÓ tag `voltage`, 733/1.387 có `substation=*`."""
+    for them in ({"substation": "transmission"}, {"voltage": "110000"}, {"capacity": "2x63MVA"}):
+        assert osm.is_substation({"power": "substation", **them}) is True
+
+
+def test_khong_co_power_thi_khong_phai_tram_bien_ap():
+    """`railway=substation` là trạm điện ĐƯỜNG SẮT — khái niệm khác."""
+    assert osm.is_substation({"railway": "substation"}) is False
+    assert osm.is_substation({"substation": "distribution"}) is False

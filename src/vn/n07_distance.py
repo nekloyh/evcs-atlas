@@ -40,7 +40,7 @@ from evcs.core.roadgraph import DETOUR_MIN_EUCLID_M, NEIGHBOR_JUMP_M, SNAP_MAX_M
 from . import admin, paths, qa, roadgraph
 from .runner import Step
 
-VERSION = "2"
+VERSION = "3"  # 3: thêm euclid_coverage_error_by_radius (ADR-0003 §3)
 
 
 def run(province_code: str) -> None:
@@ -148,7 +148,28 @@ def run(province_code: str) -> None:
         "snap_max_m": SNAP_MAX_M,
         "m_per_deg_lon": round(g.m_lon, 1),
     }
+    # Sai số của việc dùng CHIM BAY thay quãng đường, ở các bán kính phục vụ thường dùng.
+    #
+    # Đây là lý do `dist_station_euclid_m` KHÔNG được dùng để trả lời "ô này đã phủ chưa".
+    # Sai số chỉ lệch VỀ MỘT PHÍA: đường đi thật không bao giờ ngắn hơn chim bay, nên mọi
+    # chênh lệch là DƯƠNG TÍNH GIẢ (báo đã phủ trong khi chưa) và **không có âm tính giả**.
+    #
+    # Con số này KHÔNG phải hằng số toàn quốc — cùng luật với QUYET_DINH §3. Nó phải được
+    # tính lại cho từng tỉnh, và tỉ lệ báo phủ nhầm trải rộng giữa các tỉnh.
+    radii = {}
+    for R in (1_000, 2_000, 3_000, 5_000):
+        cov_eu = eu <= R
+        cov_net = np.nan_to_num(dist_m <= R, nan=False)
+        fp = cov_eu & ~cov_net
+        radii[f"{R}m"] = {
+            "cells_covered_euclid": int(cov_eu.sum()),
+            "cells_covered_network": int(cov_net.sum()),
+            "false_positive_cells": int(fp.sum()),
+            "false_positive_share": round(float(fp.sum() / max(1, cov_eu.sum())), 4),
+        }
+
     r.stat(
+        euclid_coverage_error_by_radius=radii,
         n_cells=int(len(df)),
         n_reachable=int(df.network_reachable.sum()),
         share_reachable=round(float(df.network_reachable.mean()), 4),
