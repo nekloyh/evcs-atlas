@@ -154,9 +154,25 @@ def _roads_parquet(code: str, dst) -> dict:
     t = pq.read_table(paths.PROV / code / "roads.parquet")
     df = t.to_pandas()
     n_all = len(df)
-    ship = df[df.in_province & ~df.road_class.isin(SHIP_EXCLUDE_ROAD_CLASS)]
-    ship = ship[["osm_id", "road_class", "bridge", "coords"]].sort_values("road_class")
+    ship = df[df.in_province & ~df.road_class.isin(SHIP_EXCLUDE_ROAD_CLASS)].copy()
+
+    # Nhãn khoảng cách theo ĐOẠN, do `n07` tính. Nối bằng ``osm_id`` chứ không theo vị trí:
+    # bảng nhãn chỉ có những đoạn NẰM TRONG đồ thị (đã lọc `access`), nên nó là tập con.
+    #
+    # Đoạn bị `access` chặn vẫn được SHIP (nó có thật, xe khác vẫn đi) nhưng KHÔNG có nhãn
+    # — và `null` ở đây nghĩa là "không nằm trong mạng xe công chúng đi được", không phải
+    # "khoảng cách bằng 0". Web vẽ chúng xám.
+    rdp = paths.PROV / code / "road_dist.parquet"
+    if rdp.exists():
+        lab = pq.read_table(rdp).to_pandas()
+        ship["dist_station_m"] = ship.osm_id.map(dict(zip(lab.osm_id, lab.dist_station_m)))
+    else:
+        ship["dist_station_m"] = pd.Series([pd.NA] * len(ship), dtype="Float32")
+
+    cols = ["osm_id", "road_class", "bridge", "dist_station_m", "coords"]
+    ship = ship[cols].sort_values("road_class")
     pq.write_table(pa.Table.from_pandas(ship, preserve_index=False), dst, compression="zstd")
+    n_null = int(ship.dist_station_m.isna().sum())
     return {
         "ways_in_shard": n_all,
         "ways_shipped": int(len(ship)),
@@ -164,6 +180,10 @@ def _roads_parquet(code: str, dst) -> dict:
         "ways_dropped_service": int(
             (df.in_province & df.road_class.isin(SHIP_EXCLUDE_ROAD_CLASS)).sum()
         ),
+        "bridge_ways_shipped": int(df[df.in_province].bridge.sum()),
+        # Cùng tên khoá với bộ Hà Nội — `story/bodies.tsx` đọc đúng hai khoá này, và thiếu
+        # chúng là chỗ `formatNumber(undefined)` từng ném TypeError.
+        "ways_unreachable_null_dist": n_null,
     }
 
 
@@ -392,6 +412,20 @@ def export_province(code: str) -> dict:
 
     road_meta = _roads_parquet(code, d / "roads.parquet")
     note("roads.parquet", d / "roads.parquet", road_meta["ways_shipped"])
+
+    # Cặp tuyến minh hoạ — chỉ có ở tỉnh được `n14_showcase` dựng. Vắng file là bình
+    # thường, và `storyDataReady` ở web đọc đúng chuyện đó để quyết định mở cảnh hay không.
+    rsrc = paths.PROV / code / "routes_showcase.geojson"
+    if rsrc.exists():
+        shutil.copy2(rsrc, d / "routes_showcase.geojson")
+        n_feat = len(json.loads(rsrc.read_text(encoding="utf-8"))["features"])
+        note("routes_showcase.geojson", d / "routes_showcase.geojson", n_feat)
+        road_meta["showcase_cells"] = sorted(
+            {
+                f["properties"]["h3_r8"]
+                for f in json.loads(rsrc.read_text(encoding="utf-8"))["features"]
+            }
+        )
 
     sgj, sub_meta = _substation_geojson(code)
     if sgj:

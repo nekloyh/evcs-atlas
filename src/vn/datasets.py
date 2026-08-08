@@ -233,6 +233,16 @@ _PROVINCE = [
         desc="Khoảng cách Dijkstra theo mạng đường — MÉT, không phút",
     ),
     Dataset(
+        "road_dist",
+        "province",
+        "interim",
+        "road_dist.parquet",
+        desc=(
+            "Nhãn khoảng cách theo ĐOẠN đường: osm_id → dist_station_m (MIN trên các đỉnh "
+            "của đoạn). Con số mà Dijkstra vẫn tính trên từng đỉnh rồi ném đi."
+        ),
+    ),
+    Dataset(
         "screening_cell",
         "province",
         "interim",

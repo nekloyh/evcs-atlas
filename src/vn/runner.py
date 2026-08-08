@@ -43,6 +43,7 @@ def _steps() -> list[Step]:
         n11_web_export,
         n12_national,
         n13_substation,
+        n14_showcase,
     )
 
     return [
@@ -61,6 +62,7 @@ def _steps() -> list[Step]:
             n11_web_export,
             n12_national,
             n13_substation,
+            n14_showcase,
         )
     ]
 

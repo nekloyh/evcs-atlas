@@ -5,6 +5,9 @@
   "no_time_field": "Không phát trường thời gian: bảng tốc độ giả định chi phối 100% giá trị và 62% ô đổi nhóm ngưỡng phút khi đổi bảng ±30% (DECISIONS §6).",
   "province_code": "33",
   "stats": {
+    "road_segments_labelled": 131085,
+    "road_segments_in_graph": 131437,
+    "road_segments_unreachable": 352,
     "euclid_coverage_error_by_radius": {
       "1000m": {
         "cells_covered_euclid": 560,

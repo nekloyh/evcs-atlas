@@ -51,7 +51,7 @@ def load_ways(province_code: str) -> tuple[pd.DataFrame, int]:
     return t[~t.access.isin(ACCESS_BLOCKED)].reset_index(drop=True), n_all
 
 
-def build(province_code: str, ways: pd.DataFrame) -> RoadGraph:
+def build(province_code: str, ways: pd.DataFrame, keep_way_nodes: bool = False) -> RoadGraph:
     """Dựng đồ thị của tỉnh — hệ số mét/độ lấy theo vĩ độ tâm của chính tỉnh đó."""
     m_lat, m_lon = scale_for(province_code)
-    return _build(ways, m_lat, m_lon)
+    return _build(ways, m_lat, m_lon, keep_way_nodes=keep_way_nodes)

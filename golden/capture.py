@@ -41,6 +41,7 @@ TABLES: dict[str, str | None] = {
     "landcover_cell.parquet": "h3_r8",
     "traveltime_cell.parquet": "h3_r8",
     "screening_cell.parquet": "h3_r8",
+    "road_dist.parquet": "osm_id",
     "poi_demand.parquet": None,
     "poi_visual.parquet": None,
     "poi_commune.parquet": None,

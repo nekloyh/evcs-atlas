@@ -40,7 +40,7 @@ from evcs.core.roadgraph import DETOUR_MIN_EUCLID_M, NEIGHBOR_JUMP_M, SNAP_MAX_M
 from . import admin, paths, qa, roadgraph
 from .runner import Step
 
-VERSION = "3"  # 3: thêm euclid_coverage_error_by_radius (ADR-0003 §3)
+VERSION = "4"  # 4: thêm nhãn dist_station_m theo đoạn (ADR-0003 §2)  # 3: thêm euclid_coverage_error_by_radius (ADR-0003 §3)
 
 
 def run(province_code: str) -> None:
@@ -55,7 +55,8 @@ def run(province_code: str) -> None:
         ),
     )
     ways, n_all = roadgraph.load_ways(province_code)
-    g = roadgraph.build(province_code, ways)
+    # `keep_way_nodes` cho nhãn `dist_station_m` theo ĐOẠN — 6,6 MB ở tỉnh lớn nhất.
+    g = roadgraph.build(province_code, ways, keep_way_nodes=True)
 
     st = pq.read_table(
         paths.PROV / province_code / "stations.parquet",
@@ -85,6 +86,36 @@ def run(province_code: str) -> None:
     # Cộng đoạn nối từ tâm ô ra điểm vào mạng đường (ngõ/lối vào), tính theo đường thẳng.
     dist_m = np.where(np.isfinite(nd_to), nd_to + cd, np.nan)
     from_m = np.where(np.isfinite(nd_from), nd_from + cd, np.nan)
+
+    # --- nhãn khoảng cách theo ĐOẠN đường -----------------------------------
+    #
+    # Đây là con số mà Dijkstra vẫn tính trên TỪNG ĐỈNH rồi ném đi. Lấy MIN trên các đỉnh
+    # của đoạn, không phải trung bình: giá trị đại diện là "từ đoạn đường này, lối vào gần
+    # nhất tới mạng lưới trạm". Đoạn trung bình dài ~130 m nên lựa chọn này không tạo cấu
+    # trúc nhìn thấy được.
+    #
+    # Khoá bằng ``osm_id``, KHÔNG bằng vị trí dòng: ``ways`` ở đây đã lọc theo ``access``
+    # nên nó là tập con của ``roads.parquet``, và hai bảng không thẳng hàng.
+    way_dist = np.full(len(ways), np.nan)
+    for i in range(len(ways)):
+        nd = g.nodes_of_way(i)
+        if len(nd) == 0:
+            continue
+        dd = d_to[nd]
+        dd = dd[np.isfinite(dd)]
+        if len(dd):
+            way_dist[i] = float(dd.min())
+    rd = pd.DataFrame(
+        {
+            "osm_id": ways.osm_id.astype("int64").to_numpy(),
+            "dist_station_m": way_dist.astype("float32"),
+        }
+    )
+    pq.write_table(
+        pa.Table.from_pandas(rd, preserve_index=False),
+        paths.province_dir(province_code) / "road_dist.parquet",
+        compression="zstd",
+    )
 
     stree = cKDTree(np.c_[sx, sy])
     eu, _ = stree.query(np.c_[cx, cy])
@@ -168,7 +199,11 @@ def run(province_code: str) -> None:
             "false_positive_share": round(float(fp.sum() / max(1, cov_eu.sum())), 4),
         }
 
+    n_way_lab = int(np.isfinite(way_dist).sum())
     r.stat(
+        road_segments_labelled=n_way_lab,
+        road_segments_in_graph=int(len(ways)),
+        road_segments_unreachable=int(len(ways) - n_way_lab),
         euclid_coverage_error_by_radius=radii,
         n_cells=int(len(df)),
         n_reachable=int(df.network_reachable.sum()),
@@ -233,6 +268,7 @@ STEP = Step(
     ),
     writes=(
         "traveltime_cell",
+        "road_dist",
     ),
     desc="khoảng cách theo mạng đường tới trạm gần nhất (Dijkstra), theo tỉnh",
 )

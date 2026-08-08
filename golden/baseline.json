@@ -3613,6 +3613,37 @@
    "n_cols": 9,
    "n_rows": 126
   },
+  "p/01/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 21148.9609375,
+     "min": 0.665219783783,
+     "n_finite": 237194,
+     "n_null": 1007,
+     "p50": 1520.52148438,
+     "sum": 465145004.592,
+     "sumsq": 1534143183430.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1540972274.0,
+     "min": 9656653.0,
+     "n_finite": 238201,
+     "n_null": 0,
+     "p50": 932404205.0,
+     "sum": 219987712302000.0,
+     "sumsq": 2.22188294191e+23
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "5740d581bfb2a806",
+   "n_cols": 2,
+   "n_rows": 238201
+  },
   "p/01/roads.parquet": {
    "col": {
     "access": {
@@ -6331,6 +6362,37 @@
    "n_cols": 9,
    "n_rows": 56
   },
+  "p/04/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 67934.875,
+     "min": 2.93481135368,
+     "n_finite": 16025,
+     "n_null": 1730,
+     "p50": 10402.4941406,
+     "sum": 222596427.525,
+     "sumsq": 5587575053810.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1518592829.0,
+     "min": 49037102.0,
+     "n_finite": 17755,
+     "n_null": 0,
+     "p50": 911069277.0,
+     "sum": 17002176805600.0,
+     "sumsq": 1.68438755021e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "0969ef30abac0892",
+   "n_cols": 2,
+   "n_rows": 17755
+  },
   "p/04/roads.parquet": {
    "col": {
     "access": {
@@ -9038,6 +9100,37 @@
    "key_hash": "2bbad87a53266fd9",
    "n_cols": 9,
    "n_rows": 124
+  },
+  "p/08/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 83334.140625,
+     "min": 3.43876838684,
+     "n_finite": 120441,
+     "n_null": 3378,
+     "p50": 7159.55224609,
+     "sum": 1279513230.54,
+     "sumsq": 26014291810700.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1533535695.0,
+     "min": 48117222.0,
+     "n_finite": 123819,
+     "n_null": 0,
+     "p50": 924031779.0,
+     "sum": 114496483849000.0,
+     "sumsq": 1.06465551711e+23
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "6352cdce73d568bf",
+   "n_cols": 2,
+   "n_rows": 123819
   },
   "p/08/roads.parquet": {
    "col": {
@@ -11757,6 +11850,37 @@
    "n_cols": 9,
    "n_rows": 45
   },
+  "p/11/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 84191.6875,
+     "min": 3.04331660271,
+     "n_finite": 24925,
+     "n_null": 1894,
+     "p50": 8933.09277344,
+     "sum": 362133253.889,
+     "sumsq": 11771218079700.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1529974336.0,
+     "min": 36856316.0,
+     "n_finite": 26819,
+     "n_null": 0,
+     "p50": 894127275.0,
+     "sum": 24270707808500.0,
+     "sumsq": 2.21353982154e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "9575105479226eac",
+   "n_cols": 2,
+   "n_rows": 26819
+  },
   "p/11/roads.parquet": {
    "col": {
     "access": {
@@ -14459,6 +14583,37 @@
    "key_hash": "5e780b39a208e761",
    "n_cols": 9,
    "n_rows": 38
+  },
+  "p/12/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 139870.171875,
+     "min": 3.04329514503,
+     "n_finite": 19347,
+     "n_null": 1733,
+     "p50": 12736.7832031,
+     "sum": 393797164.261,
+     "sumsq": 17773203951400.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1539673130.0,
+     "min": 36873667.0,
+     "n_finite": 21080,
+     "n_null": 0,
+     "p50": 902862585.5,
+     "sum": 18856999240600.0,
+     "sumsq": 1.70829019078e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "14d35f6efe187d87",
+   "n_cols": 2,
+   "n_rows": 21080
   },
   "p/12/roads.parquet": {
    "col": {
@@ -17167,6 +17322,37 @@
    "key_hash": "7f9e169c64dfffc0",
    "n_cols": 9,
    "n_rows": 75
+  },
+  "p/14/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 92629.0,
+     "min": 5.02026891708,
+     "n_finite": 51106,
+     "n_null": 2444,
+     "p50": 9977.91210938,
+     "sum": 752453030.695,
+     "sumsq": 21962864356500.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1535101517.0,
+     "min": 38040942.0,
+     "n_finite": 53550,
+     "n_null": 0,
+     "p50": 890509487.5,
+     "sum": 48107703890800.0,
+     "sumsq": 4.34670295299e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "7a8458a125ee9428",
+   "n_cols": 2,
+   "n_rows": 53550
   },
   "p/14/roads.parquet": {
    "col": {
@@ -19881,6 +20067,37 @@
    "n_cols": 9,
    "n_rows": 99
   },
+  "p/15/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 148925.046875,
+     "min": 4.40526199341,
+     "n_finite": 88704,
+     "n_null": 3304,
+     "p50": 8047.01049805,
+     "sum": 999036360.465,
+     "sumsq": 22142200154600.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1541026000.0,
+     "min": 32771359.0,
+     "n_finite": 92008,
+     "n_null": 0,
+     "p50": 924643266.5,
+     "sum": 85813550014400.0,
+     "sumsq": 8.13259825249e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "59b91770a8599c85",
+   "n_cols": 2,
+   "n_rows": 92008
+  },
   "p/15/roads.parquet": {
    "col": {
     "access": {
@@ -22594,6 +22811,37 @@
    "n_cols": 9,
    "n_rows": 92
   },
+  "p/19/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 78363.2578125,
+     "min": 1.20742094517,
+     "n_finite": 125470,
+     "n_null": 3388,
+     "p50": 3885.12744141,
+     "sum": 818681216.991,
+     "sumsq": 14353030464200.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1539624870.0,
+     "min": 48117382.0,
+     "n_finite": 128858,
+     "n_null": 0,
+     "p50": 930741078.0,
+     "sum": 119938686519000.0,
+     "sumsq": 1.12341258727e+23
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "f1ebcb75688adac4",
+   "n_cols": 2,
+   "n_rows": 128858
+  },
   "p/19/roads.parquet": {
    "col": {
     "access": {
@@ -25301,6 +25549,37 @@
    "key_hash": "7a4d60b2302aae96",
    "n_cols": 9,
    "n_rows": 65
+  },
+  "p/20/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 69919.1796875,
+     "min": 1.33801949024,
+     "n_finite": 66841,
+     "n_null": 1455,
+     "p50": 10125.9140625,
+     "sum": 813126680.801,
+     "sumsq": 16451806846300.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1527718700.0,
+     "min": 49037070.0,
+     "n_finite": 68296,
+     "n_null": 0,
+     "p50": 913314803.5,
+     "sum": 62516644295000.0,
+     "sumsq": 5.78804845012e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "46cfc6bd7fa17c36",
+   "n_cols": 2,
+   "n_rows": 68296
   },
   "p/20/roads.parquet": {
    "col": {
@@ -28014,6 +28293,37 @@
    "key_hash": "3a7d707d9f236be5",
    "n_cols": 9,
    "n_rows": 54
+  },
+  "p/22/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 59503.3671875,
+     "min": 3.33530664444,
+     "n_finite": 51881,
+     "n_null": 1767,
+     "p50": 2588.62402344,
+     "sum": 233583557.723,
+     "sumsq": 3038307167840.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1539003841.0,
+     "min": 40046941.0,
+     "n_finite": 53648,
+     "n_null": 0,
+     "p50": 885346427.0,
+     "sum": 45691995576300.0,
+     "sumsq": 4.19026762093e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "81458c7c1ad7b61a",
+   "n_cols": 2,
+   "n_rows": 53648
   },
   "p/22/roads.parquet": {
    "col": {
@@ -30733,6 +31043,37 @@
    "n_cols": 9,
    "n_rows": 99
   },
+  "p/24/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 56006.8554688,
+     "min": 1.9484962225,
+     "n_finite": 214030,
+     "n_null": 2248,
+     "p50": 3092.30554199,
+     "sum": 902551579.594,
+     "sumsq": 7569680586060.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1541081631.0,
+     "min": 26550937.0,
+     "n_finite": 216278,
+     "n_null": 0,
+     "p50": 930855380.5,
+     "sum": 202397956800000.0,
+     "sumsq": 1.95738270942e+23
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "7f2940f01a63a49c",
+   "n_cols": 2,
+   "n_rows": 216278
+  },
   "p/24/roads.parquet": {
    "col": {
     "access": {
@@ -33440,6 +33781,37 @@
    "key_hash": "f8d0163c92fc1dd5",
    "n_cols": 9,
    "n_rows": 148
+  },
+  "p/25/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 52412.0195312,
+     "min": 0.893899857998,
+     "n_finite": 216036,
+     "n_null": 2787,
+     "p50": 3108.98840332,
+     "sum": 910386347.095,
+     "sumsq": 7258088437560.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1540909754.0,
+     "min": 10048345.0,
+     "n_finite": 218823,
+     "n_null": 0,
+     "p50": 922013771.0,
+     "sum": 201894892109000.0,
+     "sumsq": 1.89246675612e+23
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "253de928f1ce7c70",
+   "n_cols": 2,
+   "n_rows": 218823
   },
   "p/25/roads.parquet": {
    "col": {
@@ -36159,6 +36531,37 @@
    "n_cols": 9,
    "n_rows": 114
   },
+  "p/31/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 23232.1992188,
+     "min": 1.4613918066,
+     "n_finite": 128339,
+     "n_null": 372,
+     "p50": 2843.88183594,
+     "sum": 429277059.123,
+     "sumsq": 2273889101610.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1540933357.0,
+     "min": 10593272.0,
+     "n_finite": 128711,
+     "n_null": 0,
+     "p50": 885415460.0,
+     "sum": 109403393320000.0,
+     "sumsq": 9.8157851848e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "2bdc42069787835d",
+   "n_cols": 2,
+   "n_rows": 128711
+  },
   "p/31/roads.parquet": {
    "col": {
     "access": {
@@ -38876,6 +39279,37 @@
    "key_hash": "5ca85dd998f35a09",
    "n_cols": 9,
    "n_rows": 104
+  },
+  "p/33/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 15963.8037109,
+     "min": 0.786065638065,
+     "n_finite": 131085,
+     "n_null": 352,
+     "p50": 2795.72192383,
+     "sum": 422253693.057,
+     "sumsq": 1994976717070.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1541081631.0,
+     "min": 11002461.0,
+     "n_finite": 131437,
+     "n_null": 0,
+     "p50": 885747215.0,
+     "sum": 119896825749000.0,
+     "sumsq": 1.13600740898e+23
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "b7173ca880bb0cb4",
+   "n_cols": 2,
+   "n_rows": 131437
   },
   "p/33/roads.parquet": {
    "col": {
@@ -41595,6 +42029,37 @@
    "n_cols": 9,
    "n_rows": 129
   },
+  "p/37/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 31046.3886719,
+     "min": 0.895988464355,
+     "n_finite": 125630,
+     "n_null": 204,
+     "p50": 3085.66687012,
+     "sum": 431113275.001,
+     "sumsq": 2107971991920.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1540982524.0,
+     "min": 10592872.0,
+     "n_finite": 125834,
+     "n_null": 0,
+     "p50": 874202201.5,
+     "sum": 111459243940000.0,
+     "sumsq": 1.02550914694e+23
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "91d8ce7622112245",
+   "n_cols": 2,
+   "n_rows": 125834
+  },
   "p/37/roads.parquet": {
    "col": {
     "access": {
@@ -44313,6 +44778,37 @@
    "n_cols": 9,
    "n_rows": 166
   },
+  "p/38/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 69932.6015625,
+     "min": 3.49016571045,
+     "n_finite": 91744,
+     "n_null": 411,
+     "p50": 3903.93701172,
+     "sum": 495695937.526,
+     "sumsq": 6253774039360.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1540970358.0,
+     "min": 38147198.0,
+     "n_finite": 92155,
+     "n_null": 0,
+     "p50": 853367148.0,
+     "sum": 80902860535700.0,
+     "sumsq": 7.33714591617e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "09cc9616ad7ccf98",
+   "n_cols": 2,
+   "n_rows": 92155
+  },
   "p/38/roads.parquet": {
    "col": {
     "access": {
@@ -47020,6 +47516,37 @@
    "key_hash": "9b4ac75033857bed",
    "n_cols": 9,
    "n_rows": 130
+  },
+  "p/40/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 123589.71875,
+     "min": 0.873489379883,
+     "n_finite": 106331,
+     "n_null": 951,
+     "p50": 4249.96484375,
+     "sum": 686688629.896,
+     "sumsq": 12607224491000.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1540716229.0,
+     "min": 37724761.0,
+     "n_finite": 107282,
+     "n_null": 0,
+     "p50": 846135580.5,
+     "sum": 91148315380500.0,
+     "sumsq": 8.00602721075e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "8d9a72f552cbcb6c",
+   "n_cols": 2,
+   "n_rows": 107282
   },
   "p/40/roads.parquet": {
    "col": {
@@ -49734,6 +50261,37 @@
    "n_cols": 9,
    "n_rows": 69
   },
+  "p/42/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 46872.6601562,
+     "min": 0.878391206264,
+     "n_finite": 74485,
+     "n_null": 387,
+     "p50": 3318.05078125,
+     "sum": 308086801.882,
+     "sumsq": 2124605047520.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1540712755.0,
+     "min": 35976486.0,
+     "n_finite": 74872,
+     "n_null": 0,
+     "p50": 843367336.0,
+     "sum": 62355072696000.0,
+     "sumsq": 5.4021610248e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "d29bcbdc023ed34a",
+   "n_cols": 2,
+   "n_rows": 74872
+  },
   "p/42/roads.parquet": {
    "col": {
     "access": {
@@ -52446,6 +53004,37 @@
    "key_hash": "922626f7ee2bb043",
    "n_cols": 9,
    "n_rows": 78
+  },
+  "p/44/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 64259.0507812,
+     "min": 4.63324689865,
+     "n_finite": 58186,
+     "n_null": 551,
+     "p50": 3456.76208496,
+     "sum": 275399325.228,
+     "sumsq": 2627007002420.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1540746682.0,
+     "min": 12790818.0,
+     "n_finite": 58737,
+     "n_null": 0,
+     "p50": 842581790.0,
+     "sum": 49296966720700.0,
+     "sumsq": 4.35529578426e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "befe1e21da39e49d",
+   "n_cols": 2,
+   "n_rows": 58737
   },
   "p/44/roads.parquet": {
    "col": {
@@ -55165,6 +55754,37 @@
    "n_cols": 9,
    "n_rows": 40
   },
+  "p/46/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 110094.382812,
+     "min": 2.23768806458,
+     "n_finite": 28040,
+     "n_null": 459,
+     "p50": 3103.98364258,
+     "sum": 169191453.375,
+     "sumsq": 3921904998310.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1540746682.0,
+     "min": 35926886.0,
+     "n_finite": 28499,
+     "n_null": 0,
+     "p50": 830971153.0,
+     "sum": 21709121936700.0,
+     "sumsq": 1.93130899992e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "c512b8de0c72dfc3",
+   "n_cols": 2,
+   "n_rows": 28499
+  },
   "p/46/roads.parquet": {
    "col": {
     "access": {
@@ -57878,6 +58498,37 @@
    "n_cols": 9,
    "n_rows": 94
   },
+  "p/48/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 132475.453125,
+     "min": 0.471243053675,
+     "n_finite": 64109,
+     "n_null": 1702,
+     "p50": 2545.05004883,
+     "sum": 328222319.212,
+     "sumsq": 8218273767230.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1540859870.0,
+     "min": 12207187.0,
+     "n_finite": 65811,
+     "n_null": 0,
+     "p50": 828300807.0,
+     "sum": 48038236090800.0,
+     "sumsq": 4.0155314512e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "88b44ebfcde60210",
+   "n_cols": 2,
+   "n_rows": 65811
+  },
   "p/48/roads.parquet": {
    "col": {
     "access": {
@@ -60585,6 +61236,37 @@
    "key_hash": "6a48fe22f5730648",
    "n_cols": 9,
    "n_rows": 96
+  },
+  "p/51/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 115163.054688,
+     "min": 1.39081943035,
+     "n_finite": 62903,
+     "n_null": 1264,
+     "p50": 5264.17333984,
+     "sum": 573554072.188,
+     "sumsq": 15069112332100.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1540710465.0,
+     "min": 38563046.0,
+     "n_finite": 64167,
+     "n_null": 0,
+     "p50": 831654952.0,
+     "sum": 52288876478200.0,
+     "sumsq": 4.49437632361e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "a4b7de9f4a1502df",
+   "n_cols": 2,
+   "n_rows": 64167
   },
   "p/51/roads.parquet": {
    "col": {
@@ -63298,6 +63980,37 @@
    "key_hash": "d011d901eb2f01e7",
    "n_cols": 9,
    "n_rows": 135
+  },
+  "p/52/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 96115.9375,
+     "min": 4.88287782669,
+     "n_finite": 133635,
+     "n_null": 1998,
+     "p50": 4833.23925781,
+     "sum": 931307263.686,
+     "sumsq": 14418003196800.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1539477593.0,
+     "min": 33265867.0,
+     "n_finite": 135633,
+     "n_null": 0,
+     "p50": 828313918.0,
+     "sum": 111519645563000.0,
+     "sumsq": 9.48504568222e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "259ea6e04ad14273",
+   "n_cols": 2,
+   "n_rows": 135633
   },
   "p/52/roads.parquet": {
    "col": {
@@ -66017,6 +66730,37 @@
    "n_cols": 9,
    "n_rows": 65
   },
+  "p/56/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 47598.765625,
+     "min": 2.61643624306,
+     "n_finite": 36900,
+     "n_null": 789,
+     "p50": 3124.92651367,
+     "sum": 175447905.573,
+     "sumsq": 2033457114100.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1540964205.0,
+     "min": 32778690.0,
+     "n_finite": 37689,
+     "n_null": 0,
+     "p50": 771270763.0,
+     "sum": 31340599880400.0,
+     "sumsq": 2.98292557395e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "ff2e1cf9a64c8c4e",
+   "n_cols": 2,
+   "n_rows": 37689
+  },
   "p/56/roads.parquet": {
    "col": {
     "access": {
@@ -68734,6 +69478,37 @@
    "key_hash": "8a778f6ed9bd8b9b",
    "n_cols": 9,
    "n_rows": 102
+  },
+  "p/66/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 45949.171875,
+     "min": 2.71881556511,
+     "n_finite": 59051,
+     "n_null": 458,
+     "p50": 4127.70996094,
+     "sum": 341873390.057,
+     "sumsq": 3905610019750.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1539693455.0,
+     "min": 33269302.0,
+     "n_finite": 59509,
+     "n_null": 0,
+     "p50": 802339625.0,
+     "sum": 47057326619800.0,
+     "sumsq": 3.96259779873e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "00c3729bc33e6014",
+   "n_cols": 2,
+   "n_rows": 59509
   },
   "p/66/roads.parquet": {
    "col": {
@@ -71453,6 +72228,37 @@
    "n_cols": 9,
    "n_rows": 124
   },
+  "p/68/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 60250.9804688,
+     "min": 0.33740323782,
+     "n_finite": 88487,
+     "n_null": 1540,
+     "p50": 3615.12109375,
+     "sum": 456258404.98,
+     "sumsq": 4651558161880.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1540967235.0,
+     "min": 31908775.0,
+     "n_finite": 90027,
+     "n_null": 0,
+     "p50": 798218696.0,
+     "sum": 72226626215500.0,
+     "sumsq": 6.21237347198e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "4c15e16216efa59a",
+   "n_cols": 2,
+   "n_rows": 90027
+  },
   "p/68/roads.parquet": {
    "col": {
     "access": {
@@ -74170,6 +74976,37 @@
    "key_hash": "2556e056e5fb2a12",
    "n_cols": 9,
    "n_rows": 95
+  },
+  "p/75/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 57957.7617188,
+     "min": 0.7593755126,
+     "n_finite": 183216,
+     "n_null": 2048,
+     "p50": 2619.96911621,
+     "sum": 749179846.731,
+     "sumsq": 6264185717770.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1540936771.0,
+     "min": 26163073.0,
+     "n_finite": 185264,
+     "n_null": 0,
+     "p50": 840057064.5,
+     "sum": 150048046034000.0,
+     "sumsq": 1.30304970662e+23
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "4062340b71dbab68",
+   "n_cols": 2,
+   "n_rows": 185264
   },
   "p/75/roads.parquet": {
    "col": {
@@ -76889,6 +77726,37 @@
    "n_cols": 9,
    "n_rows": 168
   },
+  "p/79/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 31599.53125,
+     "min": 0.445875704288,
+     "n_finite": 245618,
+     "n_null": 5345,
+     "p50": 1332.67388916,
+     "sum": 533476685.053,
+     "sumsq": 2660131478000.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1541039592.0,
+     "min": 31096786.0,
+     "n_finite": 250963,
+     "n_null": 0,
+     "p50": 776136063.0,
+     "sum": 190935229820000.0,
+     "sumsq": 1.69622079721e+23
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "95822e3fe48c7bb1",
+   "n_cols": 2,
+   "n_rows": 250963
+  },
   "p/79/roads.parquet": {
    "col": {
     "access": {
@@ -79596,6 +80464,37 @@
    "key_hash": "5fb4a38f6c95ef2b",
    "n_cols": 9,
    "n_rows": 96
+  },
+  "p/80/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 52878.1367188,
+     "min": 0.992443561554,
+     "n_finite": 144138,
+     "n_null": 1406,
+     "p50": 3812.77429199,
+     "sum": 754912354.831,
+     "sumsq": 7154969592940.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1540948011.0,
+     "min": 31094951.0,
+     "n_finite": 145544,
+     "n_null": 0,
+     "p50": 896462974.5,
+     "sum": 124262040372000.0,
+     "sumsq": 1.12626184021e+23
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "8dfcef6c76fc9027",
+   "n_cols": 2,
+   "n_rows": 145544
   },
   "p/80/roads.parquet": {
    "col": {
@@ -82315,6 +83214,37 @@
    "n_cols": 9,
    "n_rows": 102
   },
+  "p/82/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 41400.8476562,
+     "min": 1.72383403778,
+     "n_finite": 118862,
+     "n_null": 3197,
+     "p50": 4545.83837891,
+     "sum": 658127287.249,
+     "sumsq": 6023667901100.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1540962865.0,
+     "min": 12210611.0,
+     "n_finite": 122059,
+     "n_null": 0,
+     "p50": 895406597.0,
+     "sum": 102651862360000.0,
+     "sumsq": 9.05892976123e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "b99a8cca73ab0676",
+   "n_cols": 2,
+   "n_rows": 122059
+  },
   "p/82/roads.parquet": {
    "col": {
     "access": {
@@ -85022,6 +85952,37 @@
    "key_hash": "e23316c603887bb4",
    "n_cols": 9,
    "n_rows": 124
+  },
+  "p/86/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 29648.8183594,
+     "min": 4.12290525436,
+     "n_finite": 88964,
+     "n_null": 2331,
+     "p50": 5448.4934082,
+     "sum": 584903863.003,
+     "sumsq": 6128097658900.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1541093278.0,
+     "min": 10417553.0,
+     "n_finite": 91295,
+     "n_null": 0,
+     "p50": 894833132.0,
+     "sum": 77133025255800.0,
+     "sumsq": 6.93956223548e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "04eb87653674544b",
+   "n_cols": 2,
+   "n_rows": 91295
   },
   "p/86/roads.parquet": {
    "col": {
@@ -87741,6 +88702,37 @@
    "n_cols": 9,
    "n_rows": 102
   },
+  "p/91/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 37513.5820312,
+     "min": 1.2018545866,
+     "n_finite": 54304,
+     "n_null": 2828,
+     "p50": 5992.18896484,
+     "sum": 430666402.48,
+     "sumsq": 5899520454060.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1540933556.0,
+     "min": 10416871.0,
+     "n_finite": 57132,
+     "n_null": 0,
+     "p50": 850728767.5,
+     "sum": 46863905319000.0,
+     "sumsq": 4.2087301555e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "1ac58e650d1b5391",
+   "n_cols": 2,
+   "n_rows": 57132
+  },
   "p/91/roads.parquet": {
    "col": {
     "access": {
@@ -90459,6 +91451,37 @@
    "n_cols": 9,
    "n_rows": 103
   },
+  "p/92/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 56950.0234375,
+     "min": 0.42712816596,
+     "n_finite": 51427,
+     "n_null": 1347,
+     "p50": 7544.94335938,
+     "sum": 467123890.234,
+     "sumsq": 7298704893720.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1541093278.0,
+     "min": 10417532.0,
+     "n_finite": 52774,
+     "n_null": 0,
+     "p50": 812664257.5,
+     "sum": 43288844170900.0,
+     "sumsq": 3.91475277014e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "372d434e26a1994d",
+   "n_cols": 2,
+   "n_rows": 52774
+  },
   "p/92/roads.parquet": {
    "col": {
     "access": {
@@ -93167,6 +94190,37 @@
    "n_cols": 9,
    "n_rows": 64
   },
+  "p/96/road_dist.parquet": {
+   "col": {
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 46569.7929688,
+     "min": 2.98684573174,
+     "n_finite": 47236,
+     "n_null": 2644,
+     "p50": 8363.40429688,
+     "sum": 488341045.232,
+     "sumsq": 8035923249630.0
+    },
+    "osm_id": {
+     "dtype": "num",
+     "max": 1533847552.0,
+     "min": 126748653.0,
+     "n_finite": 49880,
+     "n_null": 0,
+     "p50": 855241264.5,
+     "sum": 42620151856900.0,
+     "sumsq": 3.74930056152e+22
+    }
+   },
+   "columns": [
+    "dist_station_m",
+    "osm_id"
+   ],
+   "key_hash": "6349abd888eb063a",
+   "n_cols": 2,
+   "n_rows": 49880
+  },
   "p/96/roads.parquet": {
    "col": {
     "access": {
@@ -95866,6 +96920,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 21148.9609375,
+     "min": 0.665219783783,
+     "n_finite": 115709,
+     "n_null": 485,
+     "p50": 1489.9440918,
+     "sum": 209678944.796,
+     "sumsq": 579645224761.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1540901001.0,
@@ -95886,10 +96950,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 116194
   },
   "web/p/01/station_occupancy.parquet": {
@@ -97148,6 +98213,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 55889.1679688,
+     "min": 4.85993814468,
+     "n_finite": 8793,
+     "n_null": 724,
+     "p50": 10057.2177734,
+     "sum": 114387207.579,
+     "sumsq": 2676028322050.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1518592829.0,
@@ -97168,10 +98243,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 9517
   },
   "web/p/04/station_occupancy.parquet": {
@@ -98430,6 +99506,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 83334.140625,
+     "min": 5.27921628952,
+     "n_finite": 35898,
+     "n_null": 1187,
+     "p50": 7655.91186523,
+     "sum": 381334731.793,
+     "sumsq": 7549479285560.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1533535695.0,
@@ -98450,10 +99536,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 37085
   },
   "web/p/08/station_occupancy.parquet": {
@@ -99712,6 +100799,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 81347.5234375,
+     "min": 3.56924629211,
+     "n_finite": 15623,
+     "n_null": 491,
+     "p50": 8459.5625,
+     "sum": 219399903.238,
+     "sumsq": 6748958079540.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1529974336.0,
@@ -99732,10 +100829,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 16114
   },
   "web/p/11/station_occupancy.parquet": {
@@ -100989,6 +102087,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 117677.671875,
+     "min": 9.24900436401,
+     "n_finite": 11297,
+     "n_null": 211,
+     "p50": 11440.5576172,
+     "sum": 200336214.567,
+     "sumsq": 7386110213480.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1539673130.0,
@@ -101009,10 +102117,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 11508
   },
   "web/p/12/station_occupancy.parquet": {
@@ -102271,6 +103380,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 77051.9296875,
+     "min": 5.02026891708,
+     "n_finite": 33655,
+     "n_null": 688,
+     "p50": 9195.97558594,
+     "sum": 424699814.901,
+     "sumsq": 9822935962560.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1530250363.0,
@@ -102291,10 +103410,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 34343
   },
   "web/p/14/station_occupancy.parquet": {
@@ -103548,6 +104668,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 126889.984375,
+     "min": 4.40526199341,
+     "n_finite": 33673,
+     "n_null": 518,
+     "p50": 7950.68603516,
+     "sum": 364365718.434,
+     "sumsq": 7333882420680.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1541018477.0,
@@ -103568,10 +104698,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 34191
   },
   "web/p/15/station_occupancy.parquet": {
@@ -104830,6 +105961,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 77011.125,
+     "min": 1.20742094517,
+     "n_finite": 37666,
+     "n_null": 503,
+     "p50": 3862.6204834,
+     "sum": 256648765.176,
+     "sumsq": 4493195438230.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1539624870.0,
@@ -104850,10 +105991,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 38169
   },
   "web/p/19/station_occupancy.parquet": {
@@ -106112,6 +107254,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 61522.5039062,
+     "min": 1.33801949024,
+     "n_finite": 23848,
+     "n_null": 442,
+     "p50": 9783.45996094,
+     "sum": 265400814.973,
+     "sumsq": 4706693476670.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1527718700.0,
@@ -106132,10 +107284,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 24290
   },
   "web/p/20/station_occupancy.parquet": {
@@ -107389,6 +108542,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 42654.1992188,
+     "min": 3.33530664444,
+     "n_finite": 30751,
+     "n_null": 596,
+     "p50": 2350.41992188,
+     "sum": 118131776.73,
+     "sumsq": 1206238048230.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1539003841.0,
@@ -107409,10 +108572,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 31347
   },
   "web/p/22/station_occupancy.parquet": {
@@ -108671,6 +109835,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 42411.03125,
+     "min": 1.9484962225,
+     "n_finite": 85301,
+     "n_null": 137,
+     "p50": 2731.22314453,
+     "sum": 304260052.562,
+     "sumsq": 2085302804510.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1541005335.0,
@@ -108691,10 +109865,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 85438
   },
   "web/p/24/station_occupancy.parquet": {
@@ -109953,6 +111128,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 52412.0195312,
+     "min": 2.04266309738,
+     "n_finite": 81620,
+     "n_null": 96,
+     "p50": 2679.99658203,
+     "sum": 314250530.426,
+     "sumsq": 2472550311560.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1540760104.0,
@@ -109973,10 +111158,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 81716
   },
   "web/p/25/station_occupancy.parquet": {
@@ -111235,6 +112421,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 23232.1992188,
+     "min": 2.03310966492,
+     "n_finite": 70587,
+     "n_null": 53,
+     "p50": 2864.99072266,
+     "sum": 221915293.448,
+     "sumsq": 959748768467.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1539633241.0,
@@ -111255,10 +112451,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 70640
   },
   "web/p/31/station_occupancy.parquet": {
@@ -112517,6 +113714,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 14129.1191406,
+     "min": 2.90532946587,
+     "n_finite": 75069,
+     "n_null": 63,
+     "p50": 2757.04199219,
+     "sum": 235233820.465,
+     "sumsq": 1067073022920.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1536965024.0,
@@ -112537,10 +113744,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 75132
   },
   "web/p/33/station_occupancy.parquet": {
@@ -113799,6 +115007,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 31046.3886719,
+     "min": 0.895988464355,
+     "n_finite": 91591,
+     "n_null": 160,
+     "p50": 3046.57421875,
+     "sum": 301187519.104,
+     "sumsq": 1349830721070.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1540910258.0,
@@ -113819,10 +115037,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 91751
   },
   "web/p/37/station_occupancy.parquet": {
@@ -115081,6 +116300,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 64165.53125,
+     "min": 4.62195634842,
+     "n_finite": 79036,
+     "n_null": 128,
+     "p50": 3800.39758301,
+     "sum": 384047603.031,
+     "sumsq": 3680677277980.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1540962656.0,
@@ -115101,10 +116330,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 79164
   },
   "web/p/38/station_occupancy.parquet": {
@@ -116363,6 +117593,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 123589.71875,
+     "min": 0.873489379883,
+     "n_finite": 87501,
+     "n_null": 348,
+     "p50": 4366.05419922,
+     "sum": 579888446.685,
+     "sumsq": 10931860502900.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1540206014.0,
@@ -116383,10 +117623,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 87849
   },
   "web/p/40/station_occupancy.parquet": {
@@ -117640,6 +118881,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 39194.0273438,
+     "min": 6.57120943069,
+     "n_finite": 57939,
+     "n_null": 224,
+     "p50": 3538.68847656,
+     "sum": 242685851.284,
+     "sumsq": 1528549317930.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1538989731.0,
@@ -117660,10 +118911,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 58163
   },
   "web/p/42/station_occupancy.parquet": {
@@ -118922,6 +120174,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 59780.1835938,
+     "min": 4.63324689865,
+     "n_finite": 50950,
+     "n_null": 251,
+     "p50": 3329.46313477,
+     "sum": 227374683.164,
+     "sumsq": 2025106825550.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1540746682.0,
@@ -118942,10 +120204,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 51201
   },
   "web/p/44/station_occupancy.parquet": {
@@ -120204,6 +121467,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 97199.8125,
+     "min": 7.57483196259,
+     "n_finite": 21823,
+     "n_null": 163,
+     "p50": 3185.65869141,
+     "sum": 135786999.593,
+     "sumsq": 3212099160250.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1540746669.0,
@@ -120224,10 +121497,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 21986
   },
   "web/p/46/station_occupancy.parquet": {
@@ -121481,6 +122755,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 129540.171875,
+     "min": 1.931666255,
+     "n_finite": 53433,
+     "n_null": 1030,
+     "p50": 2668.92089844,
+     "sum": 276562268.711,
+     "sumsq": 6745809260890.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1540859870.0,
@@ -121501,10 +122785,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 54463
   },
   "web/p/48/station_occupancy.parquet": {
@@ -122763,6 +124048,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 104883.0,
+     "min": 1.39081943035,
+     "n_finite": 51303,
+     "n_null": 438,
+     "p50": 5261.47412109,
+     "sum": 436912129.636,
+     "sumsq": 9621295572620.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1540710465.0,
@@ -122783,10 +124078,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 51741
   },
   "web/p/51/station_occupancy.parquet": {
@@ -124040,6 +125336,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 81073.0546875,
+     "min": 5.15945339203,
+     "n_finite": 102474,
+     "n_null": 1083,
+     "p50": 4732.84545898,
+     "sum": 691004433.347,
+     "sumsq": 9894175040360.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1539477593.0,
@@ -124060,10 +125366,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 103557
   },
   "web/p/52/station_occupancy.parquet": {
@@ -125322,6 +126629,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 47598.765625,
+     "min": 2.61643624306,
+     "n_finite": 30476,
+     "n_null": 361,
+     "p50": 3237.38696289,
+     "sum": 140282949.351,
+     "sumsq": 1453060910820.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1540964204.0,
@@ -125342,10 +126659,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 30837
   },
   "web/p/56/station_occupancy.parquet": {
@@ -126604,6 +127922,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 45949.171875,
+     "min": 2.71881556511,
+     "n_finite": 52028,
+     "n_null": 296,
+     "p50": 4124.84106445,
+     "sum": 286470174.961,
+     "sumsq": 2864882757990.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1539693455.0,
@@ -126624,10 +127952,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 52324
   },
   "web/p/66/station_occupancy.parquet": {
@@ -127886,6 +129215,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 60250.9804688,
+     "min": 2.41184425354,
+     "n_finite": 60507,
+     "n_null": 890,
+     "p50": 3551.20043945,
+     "sum": 302613095.591,
+     "sumsq": 2853212304540.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1540221629.0,
@@ -127906,10 +129245,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 61397
   },
   "web/p/68/station_occupancy.parquet": {
@@ -129168,6 +130508,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 49607.3242188,
+     "min": 2.2857427597,
+     "n_finite": 79811,
+     "n_null": 751,
+     "p50": 2521.39038086,
+     "sum": 290652836.038,
+     "sumsq": 2052478781640.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1537053674.0,
@@ -129188,10 +130538,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 80562
   },
   "web/p/75/station_occupancy.parquet": {
@@ -130450,6 +131801,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 31599.53125,
+     "min": 0.445875704288,
+     "n_finite": 124202,
+     "n_null": 735,
+     "p50": 1169.61175537,
+     "sum": 221978684.344,
+     "sumsq": 919335472094.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1540996814.0,
@@ -130470,10 +131831,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 124937
   },
   "web/p/79/station_occupancy.parquet": {
@@ -131732,6 +133094,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 39189.96875,
+     "min": 1.53697061539,
+     "n_finite": 66785,
+     "n_null": 175,
+     "p50": 4247.90039062,
+     "sum": 382342730.612,
+     "sumsq": 3651611815930.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1540948011.0,
@@ -131752,10 +133124,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 66960
   },
   "web/p/80/station_occupancy.parquet": {
@@ -133014,6 +134387,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 27466.0996094,
+     "min": 2.54156517982,
+     "n_finite": 65381,
+     "n_null": 687,
+     "p50": 4358.15869141,
+     "sum": 317839534.643,
+     "sumsq": 2247207229450.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1540962865.0,
@@ -133034,10 +134417,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 66068
   },
   "web/p/82/station_occupancy.parquet": {
@@ -134296,6 +135680,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 28028.0703125,
+     "min": 4.18542146683,
+     "n_finite": 49008,
+     "n_null": 1397,
+     "p50": 6140.47338867,
+     "sum": 343826831.975,
+     "sumsq": 3631896115770.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1540975481.0,
@@ -134316,10 +135710,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 50405
   },
   "web/p/86/station_occupancy.parquet": {
@@ -135578,6 +136973,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 33486.2773438,
+     "min": 1.2018545866,
+     "n_finite": 35681,
+     "n_null": 1140,
+     "p50": 5819.69921875,
+     "sum": 268685586.976,
+     "sumsq": 3428839819940.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1540933556.0,
@@ -135598,10 +137003,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 36821
   },
   "web/p/91/station_occupancy.parquet": {
@@ -136860,6 +138266,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 38675.140625,
+     "min": 2.02710008621,
+     "n_finite": 36237,
+     "n_null": 612,
+     "p50": 7097.88769531,
+     "sum": 279861364.108,
+     "sumsq": 3239211596470.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1541093278.0,
@@ -136880,10 +138296,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 36849
   },
   "web/p/92/station_occupancy.parquet": {
@@ -138142,6 +139559,16 @@
      "dtype": "opaque",
      "n_null": 0
     },
+    "dist_station_m": {
+     "dtype": "num",
+     "max": 42335.640625,
+     "min": 2.98684573174,
+     "n_finite": 25498,
+     "n_null": 1096,
+     "p50": 7310.32495117,
+     "sum": 228858914.052,
+     "sumsq": 3402492994220.0
+    },
     "osm_id": {
      "dtype": "num",
      "max": 1533847552.0,
@@ -138162,10 +139589,11 @@
    "columns": [
     "bridge",
     "coords",
+    "dist_station_m",
     "osm_id",
     "road_class"
    ],
-   "n_cols": 4,
+   "n_cols": 5,
    "n_rows": 26594
   },
   "web/p/96/station_occupancy.parquet": {

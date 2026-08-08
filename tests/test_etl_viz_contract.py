@@ -205,3 +205,60 @@ def test_substations_tinh_01_khop_bo_ha_noi():
     assert len(tinh01) == len(ha_noi)
     assert set(zip(tinh01.osm_type, tinh01.osm_id)) == set(zip(ha_noi.osm_type, ha_noi.osm_id))
     assert int((tinh01.scope == "IN").sum()) + int((tinh01.scope == "BUFFER").sum()) == len(ha_noi)
+
+
+# ── B4: cặp tuyến + nhãn đường theo đoạn ─────────────────────────────────
+@pytest.mark.parametrize("pdir", TINH, ids=lambda p: p.name)
+def test_roads_co_nhan_dist_station_m(pdir: Path):
+    """Cột này vắng ở cả 34 tỉnh cho tới B4, và `road:dist_station_m` chọn được trong rail
+    ⇒ SELECT cột không tồn tại ⇒ Binder Error ⇒ màn hình trắng."""
+    co = set(pq.read_schema(pdir / "roads.parquet").names)
+    assert "dist_station_m" in co
+    assert set(_manifest(pdir)["available_road_columns"]) == co
+
+
+@pytest.mark.parametrize("pdir", TINH, ids=lambda p: p.name)
+def test_hai_khoa_manifest_roads_ma_cot_canh_doc(pdir: Path):
+    """`story/bodies.tsx` đọc đúng hai khoá này. Thiếu chúng là `formatNumber(undefined)`."""
+    roads = _manifest(pdir)["roads"]
+    for k in ("bridge_ways_shipped", "ways_unreachable_null_dist"):
+        assert k in roads and isinstance(roads[k], int), k
+
+
+def test_cap_tuyen_chi_dung_cho_tinh_da_khai():
+    """Một hằng, một chỗ. Dựng cho tỉnh không khai là chở trọng lượng không ai đọc; thiếu ở
+    tỉnh đã khai là cảnh mở ra mà nửa trống."""
+    from vn.n14_showcase import FILE, SHOWCASE_PROVINCES
+
+    for p in TINH:
+        co = (p / FILE).exists()
+        assert co == (p.name in SHOWCASE_PROVINCES), f"{p.name}: có file={co}"
+
+
+def test_cap_tuyen_du_ba_bac_va_moi_o_hai_tuyen():
+    from vn.n14_showcase import FILE, SHOWCASE_POP_TIERS, SHOWCASE_PROVINCES
+
+    for code in SHOWCASE_PROVINCES:
+        f = WEB / code / FILE
+        if not f.exists():
+            pytest.skip(f"tỉnh {code} chưa xuất")
+        feats = json.loads(f.read_text(encoding="utf-8"))["features"]
+        o = {x["properties"]["h3_r8"] for x in feats}
+        assert len(o) == len(SHOWCASE_POP_TIERS)
+        assert len(feats) == 2 * len(o), "mỗi ô đúng hai tuyến: mạng đường và chim bay"
+        assert {x["properties"]["kind"] for x in feats} == {"network", "euclid"}
+
+
+def test_tuyen_mang_duong_luon_DAI_HON_doan_chim_bay():
+    """Bất biến vật lý, và là cả luận điểm của cảnh C: đường đi thật không bao giờ ngắn hơn
+    chim bay. Một cặp vi phạm nghĩa là tuyến dựng sai, không phải dữ liệu lạ."""
+    from vn.n14_showcase import FILE, SHOWCASE_PROVINCES
+
+    for code in SHOWCASE_PROVINCES:
+        f = WEB / code / FILE
+        if not f.exists():
+            pytest.skip(f"tỉnh {code} chưa xuất")
+        for x in json.loads(f.read_text(encoding="utf-8"))["features"]:
+            p = x["properties"]
+            assert p["dist_station_network_m"] >= p["dist_station_euclid_m"], p["h3_r8"]
+            assert p["detour_ratio"] >= 1.0, p["h3_r8"]

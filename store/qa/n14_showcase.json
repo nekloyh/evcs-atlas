@@ -1,0 +1,40 @@
+{
+  "layer": "n14_showcase",
+  "rule": "detour_ratio đo được ∧ chim bay ≥ 1000 m → mỗi bậc dân số [1000, 5000, 10000] một ô tỉ số cao nhất",
+  "scope_note": "CHỈ dựng cho 01. Ba bậc dân số là hằng số mật độ Hà Nội và không đủ ô ở 16/34 tỉnh — xem docstring module.",
+  "stats": {
+    "provinces": [
+      "01"
+    ],
+    "per_province": {
+      "01": {
+        "n_cells": 3,
+        "n_features": 6,
+        "cells": [
+          "88415cae43fffff",
+          "884143625dfffff",
+          "8841436a2dfffff"
+        ],
+        "detour_ratios": [
+          6.97,
+          3.86,
+          2.22
+        ],
+        "bytes": 9884
+      }
+    },
+    "elapsed_s": 5.1
+  },
+  "checks": [
+    {
+      "name": "du_ba_bac_01",
+      "status": "PASS",
+      "detail": "3/3 bậc lấp được · tỉ số [6.97, 3.86, 2.22]"
+    },
+    {
+      "name": "moi_o_hai_tuyen_01",
+      "status": "PASS",
+      "detail": "6"
+    }
+  ]
+}
