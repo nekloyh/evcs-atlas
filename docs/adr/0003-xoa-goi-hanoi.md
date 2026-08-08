@@ -1,6 +1,6 @@
-# ADR-0003 — Chưa xoá gói `hanoi`, và điều kiện để xoá
+# ADR-0003 — Điều kiện để xoá gói `hanoi` (đã xoá)
 
-**Ngày** 2026-08-08 · **Trạng thái** ĐÃ GIẢI TOẢ · **Thay cho** ghi chú ở `src/vn/__init__.py:10-14`
+**Ngày** 2026-08-08 · **Trạng thái** ĐÃ THỰC HIỆN · **Thay cho** ghi chú ở `src/vn/__init__.py:10-14`
 
 > **Cập nhật 2026-08-08, cùng ngày.** Cả ba điều kiện đã xong (B1 · B3 · B4). Đo lại hôm
 > nay, bộ Hà Nội và `p/01` **không còn khác nhau một file nào**, và `roads.parquet` hai bên
@@ -8,8 +8,11 @@
 > biết: `road_len_in_hanoi_m` ↔ `road_len_in_province_m` (cùng khái niệm, khác tên), cộng
 > 5 cột mà `p/01` có thêm (3 lớp phủ luôn-phát, `population_wp`, `province_code`).
 >
-> Gói `hanoi` nay **xoá được**. Việc còn lại là di cư lối vào `/` và trỏ lại `analysis/` —
-> xem "Bước còn lại" ở cuối.
+> **Gói `hanoi` đã xoá** cùng ngày, sau khi B5–B8 xong. Cổng chặn báo đúng thứ đã dự
+> đoán: **6 bảng BIẾN MẤT, 0 dòng ĐỔI SỐ, 0 bảng mới**.
+>
+> (ADR bản trước ghi "12 khoá biến mất". Con số đúng là **6** — 6 khoá `web/*` của bộ Hà
+> Nội không biến mất mà bị THAY THẾ ở B6, nên chúng đã hết chênh lệch từ trước bước xoá.)
 
 ## Bối cảnh
 
@@ -96,16 +99,23 @@ Cặp tuyến minh hoạ dựng cho **tỉnh 01** (`SHOWCASE_PROVINCES`), theo q
 án. Lý do không phải chi phí mà là luật chọn ô: ba bậc dân số 1k/5k/10k là hằng số mật độ
 Hà Nội và **16/34 tỉnh không đủ ô lấp cả ba**.
 
-### Bước còn lại để xoá
+### Bước đã làm để xoá
 
-* **B5** dọn nốt khối `manifest` và các hằng số gõ tay còn lại ở web
-* **B6** đổi lối vào `/` — redirect sang `#tinh=01`, hoặc xuất thêm một bản không tiền tố
-* **B7** trỏ `analysis/` (21 script) và `notebooks/` sang `store/` và `evcs.core`
-  — `tests/test_analysis_imports.py` là danh sách việc, và sau B8 nó là cổng
-* **B8** xoá `src/hanoi/` + `data/` + bộ web không tiền tố, MỘT lần
+* **B5** gỡ trường `road_len_in_hanoi_m` khỏi danh mục — bộ gốc nay chỉ còn một tên cột
+* **B6** `n11` **nhân bản** bộ tỉnh 01 ra đường dẫn không tiền tố (chọn của chủ dự án).
+  Nhân bản chứ không dựng lại: kiểm được giống nhau tới từng byte. `/` giữ nguyên URL.
+* **B7** `analysis/` (21 script) đọc `store/p/01` và import `evcs.core`; `_len_m` — vốn có
+  hai bản — thành `evcs.core.geo.length_m`
+* **B8** xoá `src/hanoi/` (21 module), `data/processed/`, `data/raw/`, mọi target Makefile
+  của gói cũ, và phép đối chiếu chết ở `n01_admin`
 
-Golden sẽ báo **12 khoá BIẾN MẤT, 0 dòng ĐỔI SỐ** ở B8. Bất kỳ dòng ĐỔI SỐ nào ở bước ấy
-nghĩa là bộ Hà Nội và `p/01` chưa thật sự tương đương, và phải dừng lại.
+**Số ở `/` CÓ đổi, và đây là con số đã đo:** cùng 4.400 ô, 24/48 cột số chung có ô đổi giá
+trị, **Δ tương đối trung vị 0,01%** — |Δ| lớn nhất 35 m trên khoảng cách cỡ km. Đó là 8
+đỉnh đồ thị mà §F đã truy được. Một thay đổi NHÌN THẤY ĐƯỢC: `roads` 160.823 → 116.194
+đoạn, vì mô hình tỉnh không ship đường trong vành đệm.
+
+`data/qa/` **giữ lại**: nó chứa báo cáo QA và kết quả 13 mũi phản biện, và `analysis/` vẫn
+ghi vào `data/qa/critique/`.
 
 ### Đã làm trước, vì cổng chặn nói dối đúng lúc cần nó nhất
 

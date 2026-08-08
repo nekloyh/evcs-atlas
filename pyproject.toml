@@ -35,7 +35,7 @@ notebook = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/evcs", "src/hanoi", "src/vn"]
+packages = ["src/evcs", "src/vn"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

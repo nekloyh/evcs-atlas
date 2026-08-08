@@ -228,19 +228,12 @@ def run() -> None:
     )
     r.check("all_geoms_valid", bool(t.geom_valid.all()), "")
 
-    # Đối chiếu với gói ``hanoi``: hai đường dựng ranh giới phải cho CÙNG một hình.
-    try:
-        from hanoi import aoi as hanoi_aoi
-
-        b_vn, b_hn = admin.boundary("01"), hanoi_aoi.boundary()
-        sym = b_vn.symmetric_difference(b_hn).area
-        r.check(
-            "province_01_matches_hanoi_package",
-            sym < 1e-12,
-            f"chênh lệch đối xứng {sym:.3e} độ² so với hanoi.aoi.boundary()",
-        )
-    except Exception as e:  # gói hanoi thiếu nguồn thì bỏ phép đối chiếu, không làm hỏng bước
-        r.check("province_01_matches_hanoi_package", True, f"không đối chiếu được: {e}")
+    # Phép đối chiếu với gói ``hanoi`` từng ở đây đã được GỠ cùng gói ấy.
+    #
+    # Nó so ranh giới tỉnh 01 do hai đường mã dựng ra, và nó có một điểm yếu: nhánh
+    # ``except`` báo PASS khi không đối chiếu được, nên nó im lặng thành vô nghĩa đúng lúc
+    # gói kia biến mất. Thứ thay thế nó mạnh hơn về mọi mặt — ``golden/`` chụp vân tay 863
+    # bảng của cả 34 tỉnh và DỪNG khi một con số đổi, chứ không chỉ một đa giác của một tỉnh.
 
     r.write()
 

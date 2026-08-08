@@ -9,7 +9,7 @@ nợ kỹ thuật hay các bảng biến thể trùng lặp của chúng.
 - **Từ điển trường** → [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md)
 - **Mọi quyết định không hiển nhiên** → [`DECISIONS.md`](DECISIONS.md)
 - **Trạng thái 13 mũi phản biện + 10 lớp bản đồ** → [`CRITIQUE.md`](CRITIQUE.md)
-- **Báo cáo kiểm chất lượng** → [`data/qa/QA_SUMMARY.md`](data/qa/QA_SUMMARY.md) — 46 PASS · 0 FAIL
+- **Báo cáo kiểm chất lượng** → [`store/qa/`](store/qa/) — một JSON mỗi bước, mỗi tỉnh
 
 ---
 
@@ -18,21 +18,22 @@ nợ kỹ thuật hay các bảng biến thể trùng lặp của chúng.
 Phạm vi: **Thành phố Hà Nội** theo ranh giới hành chính VNSDI hiệu lực 16/6/2025 —
 126 xã/phường, 3.359,8 km². Lưới phân tích **H3 độ phân giải 8** (~0,74 km²/ô).
 
-| Bảng | Dòng | Nội dung |
+| Bảng | Dòng (Hà Nội) | Nội dung |
 |---|---:|---|
-| `data/processed/grid_h3_r8.parquet` | 4.400 | **Bảng chính.** Một dòng một ô lưới, 56 cột ([`docs/COT.md`](docs/COT.md) — store toàn quốc có 61): dân số · lớp phủ · đường · POI · cung hiện hữu · khoảng cách tới trạm · mức sử dụng đo được |
-| `data/processed/commune.parquet` | 126 | Xã/phường: ranh giới, dân số, cung, mức sử dụng, khoảng cách trung bình theo dân |
-| `data/processed/stations.parquet` | 939 | Trạm sạc **công cộng** (710 trong Hà Nội + 229 trong vành đệm 5 km). Điểm sạc cá nhân 1-súng-AC đã loại — DECISIONS §3a |
-| `data/processed/connectors.parquet` | 1.602 | Cổng sạc theo chuẩn/công suất |
-| `data/processed/station_occupancy.parquet` | 703 | Mức sử dụng thật, cửa sổ telemetry 30 ngày |
-| `data/processed/station_occupancy_profile_168h.parquet` | 116.785 | Hồ sơ bận theo 168 ô (thứ × giờ) từng trạm |
-| `data/processed/grid_h3_r8.geojson` · `admin_boundary.geojson` | — | Bản GIS mở thẳng bằng QGIS |
+| `store/p/01/grid_h3_r8.parquet` | 4.400 | **Bảng chính.** Một dòng một ô lưới, **61 cột** — [`docs/COT.md`](docs/COT.md) |
+| `store/p/01/commune.parquet` | 126 | Xã/phường: ranh giới, dân số, cung, mức sử dụng — 21 cột |
+| `store/p/01/stations.parquet` | 939 | Trạm **công cộng** (710 IN + 229 BUFFER). Điểm sạc cá nhân 1-súng-AC đã loại — DECISIONS §3a |
+| `store/p/01/connectors.parquet` | 1.602 | Cổng sạc theo chuẩn/công suất |
+| `store/p/01/station_occupancy.parquet` | 703 | Mức sử dụng thật, cửa sổ telemetry 30 ngày |
+| `store/p/01/station_occupancy_profile_168h.parquet` | 116.785 | Hồ sơ bận theo 168 ô (thứ × giờ) từng trạm |
+| `store/p/01/substations.parquet` | 132 | Trạm biến áp OSM — lớp ĐIỂM để vẽ, không có trường dẫn xuất |
 
-`data/processed/layers/` là phân rã theo nguồn của bảng chính, giữ lại để truy vết. Không
-cần đọc để dùng bộ dữ liệu.
+Cùng bộ ấy tồn tại cho **cả 34 tỉnh** dưới `store/p/<mã>/`, cùng một schema. Hà Nội là mã
+`01` và không có gì đặc biệt về mặt cấu trúc — nó chỉ là tỉnh đầu tiên được dựng.
 
-Tổng dung lượng **48 MB**. `data/raw/` chứa bản trích phạm vi Hà Nội của các nguồn thượng
-nguồn, nên sau lần build đầu bộ dữ liệu **đứng độc lập** với hai repo cũ.
+`store/` **907 MB**, chia hai tier: `p/` là sản phẩm, `cache/` là thứ dựng lại được từ PBF
+(`make clean-cache` xoá được mà không mất sản phẩm nào).
+
 
 ## Ba thứ khác hẳn hai repo cũ
 
@@ -98,40 +99,38 @@ trong bán kính neo 2 km (32.171 người), đánh dấu ở `evidence_grade_di
 
 ```bash
 cd ~/Work/internVSF/evcs-hanoi
-make all          # ~3 phút; bước nặng nhất là quét file PBF 325 MB một lần
+make vn           # cả 34 tỉnh (~20 phút, nặng nhất là 3 lượt quét PBF toàn quốc)
+make vn TINH=01   # chỉ Hà Nội
 ```
 
-Cần hai repo cũ nằm ở `~/Work/internVSF/{aGiang-evcs,evcs-dataset}`; đặt `EVCS_AGIANG_REPO`
-nếu chúng ở chỗ khác. Pipeline chỉ ĐỌC từ đó — `assert_sources()` dừng sớm với thông báo rõ
-nếu thiếu nguồn.
+Cần hai repo cũ ở `~/Work/internVSF/{aGiang-evcs,evcs-dataset}`; đặt `EVCS_AGIANG_REPO` nếu
+chúng ở chỗ khác. Pipeline chỉ ĐỌC từ đó — `assert_sources()` dừng sớm nếu thiếu nguồn.
 
-```bash
-make layers       # chạy lại mọi thứ trừ bước quét PBF (~30 giây)
-make clean        # xoá data/processed + data/qa, giữ data/raw
-```
-
-Từng bước chạy được độc lập: `uv run python -m hanoi.s04_population`. Mỗi bước in số đo và
-bảng kiểm của chính nó, đồng thời ghi `data/qa/<bước>.json`.
+Resume theo cặp (bước, tỉnh): đứt ở tỉnh thứ 19 thì lần sau bắt đầu từ tỉnh thứ 19. Xem
+`make vn-plan` để biết cặp nào sẽ chạy và vì sao.
 
 | Bước | Việc |
 |---|---|
-| `s01_admin` | Ranh giới VNSDI 126 xã/phường + vành đệm 5 km |
-| `s02_grid` | Lưới H3 r8 (loại ô vụn `area_frac` < 0,01), gán nhãn xã, tỉ lệ diện tích ô cắt biên |
-| `s03_osm_extract` | Một lượt quét PBF → đường + POI + trạm biến áp, cắt đúng đa giác |
-| `s04_population` | Dân số dasymetric neo VNSDI |
-| `s05_stations` | Trạm + cổng sạc, gán lại xã bằng hình học |
-| `s06_occupancy` | Mức sử dụng + hồ sơ 168 giờ |
-| `s07_landcover` | ESA WorldCover → tỉ lệ lớp phủ |
-| `s08_traveltime` | Đồ thị đường bộ + Dijkstra đa nguồn (mét, không phút) |
-| `s09_grid_features` | Gộp đường/POI/cung về ô |
-| `s10_assemble` | Ghép thành `grid_h3_r8.parquet` + GeoJSON |
-| `s11_summary` | Bảng xã/phường + gom QA |
+| `n01_admin` | Địa giới 34 tỉnh / 3.321 xã + crosswalk + ranh giới từng tỉnh |
+| `n02_osm` | Hai lượt quét PBF → đường (nhìn + tính) · POI đếm-cầu · POI visual |
+| `n13_substation` | Lượt quét thứ ba → trạm biến áp, lớp ĐIỂM để vẽ |
+| `n03_supply` | Trạm + cổng + mức sử dụng + nhịp 168 giờ |
+| `n04_grid` | Lưới H3 r8 + nhãn xã + cung/POI/đường theo ô |
+| `n05_population` | Dân số dasymetric neo VNSDI, kèm bản KHÔNG neo |
+| `n06_landcover` | ESA WorldCover → 11 tỉ lệ lớp phủ, đọc theo dải |
+| `n07_distance` | Dijkstra đa nguồn (mét, không phút) + nhãn đường theo đoạn |
+| `n08_screening` | Engine sàng lọc — đặc khu dùng ngưỡng của Phường |
+| `n09_assemble` | Ghép thành `grid_h3_r8.parquet` + `commune.parquet` |
+| `n10_quality` | Bảng thống kê theo tỉnh + cờ chất lượng + đề nghị loại trừ |
+| `n11_web_export` | Xuất cho web theo tỉnh + bản không tiền tố của tỉnh 01 |
+| `n12_national` | Lớp gộp CẢ NƯỚC (H3 r6) |
+| `n14_showcase` | Cặp tuyến minh hoạ cho cảnh CÂU CHUYỆN — chỉ tỉnh 01 |
 
 ## Đọc thử
 
 ```python
 import pyarrow.parquet as pq
-g = pq.read_table("data/processed/grid_h3_r8.parquet").to_pandas()
+g = pq.read_table("store/p/01/grid_h3_r8.parquet").to_pandas()   # 01 = Hà Nội
 
 # dân số ngoài 2 km đường tới trạm gần nhất
 far = g[g.dist_station_network_m > 2000]
@@ -222,7 +221,6 @@ src/evcs/core/      nguyên hàm miền — THUẦN, không IO. Test không cầ
 src/evcs/schema/    khai 61 cột của bảng chính. Một chỗ, mọi thứ khác suy ra.
 src/evcs/pipeline/  Dataset · Step · DAG · resume · audit. Chỗ DUY NHẤT đọc/ghi đĩa.
 src/vn/             12 bước ETL + registry dataset của pipeline toàn quốc.
-src/hanoi/          ĐÓNG BĂNG — bộ Hà Nội cũ. Điều kiện xoá ở `docs/adr/0003`.
 golden/             vân tay 801 bảng sản phẩm — cổng chặn của mọi đợt refactor.
 ```
 

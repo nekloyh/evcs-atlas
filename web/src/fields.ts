@@ -367,17 +367,6 @@ const CELL_SPECS: Spec[] = [
     kind: "numeric",
   },
   {
-    // Cột này sinh ra để chênh lệch ở ô BIÊN đo được chứ không âm thầm: `road_len_m` đếm
-    // cả phần đường chạy ra ngoài ranh giới, cột này chỉ đếm phần trong Hà Nội. Ô nằm trọn
-    // trong thành phố thì hai số bằng nhau; ô biên thì không, và hiệu số đó là thật.
-    id: "road_len_in_hanoi_m",
-    group: "duong",
-    label: "Đường trong ranh giới",
-    desc: "Phần chiều dài đường nằm TRONG ranh giới Hà Nội. Bằng tổng chiều dài ở ô nằm trọn trong thành phố; nhỏ hơn ở ô biên.",
-    unit: "mét",
-    kind: "numeric",
-  },
-  {
     // Cùng khái niệm với `road_len_in_hanoi_m`, khác TÊN CỘT — và hai dòng cùng tồn tại là
     // cố ý, không phải trùng lặp. Bộ Hà Nội đặt tên cột mang tên tỉnh (`..._in_hanoi_m`);
     // store toàn quốc không thể làm vậy nên nó là `..._in_province_m`. Đổi tên cột của bộ

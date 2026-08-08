@@ -55,17 +55,6 @@ ADMIN_TABLES: dict[str, str | None] = {
     "crosswalk_province_legacy.parquet": None,
 }
 
-# Bộ Hà Nội cũ — cây thư mục phẳng, tên bảng khác một phần.
-HANOI_TABLES: dict[str, str | None] = {
-    "grid_h3_r8.parquet": "h3_r8",
-    "commune.parquet": "commune_code",
-    "stations.parquet": "station_id",
-    "connectors.parquet": None,
-    "station_occupancy.parquet": "station_code",
-    "station_occupancy_profile_168h.parquet": None,
-}
-
-
 def _scan(
     root: Path, tables: dict[str, str | None], label: str, doc: dict, missing: list[str]
 ) -> None:
@@ -109,10 +98,6 @@ def capture() -> tuple[dict, list[str]]:
             for pdir in sorted(wp.iterdir()):
                 if pdir.is_dir():
                     _scan(pdir, WEB_TABLES, f"web/p/{pdir.name}", doc, missing)
-
-    hanoi = ROOT / "data" / "processed"
-    if hanoi.exists():
-        _scan(hanoi, HANOI_TABLES, "hanoi", doc, missing)
 
     admin = ROOT / "store" / "admin"
     if admin.exists():

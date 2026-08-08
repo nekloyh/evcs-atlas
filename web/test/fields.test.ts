@@ -262,11 +262,17 @@ test("mọi trường đều có nhãn, mô tả và nhóm hợp lệ", () => {
 
 // ── §6: mọi cột bản đồ hoá được phải có mặt — không sót cột nào ────────────────
 
-test("nhóm ĐƯỜNG có `road_len_in_hanoi_m` — cột thêm ở đợt refactor pipeline", () => {
-  const f = FIELD_BY_ID.get("road_len_in_hanoi_m");
+test("nhóm ĐƯỜNG có `road_len_in_province_m`, và KHÔNG còn bản mang tên tỉnh", () => {
+  // Trước đây hai trường sống cạnh nhau — `road_len_in_hanoi_m` cho bộ Hà Nội riêng và
+  // `road_len_in_province_m` cho store toàn quốc — vì đổi tên cột ở bộ cũ sẽ dựng lại mọi
+  // con số đã công bố. Bộ gốc nay nhân bản từ tỉnh 01 nên chỉ còn MỘT tên.
+  //
+  // Assert cả hai chiều: tên tỉnh-hoá không được quay lại, vì nó là mầm của một fork.
+  const f = FIELD_BY_ID.get("road_len_in_province_m");
   assert.ok(f, "cột tồn tại trong lưới thì phải có FieldMeta (§6: chia hết, không sót)");
   assert.equal(f!.group, "duong");
   assert.equal(f!.readAs, "cell");
+  assert.equal(FIELD_BY_ID.get("road_len_in_hanoi_m"), undefined);
 });
 
 // ── §7a mở rộng: null có HAI nguyên nhân (M3-Q3) ──────────────────────────────

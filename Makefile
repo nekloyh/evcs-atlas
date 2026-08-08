@@ -1,12 +1,8 @@
-.PHONY: all setup clean layers docs help web web-data vn vn-plan vn-web vn-quocgia golden golden-ghi schema schema-kiem kiem clean-cache
-PY := uv run python -m hanoi
+.PHONY: setup clean docs help web vn vn-plan vn-web vn-quocgia golden golden-ghi schema schema-kiem kiem clean-cache
 
 help:
 	@echo "make setup    — cài môi trường (uv sync)"
-	@echo "make all      — chạy toàn bộ pipeline B1→B11 (~4 phút, bước nặng nhất là quét PBF)"
-	@echo "make layers   — chạy lại các bước sau khi đã có bản trích OSM (~30 giây)"
-	@echo "make clean    — xoá data/processed và data/qa (giữ data/raw)"
-	@echo "make web-data — xuất dữ liệu cho web app sang web/public/data/"
+	@echo "make clean    — xoá store/p, store/cache và QA theo tỉnh"
 	@echo "make web      — chạy dev server của web app (cần make web-data trước)"
 	@echo ""
 	@echo "  ── toàn quốc (34 tỉnh) ──"
@@ -30,34 +26,8 @@ help:
 setup:
 	uv sync
 
-# B3 quét file PBF 325 MB một lần (~2,5 phút); các bước còn lại chạy trên bản trích Hà Nội.
-# B3b quét lần hai với area-assembly (~2 phút) — lớp POI VISUAL giữ polygon (DESIGN §11 M3.5).
-# B3c quét lần ba (~1,7 phút) — toạ độ trạm biến áp OSM, lớp ĐIỂM để vẽ (DESIGN §11 M5).
-# Ba lần quét thay vì một, cùng lý do đã ghi ở đầu mỗi bước: ba lớp là ba khái niệm, và
-# gộp chúng vào một lần đọc sẽ đổi nghĩa các cột đếm mà lớp đầu tiên đã phát.
-all: setup
-	$(PY).s01_admin
-	$(PY).s03_osm_extract
-	$(PY).s03b_osm_poi_visual
-	$(PY).s03c_osm_substation
-	$(MAKE) layers
-
-# B2 định nghĩa TẬP Ô BÁO CÁO (grid.MIN_AREA_FRAC) nên phải chạy lại mỗi khi grid.py đổi.
-# Nó chỉ đọc VNSDI, không đụng file PBF, nên chỗ đúng của nó là ở đây chứ không phải `all`.
-layers:
-	$(PY).s02_grid
-	$(PY).s04_population
-	$(PY).s05_stations
-	$(PY).s06_occupancy
-	$(PY).s07_landcover
-	$(PY).s08_traveltime
-	$(PY).s09_grid_features
-	$(PY).s12_screening
-	$(PY).s10_assemble
-	$(PY).s11_summary
-
 clean:
-	rm -rf data/processed data/qa
+	rm -rf store/p store/cache store/qa/[0-9]*
 
 # Cache dựng lại được từ PBF: xoá không mất sản phẩm nào. Đây là cả điểm của việc tách tier —
 # "xoá cache" phải là một lệnh, không phải một cuộc rà soát bằng mắt.
@@ -65,10 +35,7 @@ clean-cache:
 	rm -rf store/cache
 
 # --- web app (xem web/DESIGN.md) -------------------------------------------
-.PHONY: web web-data
-
-web-data:
-	$(PY).web_export
+.PHONY: web
 
 web:
 	cd web && pnpm install && pnpm dev

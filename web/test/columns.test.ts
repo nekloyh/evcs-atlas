@@ -34,15 +34,16 @@ const CHUA_CO_TRUONG: Record<string, string> = {
 };
 
 /**
- * Cột CHỈ tồn tại ở bộ Hà Nội cũ (`data/processed/`), không có trong store toàn quốc.
+ * RỖNG — và chú thích này ghi lại vì sao nó từng không rỗng.
  *
- * `road_len_in_hanoi_m` và `road_len_in_province_m` là **cùng một khái niệm, khác tên cột**.
- * Đổi tên ở bộ cũ sẽ dựng lại mọi con số đã công bố của Hà Nội, nên hai tên sống cạnh nhau
- * và `fieldAvailable` cho đúng một trong hai hiện lên tuỳ bộ dữ liệu đang mở.
+ * `road_len_in_hanoi_m` và `road_len_in_province_m` là cùng một khái niệm, khác tên cột.
+ * Chúng phải sống cạnh nhau chừng nào bộ Hà Nội còn là một bộ RIÊNG. Bộ gốc nay được nhân
+ * bản từ tỉnh 01 nên chỉ còn một tên, và trường thừa đã gỡ khỏi danh mục.
  *
- * Dòng này biến mất khi bộ Hà Nội thành tỉnh 01 của store chung.
+ * Giữ cơ chế lại thay vì xoá hẳn: câu hỏi "trường nào chỉ có ở một bộ" sẽ quay lại lần
+ * sau có một bộ dữ liệu thứ hai.
  */
-const CHI_CO_O_BO_HA_NOI = new Set(["road_len_in_hanoi_m"]);
+const CHI_CO_O_BO_HA_NOI = new Set<string>();
 
 test("mọi trường của ô đều trỏ tới một cột CÓ THẬT", () => {
   const la = CELL_SPECS_COLUMNS.filter(
