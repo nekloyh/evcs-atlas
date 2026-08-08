@@ -14,7 +14,7 @@ from scipy.stats import spearmanr
 
 import _graph
 from _common import emit
-from hanoi.s03_osm_extract import DEFAULT_KPH, LINK_KPH
+from _graph import DEFAULT_KPH, LINK_KPH
 
 BINS = [0, 3, 5, 10, np.inf]
 

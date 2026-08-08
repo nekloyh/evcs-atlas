@@ -150,7 +150,7 @@ def main() -> None:
     import sys
 
     sys.path.insert(0, str(ROOT / "src"))
-    from hanoi import grid as gridmod
+    from evcs.core import grid as gridmod
 
     clat = np.array([gridmod.centroid(c)[0] for c in cells])
     clng = np.array([gridmod.centroid(c)[1] for c in cells])

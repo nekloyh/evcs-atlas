@@ -22,7 +22,7 @@ from _common import ROOT
 import sys
 
 sys.path.insert(0, str(ROOT / "src"))
-from hanoi import grid as gridmod  # noqa: E402
+from evcs.core import grid as gridmod  # noqa: E402
 
 # Bảng tốc độ giả định CŨ, giữ lại ở ĐÂY chứ không ở `src/hanoi/`.
 #

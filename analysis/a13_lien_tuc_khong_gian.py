@@ -25,9 +25,6 @@ from __future__ import annotations
 import h3
 import numpy as np
 import pandas as pd
-import pyarrow.parquet as pq
-from shapely import wkb as shwkb
-from shapely.strtree import STRtree
 
 from _common import CRITIQUE, ROOT, emit, grid
 
@@ -39,7 +36,6 @@ def main() -> None:
     import sys
 
     sys.path.insert(0, str(ROOT / "src"))
-    from hanoi import grid as gridmod
 
     g = grid().set_index("h3_r8")
     d = g.dist_station_network_m.to_dict()

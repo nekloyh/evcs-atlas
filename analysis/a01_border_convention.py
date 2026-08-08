@@ -20,14 +20,19 @@ from shapely.strtree import STRtree
 
 from _common import ROOT, emit, grid, roads  # noqa: E402
 
-from hanoi import aoi, grid as gridmod  # noqa: E402
-from hanoi.s09_grid_features import _len_m  # noqa: E402
+from evcs.core import geo  # noqa: E402
+from evcs.core import grid as gridmod  # noqa: E402
+from vn import admin  # noqa: E402
+
+
+def _len_m(geom) -> float:
+    return geo.length_m(geom, *geo.scale_at(21.0))
 
 
 def main() -> None:
     g = grid().set_index("h3_r8")
     cells = list(g.index)
-    boundary = aoi.boundary()
+    boundary = admin.boundary("01")
     pb = prep(boundary)
 
     # --- 1. đường: cắt theo ô ∩ ranh giới ----------------------------------

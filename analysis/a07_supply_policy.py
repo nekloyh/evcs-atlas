@@ -10,10 +10,9 @@ Không "hỏng" theo nghĩa lỗi kỹ thuật — nhưng nếu (b) mạnh hơn 
 from __future__ import annotations
 
 import numpy as np
-import pandas as pd
 from scipy.stats import spearmanr
 
-from _common import communes, emit, grid, stations
+from _common import communes, emit, stations
 
 # Nhận diện khu đô thị lớn qua CHÍNH TÊN TRẠM trong nguồn evcs (không có lớp ranh giới
 # khu đô thị nào trong bộ dữ liệu). Đây là proxy KHAI BÁO, không phải lớp dữ liệu.

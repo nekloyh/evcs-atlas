@@ -42,12 +42,15 @@ from shapely.geometry import Point
 from shapely.prepared import prep
 from shapely.strtree import STRtree
 
+import h3
+
+from evcs.core.grid import RES
 from evcs.core.supply import STATION_KEEP, is_private_ac, peer_label, scope_of
 
 from . import admin, paths, qa
 from .runner import Step
 
-VERSION = "1"
+VERSION = "2"  # 2: thêm cột h3_r8 (khoá nối trạm ↔ lưới cho util_pctl_cell)
 
 RENAME = {
     "n_guns_installed": "n_ports",
@@ -159,6 +162,14 @@ def run(province_code: str) -> None:
         out.drop(columns=[c for c in ("is_primary", "coord_resolved") if c in out.columns])
         .sort_values("station_id")
         .reset_index(drop=True)
+    )
+
+    # Ô chứa trạm. Con số này vốn được `n04` tính rồi VỨT ĐI sau khi cộng cung về ô —
+    # cùng loại lãng phí mà `dist_station_m` theo đoạn đã mắc. Giữ lại vì nó là khoá nối
+    # trạm ↔ lưới mà giao diện cần: trường `util_pctl_cell` chạy một truy vấn tương quan
+    # `WHERE s.h3_r8 = g.h3_r8`, và thiếu cột này thì trường ấy biến mất khỏi rail.
+    out["h3_r8"] = pd.Series(
+        [h3.latlng_to_cell(la, ln, RES) for la, ln in zip(out.lat, out.lng)], dtype="string"
     )
 
     # commune_kind BA nhánh, nối từ bảng xã của n01 — không đoán từ tiền tố tên.

@@ -19,8 +19,8 @@ from shapely.geometry import LineString, Point
 from shapely.prepared import prep
 
 from _common import CRITIQUE
-from hanoi import aoi, paths
-from hanoi.s03_osm_extract import classify_poi
+from vn import admin, paths
+from evcs.core.osm import classify_poi
 
 # Nhóm mở rộng. Giữ RIÊNG lớp gốc ở cột `poi_class` để so được với bản hiện hành.
 EXT = [
@@ -50,7 +50,7 @@ def klass(tags):
 
 def main() -> None:
     t0 = time.time()
-    hanoi = aoi.boundary()
+    hanoi = admin.boundary("01")
     ph = prep(hanoi)
     minx, miny, maxx, maxy = hanoi.bounds
     rows = []
@@ -87,7 +87,7 @@ def main() -> None:
 
     df = pd.DataFrame(rows)
     import h3
-    from hanoi import grid as gridmod
+    from evcs.core import grid as gridmod
 
     df["h3_r8"] = [h3.latlng_to_cell(a, b, gridmod.RES) for a, b in zip(df.lat, df.lng)]
     out = CRITIQUE / "poi_extended.parquet"

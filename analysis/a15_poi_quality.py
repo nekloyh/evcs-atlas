@@ -11,7 +11,6 @@ Quét lại PBF một lượt (~2,5 phút). CHỈ ĐỌC.
 
 from __future__ import annotations
 
-import json
 import time
 from collections import Counter
 
@@ -23,8 +22,8 @@ from shapely.geometry import LineString, Point
 from shapely.prepared import prep
 
 from _common import ROOT, emit, grid
-from hanoi import aoi, paths
-from hanoi.s03_osm_extract import classify_poi
+from vn import admin, paths
+from evcs.core.osm import classify_poi
 
 # --- taxonomy MỞ RỘNG: neo lưu trú/điểm đến mà 8 lớp hiện hành không bắt ---
 # Mỗi mục là (tên nhóm, hàm nhận tags). Chỉ để ĐO độ phủ, không đề xuất dùng ngay.
@@ -47,9 +46,9 @@ EXT = {
 
 def main() -> None:
     t0 = time.time()
-    area = aoi.buffered()
+    area = admin.buffered("01")
     parea = prep(area)
-    hanoi = aoi.boundary()
+    hanoi = admin.boundary("01")
     phanoi = prep(hanoi)
     minx, miny, maxx, maxy = area.bounds
 

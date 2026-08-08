@@ -4119,6 +4119,12 @@
      "sum": 66.42,
      "sumsq": 6.4532
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "919b1c7fa18068ea",
+     "n_null": 0,
+     "n_unique": 608
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -4260,6 +4266,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -4280,7 +4287,7 @@
     "verified_official"
    ],
    "key_hash": "91b526ef8a073e95",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 939
   },
   "p/01/substations.parquet": {
@@ -6868,6 +6875,12 @@
      "sum": 4.38,
      "sumsq": 1.6096
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "356ba10104152853",
+     "n_null": 0,
+     "n_unique": 27
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "1f419139f10195a9",
@@ -7009,6 +7022,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -7029,7 +7043,7 @@
     "verified_official"
    ],
    "key_hash": "4fb345c5d8e8d438",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 31
   },
   "p/04/substations.parquet": {
@@ -9607,6 +9621,12 @@
      "sum": 4.78,
      "sumsq": 0.3114
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "317723112f45b649",
+     "n_null": 0,
+     "n_unique": 92
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -9748,6 +9768,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -9768,7 +9789,7 @@
     "verified_official"
    ],
    "key_hash": "decc280e8dbcc479",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 110
   },
   "p/08/substations.parquet": {
@@ -12351,6 +12372,12 @@
      "sum": 5.89,
      "sumsq": 1.6675
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "e9c76630d2fe0920",
+     "n_null": 0,
+     "n_unique": 35
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -12492,6 +12519,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -12512,7 +12540,7 @@
     "verified_official"
    ],
    "key_hash": "bf6b5be111d52249",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 41
   },
   "p/11/substations.parquet": {
@@ -15090,6 +15118,12 @@
      "sum": 3.05,
      "sumsq": 1.1663
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "abedfea98cc97f8a",
+     "n_null": 0,
+     "n_unique": 23
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -15231,6 +15265,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -15251,7 +15286,7 @@
     "verified_official"
    ],
    "key_hash": "452533e6a8048ed0",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 28
   },
   "p/12/substations.parquet": {
@@ -17829,6 +17864,12 @@
      "sum": 3.92,
      "sumsq": 0.2912
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "cd4fd7efff2765f7",
+     "n_null": 0,
+     "n_unique": 59
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -17965,6 +18006,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -17985,7 +18027,7 @@
     "verified_official"
    ],
    "key_hash": "878cc9412caf54cd",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 66
   },
   "p/14/substations.parquet": {
@@ -20573,6 +20615,12 @@
      "sum": 3.24,
      "sumsq": 0.153
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "9b63f24c077f3128",
+     "n_null": 0,
+     "n_unique": 88
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -20714,6 +20762,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -20734,7 +20783,7 @@
     "verified_official"
    ],
    "key_hash": "a82a0d72cf43cdad",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 100
   },
   "p/15/substations.parquet": {
@@ -23317,6 +23366,12 @@
      "sum": 6.65,
      "sumsq": 0.6981
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "53bf2f14423d8280",
+     "n_null": 0,
+     "n_unique": 123
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -23458,6 +23513,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -23478,7 +23534,7 @@
     "verified_official"
    ],
    "key_hash": "f23559d80491c116",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 152
   },
   "p/19/substations.parquet": {
@@ -26056,6 +26112,12 @@
      "sum": 3.01,
      "sumsq": 0.2267
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "a93ccd223135138c",
+     "n_null": 0,
+     "n_unique": 37
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "1f419139f10195a9",
@@ -26192,6 +26254,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -26212,7 +26275,7 @@
     "verified_official"
    ],
    "key_hash": "9ec398d71c333ccb",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 42
   },
   "p/20/substations.parquet": {
@@ -28800,6 +28863,12 @@
      "sum": 5.54,
      "sumsq": 0.3054
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "b7f4a8631337d80c",
+     "n_null": 0,
+     "n_unique": 141
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -28941,6 +29010,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -28961,7 +29031,7 @@
     "verified_official"
    ],
    "key_hash": "680f4dca345c1a70",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 181
   },
   "p/22/substations.parquet": {
@@ -31549,6 +31619,12 @@
      "sum": 62.7,
      "sumsq": 43.3006
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "d44e7502bba44e4a",
+     "n_null": 0,
+     "n_unique": 251
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -31690,6 +31766,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -31710,7 +31787,7 @@
     "verified_official"
    ],
    "key_hash": "f04069eacfce3273",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 344
   },
   "p/24/substations.parquet": {
@@ -34288,6 +34365,12 @@
      "sum": 25.16,
      "sumsq": 6.009
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "2a031f8099675653",
+     "n_null": 0,
+     "n_unique": 362
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -34429,6 +34512,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -34449,7 +34533,7 @@
     "verified_official"
    ],
    "key_hash": "d44b7d35d6ca04ea",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 425
   },
   "p/25/substations.parquet": {
@@ -37037,6 +37121,12 @@
      "sum": 19.87,
      "sumsq": 2.2725
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "99cabea2c6de62bd",
+     "n_null": 0,
+     "n_unique": 235
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -37178,6 +37268,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -37198,7 +37289,7 @@
     "verified_official"
    ],
    "key_hash": "892c245f36fe7f33",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 295
   },
   "p/31/substations.parquet": {
@@ -39786,6 +39877,12 @@
      "sum": 20.66,
      "sumsq": 1.5094
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "89ae351fb0ea0449",
+     "n_null": 0,
+     "n_unique": 261
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -39927,6 +40024,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -39947,7 +40045,7 @@
     "verified_official"
    ],
    "key_hash": "cfee4c4705dfd7e2",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 360
   },
   "p/33/substations.parquet": {
@@ -42535,6 +42633,12 @@
      "sum": 13.11,
      "sumsq": 1.2665
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "5a0eca0b60c2c4a9",
+     "n_null": 0,
+     "n_unique": 236
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -42676,6 +42780,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -42696,7 +42801,7 @@
     "verified_official"
    ],
    "key_hash": "5c09cbd3d0b010c9",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 274
   },
   "p/37/substations.parquet": {
@@ -45284,6 +45389,12 @@
      "sum": 7.62,
      "sumsq": 1.4006
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "7bdcfac01f30194c",
+     "n_null": 0,
+     "n_unique": 177
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -45425,6 +45536,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -45445,7 +45557,7 @@
     "verified_official"
    ],
    "key_hash": "90509040bed9d679",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 201
   },
   "p/38/substations.parquet": {
@@ -48023,6 +48135,12 @@
      "sum": 5.92,
      "sumsq": 0.317
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "2d4b251ef08c9eb4",
+     "n_null": 0,
+     "n_unique": 115
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "1f419139f10195a9",
@@ -48159,6 +48277,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -48179,7 +48298,7 @@
     "verified_official"
    ],
    "key_hash": "6863347dc8944f18",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 131
   },
   "p/40/substations.parquet": {
@@ -50767,6 +50886,12 @@
      "sum": 9.61,
      "sumsq": 0.8885
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "4e97815623dc416b",
+     "n_null": 0,
+     "n_unique": 110
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -50908,6 +51033,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -50928,7 +51054,7 @@
     "verified_official"
    ],
    "key_hash": "b7d3cdcd55fd9d72",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 131
   },
   "p/42/substations.parquet": {
@@ -53511,6 +53637,12 @@
      "sum": 9.25,
      "sumsq": 2.0655
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "7e4af5aec000ab00",
+     "n_null": 0,
+     "n_unique": 133
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -53652,6 +53784,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -53672,7 +53805,7 @@
     "verified_official"
    ],
    "key_hash": "10cdcc65d5d1a0fd",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 155
   },
   "p/44/substations.parquet": {
@@ -56260,6 +56393,12 @@
      "sum": 3.8,
      "sumsq": 4.753
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "ad9c331b55b27a2d",
+     "n_null": 0,
+     "n_unique": 61
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "1f419139f10195a9",
@@ -56396,6 +56535,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -56416,7 +56556,7 @@
     "verified_official"
    ],
    "key_hash": "cee0c273f0f16945",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 67
   },
   "p/46/substations.parquet": {
@@ -59004,6 +59144,12 @@
      "sum": 14.43,
      "sumsq": 1.4087
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "846e5cec8bbe6843",
+     "n_null": 0,
+     "n_unique": 160
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -59145,6 +59291,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -59165,7 +59312,7 @@
     "verified_official"
    ],
    "key_hash": "e8a4c33f6bce91b0",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 194
   },
   "p/48/substations.parquet": {
@@ -61743,6 +61890,12 @@
      "sum": 4.43,
      "sumsq": 0.9935
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "76056968fc3fbe3d",
+     "n_null": 0,
+     "n_unique": 79
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -61879,6 +62032,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -61899,7 +62053,7 @@
     "verified_official"
    ],
    "key_hash": "e17af716b1b8c9f7",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 86
   },
   "p/51/substations.parquet": {
@@ -64487,6 +64641,12 @@
      "sum": 16.9,
      "sumsq": 1.731
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "a73172e662e0c6a7",
+     "n_null": 0,
+     "n_unique": 148
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -64628,6 +64788,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -64648,7 +64809,7 @@
     "verified_official"
    ],
    "key_hash": "573e17c48869a61a",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 174
   },
   "p/52/substations.parquet": {
@@ -67236,6 +67397,12 @@
      "sum": 4.95,
      "sumsq": 0.2353
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "b69572f7235e1dee",
+     "n_null": 0,
+     "n_unique": 92
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -67377,6 +67544,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -67397,7 +67565,7 @@
     "verified_official"
    ],
    "key_hash": "46523c190c12eb43",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 111
   },
   "p/56/substations.parquet": {
@@ -69985,6 +70153,12 @@
      "sum": 21.0,
      "sumsq": 2.1036
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "dda3cfbfd60f641d",
+     "n_null": 0,
+     "n_unique": 191
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -70126,6 +70300,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -70146,7 +70321,7 @@
     "verified_official"
    ],
    "key_hash": "7125483b4b67e95b",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 247
   },
   "p/66/substations.parquet": {
@@ -72734,6 +72909,12 @@
      "sum": 19.52,
      "sumsq": 1.7506
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "5b926417be033a7b",
+     "n_null": 0,
+     "n_unique": 236
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -72875,6 +73056,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -72895,7 +73077,7 @@
     "verified_official"
    ],
    "key_hash": "82dbe22e107e9d6e",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 263
   },
   "p/68/substations.parquet": {
@@ -75483,6 +75665,12 @@
      "sum": 47.28,
      "sumsq": 4.5438
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "08cbfb6f0cdec7b0",
+     "n_null": 0,
+     "n_unique": 362
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -75624,6 +75812,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -75644,7 +75833,7 @@
     "verified_official"
    ],
    "key_hash": "e3fff3cca069d03a",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 518
   },
   "p/75/substations.parquet": {
@@ -78232,6 +78421,12 @@
      "sum": 81.74,
      "sumsq": 7.8274
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "aa2337aa1275ea10",
+     "n_null": 0,
+     "n_unique": 710
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -78373,6 +78568,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -78393,7 +78589,7 @@
     "verified_official"
    ],
    "key_hash": "c9165832f7ea44d2",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 1017
   },
   "p/79/substations.parquet": {
@@ -80971,6 +81167,12 @@
      "sum": 13.59,
      "sumsq": 1.8347
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "a94b3aa30701f461",
+     "n_null": 0,
+     "n_unique": 238
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -81112,6 +81314,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -81132,7 +81335,7 @@
     "verified_official"
    ],
    "key_hash": "1fe45ba0e9e4409d",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 264
   },
   "p/80/substations.parquet": {
@@ -83720,6 +83923,12 @@
      "sum": 15.32,
      "sumsq": 1.6476
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "a2a92f3e006f1247",
+     "n_null": 0,
+     "n_unique": 180
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -83861,6 +84070,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -83881,7 +84091,7 @@
     "verified_official"
    ],
    "key_hash": "d4463e6c28aa2baa",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 202
   },
   "p/82/substations.parquet": {
@@ -86459,6 +86669,12 @@
      "sum": 7.94,
      "sumsq": 0.7242
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "43e4c719420f4ad9",
+     "n_null": 0,
+     "n_unique": 171
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -86600,6 +86816,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -86620,7 +86837,7 @@
     "verified_official"
    ],
    "key_hash": "da4a429e5f2a46ea",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 196
   },
   "p/86/substations.parquet": {
@@ -89208,6 +89425,12 @@
      "sum": 21.56,
      "sumsq": 2.6174
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "341f7fc7fd2098d4",
+     "n_null": 0,
+     "n_unique": 167
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -89349,6 +89572,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -89369,7 +89593,7 @@
     "verified_official"
    ],
    "key_hash": "de0528dd046f7ae5",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 208
   },
   "p/91/substations.parquet": {
@@ -91957,6 +92181,12 @@
      "sum": 12.94,
      "sumsq": 1.4706
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "5d10aa86352c817f",
+     "n_null": 0,
+     "n_unique": 126
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -92098,6 +92328,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -92118,7 +92349,7 @@
     "verified_official"
    ],
    "key_hash": "38ef001f8c200ee4",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 153
   },
   "p/92/substations.parquet": {
@@ -94696,6 +94927,12 @@
      "sum": 7.69,
      "sumsq": 0.8813
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "8537ef5c1e3e2bb4",
+     "n_null": 0,
+     "n_unique": 69
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -94837,6 +95074,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -94857,7 +95095,7 @@
     "verified_official"
    ],
    "key_hash": "8e44d386c101b33c",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 81
   },
   "p/96/substations.parquet": {
@@ -95560,6 +95798,12 @@
      "sum": 82849.7,
      "sumsq": 8193957.53
     },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "0661319aac4ce12d",
+     "n_null": 0,
+     "n_unique": 1
+    },
     "station_code": {
      "dtype": "cat",
      "hash": "5094f74ea86fe52d",
@@ -95585,11 +95829,12 @@
     "count_total",
     "current_type",
     "power_kw",
+    "province_code",
     "station_code",
     "station_id",
     "vehicle_class"
    ],
-   "n_cols": 8,
+   "n_cols": 9,
    "n_rows": 1602
   },
   "web/grid_h3_r8.parquet": {
@@ -95601,8 +95846,8 @@
      "n_finite": 4400,
      "n_null": 0,
      "p50": 0.0,
-     "sum": 21025.0,
-     "sumsq": 6393047.0
+     "sum": 21006.0,
+     "sumsq": 6392686.0
     },
     "area_frac": {
      "dtype": "num",
@@ -95684,49 +95929,49 @@
     },
     "detour_ratio": {
      "dtype": "num",
-     "max": 36.078787962,
-     "min": 1.00902935239,
-     "n_finite": 4312,
-     "n_null": 88,
-     "p50": 1.47447964889,
-     "sum": 7248.21461626,
-     "sumsq": 15942.7456651
+     "max": 36.0790697985,
+     "min": 1.00902759155,
+     "n_finite": 4310,
+     "n_null": 90,
+     "p50": 1.4741585585,
+     "sum": 7244.93274326,
+     "sumsq": 15937.3919287
     },
     "dist_station_asym_m": {
      "dtype": "num",
-     "max": 16293.0290589,
+     "max": 16292.2160222,
      "min": 0.0,
-     "n_finite": 4399,
-     "n_null": 1,
+     "n_finite": 4397,
+     "n_null": 3,
      "p50": 0.0,
-     "sum": 334833.158287,
-     "sumsq": 916410088.976
+     "sum": 334814.673359,
+     "sumsq": 916280798.663
     },
     "dist_station_euclid_m": {
      "dtype": "num",
-     "max": 6331.13718012,
-     "min": 0.824168019836,
+     "max": 6330.98349384,
+     "min": 0.824153214106,
      "n_finite": 4400,
      "n_null": 0,
-     "p50": 1487.24372572,
-     "sum": 7423649.12335,
-     "sumsq": 17465839999.5
+     "p50": 1487.14726177,
+     "sum": 7423162.95956,
+     "sumsq": 17463518477.2
     },
     "dist_station_network_m": {
      "dtype": "num",
-     "max": 21162.0368842,
-     "min": 18.2401623772,
-     "n_finite": 4399,
-     "n_null": 1,
-     "p50": 2322.76252954,
-     "sum": 11746604.0747,
-     "sumsq": 45184580321.7
+     "max": 21161.0436344,
+     "min": 18.2396987317,
+     "n_finite": 4397,
+     "n_null": 3,
+     "p50": 2322.12772876,
+     "sum": 11740080.1461,
+     "sumsq": 45161562630.1
     },
     "evidence_grade_distance": {
      "dtype": "cat",
-     "hash": "fa2ff2ee7b103c13",
+     "hash": "94bb8b7d7f1b7be8",
      "n_null": 0,
-     "n_unique": 2
+     "n_unique": 3
     },
     "grass_frac": {
      "dtype": "num",
@@ -95764,6 +96009,26 @@
      "sum": 465083.452375,
      "sumsq": 49159819.793
     },
+    "mangrove_frac": {
+     "dtype": "num",
+     "max": 0.0,
+     "min": 0.0,
+     "n_finite": 4400,
+     "n_null": 0,
+     "p50": 0.0,
+     "sum": 0.0,
+     "sumsq": 0.0
+    },
+    "moss_frac": {
+     "dtype": "num",
+     "max": 0.0,
+     "min": 0.0,
+     "n_finite": 4400,
+     "n_null": 0,
+     "p50": 0.0,
+     "sum": 0.0,
+     "sumsq": 0.0
+    },
     "n_apartment": {
      "dtype": "num",
      "max": 66.0,
@@ -95771,8 +96036,8 @@
      "n_finite": 4400,
      "n_null": 0,
      "p50": 0.0,
-     "sum": 2482.0,
-     "sumsq": 57092.0
+     "sum": 2477.0,
+     "sumsq": 57075.0
     },
     "n_dept_store": {
      "dtype": "num",
@@ -95791,8 +96056,8 @@
      "n_finite": 4400,
      "n_null": 0,
      "p50": 0.0,
-     "sum": 321.0,
-     "sumsq": 469.0
+     "sum": 310.0,
+     "sumsq": 456.0
     },
     "n_mall": {
      "dtype": "num",
@@ -95811,8 +96076,8 @@
      "n_finite": 4400,
      "n_null": 0,
      "p50": 0.0,
-     "sum": 193.0,
-     "sumsq": 281.0
+     "sum": 188.0,
+     "sumsq": 274.0
     },
     "n_parking_off": {
      "dtype": "num",
@@ -95821,8 +96086,8 @@
      "n_finite": 4400,
      "n_null": 0,
      "p50": 0.0,
-     "sum": 509.0,
-     "sumsq": 1905.0
+     "sum": 495.0,
+     "sumsq": 1841.0
     },
     "n_parking_street": {
      "dtype": "num",
@@ -95841,8 +96106,8 @@
      "n_finite": 4400,
      "n_null": 0,
      "p50": 0.0,
-     "sum": 15359.0,
-     "sumsq": 1005031.0
+     "sum": 15273.0,
+     "sumsq": 1005471.0
     },
     "n_poi_total": {
      "dtype": "num",
@@ -95851,8 +96116,8 @@
      "n_finite": 4400,
      "n_null": 0,
      "p50": 0.0,
-     "sum": 3955.0,
-     "sumsq": 92713.0
+     "sum": 3919.0,
+     "sumsq": 92609.0
     },
     "n_ports": {
      "dtype": "num",
@@ -95901,8 +96166,8 @@
      "n_finite": 4400,
      "n_null": 0,
      "p50": 0.0,
-     "sum": 253.0,
-     "sumsq": 589.0
+     "sum": 252.0,
+     "sumsq": 588.0
     },
     "network_reachable": {
      "dtype": "cat",
@@ -95936,6 +96201,16 @@
      "sum": 8831125.88533,
      "sumsq": 92731746202.5
     },
+    "population_wp": {
+     "dtype": "num",
+     "max": 38527.5389557,
+     "min": 0.0,
+     "n_finite": 4400,
+     "n_null": 0,
+     "p50": 782.491868466,
+     "sum": 9174344.87518,
+     "sumsq": 95446731413.0
+    },
     "power_kw_site": {
      "dtype": "num",
      "max": 13393.0,
@@ -95946,115 +96221,121 @@
      "sum": 232841.3,
      "sumsq": 723134571.51
     },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "0661319aac4ce12d",
+     "n_null": 0,
+     "n_unique": 1
+    },
     "road_access_offset_m": {
      "dtype": "num",
-     "max": 2088.00691317,
-     "min": 0.529602938207,
+     "max": 2087.84132825,
+     "min": 0.529600145466,
      "n_finite": 4400,
      "n_null": 0,
-     "p50": 62.3599187922,
-     "sum": 544127.763039,
-     "sumsq": 226476665.926
+     "p50": 62.2973989909,
+     "sum": 543825.383964,
+     "sumsq": 226375664.463
     },
     "road_len_arterial_m": {
      "dtype": "num",
-     "max": 12426.6459713,
+     "max": 12425.8517636,
      "min": 0.0,
      "n_finite": 4400,
      "n_null": 0,
      "p50": 0.0,
-     "sum": 3109422.85453,
-     "sumsq": 8785195842.0
+     "sum": 3109234.69972,
+     "sumsq": 8784122112.07
     },
-    "road_len_in_hanoi_m": {
+    "road_len_in_province_m": {
      "dtype": "num",
-     "max": 37603.9167445,
+     "max": 37601.4059685,
      "min": 0.0,
      "n_finite": 4400,
      "n_null": 0,
-     "p50": 5911.0472819,
-     "sum": 29296784.6073,
-     "sumsq": 312794571927.0
+     "p50": 5910.67403267,
+     "sum": 29294919.8668,
+     "sumsq": 312754626965.0
     },
     "road_len_local_m": {
      "dtype": "num",
-     "max": 18150.996544,
+     "max": 18149.6970067,
      "min": 0.0,
      "n_finite": 4400,
      "n_null": 0,
-     "p50": 4283.33335272,
-     "sum": 19840239.4286,
-     "sumsq": 128514376271.0
+     "p50": 4283.02985244,
+     "sum": 19838971.5443,
+     "sumsq": 128497983594.0
     },
     "road_len_m": {
      "dtype": "num",
-     "max": 37603.9167445,
+     "max": 37601.4059685,
      "min": 0.0,
      "n_finite": 4400,
      "n_null": 0,
-     "p50": 6137.98923068,
-     "sum": 30476727.5732,
-     "sumsq": 323912595596.0
+     "p50": 6137.6540244,
+     "sum": 30474787.9066,
+     "sumsq": 323871225877.0
     },
     "road_len_motorway_m": {
      "dtype": "num",
-     "max": 9977.66115797,
+     "max": 9977.15065806,
      "min": 0.0,
      "n_finite": 4400,
      "n_null": 0,
      "p50": 0.0,
-     "sum": 410955.091788,
-     "sumsq": 1047758833.03
+     "sum": 410931.186278,
+     "sumsq": 1047637242.6
     },
     "road_len_primary_m": {
      "dtype": "num",
-     "max": 6483.54966725,
+     "max": 6483.02401099,
      "min": 0.0,
      "n_finite": 4400,
      "n_null": 0,
      "p50": 0.0,
-     "sum": 1008291.30897,
-     "sumsq": 1827260971.93
+     "sum": 1008225.77113,
+     "sumsq": 1827027435.99
     },
     "road_len_secondary_m": {
      "dtype": "num",
-     "max": 4661.41397537,
+     "max": 4660.97475414,
      "min": 0.0,
      "n_finite": 4400,
      "n_null": 0,
      "p50": 0.0,
-     "sum": 973554.090971,
-     "sumsq": 1454797677.81
+     "sum": 973494.646312,
+     "sumsq": 1454618923.67
     },
     "road_len_service_m": {
      "dtype": "num",
-     "max": 31684.7356523,
+     "max": 31682.6955284,
      "min": 0.0,
      "n_finite": 4400,
      "n_null": 0,
-     "p50": 266.521172839,
-     "sum": 5667170.87671,
-     "sumsq": 41082191809.8
+     "p50": 266.502613381,
+     "sum": 5666802.79094,
+     "sumsq": 41076788002.3
     },
     "road_len_tertiary_m": {
      "dtype": "num",
-     "max": 7015.01268069,
+     "max": 7014.5688251,
      "min": 0.0,
      "n_finite": 4400,
      "n_null": 0,
      "p50": 0.0,
-     "sum": 1859894.41332,
-     "sumsq": 2972842633.07
+     "sum": 1859778.87161,
+     "sumsq": 2972469580.01
     },
     "road_len_trunk_m": {
      "dtype": "num",
-     "max": 7545.93323506,
+     "max": 7545.39028266,
      "min": 0.0,
      "n_finite": 4400,
      "n_null": 0,
      "p50": 0.0,
-     "sum": 716622.362806,
-     "sumsq": 1347096689.59
+     "sum": 716583.096003,
+     "sumsq": 1346947958.8
     },
     "screen_decision": {
      "dtype": "cat",
@@ -96064,13 +96345,13 @@
     },
     "screen_margin_m": {
      "dtype": "num",
-     "max": 4331.13718012,
-     "min": -1999.17583198,
+     "max": 4330.98349384,
+     "min": -1999.17584679,
      "n_finite": 4400,
      "n_null": 0,
-     "p50": -261.730743596,
-     "sum": -627850.876647,
-     "sumsq": 4789368772.5
+     "p50": -261.744955049,
+     "sum": -628337.040444,
+     "sumsq": 4788911839.52
     },
     "shrub_frac": {
      "dtype": "num",
@@ -96081,6 +96362,16 @@
      "p50": 0.0,
      "sum": 0.596450319796,
      "sumsq": 0.0159209409738
+    },
+    "snow_frac": {
+     "dtype": "num",
+     "max": 0.0,
+     "min": 0.0,
+     "n_finite": 4400,
+     "n_null": 0,
+     "p50": 0.0,
+     "sum": 0.0,
+     "sumsq": 0.0
     },
     "tree_frac": {
      "dtype": "num",
@@ -96143,6 +96434,8 @@
     "h3_r8",
     "lat",
     "lng",
+    "mangrove_frac",
+    "moss_frac",
     "n_apartment",
     "n_dept_store",
     "n_fuel",
@@ -96161,10 +96454,12 @@
     "pop_density_ppkm2",
     "pop_source",
     "population",
+    "population_wp",
     "power_kw_site",
+    "province_code",
     "road_access_offset_m",
     "road_len_arterial_m",
-    "road_len_in_hanoi_m",
+    "road_len_in_province_m",
     "road_len_local_m",
     "road_len_m",
     "road_len_motorway_m",
@@ -96176,13 +96471,14 @@
     "screen_decision",
     "screen_margin_m",
     "shrub_frac",
+    "snow_frac",
     "tree_frac",
     "util_cell",
     "water_frac",
     "wetland_frac"
    ],
    "key_hash": "6210d9879d8ae233",
-   "n_cols": 56,
+   "n_cols": 61,
    "n_rows": 4400
   },
   "web/p/01/connectors.parquet": {
@@ -97314,6 +97610,12 @@
      "sum": 66.42,
      "sumsq": 6.4532
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "919b1c7fa18068ea",
+     "n_null": 0,
+     "n_unique": 608
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -97455,6 +97757,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -97475,7 +97778,7 @@
     "verified_official"
    ],
    "key_hash": "91b526ef8a073e95",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 939
   },
   "web/p/04/connectors.parquet": {
@@ -98607,6 +98910,12 @@
      "sum": 4.38,
      "sumsq": 1.6096
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "356ba10104152853",
+     "n_null": 0,
+     "n_unique": 27
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "1f419139f10195a9",
@@ -98748,6 +99057,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -98768,7 +99078,7 @@
     "verified_official"
    ],
    "key_hash": "4fb345c5d8e8d438",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 31
   },
   "web/p/08/connectors.parquet": {
@@ -99900,6 +100210,12 @@
      "sum": 4.78,
      "sumsq": 0.3114
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "317723112f45b649",
+     "n_null": 0,
+     "n_unique": 92
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -100041,6 +100357,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -100061,7 +100378,7 @@
     "verified_official"
    ],
    "key_hash": "decc280e8dbcc479",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 110
   },
   "web/p/11/connectors.parquet": {
@@ -101188,6 +101505,12 @@
      "sum": 5.89,
      "sumsq": 1.6675
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "e9c76630d2fe0920",
+     "n_null": 0,
+     "n_unique": 35
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -101329,6 +101652,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -101349,7 +101673,7 @@
     "verified_official"
    ],
    "key_hash": "bf6b5be111d52249",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 41
   },
   "web/p/12/connectors.parquet": {
@@ -102481,6 +102805,12 @@
      "sum": 3.05,
      "sumsq": 1.1663
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "abedfea98cc97f8a",
+     "n_null": 0,
+     "n_unique": 23
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -102622,6 +102952,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -102642,7 +102973,7 @@
     "verified_official"
    ],
    "key_hash": "452533e6a8048ed0",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 28
   },
   "web/p/14/connectors.parquet": {
@@ -103774,6 +104105,12 @@
      "sum": 3.92,
      "sumsq": 0.2912
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "cd4fd7efff2765f7",
+     "n_null": 0,
+     "n_unique": 59
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -103910,6 +104247,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -103930,7 +104268,7 @@
     "verified_official"
    ],
    "key_hash": "878cc9412caf54cd",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 66
   },
   "web/p/15/connectors.parquet": {
@@ -105062,6 +105400,12 @@
      "sum": 3.24,
      "sumsq": 0.153
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "9b63f24c077f3128",
+     "n_null": 0,
+     "n_unique": 88
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -105203,6 +105547,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -105223,7 +105568,7 @@
     "verified_official"
    ],
    "key_hash": "a82a0d72cf43cdad",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 100
   },
   "web/p/19/connectors.parquet": {
@@ -106355,6 +106700,12 @@
      "sum": 6.65,
      "sumsq": 0.6981
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "53bf2f14423d8280",
+     "n_null": 0,
+     "n_unique": 123
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -106496,6 +106847,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -106516,7 +106868,7 @@
     "verified_official"
    ],
    "key_hash": "f23559d80491c116",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 152
   },
   "web/p/20/connectors.parquet": {
@@ -107648,6 +108000,12 @@
      "sum": 3.01,
      "sumsq": 0.2267
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "a93ccd223135138c",
+     "n_null": 0,
+     "n_unique": 37
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "1f419139f10195a9",
@@ -107784,6 +108142,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -107804,7 +108163,7 @@
     "verified_official"
    ],
    "key_hash": "9ec398d71c333ccb",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 42
   },
   "web/p/22/connectors.parquet": {
@@ -108936,6 +109295,12 @@
      "sum": 5.54,
      "sumsq": 0.3054
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "b7f4a8631337d80c",
+     "n_null": 0,
+     "n_unique": 141
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -109077,6 +109442,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -109097,7 +109463,7 @@
     "verified_official"
    ],
    "key_hash": "680f4dca345c1a70",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 181
   },
   "web/p/24/connectors.parquet": {
@@ -110229,6 +110595,12 @@
      "sum": 62.7,
      "sumsq": 43.3006
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "d44e7502bba44e4a",
+     "n_null": 0,
+     "n_unique": 251
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -110370,6 +110742,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -110390,7 +110763,7 @@
     "verified_official"
    ],
    "key_hash": "f04069eacfce3273",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 344
   },
   "web/p/25/connectors.parquet": {
@@ -111522,6 +111895,12 @@
      "sum": 25.16,
      "sumsq": 6.009
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "2a031f8099675653",
+     "n_null": 0,
+     "n_unique": 362
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -111663,6 +112042,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -111683,7 +112063,7 @@
     "verified_official"
    ],
    "key_hash": "d44b7d35d6ca04ea",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 425
   },
   "web/p/31/connectors.parquet": {
@@ -112815,6 +113195,12 @@
      "sum": 19.87,
      "sumsq": 2.2725
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "99cabea2c6de62bd",
+     "n_null": 0,
+     "n_unique": 235
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -112956,6 +113342,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -112976,7 +113363,7 @@
     "verified_official"
    ],
    "key_hash": "892c245f36fe7f33",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 295
   },
   "web/p/33/connectors.parquet": {
@@ -114108,6 +114495,12 @@
      "sum": 20.66,
      "sumsq": 1.5094
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "89ae351fb0ea0449",
+     "n_null": 0,
+     "n_unique": 261
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -114249,6 +114642,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -114269,7 +114663,7 @@
     "verified_official"
    ],
    "key_hash": "cfee4c4705dfd7e2",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 360
   },
   "web/p/37/connectors.parquet": {
@@ -115401,6 +115795,12 @@
      "sum": 13.11,
      "sumsq": 1.2665
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "5a0eca0b60c2c4a9",
+     "n_null": 0,
+     "n_unique": 236
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -115542,6 +115942,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -115562,7 +115963,7 @@
     "verified_official"
    ],
    "key_hash": "5c09cbd3d0b010c9",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 274
   },
   "web/p/38/connectors.parquet": {
@@ -116694,6 +117095,12 @@
      "sum": 7.62,
      "sumsq": 1.4006
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "7bdcfac01f30194c",
+     "n_null": 0,
+     "n_unique": 177
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -116835,6 +117242,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -116855,7 +117263,7 @@
     "verified_official"
    ],
    "key_hash": "90509040bed9d679",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 201
   },
   "web/p/40/connectors.parquet": {
@@ -117987,6 +118395,12 @@
      "sum": 5.92,
      "sumsq": 0.317
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "2d4b251ef08c9eb4",
+     "n_null": 0,
+     "n_unique": 115
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "1f419139f10195a9",
@@ -118123,6 +118537,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -118143,7 +118558,7 @@
     "verified_official"
    ],
    "key_hash": "6863347dc8944f18",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 131
   },
   "web/p/42/connectors.parquet": {
@@ -119275,6 +119690,12 @@
      "sum": 9.61,
      "sumsq": 0.8885
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "4e97815623dc416b",
+     "n_null": 0,
+     "n_unique": 110
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -119416,6 +119837,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -119436,7 +119858,7 @@
     "verified_official"
    ],
    "key_hash": "b7d3cdcd55fd9d72",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 131
   },
   "web/p/44/connectors.parquet": {
@@ -120568,6 +120990,12 @@
      "sum": 9.25,
      "sumsq": 2.0655
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "7e4af5aec000ab00",
+     "n_null": 0,
+     "n_unique": 133
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -120709,6 +121137,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -120729,7 +121158,7 @@
     "verified_official"
    ],
    "key_hash": "10cdcc65d5d1a0fd",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 155
   },
   "web/p/46/connectors.parquet": {
@@ -121861,6 +122290,12 @@
      "sum": 3.8,
      "sumsq": 4.753
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "ad9c331b55b27a2d",
+     "n_null": 0,
+     "n_unique": 61
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "1f419139f10195a9",
@@ -121997,6 +122432,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -122017,7 +122453,7 @@
     "verified_official"
    ],
    "key_hash": "cee0c273f0f16945",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 67
   },
   "web/p/48/connectors.parquet": {
@@ -123149,6 +123585,12 @@
      "sum": 14.43,
      "sumsq": 1.4087
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "846e5cec8bbe6843",
+     "n_null": 0,
+     "n_unique": 160
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -123290,6 +123732,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -123310,7 +123753,7 @@
     "verified_official"
    ],
    "key_hash": "e8a4c33f6bce91b0",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 194
   },
   "web/p/51/connectors.parquet": {
@@ -124442,6 +124885,12 @@
      "sum": 4.43,
      "sumsq": 0.9935
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "76056968fc3fbe3d",
+     "n_null": 0,
+     "n_unique": 79
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -124578,6 +125027,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -124598,7 +125048,7 @@
     "verified_official"
    ],
    "key_hash": "e17af716b1b8c9f7",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 86
   },
   "web/p/52/connectors.parquet": {
@@ -125730,6 +126180,12 @@
      "sum": 16.9,
      "sumsq": 1.731
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "a73172e662e0c6a7",
+     "n_null": 0,
+     "n_unique": 148
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -125871,6 +126327,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -125891,7 +126348,7 @@
     "verified_official"
    ],
    "key_hash": "573e17c48869a61a",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 174
   },
   "web/p/56/connectors.parquet": {
@@ -127023,6 +127480,12 @@
      "sum": 4.95,
      "sumsq": 0.2353
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "b69572f7235e1dee",
+     "n_null": 0,
+     "n_unique": 92
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -127164,6 +127627,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -127184,7 +127648,7 @@
     "verified_official"
    ],
    "key_hash": "46523c190c12eb43",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 111
   },
   "web/p/66/connectors.parquet": {
@@ -128316,6 +128780,12 @@
      "sum": 21.0,
      "sumsq": 2.1036
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "dda3cfbfd60f641d",
+     "n_null": 0,
+     "n_unique": 191
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -128457,6 +128927,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -128477,7 +128948,7 @@
     "verified_official"
    ],
    "key_hash": "7125483b4b67e95b",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 247
   },
   "web/p/68/connectors.parquet": {
@@ -129609,6 +130080,12 @@
      "sum": 19.52,
      "sumsq": 1.7506
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "5b926417be033a7b",
+     "n_null": 0,
+     "n_unique": 236
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -129750,6 +130227,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -129770,7 +130248,7 @@
     "verified_official"
    ],
    "key_hash": "82dbe22e107e9d6e",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 263
   },
   "web/p/75/connectors.parquet": {
@@ -130902,6 +131380,12 @@
      "sum": 47.28,
      "sumsq": 4.5438
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "08cbfb6f0cdec7b0",
+     "n_null": 0,
+     "n_unique": 362
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -131043,6 +131527,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -131063,7 +131548,7 @@
     "verified_official"
    ],
    "key_hash": "e3fff3cca069d03a",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 518
   },
   "web/p/79/connectors.parquet": {
@@ -132195,6 +132680,12 @@
      "sum": 81.74,
      "sumsq": 7.8274
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "aa2337aa1275ea10",
+     "n_null": 0,
+     "n_unique": 710
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -132336,6 +132827,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -132356,7 +132848,7 @@
     "verified_official"
    ],
    "key_hash": "c9165832f7ea44d2",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 1017
   },
   "web/p/80/connectors.parquet": {
@@ -133488,6 +133980,12 @@
      "sum": 13.59,
      "sumsq": 1.8347
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "a94b3aa30701f461",
+     "n_null": 0,
+     "n_unique": 238
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -133629,6 +134127,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -133649,7 +134148,7 @@
     "verified_official"
    ],
    "key_hash": "1fe45ba0e9e4409d",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 264
   },
   "web/p/82/connectors.parquet": {
@@ -134781,6 +135280,12 @@
      "sum": 15.32,
      "sumsq": 1.6476
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "a2a92f3e006f1247",
+     "n_null": 0,
+     "n_unique": 180
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -134922,6 +135427,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -134942,7 +135448,7 @@
     "verified_official"
    ],
    "key_hash": "d4463e6c28aa2baa",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 202
   },
   "web/p/86/connectors.parquet": {
@@ -136074,6 +136580,12 @@
      "sum": 7.94,
      "sumsq": 0.7242
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "43e4c719420f4ad9",
+     "n_null": 0,
+     "n_unique": 171
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -136215,6 +136727,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -136235,7 +136748,7 @@
     "verified_official"
    ],
    "key_hash": "da4a429e5f2a46ea",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 196
   },
   "web/p/91/connectors.parquet": {
@@ -137367,6 +137880,12 @@
      "sum": 21.56,
      "sumsq": 2.6174
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "341f7fc7fd2098d4",
+     "n_null": 0,
+     "n_unique": 167
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -137508,6 +138027,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -137528,7 +138048,7 @@
     "verified_official"
    ],
    "key_hash": "de0528dd046f7ae5",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 208
   },
   "web/p/92/connectors.parquet": {
@@ -138660,6 +139180,12 @@
      "sum": 12.94,
      "sumsq": 1.4706
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "5d10aa86352c817f",
+     "n_null": 0,
+     "n_unique": 126
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -138801,6 +139327,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -138821,7 +139348,7 @@
     "verified_official"
    ],
    "key_hash": "38ef001f8c200ee4",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 153
   },
   "web/p/96/connectors.parquet": {
@@ -139953,6 +140480,12 @@
      "sum": 7.69,
      "sumsq": 0.8813
     },
+    "h3_r8": {
+     "dtype": "cat",
+     "hash": "8537ef5c1e3e2bb4",
+     "n_null": 0,
+     "n_unique": 69
+    },
     "has_timeseries": {
      "dtype": "cat",
      "hash": "56817db82608c1af",
@@ -140094,6 +140627,7 @@
     "commune_name",
     "current_type",
     "freshness",
+    "h3_r8",
     "has_timeseries",
     "lat",
     "lng",
@@ -140114,7 +140648,7 @@
     "verified_official"
    ],
    "key_hash": "8e44d386c101b33c",
-   "n_cols": 25,
+   "n_cols": 26,
    "n_rows": 81
   },
   "web/roads.parquet": {
@@ -140131,23 +140665,23 @@
     },
     "dist_station_m": {
      "dtype": "num",
-     "max": 21150.0,
-     "min": 1.0,
-     "n_finite": 160427,
-     "n_null": 396,
-     "p50": 1606.0,
-     "sum": 320421266.0,
-     "sumsq": 1037470071760.0
+     "max": 21148.9609375,
+     "min": 0.665219783783,
+     "n_finite": 115709,
+     "n_null": 485,
+     "p50": 1489.9440918,
+     "sum": 209678944.796,
+     "sumsq": 579645224761.0
     },
     "osm_id": {
      "dtype": "num",
      "max": 1540901001.0,
      "min": 9656653.0,
-     "n_finite": 160823,
+     "n_finite": 116194,
      "n_null": 0,
-     "p50": 936335890.0,
-     "sum": 146171142015000.0,
-     "sumsq": 1.44398623632e+23
+     "p50": 934447866.5,
+     "sum": 103875829378000.0,
+     "sumsq": 1.01968830452e+23
     },
     "road_class": {
      "dtype": "cat",
@@ -140164,7 +140698,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 160823
+   "n_rows": 116194
   },
   "web/station_occupancy.parquet": {
    "col": {
@@ -140258,6 +140792,12 @@
      "sum": 11165.0,
      "sumsq": 217319.0
     },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "0661319aac4ce12d",
+     "n_null": 0,
+     "n_unique": 1
+    },
     "saturation_frac": {
      "dtype": "num",
      "max": 0.768671679198,
@@ -140328,7 +140868,7 @@
     },
     "util_pctl_peer": {
      "dtype": "cat",
-     "hash": "105cb23bd7661d9a",
+     "hash": "424f2e917be9a5e3",
      "n_null": 27,
      "n_unique": 3
     },
@@ -140373,6 +140913,7 @@
     "occ_status",
     "peak_dow",
     "peak_hour",
+    "province_code",
     "saturation_frac",
     "shape_class",
     "snapshot_id",
@@ -140388,7 +140929,7 @@
     "window_start_utc"
    ],
    "key_hash": "c8044e78ce6c2144",
-   "n_cols": 24,
+   "n_cols": 25,
    "n_rows": 703
   },
   "web/station_occupancy_profile_168h.parquet": {
@@ -140443,6 +140984,12 @@
      "sum": 309009.272774,
      "sumsq": 3834712.574
     },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "0661319aac4ce12d",
+     "n_null": 0,
+     "n_unique": 1
+    },
     "station_code": {
      "dtype": "cat",
      "hash": "c8044e78ce6c2144",
@@ -140456,9 +141003,10 @@
     "n_obs",
     "observed_h",
     "occ",
+    "province_code",
     "station_code"
    ],
-   "n_cols": 6,
+   "n_cols": 7,
    "n_rows": 116785
   },
   "web/stations.parquet": {
@@ -140480,6 +141028,12 @@
      "hash": "35d9b396599ca0ee",
      "n_null": 229,
      "n_unique": 118
+    },
+    "commune_kind": {
+     "dtype": "cat",
+     "hash": "970d0dd0e14263d1",
+     "n_null": 229,
+     "n_unique": 2
     },
     "commune_name": {
      "dtype": "cat",
@@ -140599,9 +141153,15 @@
      "sum": 292391.3,
      "sumsq": 368377690.61
     },
+    "province_code": {
+     "dtype": "cat",
+     "hash": "0661319aac4ce12d",
+     "n_null": 0,
+     "n_unique": 1
+    },
     "scope": {
      "dtype": "cat",
-     "hash": "ee4c757aff0c9a28",
+     "hash": "d7e9a90819a59b39",
      "n_null": 0,
      "n_unique": 2
     },
@@ -140640,6 +141200,7 @@
     "access",
     "address",
     "commune_code",
+    "commune_kind",
     "commune_name",
     "current_type",
     "freshness",
@@ -140655,6 +141216,7 @@
     "port_config_source",
     "power_kw_max_port",
     "power_kw_site",
+    "province_code",
     "scope",
     "station_code",
     "station_id",
@@ -140663,7 +141225,7 @@
     "verified_official"
    ],
    "key_hash": "91b526ef8a073e95",
-   "n_cols": 24,
+   "n_cols": 26,
    "n_rows": 939
   },
   "web/vn/grid_h3_r6.parquet": {

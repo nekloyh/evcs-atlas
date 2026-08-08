@@ -15,7 +15,6 @@ Ghi: data/qa/critique/a03.json
 from __future__ import annotations
 
 import numpy as np
-import pandas as pd
 import rasterio
 import rasterio.features
 
@@ -29,7 +28,7 @@ def main() -> None:
     import sys
 
     sys.path.insert(0, str(ROOT / "src"))
-    from hanoi import grid as gridmod
+    from evcs.core import grid as gridmod
 
     g = grid().set_index("h3_r8")
     cells = list(g.index)

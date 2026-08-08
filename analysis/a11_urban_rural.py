@@ -6,7 +6,6 @@ chứa trạm: nhãn "rural" ở ô > 5.000 người/km² là mâu thuẫn.
 
 from __future__ import annotations
 
-import numpy as np
 
 from _common import emit, grid, occupancy, stations
 

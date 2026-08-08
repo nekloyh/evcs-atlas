@@ -34,7 +34,7 @@ from shapely.geometry import LineString, Point
 from shapely.prepared import prep
 from shapely.strtree import STRtree
 
-from evcs.core import grid as cgrid
+from evcs.core import geo, grid as cgrid
 from evcs.core.grid import RES, cell_polygon
 from evcs.core.osm import POI_CLASSES, ROAD_CLASS
 
@@ -166,16 +166,10 @@ def run(province_code: str) -> None:
     pb = prep(b)
     clipped = [q if pb.contains(q) else q.intersection(b) for q in polys]
 
+    # Hệ số mét/độ CHUNG cho cả tỉnh, không tính lại theo từng đoạn: chiều dài phải cộng
+    # lại được, và một hệ số chạy theo vị trí làm tổng phụ thuộc thứ tự cộng.
     def _len_m(geom) -> float:
-        if geom.is_empty:
-            return 0.0
-        total = 0.0
-        for part in geom.geoms if hasattr(geom, "geoms") else [geom]:
-            c = np.asarray(part.coords)
-            if len(c) < 2:
-                continue
-            total += float(np.hypot(np.diff(c[:, 0]) * m_lon, np.diff(c[:, 1]) * m_lat).sum())
-        return total
+        return geo.length_m(geom, m_lat, m_lon)
 
     for rc, flat in zip(rg.road_class, rg.coords):
         arr = np.asarray(flat, dtype=np.float64)

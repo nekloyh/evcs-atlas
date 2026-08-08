@@ -35,7 +35,7 @@ from scipy.spatial import cKDTree
 from _common import ROOT, emit
 
 sys.path.insert(0, str(ROOT / "src"))
-from hanoi import roadnet  # noqa: E402
+from evcs.core import roadgraph as roadnet  # noqa: E402
 
 BAN_KINH = (300, 500, 1000, 1500)
 LIMIT_M = 1_600.0

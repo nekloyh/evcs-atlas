@@ -68,3 +68,27 @@ def as_geojson(geom) -> dict:
     from shapely.geometry import mapping
 
     return mapping(geom)
+
+
+def length_m(geom, m_lat: float = M_PER_DEG_LAT, m_lon: float | None = None) -> float:
+    """Chiều dài hình học trong hệ ĐỘ, quy đổi ra mét.
+
+    ``m_lon`` mặc định tính theo vĩ độ TÂM của chính hình. Truyền tường minh khi nhiều
+    hình phải dùng CHUNG một hệ số — ví dụ mọi đoạn đường trong một tỉnh, để chiều dài
+    cộng lại được mà không lệch theo vị trí từng đoạn.
+
+    Xử lý cả Multi*: ``geom.geoms`` nếu có, còn không thì chính nó.
+    """
+    import numpy as np
+
+    if geom.is_empty:
+        return 0.0
+    if m_lon is None:
+        m_lon = m_per_deg_lon(geom.centroid.y)
+    total = 0.0
+    for part in (geom.geoms if hasattr(geom, "geoms") else [geom]):
+        c = np.asarray(part.coords)
+        if len(c) < 2:
+            continue
+        total += float(np.hypot(np.diff(c[:, 0]) * m_lon, np.diff(c[:, 1]) * m_lat).sum())
+    return total

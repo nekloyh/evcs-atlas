@@ -618,12 +618,42 @@ def _province_index() -> dict:
     }
 
 
+def _export_root_bundle(code: str) -> list[str]:
+    """Nhân bản bộ của một tỉnh ra đường dẫn KHÔNG TIỀN TỐ.
+
+    Vì sao tồn tại: `/` (không có khoá `tinh`) là URL đã được chia sẻ, đã chụp ảnh vào tài
+    liệu, đã bookmark. Giữ nó chạy được là **tách "đổi URL" khỏi "xoá mã"** — hai việc có
+    thể sai độc lập, nên chúng phải kiểm được độc lập.
+
+    Nhân bản chứ không dựng lại: hai bộ phải giống nhau tới từng byte, và cách chắc chắn
+    nhất để hai thứ giống nhau là chỉ dựng MỘT.
+
+    Không đụng `provinces.geojson` / `provinces.parquet` ở gốc — chúng là chỉ mục TOÀN QUỐC,
+    không thuộc tỉnh nào, và tên file không trùng nên phép chép không chạm tới.
+    """
+    src = WEB_PROV / code
+    chep = []
+    for f in sorted(src.iterdir()):
+        if f.is_file():
+            shutil.copy2(f, WEB_DATA / f.name)
+            chep.append(f.name)
+    return chep
+
+
+# Tỉnh được nhân bản ra đường dẫn không tiền tố. Một hằng, một chỗ.
+ROOT_BUNDLE_PROVINCE = "01"
+
+
 def run() -> None:
     WEB_PROV.mkdir(parents=True, exist_ok=True)
     r = qa.Report("n11_web_export", target=str(WEB_DATA.relative_to(paths.ROOT)))
     done = [c for c in admin.province_codes() if (paths.PROV / c / "grid_cell.parquet").exists()]
     out = [export_province(c) for c in done]
     index = _province_index()
+
+    root_files: list[str] = []
+    if ROOT_BUNDLE_PROVINCE in done:
+        root_files = _export_root_bundle(ROOT_BUNDLE_PROVINCE)
 
     per = {o["province_code"]: o["bytes_total"] for o in out}
     tot = sum(per.values())
@@ -636,6 +666,14 @@ def run() -> None:
     # dùng trả giá TRƯỚC KHI thấy gì; "một tỉnh" là thứ họ trả khi chọn.
     r.stat(
         n_provinces_exported=len(done),
+        root_bundle={
+            "province_code": ROOT_BUNDLE_PROVINCE,
+            "reason": (
+                "`/` không có khoá `tinh` là URL đã chia sẻ và đã chụp ảnh vào tài liệu. "
+                "Nhân bản (không dựng lại) để hai bộ giống nhau tới từng byte."
+            ),
+            "files": root_files,
+        },
         ngan_sach_tai_lan_dau_bytes=first_load,
         ngan_sach_tai_lan_dau_MB=round(first_load / 1e6, 2),
         ngan_sach_moi_tinh_MB={

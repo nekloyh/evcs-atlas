@@ -37,12 +37,14 @@ NOTEBOOKS = ROOT / "notebooks"
 # Hệ quả đáng ghi: mũi phản biện **A2** không chạy lại được nữa. Kết luận của nó còn trong
 # `CRITIQUE.md`, nhưng nó đã thành một khẳng định thay vì một phép đo tái lập được. Đây là
 # NỢ ĐÃ GHI NHẬN, không phải một chỗ giấu rác.
-DA_HONG_TU_TRUOC = {
-    "a02_speed_sensitivity.py": (
-        "import DEFAULT_KPH/LINK_KPH — đã bị bỏ cùng trường thời-gian-lái (DECISIONS §6). "
-        "Mũi phản biện A2 vì thế không tái lập được."
-    ),
-}
+# Rỗng — và đó là trạng thái ĐÚNG, không phải trạng thái chưa dùng tới.
+#
+# Mục duy nhất từng nằm ở đây là `a02_speed_sensitivity.py`: nó import `DEFAULT_KPH` từ
+# `hanoi.s03_osm_extract`, nơi hai tên ấy chỉ còn trong một COMMENT. Hoá ra bản sao có
+# thật vẫn sống ở `analysis/_graph.py` — kèm đúng lời giải thích vì sao nó ở đó và không
+# được import vào bất cứ thứ gì sinh dữ liệu. Nên đó không phải một khái niệm đã mất, chỉ
+# là một import trỏ nhầm chỗ, và mũi phản biện A2 TÁI LẬP ĐƯỢC.
+DA_HONG_TU_TRUOC: dict[str, str] = {}
 
 
 # Gói CỦA DỰ ÁN. Thiếu một trong số này là hồi quy; thiếu gói bên ngoài thì không.
