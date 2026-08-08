@@ -159,25 +159,54 @@ def main(argv: list[str] | None = None) -> int:
     if a.chi:
         keys = [k for k in keys if a.chi in k]
 
-    diffs: list[str] = []
+    # Ba loại chênh lệch, và chúng KHÔNG cùng mức nghiêm trọng — gộp chúng vào một danh
+    # sách là chỗ dễ mất cảnh giác nhất của một cổng chặn:
+    #
+    #   MỚI      thêm một bảng ⇒ hợp lệ khi đang thêm một lớp. `--ghi` là câu trả lời đúng.
+    #   BIẾN MẤT bảng cũ không còn ⇒ có thể hợp lệ (bỏ một lớp) nhưng phải CỐ Ý.
+    #   ĐỔI SỐ   cùng một bảng, khác giá trị ⇒ KHÔNG BAO GIỜ tự động hợp lệ.
+    #
+    # Nếu chỉ có MỚI thì lệnh vẫn DỪNG, nhưng nó nói rõ rằng `--ghi` là bước tiếp theo đúng.
+    # Nếu có ĐỔI SỐ thì `--ghi` là bước tiếp theo SAI, và thông báo phải nói ra điều đó.
+    moi: list[str] = []
+    mat: list[str] = []
+    doi: list[str] = []
     for k in keys:
         if k not in doc:
-            diffs.append(f"{k}: bảng BIẾN MẤT")
+            mat.append(k)
         elif k not in base:
-            diffs.append(f"{k}: bảng MỚI (không có trong baseline)")
+            moi.append(k)
         else:
-            diffs.extend(compare(base[k], doc[k], k))
+            doi.extend(compare(base[k], doc[k], k))
 
-    if not diffs:
+    if not (moi or mat or doi):
         print(f"✓ {len(keys)} bảng khớp baseline — không một con số nào đổi")
         return 0
 
-    print(f"\n✗ {len(diffs)} chênh lệch so với baseline:\n", file=sys.stderr)
-    for d in diffs[:200]:
-        print(f"   {d}", file=sys.stderr)
-    if len(diffs) > 200:
-        print(f"   … và {len(diffs) - 200} dòng nữa", file=sys.stderr)
+    if doi:
+        print(f"\n✗ {len(doi)} GIÁ TRỊ ĐỔI trên bảng đã có — đây KHÔNG phải thay đổi tự động hợp lệ.", file=sys.stderr)
+        print("  Refactor đúng thì golden không đổi. Nếu số PHẢI đổi thì đó là một quyết", file=sys.stderr)
+        print("  định có người ký: sửa mã cho đúng, hoặc chạy --ghi kèm commit nói vì sao.\n", file=sys.stderr)
+        for d in doi[:200]:
+            print(f"   {d}", file=sys.stderr)
+        if len(doi) > 200:
+            print(f"   … và {len(doi) - 200} dòng nữa", file=sys.stderr)
+
+    if mat:
+        print(f"\n✗ {len(mat)} bảng BIẾN MẤT:", file=sys.stderr)
+        for k in mat[:40]:
+            print(f"   {k}", file=sys.stderr)
+
+    if moi:
+        muc = "✓" if not (doi or mat) else "·"
+        print(f"\n{muc} {len(moi)} bảng MỚI (chưa có trong baseline):", file=sys.stderr)
+        for k in moi[:40]:
+            print(f"   {k}", file=sys.stderr)
+        if not (doi or mat):
+            print("\n  Chỉ có bảng mới, không giá trị nào đổi — thêm một lớp là hợp lệ.", file=sys.stderr)
+            print("  Chạy `make golden-ghi` để nhận chúng vào baseline.", file=sys.stderr)
     return 1
+
 
 
 if __name__ == "__main__":
