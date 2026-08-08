@@ -5,7 +5,15 @@ import type { CellValue } from "../viz/palette";
  * Số cho panel Ô. Khác `formatBreak` (nhãn legend, ưu tiên ngắn): ở đây ưu tiên ĐỌC ĐÚNG,
  * nên giữ nhiều chữ số có nghĩa hơn và không rút gọn thành "ng"/"tr".
  */
-export function formatNumber(v: number): string {
+export function formatNumber(v: number | null | undefined): string {
+  // Thiếu phải NHÌN THẤY được, không được thành sự cố — cùng luật với ràng buộc 1 của
+  // giao diện, chỉ khác là áp cho tầng hiển thị số.
+  //
+  // Đây từng là một crash thật: `manifest.roads` của store toàn quốc có 4 khoá, còn
+  // `story/bodies.tsx` đọc `bridge_ways_shipped` và `ways_unreachable_null_dist` — hai khoá
+  // chỉ bộ Hà Nội có. `undefined.toLocaleString()` ném TypeError và cảnh C trắng màn hình
+  // ở `#tinh=01`, nơi `story_enabled` đang BẬT.
+  if (v == null || !Number.isFinite(v)) return "—";
   const a = Math.abs(v);
   if (a === 0) return "0";
   if (Number.isInteger(v) && a < 1e9) return v.toLocaleString("vi-VN");

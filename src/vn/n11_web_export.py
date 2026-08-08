@@ -374,6 +374,10 @@ def export_province(code: str) -> dict:
                 }
             )
 
+    # Cột THẬT SỰ có trong hai file vừa ghi — đọc schema, không suy từ trí nhớ.
+    road_cols = sorted(pq.read_schema(d / "roads.parquet").names)
+    station_cols = sorted(pq.read_schema(d / "stations.parquet").names)
+
     manifest = {
         "exported_utc": datetime.now(UTC).isoformat(timespec="seconds"),
         "vintage": admin.VINTAGE,
@@ -396,6 +400,17 @@ def export_province(code: str) -> dict:
         "available_columns": sorted(grid.columns),
         # Thuộc tính có mặt trong `commune.geojson`. Trường của XÃ đọc từ đó, không từ lưới.
         "available_commune_columns": commune_keys,
+        # Giao diện có BỐN đơn vị đọc, và cho tới lượt này chỉ hai đơn vị đầu được khai.
+        #
+        # Hệ quả là một lỗi ĐANG SỐNG, không phải một khoảng trống lý thuyết: `fieldAvailable`
+        # trả `true` cho mọi trường không phải của Ô, nên trường `road:dist_station_m` luôn
+        # hiện trong rail — kể cả ở 34 tỉnh mà `roads.parquet` KHÔNG có cột đó. Chọn nó là
+        # `fetchRoads` chạy `SELECT "dist_station_m"` trên một bảng không có cột ấy, DuckDB
+        # ném Binder Error, và màn hình trắng.
+        #
+        # ĐO, không gõ tay: đọc thẳng schema của chính hai file vừa ghi.
+        "available_road_columns": road_cols,
+        "available_station_columns": station_cols,
         # ĐO, không gõ tay: cột nào bộ Hà Nội có mà tỉnh này không có. Danh sách gõ tay sẽ
         # nói dối ngay lần đầu một lớp được dựng thêm — và nó đã suýt nói dối ở lượt này.
         "missing_layers": {

@@ -28,14 +28,14 @@
 
 import type { Manifest } from "./manifest";
 import { setUnavailableOverlays, unavailableOverlayPairs } from "./overlays";
-import { setAvailableColumns, setUnusableLayers } from "../fields";
+import { setAvailableColumns, setUnusableLayers, type AvailableByUnit } from "../fields";
 import { setInitialViewFromBbox } from "../map/positron";
 import { setStoryEnabled } from "../story/scenes";
 
 /** Những gì một bộ dữ liệu nói về chính nó. Tách khỏi `Manifest` để test không cần dựng cả. */
 export interface DatasetFacts {
-  columns?: string[];
-  communeColumns?: string[];
+  /** Cột có thật, theo TỪNG đơn vị đọc. Khoá vắng = không lọc đơn vị đó. */
+  columns: AvailableByUnit;
   unusableLayers?: string[];
   storyEnabled: boolean;
   overlayPairs: [string, string][];
@@ -45,8 +45,7 @@ export interface DatasetFacts {
 
 /** Trạng thái khi CHƯA BIẾT gì — không lọc, không tắt, không đổi khung nhìn. */
 export const UNKNOWN: DatasetFacts = {
-  columns: undefined,
-  communeColumns: undefined,
+  columns: {},
   unusableLayers: undefined,
   storyEnabled: true,
   overlayPairs: [],
@@ -56,8 +55,14 @@ export const UNKNOWN: DatasetFacts = {
 /** Đọc manifest thành các sự thật. Hàm THUẦN — không đụng biến toàn cục nào. */
 export function factsFrom(m: Manifest): DatasetFacts {
   return {
-    columns: m.available_columns,
-    communeColumns: m.available_commune_columns,
+    columns: {
+      cell: m.available_columns,
+      commune: m.available_commune_columns,
+      // Hai đơn vị này chỉ có ở manifest của store toàn quốc. Bộ Hà Nội gốc không khai
+      // chúng, và vắng khoá = KHÔNG LỌC — đúng luật "chưa biết ≠ biết là thiếu".
+      road: m.available_road_columns,
+      station: m.available_station_columns,
+    },
     unusableLayers: m.unusable_layers?.map((l) => l.layer),
     // `!== false` chứ không phải `=== true`: manifest cũ không có khoá này, và vắng khoá
     // nghĩa là "chưa ai tắt", không phải "đã tắt".
@@ -74,7 +79,7 @@ export function factsFrom(m: Manifest): DatasetFacts {
  * PHẢI chạy xong trước `import("./App")`. Đó là toàn bộ lý do hàm này tồn tại.
  */
 export function apply(f: DatasetFacts): void {
-  setAvailableColumns(f.columns, f.communeColumns);
+  setAvailableColumns(f.columns);
   setUnusableLayers(f.unusableLayers);
   setStoryEnabled(f.storyEnabled);
   setUnavailableOverlays(f.overlayPairs);

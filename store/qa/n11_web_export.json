@@ -59,7 +59,7 @@
       "station_occupancy.parquet": 0.074,
       "admin_boundary.geojson": 0.036,
       "connectors.parquet": 0.036,
-      "manifest.json": 0.013
+      "manifest.json": 0.014
     }
   },
   "checks": [

@@ -184,6 +184,9 @@ export interface Manifest {
   available_columns?: string[];
   /** Thuộc tính có mặt trong `commune.geojson` — trường của XÃ đọc từ đó, không từ lưới. */
   available_commune_columns?: string[];
+  /** Cột của `roads.parquet` / `stations.parquet` — chỉ store toàn quốc khai. */
+  available_road_columns?: string[];
+  available_station_columns?: string[];
   /** Cột vắng và VÌ SAO — "chưa tính" khác "dữ liệu hỏng", và người đọc phải phân biệt được. */
   missing_layers?: { reason: string; columns: string[] };
   /** Chế độ CÂU CHUYỆN chỉ mở ở tỉnh mà cảnh được viết cho (hiện tại: Hà Nội). */

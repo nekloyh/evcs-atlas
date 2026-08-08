@@ -26,6 +26,7 @@ import {
   STATION_OCC_FIELD,
   fieldAvailable,
   fieldsOfUnit,
+  columnAvailable,
   gridColumnAvailable,
   layerUsable,
   setAvailableColumns,
@@ -36,7 +37,7 @@ import {
 
 /** Trả về trạng thái "bộ Hà Nội đầy đủ" — không manifest, không lọc gì. */
 function reset() {
-  setAvailableColumns(undefined, undefined);
+  setAvailableColumns({});
   setUnusableLayers(undefined);
 }
 afterEach(reset);
@@ -57,19 +58,19 @@ test("không có available_columns thì KHÔNG lọc gì — bộ Hà Nội ch�
 
 // --- cột vắng ------------------------------------------------------------
 test("cột vắng thì trường của Ô bị ẩn, KHÔNG nổ", () => {
-  setAvailableColumns(["h3_r8", "n_stations"]);
+  setAvailableColumns({ cell: ["h3_r8", "n_stations"] });
   assert.ok(fieldAvailable(f("n_stations")));
   assert.ok(!fieldAvailable(f("population")));
 });
 
 test("gridColumnAvailable trả lời theo TÊN CỘT, không theo trường", () => {
-  setAvailableColumns(["h3_r8", "population"]);
+  setAvailableColumns({ cell: ["h3_r8", "population"] });
   assert.ok(gridColumnAvailable("population"));
   assert.ok(!gridColumnAvailable("dist_station_network_m"));
 });
 
 test("trường vắng ĐẾM ĐƯỢC — rail phải in ra được, không im lặng", () => {
-  setAvailableColumns(["h3_r8", "n_stations"]);
+  setAvailableColumns({ cell: ["h3_r8", "n_stations"] });
   const vang = unavailableFields();
   assert.ok(vang.length > 0);
   assert.ok(vang.some((x) => x.id === "population"));
@@ -77,7 +78,7 @@ test("trường vắng ĐẾM ĐƯỢC — rail phải in ra được, không im
 });
 
 test("fieldsOfUnit đã lọc sẵn — đây là cửa duy nhất rail đi qua", () => {
-  setAvailableColumns(["h3_r8", "n_stations"]);
+  setAvailableColumns({ cell: ["h3_r8", "n_stations"] });
   const ids = fieldsOfUnit("cell").map((x) => x.id);
   assert.ok(ids.includes("n_stations"));
   assert.ok(!ids.includes("population"));
@@ -85,13 +86,13 @@ test("fieldsOfUnit đã lọc sẵn — đây là cửa duy nhất rail đi qua"
 
 // --- đơn vị đọc khác không bị lọc bởi cột LƯỚI ---------------------------
 test("trường của XÃ đọc từ file riêng, cột lưới không nói gì về nó", () => {
-  setAvailableColumns(["h3_r8"], ["population", "n_stations"]);
+  setAvailableColumns({ cell: ["h3_r8"], commune: ["population", "n_stations"] });
   assert.ok(fieldAvailable(f(`${COMMUNE_PREFIX}population`)));
   assert.ok(!fieldAvailable(f(`${COMMUNE_PREFIX}dist_station_m_pop_weighted`)));
 });
 
 test("trường của ĐƯỜNG và TRẠM không bị lọc theo cột lưới", () => {
-  setAvailableColumns(["h3_r8"]);
+  setAvailableColumns({ cell: ["h3_r8"] });
   for (const x of FIELDS.filter((y) => y.readAs === "road" || y.readAs === "station")) {
     assert.ok(fieldAvailable(x), x.id);
   }
@@ -99,7 +100,7 @@ test("trường của ĐƯỜNG và TRẠM không bị lọc theo cột lưới"
 
 // --- bậc hỏng thứ ba: lớp có cột nhưng đọc không được --------------------
 test("lớp không đọc được thì TẮT cả trường lẫn scrubber", () => {
-  setAvailableColumns(undefined);
+  setAvailableColumns({});
   setUnusableLayers(["occupancy"]);
   assert.ok(!layerUsable("occupancy"));
   assert.ok(!fieldAvailable(f(STATION_OCC_FIELD)));
@@ -114,7 +115,7 @@ test("lớp không đọc được KHÔNG kéo theo trường của lớp khác"
 
 test("hai cơ chế độc lập: cột có mặt vẫn bị tắt nếu lớp không đọc được", () => {
   // Đây chính là bậc hỏng thứ ba — cột `util_cell` CÓ, nhưng gần như toàn null.
-  setAvailableColumns(["h3_r8", "util_cell"]);
+  setAvailableColumns({ cell: ["h3_r8", "util_cell"] });
   assert.ok(gridColumnAvailable("util_cell"), "cột vẫn có mặt");
   setUnusableLayers(["occupancy"]);
   assert.ok(!fieldAvailable(f("util_cell")), "nhưng trường phải bị tắt");
@@ -123,12 +124,12 @@ test("hai cơ chế độc lập: cột có mặt vẫn bị tắt nếu lớp k
 // --- reset ---------------------------------------------------------------
 test("mảng rỗng ĐỌC NHƯ 'không biết', không phải 'không có cột nào'", () => {
   // Một manifest thiếu khoá không được biến thành màn hình trống hoàn toàn.
-  setAvailableColumns([]);
+  setAvailableColumns({ cell: [] });
   assert.ok(FIELDS.every(fieldAvailable));
 });
 
 test("đặt lại về undefined thì mọi trường hiện lại", () => {
-  setAvailableColumns(["h3_r8"]);
+  setAvailableColumns({ cell: ["h3_r8"] });
   setUnusableLayers(["occupancy"]);
   reset();
   assert.ok(FIELDS.every(fieldAvailable));
@@ -140,6 +141,44 @@ test("manifest thật của một tỉnh cho ra ít nhất một trường tô �
   // Bản đồ không có trường nào tô được là một màn hình trống — dạng hỏng mà cả tầng này
   // sinh ra để chặn. Kiểm bằng đúng danh sách cột mà `n11` phát cho tỉnh Cà Mau.
   const cot = FIELDS.filter((x) => x.readAs === "cell" && !x.expr).map((x) => x.column);
-  setAvailableColumns(cot.slice(0, 3));
+  setAvailableColumns({ cell: cot.slice(0, 3) });
   assert.ok(fieldsOfUnit("cell").length >= 1);
+});
+
+
+// --- bậc hỏng thứ tư: trường của ĐƯỜNG / TRẠM ---------------------------
+//
+// Đây là một lỗi ĐANG SỐNG cho tới lượt sửa này. `fieldAvailable` có nhánh
+// `f.readAs !== "cell" → true`, nên trường `road:dist_station_m` luôn hiện trong rail —
+// kể cả ở 34 tỉnh mà `roads.parquet` KHÔNG có cột đó. Chọn nó là `fetchRoads` chạy
+// `SELECT "dist_station_m"` trên bảng không có cột ấy ⇒ DuckDB ném Binder Error ⇒ màn
+// hình trắng. Và `story_enabled` đang BẬT ở `#tinh=01`, nên đường tới lỗi là mở được.
+test("cột đường vắng thì trường của ĐƯỜNG bị ẩn, không nổ ở tầng SQL", () => {
+  setAvailableColumns({ road: ["osm_id", "road_class", "bridge", "coords"] });
+  const roads = FIELDS.filter((x) => x.readAs === "road");
+  assert.ok(roads.length > 0);
+  assert.ok(!roads.some(fieldAvailable), "dist_station_m không có trong 34 tỉnh");
+});
+
+test("cột đường CÓ thì trường hiện lại — bộ Hà Nội không đổi hành vi", () => {
+  setAvailableColumns({ road: ["osm_id", "road_class", "bridge", "coords", "dist_station_m"] });
+  assert.ok(FIELDS.filter((x) => x.readAs === "road").every(fieldAvailable));
+});
+
+test("bốn đơn vị đọc lọc ĐỘC LẬP nhau", () => {
+  setAvailableColumns({ cell: ["h3_r8"], road: ["osm_id"] });
+  // Khai `cell` và `road` không được đụng tới `commune`/`station`.
+  assert.ok(FIELDS.filter((x) => x.readAs === "commune").every(fieldAvailable));
+  assert.ok(FIELDS.filter((x) => x.readAs === "station").every(fieldAvailable));
+  assert.ok(!FIELDS.filter((x) => x.readAs === "road").some(fieldAvailable));
+});
+
+test("columnAvailable trả lời theo đơn vị, không gộp chung", () => {
+  setAvailableColumns({ cell: ["population"], road: ["osm_id"] });
+  assert.ok(columnAvailable("cell", "population"));
+  assert.ok(!columnAvailable("cell", "osm_id"));
+  assert.ok(columnAvailable("road", "osm_id"));
+  assert.ok(!columnAvailable("road", "dist_station_m"));
+  // Đơn vị chưa khai ⇒ không lọc.
+  assert.ok(columnAvailable("station", "bat_ky"));
 });

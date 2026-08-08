@@ -871,16 +871,32 @@ export const CELL_SPECS_COLUMNS: string[] = withUnit(CELL_SPECS, "cell")
  * đó nổ ở tầng truy vấn — người dùng thấy màn hình trắng chứ không thấy "trường này chưa
  * tính". Đây là cùng một luật với §7a: thiếu phải NHÌN THẤY được, không được thành sự cố.
  */
-let AVAILABLE: Set<string> | null = null;
-/** Thuộc tính có mặt trong `commune.geojson` — trường của XÃ đọc từ đó, không từ lưới. */
-let AVAILABLE_COMMUNE: Set<string> | null = null;
+/**
+ * Cột THẬT SỰ có, theo TỪNG đơn vị đọc. `undefined` = **không lọc gì**.
+ *
+ * Bốn đơn vị, bốn nguồn dữ liệu khác nhau, nên bốn danh sách — cột của lưới không nói gì
+ * về cột của đường. Trước đây chỉ hai đơn vị đầu được khai, và nhánh mặc định là
+ * `f.readAs !== "cell" → true`. Đó là một lỗi ĐANG SỐNG, không phải một khoảng trống lý
+ * thuyết: trường `road:dist_station_m` luôn hiện trong rail, kể cả ở 34 tỉnh mà
+ * `roads.parquet` KHÔNG có cột đó — chọn nó là `SELECT "dist_station_m"` trên bảng không
+ * có cột ấy, DuckDB ném Binder Error, màn hình trắng.
+ *
+ * `undefined` là mặc định có chủ ý: bộ Hà Nội gốc không phát manifest nào khai điều này, và
+ * "chưa biết thiếu gì" KHÔNG được biến thành "biết là thiếu".
+ */
+const AVAILABLE: Partial<Record<ReadingUnit, Set<string>>> = {};
 
-export function setAvailableColumns(
-  cols: string[] | undefined,
-  communeCols?: string[] | undefined,
-): void {
-  AVAILABLE = cols && cols.length ? new Set(cols) : null;
-  AVAILABLE_COMMUNE = communeCols && communeCols.length ? new Set(communeCols) : null;
+/** Danh sách cột theo đơn vị đọc, lấy từ `manifest`. Khoá vắng = không lọc đơn vị đó. */
+export type AvailableByUnit = Partial<Record<ReadingUnit, string[] | undefined>>;
+
+export function setAvailableColumns(by: AvailableByUnit): void {
+  for (const u of ["cell", "commune", "road", "station"] as const) {
+    const v = by[u];
+    // Mảng RỖNG đọc như "không biết", không phải "không có cột nào" — một manifest thiếu
+    // khoá không được biến thành màn hình trống hoàn toàn.
+    if (v && v.length) AVAILABLE[u] = new Set(v);
+    else delete AVAILABLE[u];
+  }
 }
 
 /**
@@ -924,15 +940,13 @@ function inUnusableLayer(id: string): boolean {
 
 /** Trường này dựng được trên dữ liệu đang mở chưa? */
 export function fieldAvailable(f: FieldMeta): boolean {
-  // Trường của XÃ / ĐƯỜNG / TRẠM đọc từ file riêng, không từ lưới — danh sách cột của lưới
-  // không nói gì về chúng, nên không lọc.
   if (inUnusableLayer(f.id)) return false;
-  if (f.readAs === "commune") return AVAILABLE_COMMUNE === null || AVAILABLE_COMMUNE.has(f.column);
-  if (AVAILABLE === null || f.readAs !== "cell") return true;
+  const co = AVAILABLE[f.readAs];
+  if (!co) return true;
   // Trường phái sinh (`expr`) có thể chạm nhiều cột; nó chỉ dựng được khi CÓ ĐỦ. Không có
   // cách nào biết chắc từ đây, nên luật là: cột trần phải có mặt, biểu thức thì bỏ qua nếu
   // cột cùng tên không có. Thà giấu một trường dựng được còn hơn hiện một trường sẽ nổ.
-  return AVAILABLE.has(f.column);
+  return co.has(f.column);
 }
 
 /** Trường của một đơn vị đọc, giữ nguyên thứ tự khai báo, ĐÃ lọc theo cột có mặt. */
@@ -948,12 +962,18 @@ export function fieldsOfUnit(unit: ReadingUnit): FieldMeta[] {
  * theo trường. Hai câu hỏi khác nhau, hai hàm khác nhau.
  */
 export function gridColumnAvailable(column: string): boolean {
-  return AVAILABLE === null || AVAILABLE.has(column);
+  return !AVAILABLE.cell || AVAILABLE.cell.has(column);
+}
+
+/** Một CỘT của một đơn vị đọc bất kỳ có mặt không — dùng ở tầng SQL của đường và trạm. */
+export function columnAvailable(unit: ReadingUnit, column: string): boolean {
+  const co = AVAILABLE[unit];
+  return !co || co.has(column);
 }
 
 /** Trường bị ẩn vì lớp sinh ra nó chưa chạy — rail in danh sách này để "vắng" nhìn thấy được. */
 export function unavailableFields(): FieldMeta[] {
-  return AVAILABLE === null ? [] : FIELDS.filter((f) => !fieldAvailable(f));
+  return Object.keys(AVAILABLE).length === 0 ? [] : FIELDS.filter((f) => !fieldAvailable(f));
 }
 
 /**

@@ -1,6 +1,6 @@
 import { query, registerParquet } from "./duckdb";
 import { dataPath, isProvinceMode } from "./province";
-import { fieldAvailable, gridColumnAvailable } from "../fields";
+import { columnAvailable, fieldAvailable, gridColumnAvailable } from "../fields";
 import { H3_RE, STATION_ID_RE } from "./h3";
 // Tách ra file riêng vì `queries.ts` kéo theo `duckdb.ts` (import `.wasm?url` của Vite) nên
 // logic thuần ở đây KHÔNG test được bằng `node --test` — cùng lý do đã tách `h3.ts` (§12).
@@ -404,8 +404,13 @@ let roadCache: Promise<RoadSeg[]> | null = null;
 export function fetchRoads(): Promise<RoadSeg[]> {
   roadCache ??= (async () => {
     await registerParquet(ROADS);
+    // `dist_station_m` chỉ có ở bộ Hà Nội — store toàn quốc chưa dựng nhãn khoảng cách
+    // theo ĐOẠN đường. Phát `NULL` thay vì tên cột không tồn tại, đúng khuôn `gcol()` ở
+    // trên: DuckDB ném Binder Error ở cột lạ, và lỗi đó nổ ở tầng truy vấn — người dùng
+    // thấy màn hình trắng chứ không thấy "trường này chưa tính".
+    const d = columnAvailable("road", "dist_station_m") ? `"dist_station_m"` : "NULL";
     const t = await query(
-      `SELECT "coords" AS c, "dist_station_m" AS d, "bridge" AS b FROM read_parquet('${ROADS}')`,
+      `SELECT "coords" AS c, ${d} AS d, "bridge" AS b FROM read_parquet('${ROADS}')`,
     );
     const cs = t.getChild("c")!;
     const ds = t.getChild("d")!;

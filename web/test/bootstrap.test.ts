@@ -36,7 +36,7 @@ test("factsFrom là hàm THUẦN — đọc manifest, không ghi gì", () => {
   const truoc = FIELDS.filter(fieldAvailable).length;
   const f = factsFrom(MANIFEST);
   assert.equal(FIELDS.filter(fieldAvailable).length, truoc, "gọi factsFrom đã đổi trạng thái");
-  assert.deepEqual(f.columns, ["h3_r8", "n_stations"]);
+  assert.deepEqual(f.columns.cell, ["h3_r8", "n_stations"]);
   assert.deepEqual(f.unusableLayers, ["occupancy"]);
   assert.equal(f.storyEnabled, false);
   assert.equal(f.title, "EVCS · Tỉnh Cà Mau");
