@@ -1,0 +1,204 @@
+{
+  "code": "A10",
+  "verdict": "CANH_BAO",
+  "cau_hoi": "Hai ngưỡng có 'vai' tự nhiên nào không, hay mọi giá trị đều tuỳ tiện như nhau?",
+  "nguong_hien_hanh": {
+    "built_min": 0.05,
+    "n_buildable": 2961,
+    "ty_trong_tram_giu_lai": 0.9666798889329631,
+    "ty_trong_cong_giu_lai": 0.96217173822426,
+    "ty_trong_dan_giu_lai": 0.9669275533217241
+  },
+  "hinh_dang_ham": {
+    "note": "n_buildable theo built_min từ 0 đến 0,50 bước 0,01",
+    "n_tai_0": 4282,
+    "n_tai_0_05": 2961,
+    "n_tai_0_10": 2362,
+    "n_tai_0_20": 1469,
+    "do_doc_max_tuyet_doi": 610.0,
+    "vi_tri_do_doc_max_built_min": 0.0,
+    "d2_median": 9.0,
+    "d2_max": 373.0,
+    "co_vai_ro_rang": true
+  },
+  "nguong_giu_99pct_tram": {
+    "built_min_lon_nhat_con_giu_99pct_tram": 0.01,
+    "nguong_0_05_giu_duoc": 0.9666798889329631
+  },
+  "quet_water_max": [
+    {
+      "water_max": 0.1,
+      "n_buildable": 2740,
+      "ty_trong_tram_giu_lai": 0.8976596588655296
+    },
+    {
+      "water_max": 0.15,
+      "n_buildable": 2819,
+      "ty_trong_tram_giu_lai": 0.92780642602142
+    },
+    {
+      "water_max": 0.2,
+      "n_buildable": 2857,
+      "ty_trong_tram_giu_lai": 0.946449821499405
+    },
+    {
+      "water_max": 0.25,
+      "n_buildable": 2886,
+      "ty_trong_tram_giu_lai": 0.9516065053550179
+    },
+    {
+      "water_max": 0.3,
+      "n_buildable": 2906,
+      "ty_trong_tram_giu_lai": 0.957159857199524
+    },
+    {
+      "water_max": 0.35,
+      "n_buildable": 2915,
+      "ty_trong_tram_giu_lai": 0.9587465291550972
+    },
+    {
+      "water_max": 0.4,
+      "n_buildable": 2929,
+      "ty_trong_tram_giu_lai": 0.9623165410551369
+    },
+    {
+      "water_max": 0.45,
+      "n_buildable": 2948,
+      "ty_trong_tram_giu_lai": 0.96390321301071
+    },
+    {
+      "water_max": 0.5,
+      "n_buildable": 2961,
+      "ty_trong_tram_giu_lai": 0.9666798889329631
+    },
+    {
+      "water_max": 0.55,
+      "n_buildable": 2975,
+      "ty_trong_tram_giu_lai": 0.9674732249107497
+    },
+    {
+      "water_max": 0.6,
+      "n_buildable": 2985,
+      "ty_trong_tram_giu_lai": 0.9674732249107497
+    },
+    {
+      "water_max": 0.65,
+      "n_buildable": 2995,
+      "ty_trong_tram_giu_lai": 0.9682665608885362
+    },
+    {
+      "water_max": 0.7,
+      "n_buildable": 3000,
+      "ty_trong_tram_giu_lai": 0.9682665608885362
+    },
+    {
+      "water_max": 0.75,
+      "n_buildable": 3007,
+      "ty_trong_tram_giu_lai": 0.9690598968663229
+    },
+    {
+      "water_max": 0.8,
+      "n_buildable": 3011,
+      "ty_trong_tram_giu_lai": 0.9690598968663229
+    },
+    {
+      "water_max": 0.85,
+      "n_buildable": 3014,
+      "ty_trong_tram_giu_lai": 0.9690598968663229
+    },
+    {
+      "water_max": 0.9,
+      "n_buildable": 3014,
+      "ty_trong_tram_giu_lai": 0.9690598968663229
+    },
+    {
+      "water_max": 0.95,
+      "n_buildable": 3014,
+      "ty_trong_tram_giu_lai": 0.9690598968663229
+    },
+    {
+      "water_max": 1.0,
+      "n_buildable": 3014,
+      "ty_trong_tram_giu_lai": 0.9690598968663229
+    }
+  ],
+  "quet_built_min": [
+    {
+      "built_min": 0.0,
+      "n_buildable": 4282,
+      "ty_trong_tram_giu_lai": 0.9968266560888537,
+      "ty_trong_cong_giu_lai": 0.998020008336807,
+      "ty_trong_dan_giu_lai": 0.9912447344320833
+    },
+    {
+      "built_min": 0.05,
+      "n_buildable": 2961,
+      "ty_trong_tram_giu_lai": 0.9666798889329631,
+      "ty_trong_cong_giu_lai": 0.96217173822426,
+      "ty_trong_dan_giu_lai": 0.9669275533217241
+    },
+    {
+      "built_min": 0.1,
+      "n_buildable": 2362,
+      "ty_trong_tram_giu_lai": 0.921063070210234,
+      "ty_trong_cong_giu_lai": 0.9351813255523135,
+      "ty_trong_dan_giu_lai": 0.9297196784380123
+    },
+    {
+      "built_min": 0.15,
+      "n_buildable": 1883,
+      "ty_trong_tram_giu_lai": 0.8560095200317335,
+      "ty_trong_cong_giu_lai": 0.8852646936223426,
+      "ty_trong_dan_giu_lai": 0.8810024589521821
+    },
+    {
+      "built_min": 0.2,
+      "n_buildable": 1469,
+      "ty_trong_tram_giu_lai": 0.7540658468861563,
+      "ty_trong_cong_giu_lai": 0.8350354314297624,
+      "ty_trong_dan_giu_lai": 0.815098097315795
+    },
+    {
+      "built_min": 0.25,
+      "n_buildable": 1139,
+      "ty_trong_tram_giu_lai": 0.6767155890519635,
+      "ty_trong_cong_giu_lai": 0.7886619424760317,
+      "ty_trong_dan_giu_lai": 0.7511676695195455
+    },
+    {
+      "built_min": 0.3,
+      "n_buildable": 892,
+      "ty_trong_tram_giu_lai": 0.5973819912733043,
+      "ty_trong_cong_giu_lai": 0.7313463943309713,
+      "ty_trong_dan_giu_lai": 0.6866564979415805
+    },
+    {
+      "built_min": 0.35,
+      "n_buildable": 699,
+      "ty_trong_tram_giu_lai": 0.4910749702499008,
+      "ty_trong_cong_giu_lai": 0.6482909545644019,
+      "ty_trong_dan_giu_lai": 0.6259768919477611
+    },
+    {
+      "built_min": 0.4,
+      "n_buildable": 570,
+      "ty_trong_tram_giu_lai": 0.43593811979373265,
+      "ty_trong_cong_giu_lai": 0.5919132972071697,
+      "ty_trong_dan_giu_lai": 0.5733854035312198
+    },
+    {
+      "built_min": 0.45,
+      "n_buildable": 446,
+      "ty_trong_tram_giu_lai": 0.3661245537485125,
+      "ty_trong_cong_giu_lai": 0.5234472696957065,
+      "ty_trong_dan_giu_lai": 0.5175820583062547
+    },
+    {
+      "built_min": 0.5,
+      "n_buildable": 358,
+      "ty_trong_tram_giu_lai": 0.3197143990479968,
+      "ty_trong_cong_giu_lai": 0.48916215089620674,
+      "ty_trong_dan_giu_lai": 0.46787464865123835
+    }
+  ]
+}

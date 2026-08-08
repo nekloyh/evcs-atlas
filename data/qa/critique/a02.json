@@ -1,0 +1,71 @@
+{
+  "code": "A02",
+  "verdict": "HONG",
+  "cau_hoi": "Xếp hạng theo drive_time có sống sót khi bảng tốc độ đổi không?",
+  "co_so": {
+    "n_doan_co_maxspeed": 2685,
+    "n_doan": 240212,
+    "ty_trong_co_tag": 0.0112,
+    "bang_hien_hanh": {
+      "MOTORWAY": 80,
+      "TRUNK": 60,
+      "PRIMARY": 45,
+      "SECONDARY": 40,
+      "TERTIARY": 35,
+      "LOCAL": 25,
+      "SERVICE": 15
+    }
+  },
+  "trung_vi_phut_theo_kich_ban": {
+    "base": 2.939,
+    "x0_7": 4.14,
+    "x1_3": 2.276,
+    "phang_30": 2.487,
+    "phang_25": 2.96,
+    "khong_dung_tag": 2.951
+  },
+  "so_sanh_cap": {
+    "x0_7__vs__x1_3": {
+      "spearman": 0.9964,
+      "ty_le_o_doi_nhom_nguong_3_5_10": 0.62,
+      "ty_le_o_doi_nhom_sau_khi_chuan_hoa_trung_vi": 0.0352,
+      "giu_lai_trong_top200_thoi_gian": 0.97,
+      "giu_lai_trong_top200_nguoi_phut": 0.955
+    },
+    "base__vs__x0_7": {
+      "spearman": 0.9988,
+      "ty_le_o_doi_nhom_nguong_3_5_10": 0.407,
+      "ty_le_o_doi_nhom_sau_khi_chuan_hoa_trung_vi": 0.0219,
+      "giu_lai_trong_top200_thoi_gian": 0.985,
+      "giu_lai_trong_top200_nguoi_phut": 0.99
+    },
+    "base__vs__x1_3": {
+      "spearman": 0.9993,
+      "ty_le_o_doi_nhom_nguong_3_5_10": 0.2697,
+      "ty_le_o_doi_nhom_sau_khi_chuan_hoa_trung_vi": 0.0133,
+      "giu_lai_trong_top200_thoi_gian": 0.985,
+      "giu_lai_trong_top200_nguoi_phut": 0.965
+    },
+    "base__vs__phang_30": {
+      "spearman": 0.9697,
+      "ty_le_o_doi_nhom_nguong_3_5_10": 0.2102,
+      "ty_le_o_doi_nhom_sau_khi_chuan_hoa_trung_vi": 0.1399,
+      "giu_lai_trong_top200_thoi_gian": 0.83,
+      "giu_lai_trong_top200_nguoi_phut": 0.88
+    },
+    "base__vs__phang_25": {
+      "spearman": 0.9698,
+      "ty_le_o_doi_nhom_nguong_3_5_10": 0.1401,
+      "ty_le_o_doi_nhom_sau_khi_chuan_hoa_trung_vi": 0.141,
+      "giu_lai_trong_top200_thoi_gian": 0.835,
+      "giu_lai_trong_top200_nguoi_phut": 0.875
+    },
+    "base__vs__khong_dung_tag": {
+      "spearman": 0.9991,
+      "ty_le_o_doi_nhom_nguong_3_5_10": 0.0059,
+      "ty_le_o_doi_nhom_sau_khi_chuan_hoa_trung_vi": 0.0114,
+      "giu_lai_trong_top200_thoi_gian": 0.98,
+      "giu_lai_trong_top200_nguoi_phut": 0.97
+    }
+  }
+}

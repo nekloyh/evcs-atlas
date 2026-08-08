@@ -1,0 +1,63 @@
+{
+  "code": "A14",
+  "verdict": "CANH_BAO",
+  "luat": "loại trạm có n_ports == 1 VÀ current_type == 'AC'",
+  "cat_di_bao_nhieu": {
+    "n_tram_bi_loai": 1811,
+    "n_tram_con_lai": 710,
+    "ty_trong_tram_bi_loai": 0.7183657278857596,
+    "ty_trong_cong_bi_loai": 0.18872446852855357,
+    "ty_trong_cong_suat_bi_loai": 0.07007989584186175,
+    "trong_so_tram_bi_loai_bao_nhieu_la_tu_nhan": 0.7581446714522363,
+    "n_tram_1_sung_KHONG_phai_AC_van_giu": 51,
+    "cong_suat_trung_vi_tram_bi_loai_kw": 11.0
+  },
+  "A7_truoc_va_sau": {
+    "truoc": {
+      "spearman_ports_vs_population": 0.34,
+      "spearman_ports_vs_pop_density": 0.033,
+      "gini_ports": 0.584,
+      "n_xa_khong_co_cong_nao": 2,
+      "dan_o_xa_khong_co_cong": 111947.0,
+      "ty_trong_cong_o_10_xa_dau": 0.441
+    },
+    "sau": {
+      "spearman_ports_vs_population": 0.333,
+      "spearman_ports_vs_pop_density": 0.092,
+      "gini_ports": 0.664,
+      "n_xa_khong_co_cong_nao": 8,
+      "dan_o_xa_khong_co_cong": 557252.8243858181,
+      "ty_trong_cong_o_10_xa_dau": 0.505
+    },
+    "gini_population": 0.211
+  },
+  "util": {
+    "n_grade_GOOD_truoc": 1130,
+    "n_grade_GOOD_sau": 676,
+    "spearman_util_vs_dens_truoc": -0.139,
+    "spearman_util_vs_dens_sau": 0.113,
+    "spearman_util_vs_logports_sau": 0.042,
+    "util_median_truoc": 0.153,
+    "util_median_sau": 0.232,
+    "util_median_theo_current_type_sau": {
+      "AC": 0.337,
+      "DC": 0.345,
+      "MIXED": 0.157
+    }
+  },
+  "khoang_cach_mang_duong": {
+    "nguon_dijkstra_truoc": 3291,
+    "nguon_dijkstra_sau": 886,
+    "median_m_truoc": 1257.4,
+    "median_m_sau": 2306.4,
+    "p90_m_truoc": 2991.5,
+    "p90_m_sau": 4824.4,
+    "tang_trung_vi_m": 715.7,
+    "tang_trung_binh_co_trong_so_dan_m": 802.2,
+    "ty_le_o_tang_qua_500m": 0.57,
+    "ty_le_o_tang_qua_2000m": 0.189,
+    "spearman_xep_hang_truoc_sau": 0.6126,
+    "n_o_khong_con_toi_duoc_tram_nao": 0,
+    "dan_o_tang_qua_2000m": 969213.2543320803
+  }
+}

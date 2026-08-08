@@ -1,0 +1,112 @@
+{
+  "code": "A15",
+  "verdict": "CANH_BAO",
+  "cau_hoi": "Lớp POI đủ tốt để dựng L5 chưa?",
+  "1_bo_sot_hinh_hoc": {
+    "note": "s03 chỉ xử lý node + way; relation bị bỏ qua hoàn toàn (`if ts != 'w': continue`)",
+    "poi_hien_hanh_trong_hanoi_theo_hinh_hoc": {
+      "PARKING_OFF": {
+        "node": 80,
+        "way": 415
+      },
+      "SUPERMARKET": {
+        "node": 229,
+        "way": 23
+      },
+      "FUEL": {
+        "node": 210,
+        "way": 100
+      },
+      "MARKET": {
+        "node": 61,
+        "way": 127
+      },
+      "APARTMENT": {
+        "node": 68,
+        "way": 2409
+      },
+      "MALL": {
+        "node": 13,
+        "way": 34
+      },
+      "DEPT_STORE": {
+        "node": 74,
+        "way": 9
+      },
+      "PARKING_STREET": {
+        "node": 16,
+        "way": 51
+      }
+    },
+    "relation_mang_tag_taxonomy_hien_hanh_TOAN_QUOC": {
+      "MARKET": 18,
+      "APARTMENT": 29,
+      "DEPT_STORE": 1,
+      "PARKING_OFF": 11,
+      "MALL": 4,
+      "SUPERMARKET": 1,
+      "PARKING_STREET": 1,
+      "FUEL": 1
+    },
+    "relation_mang_tag_taxonomy_mo_rong_TOAN_QUOC": {
+      "GIAO_DUC": 63,
+      "KHACH_SAN": 22,
+      "GIAI_TRI": 50,
+      "AN_UONG": 4,
+      "VAN_PHONG": 64,
+      "BEN_XE_GA": 2,
+      "Y_TE": 16,
+      "NGAN_HANG": 2,
+      "BAN_LE_KHAC": 2
+    },
+    "ket_luan": "relation là chặn trên toàn quốc, chưa cắt về Hà Nội — nếu nhỏ thì bỏ qua được"
+  },
+  "2_bo_sot_phan_loai": {
+    "n_poi_taxonomy_hien_hanh": 3919,
+    "n_poi_taxonomy_mo_rong": 16810,
+    "ty_so_mo_rong_tren_hien_hanh": 4.29,
+    "chi_tiet_mo_rong_trong_hanoi": {
+      "AN_UONG": 3777,
+      "BAN_LE_KHAC": 3632,
+      "GIAO_DUC": 2375,
+      "NGAN_HANG": 1967,
+      "VAN_PHONG": 1696,
+      "CUA_HANG_TIEN_LOI": 1220,
+      "KHACH_SAN": 968,
+      "GIAI_TRI": 753,
+      "Y_TE": 356,
+      "BEN_XE_GA": 66
+    },
+    "n_building_way_trong_bbox": 243459
+  },
+  "3_thien_lech_ban_do_hoa": {
+    "PHUONG": {
+      "n_o": 499.0,
+      "poi": 3331.0,
+      "km2_da_xay": 175.76703677555474,
+      "poi_tren_km2_da_xay": 18.95122123640004,
+      "dan_so": 4117237.9098468414,
+      "poi_tren_10k_dan": 8.090375326705157,
+      "ty_le_o_khong_co_poi": 0.42084168336673344
+    },
+    "XA": {
+      "n_o": 3928.0,
+      "poi": 627.0,
+      "km2_da_xay": 441.7819798151191,
+      "poi_tren_km2_da_xay": 1.419252094126593,
+      "dan_so": 4713966.443027318,
+      "poi_tren_10k_dan": 1.330090079294963,
+      "ty_le_o_khong_co_poi": 0.9238798370672098
+    }
+  },
+  "4_trung_lap_va_do_thua": {
+    "n_poi_trong_hanoi": 3919,
+    "n_cap_cung_lop_cach_nhau_duoi_25m": 292,
+    "ty_le_poi_co_ten": 0.673,
+    "ty_le_o_khong_co_poi_nao": 0.867,
+    "poi_trung_vi_moi_o": 0.0,
+    "ty_trong_apartment_trong_tong_poi": 0.632,
+    "ty_le_apartment_co_building_levels": 0.409
+  },
+  "elapsed_s": 206.5
+}

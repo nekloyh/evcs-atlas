@@ -1,0 +1,452 @@
+{
+  "code": "A04",
+  "verdict": "CANH_BAO",
+  "cau_hoi": "đồ thị có phải 'ô tô đi được' không; mọi trạm có tới được không",
+  "do_thi": {
+    "dinh": 1334688,
+    "canh_co_huong": 2773510,
+    "n_doan_osm": 240212
+  },
+  "1_access": {
+    "phan_bo_the_access": {
+      "(không tag)": {
+        "n_doan": 237448,
+        "chan_o_to": false
+      },
+      "private": {
+        "n_doan": 1645,
+        "chan_o_to": true
+      },
+      "yes": {
+        "n_doan": 575,
+        "chan_o_to": false
+      },
+      "no": {
+        "n_doan": 294,
+        "chan_o_to": true
+      },
+      "permissive": {
+        "n_doan": 114,
+        "chan_o_to": false
+      },
+      "destination": {
+        "n_doan": 60,
+        "chan_o_to": false
+      },
+      "customers": {
+        "n_doan": 51,
+        "chan_o_to": true
+      },
+      "residents": {
+        "n_doan": 17,
+        "chan_o_to": true
+      },
+      "delivery": {
+        "n_doan": 4,
+        "chan_o_to": true
+      },
+      "permit": {
+        "n_doan": 3,
+        "chan_o_to": true
+      },
+      "unknown": {
+        "n_doan": 1,
+        "chan_o_to": false
+      }
+    },
+    "coi_la_chan_o_to": [
+      "customers",
+      "delivery",
+      "no",
+      "permit",
+      "private",
+      "residents"
+    ],
+    "n_doan_bi_chan": 2014,
+    "share_doan_bi_chan": 0.00838,
+    "doan_bi_chan_theo_cap": {
+      "SERVICE": 1721,
+      "LOCAL": 155,
+      "PRIMARY": 90,
+      "TERTIARY": 26,
+      "SECONDARY": 10,
+      "TRUNK": 7,
+      "MOTORWAY": 5
+    },
+    "ghi_chu": "`service=driveway|parking_aisle` KHÔNG đo được: s03 không trích thẻ phụ `service`. Cần quét lại PBF nếu muốn tách. Ở đây SERVICE được đo trọn cấp."
+  },
+  "2_han_che_cap_duong": {
+    "FULL": {
+      "canh_giu": 2773510,
+      "canh_bo": 0,
+      "tram_neo_duoc": 886,
+      "o_toi_duoc": 4350,
+      "o_toi_duoc_share": 0.9886,
+      "dist_trung_vi_m": 2306.1,
+      "dist_p90_m": 4827.5,
+      "spearman_vs_full": 1.0,
+      "n_o_doi_gt_500m": 0,
+      "share_o_doi_gt_500m": 0.0,
+      "n_o_doi_gt_2000m": 0
+    },
+    "LOC_ACCESS": {
+      "canh_giu": 2757052,
+      "canh_bo": 16458,
+      "tram_neo_duoc": 886,
+      "o_toi_duoc": 4337,
+      "o_toi_duoc_share": 0.9857,
+      "dist_trung_vi_m": 2310.0,
+      "dist_p90_m": 4824.4,
+      "spearman_vs_full": 0.997797,
+      "n_o_doi_gt_500m": 22,
+      "share_o_doi_gt_500m": 0.0051,
+      "n_o_doi_gt_2000m": 2
+    },
+    "BO_SERVICE": {
+      "canh_giu": 2185760,
+      "canh_bo": 587750,
+      "tram_neo_duoc": 886,
+      "o_toi_duoc": 4336,
+      "o_toi_duoc_share": 0.9855,
+      "dist_trung_vi_m": 2338.8,
+      "dist_p90_m": 4900.5,
+      "spearman_vs_full": 0.97717,
+      "n_o_doi_gt_500m": 227,
+      "share_o_doi_gt_500m": 0.0526,
+      "n_o_doi_gt_2000m": 33
+    },
+    "CHI_DUONG_LON": {
+      "canh_giu": 273910,
+      "canh_bo": 2499600,
+      "tram_neo_duoc": 886,
+      "o_toi_duoc": 4221,
+      "o_toi_duoc_share": 0.9593,
+      "dist_trung_vi_m": 2543.6,
+      "dist_p90_m": 5599.2,
+      "spearman_vs_full": 0.831319,
+      "n_o_doi_gt_500m": 1631,
+      "share_o_doi_gt_500m": 0.3905,
+      "n_o_doi_gt_2000m": 419
+    }
+  },
+  "3_lien_thong": {
+    "n_scc": 1807,
+    "scc_lon_nhat_dinh": 1327553,
+    "scc_lon_nhat_share": 0.99465,
+    "n_scc_co_tren_1000_dinh": 1,
+    "n_dinh_ngoai_scc_lon": 7135,
+    "n_wcc": 395,
+    "wcc_lon_nhat_dinh": 1329180,
+    "top10_scc": [
+      1327553,
+      336,
+      320,
+      222,
+      149,
+      148,
+      142,
+      119,
+      112,
+      95
+    ]
+  },
+  "4_tram_toi_duoc": {
+    "n_tram_nguon": 886,
+    "n_tram_trong_scc_lon": 884,
+    "n_tram_KHONG_toi_duoc": 2,
+    "share_toi_duoc": 0.99774,
+    "tram_co_van_de": [
+      {
+        "station_code": "C.HNO0528",
+        "lat": 21.076759,
+        "lng": 105.812668,
+        "n_ports": 6,
+        "snap_m": 31.7,
+        "scc_size": 1
+      },
+      {
+        "station_code": "C.HNO0529",
+        "lat": 21.076759,
+        "lng": 105.812668,
+        "n_ports": 4,
+        "snap_m": 31.7,
+        "scc_size": 1
+      }
+    ]
+  },
+  "5_o_khong_toi_duoc": {
+    "n_o": 50,
+    "dan": 32171,
+    "theo_ly_do": {
+      "NGOAI_SCC_LON_OC_DAO": 49,
+      "KHONG_CO_DUONG_TRONG_2KM": 1
+    },
+    "chi_tiet": [
+      {
+        "h3_r8": "88415cb5d1fffff",
+        "snap_m": 110.9,
+        "trong_scc_lon": false,
+        "scc_size": 119,
+        "wcc_size": 119,
+        "dan": 7586.935482926628,
+        "euclid_m": 1906.9235937923384,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88415cb5e1fffff",
+        "snap_m": 13.6,
+        "trong_scc_lon": false,
+        "scc_size": 1,
+        "wcc_size": 1329180,
+        "dan": 6121.0372061107155,
+        "euclid_m": 178.62473899343416,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "8841436847fffff",
+        "snap_m": 93.2,
+        "trong_scc_lon": false,
+        "scc_size": 1,
+        "wcc_size": 11,
+        "dan": 2523.5360607192015,
+        "euclid_m": 789.6092111539103,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88415cb5d7fffff",
+        "snap_m": 18.4,
+        "trong_scc_lon": false,
+        "scc_size": 119,
+        "wcc_size": 119,
+        "dan": 1946.884460549932,
+        "euclid_m": 1569.3176789731735,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "884143684dfffff",
+        "snap_m": 14.3,
+        "trong_scc_lon": false,
+        "scc_size": 9,
+        "wcc_size": 9,
+        "dan": 1850.5446590457236,
+        "euclid_m": 253.19245675595022,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "8841436845fffff",
+        "snap_m": 45.9,
+        "trong_scc_lon": false,
+        "scc_size": 27,
+        "wcc_size": 27,
+        "dan": 1650.1980909183771,
+        "euclid_m": 851.8845908570314,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88415dc725fffff",
+        "snap_m": 64.7,
+        "trong_scc_lon": false,
+        "scc_size": 3,
+        "wcc_size": 3,
+        "dan": 1440.180806203889,
+        "euclid_m": 1592.5389196349429,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88415ca087fffff",
+        "snap_m": 68.0,
+        "trong_scc_lon": false,
+        "scc_size": 2,
+        "wcc_size": 2,
+        "dan": 1323.7679087606302,
+        "euclid_m": 358.34589389446916,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "8841436031fffff",
+        "snap_m": 10.4,
+        "trong_scc_lon": false,
+        "scc_size": 5,
+        "wcc_size": 5,
+        "dan": 1012.3085599275635,
+        "euclid_m": 1364.75944544898,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88415dc0c3fffff",
+        "snap_m": 257.8,
+        "trong_scc_lon": false,
+        "scc_size": 20,
+        "wcc_size": 20,
+        "dan": 981.7224893214932,
+        "euclid_m": 1075.91977736468,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "8841437869fffff",
+        "snap_m": 126.3,
+        "trong_scc_lon": false,
+        "scc_size": 3,
+        "wcc_size": 3,
+        "dan": 840.5261824728954,
+        "euclid_m": 611.1520729850295,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88415dc0d3fffff",
+        "snap_m": 20.5,
+        "trong_scc_lon": false,
+        "scc_size": 11,
+        "wcc_size": 11,
+        "dan": 687.2233948366542,
+        "euclid_m": 960.7038749157769,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88415dc461fffff",
+        "snap_m": 172.2,
+        "trong_scc_lon": false,
+        "scc_size": 3,
+        "wcc_size": 3,
+        "dan": 439.9396261041887,
+        "euclid_m": 2113.946353649317,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88414368d5fffff",
+        "snap_m": 366.6,
+        "trong_scc_lon": false,
+        "scc_size": 9,
+        "wcc_size": 9,
+        "dan": 346.6355791279585,
+        "euclid_m": 1363.569128026435,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88415dc625fffff",
+        "snap_m": 178.9,
+        "trong_scc_lon": false,
+        "scc_size": 5,
+        "wcc_size": 5,
+        "dan": 332.933015209321,
+        "euclid_m": 1887.3253261081315,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88415dc097fffff",
+        "snap_m": 195.3,
+        "trong_scc_lon": false,
+        "scc_size": 2,
+        "wcc_size": 2,
+        "dan": 267.59783627861196,
+        "euclid_m": 1040.7579481279483,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88415dce0dfffff",
+        "snap_m": 231.2,
+        "trong_scc_lon": false,
+        "scc_size": 38,
+        "wcc_size": 38,
+        "dan": 229.69197768314208,
+        "euclid_m": 3317.874052796358,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88415dd25dfffff",
+        "snap_m": 128.3,
+        "trong_scc_lon": false,
+        "scc_size": 2,
+        "wcc_size": 2,
+        "dan": 222.06329412302188,
+        "euclid_m": 1575.9554394546933,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88415dd661fffff",
+        "snap_m": 279.8,
+        "trong_scc_lon": false,
+        "scc_size": 10,
+        "wcc_size": 10,
+        "dan": 162.0790281780388,
+        "euclid_m": 2346.3108846094838,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88415dd665fffff",
+        "snap_m": 94.5,
+        "trong_scc_lon": false,
+        "scc_size": 26,
+        "wcc_size": 26,
+        "dan": 160.917960999733,
+        "euclid_m": 2894.08045484681,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88415dda0dfffff",
+        "snap_m": 128.2,
+        "trong_scc_lon": false,
+        "scc_size": 7,
+        "wcc_size": 7,
+        "dan": 160.8924513693857,
+        "euclid_m": 465.7023319473286,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "884143795dfffff",
+        "snap_m": 326.0,
+        "trong_scc_lon": false,
+        "scc_size": 8,
+        "wcc_size": 8,
+        "dan": 143.47459737258308,
+        "euclid_m": 1506.348267787704,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88415dd667fffff",
+        "snap_m": 275.7,
+        "trong_scc_lon": false,
+        "scc_size": 3,
+        "wcc_size": 3,
+        "dan": 134.47147952229182,
+        "euclid_m": 2031.5916581611573,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88415dd5a9fffff",
+        "snap_m": 454.2,
+        "trong_scc_lon": false,
+        "scc_size": 51,
+        "wcc_size": 51,
+        "dan": 129.79660517011936,
+        "euclid_m": 1518.5601507750075,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      },
+      {
+        "h3_r8": "88415dc635fffff",
+        "snap_m": 93.7,
+        "trong_scc_lon": false,
+        "scc_size": 44,
+        "wcc_size": 44,
+        "dan": 116.39833830623165,
+        "euclid_m": 2697.5179441342934,
+        "ly_do": "NGOAI_SCC_LON_OC_DAO"
+      }
+    ]
+  },
+  "6_thu_cach_sua_neo_vao_scc_lon": {
+    "o_toi_duoc_truoc": 4350,
+    "o_toi_duoc_sau": 4399,
+    "o_duoc_cuu": 49,
+    "tram_neo_duoc_sau": 886,
+    "dist_trung_vi_sau_m": 2319.8,
+    "n_o_doi_gt_500m": 0,
+    "do_lech_neo_them_trung_vi_m": 0.0
+  },
+  "ket_luan": [
+    "access: 2014 đoạn bị chặn (0.838%); lọc đi thì 22 ô đổi quá 500 m.",
+    "SCC lớn nhất chứa 99.47% số đỉnh; 2/886 trạm nằm ngoài.",
+    "Chỉ giữ đường lớn: 95.9% ô còn tới được, trung vị 2544 m (FULL: 2306 m).",
+    "Neo vào SCC lớn cứu được 49 ô, trạm neo được 886/886, đổi 0 ô quá 500 m."
+  ]
+}

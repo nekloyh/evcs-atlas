@@ -1,0 +1,34 @@
+{
+  "layer": "osm_extract",
+  "source_pbf": "/home/n91ym1nhky/Work/internVSF/aGiang-evcs/data/raw/osm/vietnam-latest.osm.pbf",
+  "aoi": "ranh giới VNSDI Hà Nội + đệm 5 km (đa giác thật, không phải bbox)",
+  "stats": {
+    "pbf_nodes_scanned": 45788108,
+    "pbf_ways_scanned": 4670410,
+    "roads": 240212,
+    "road_class_counts": {
+      "LOCAL": 144343,
+      "SERVICE": 79096,
+      "TERTIARY": 5465,
+      "PRIMARY": 4596,
+      "SECONDARY": 3487,
+      "TRUNK": 2258,
+      "MOTORWAY": 967
+    },
+    "roads_with_maxspeed_tag": 2685,
+    "poi": 4300,
+    "poi_class_counts": {
+      "APARTMENT": 2551,
+      "PARKING_OFF": 578,
+      "FUEL": 409,
+      "SUPERMARKET": 272,
+      "MARKET": 233,
+      "PARKING_STREET": 113,
+      "DEPT_STORE": 88,
+      "MALL": 56
+    },
+    "power_substations": 133,
+    "dropped_in_bbox_but_outside_polygon": 88063,
+    "elapsed_s": 156.5
+  }
+}

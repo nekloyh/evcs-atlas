@@ -1,0 +1,82 @@
+{
+  "layer": "stations",
+  "source": "aGiang-evcs data/interim/canonical (evcs.vn + registry VinFast, đã dedup vật lý)",
+  "dropped_private_ac": {
+    "predicate": "n_guns_installed == 1 AND current_type_asset == 'AC'",
+    "n_dropped_total": 2408,
+    "n_dropped_hanoi": 1811,
+    "n_dropped_buffer": 597,
+    "share_of_hanoi_stations_before": 0.7184,
+    "share_of_hanoi_ports_before": 0.1887,
+    "share_of_hanoi_power_before": 0.0701
+  },
+  "stats": {
+    "n_stations_hanoi": 710,
+    "n_stations_buffer_ring": 229,
+    "n_connectors_rows": 1602,
+    "n_ports_total_hanoi": 7785,
+    "power_kw_site_total_hanoi": 232841.3,
+    "op_status": {
+      "OPERATIONAL": 618,
+      "MAINTENANCE": 57,
+      "OUT_OF_SERVICE": 30,
+      "UNKNOWN": 5
+    },
+    "current_type": {
+      "MIXED": 339,
+      "DC": 305,
+      "AC": 47,
+      "nan": 19
+    },
+    "station_type": {
+      "VINFAST_CS": 704,
+      "OTHER": 6
+    },
+    "access": {
+      "PUBLIC": 690,
+      "RESTRICTED": 15,
+      "UNKNOWN": 5
+    },
+    "verified_official_share": 0.993,
+    "has_timeseries_share": 0.9901,
+    "n_communes_with_station": 118,
+    "n_cells_with_station": 449
+  },
+  "checks": [
+    {
+      "name": "station_id_unique",
+      "status": "PASS",
+      "detail": "939 trạm"
+    },
+    {
+      "name": "every_hanoi_station_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "buffer_stations_have_no_commune",
+      "status": "PASS",
+      "detail": "trạm ngoài Hà Nội không được gán xã Hà Nội"
+    },
+    {
+      "name": "every_station_cell_in_grid",
+      "status": "PASS",
+      "detail": "0 ngoài lưới"
+    },
+    {
+      "name": "connectors_fk_ok",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "power_site_le_nameplate_dropped",
+      "status": "PASS",
+      "detail": "đã bỏ nameplate_power_kw (phóng đại 1,82×)"
+    },
+    {
+      "name": "no_private_ac_left",
+      "status": "PASS",
+      "detail": "đã loại 2408 trạm 1-súng-AC (71.8% số trạm HN, nhưng chỉ 7.0% công suất)"
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "layer": "n07_distance",
+  "province_name": "Tỉnh Hưng Yên",
+  "method": "Dijkstra đa nguồn trên đồ thị đường OSM (đúng chiều một chiều), trọng số MÉT",
+  "no_time_field": "Không phát trường thời gian: bảng tốc độ giả định chi phối 100% giá trị và 62% ô đổi nhóm ngưỡng phút khi đổi bảng ±30% (DECISIONS §6).",
+  "province_code": "33",
+  "stats": {
+    "n_cells": 3386,
+    "n_reachable": 3381,
+    "share_reachable": 0.9985,
+    "dist_median_m": 3329.9,
+    "dist_p90_m": 6707.6,
+    "euclid_median_m": 2152.1,
+    "detour_ratio_median": 1.446,
+    "detour_ratio_p90": 2.235,
+    "cells_where_euclid_understates_gt_2x": 482,
+    "detour_ratio_null_cells": 36,
+    "asym_median_m": 0.0,
+    "cells_asym_gt_500m": 132,
+    "neighbor_jump_median_m": 811.8,
+    "neighbor_pairs_jump_gt_2km_share": 0.0795
+  },
+  "checks": [
+    {
+      "name": "network_ge_euclid",
+      "status": "PASS",
+      "detail": "min tỉ số 1.009 (đường mạng không thể ngắn hơn chim bay)"
+    },
+    {
+      "name": "no_negative_distance",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "no_time_field",
+      "status": "PASS",
+      "detail": "bộ dữ liệu không phát trường thời gian nào — chỉ mét"
+    },
+    {
+      "name": "all_anchors_can_drive_on",
+      "status": "PASS",
+      "detail": "mọi điểm neo (ô và trạm) nằm trong một SCC ≥ 100 đỉnh — xe đi tiếp được, không phải đầu cụt"
+    },
+    {
+      "name": "most_cells_reachable",
+      "status": "PASS",
+      "detail": "3381/3386 = 99.9%"
+    }
+  ],
+  "graph": {
+    "ways_total": 131692,
+    "ways_dropped_access_blocked": 255,
+    "access_blocked_values": [
+      "customers",
+      "delivery",
+      "no",
+      "permit",
+      "private",
+      "residents"
+    ],
+    "nodes": 658176,
+    "nodes_in_core_sccs": 655126,
+    "n_core_components": 6,
+    "min_scc_nodes": 100,
+    "n_strongly_connected_components": 1684,
+    "directed_edges": 1386173,
+    "stations_total": 347,
+    "stations_snapped": 347,
+    "station_source_nodes": 327,
+    "snap_max_m": 2000.0,
+    "m_per_deg_lon": 104189.9
+  }
+}

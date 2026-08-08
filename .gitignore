@@ -1,0 +1,31 @@
+# Dữ liệu KHÔNG vào git — kế thừa ràng buộc của nguồn:
+#   evcs.vn giới hạn ToS · OSM là ODbL · ranh giới VNSDI là dữ liệu nhà nước.
+# Không publish khi chưa có sign-off. Toàn bộ tái lập được bằng `make all`.
+data/raw/
+data/processed/
+
+# Báo cáo QA thì GIỮ: chỉ có số tổng hợp và bảng kiểm, không có toạ độ trạm.
+!data/qa/
+
+.venv/
+__pycache__/
+*.py[cod]
+.ruff_cache/
+.pytest_cache/
+
+# Không bao giờ commit khoá
+.env
+*.key
+
+# Store toàn quốc — cùng ràng buộc nguồn với data/, không vào git.
+# `store/*` chứ không phải `store/`: git KHÔNG đi vào một thư mục đã bị loại, nên
+# `store/` + `!store/qa/` sẽ im lặng loại luôn phần QA. Loại từng mục con thì phủ định
+# mới có tác dụng.
+store/*
+!store/qa/
+# Báo cáo QA thì GIỮ: chỉ số tổng hợp và bảng kiểm, không toạ độ trạm.
+web/node_modules/
+web/dist/
+web/public/data/
+web/tsconfig.tsbuildinfo
+*.tmp

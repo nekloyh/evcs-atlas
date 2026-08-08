@@ -1,0 +1,95 @@
+{
+  "layer": "n03_supply",
+  "source": "aGiang-evcs data/interim/canonical + data/interim/occ (evcs.vn, đã dedup vật lý)",
+  "province_name": "Tỉnh Sơn La",
+  "province_code": "14",
+  "stats": {
+    "n_stations_national_pool": 19598,
+    "n_stations_in": 64,
+    "n_stations_buffer_ring": 2,
+    "n_connectors_rows": 131,
+    "n_ports_total": 540,
+    "power_kw_site_total": 17619.5,
+    "power_kw_per_station": 275.3,
+    "op_status": {
+      "OPERATIONAL": 62,
+      "OUT_OF_SERVICE": 1,
+      "MAINTENANCE": 1
+    },
+    "current_type": {
+      "DC": 34,
+      "MIXED": 30
+    },
+    "commune_kind": {
+      "XA": 37,
+      "PHUONG": 27
+    },
+    "access": {
+      "PUBLIC": 64
+    },
+    "verified_official_share": 1.0,
+    "n_communes_with_station": 28,
+    "n_stations_with_occ": 63,
+    "occ_coverage": 0.9844,
+    "occ_grade": {
+      "PARTIAL": 57,
+      "INSUFFICIENT": 3,
+      "GOOD": 3
+    },
+    "util_median": 0.1068,
+    "n_profile_rows": 9507,
+    "upstream_province_label_agreement": 1.0
+  },
+  "checks": [
+    {
+      "name": "station_id_unique",
+      "status": "PASS",
+      "detail": "66 trạm"
+    },
+    {
+      "name": "every_in_station_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "buffer_stations_have_no_commune",
+      "status": "PASS",
+      "detail": "trạm ngoài tỉnh không được gán xã của tỉnh này"
+    },
+    {
+      "name": "no_private_ac_left",
+      "status": "PASS",
+      "detail": "đã loại 86 trạm 1-súng-AC (57.3% số trạm, nhưng 4.6% công suất)"
+    },
+    {
+      "name": "upstream_province_label_agrees",
+      "status": "PASS",
+      "detail": "100.00% trạm IN có admin_l1_code khớp phép gán hình học ở đây"
+    },
+    {
+      "name": "connectors_fk_ok",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "occ_only_for_in_scope",
+      "status": "PASS",
+      "detail": "occupancy chỉ cho trạm thuộc tỉnh, không cho trạm vành đệm"
+    },
+    {
+      "name": "profile_cells_le_168",
+      "status": "PASS",
+      "detail": "max 161 ô/trạm"
+    }
+  ],
+  "dropped_private_ac": {
+    "predicate": "n_guns_installed == 1 AND current_type_asset == 'AC'",
+    "n_dropped_total": 94,
+    "n_dropped_in": 86,
+    "n_dropped_buffer": 8,
+    "n_stations_in_before": 150,
+    "share_of_stations_before": 0.5733,
+    "share_of_ports_before": 0.1374,
+    "share_of_power_before": 0.0461
+  }
+}

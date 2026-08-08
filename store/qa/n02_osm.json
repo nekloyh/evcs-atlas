@@ -1,0 +1,220 @@
+{
+  "layer": "n02_osm",
+  "source_pbf": "/home/n91ym1nhky/Work/internVSF/aGiang-evcs/data/raw/osm/vietnam-latest.osm.pbf",
+  "aoi": "ranh giới VNSDI từng tỉnh (POI) · vành đệm 5 km từng tỉnh (đường) — đa giác thật",
+  "stats": {
+    "pbf_nodes_scanned": 45788108,
+    "pbf_ways_scanned": 4670410,
+    "poi_dropped_outside_all_provinces": 92,
+    "roads_dropped_outside_all_buffers": 432,
+    "road_points_before_simplify": 29210620,
+    "road_points_after_simplify": 8337676,
+    "simplify_tolerance_deg": 0.0001,
+    "write_graph": true,
+    "road_graph_rows_total": 3420492,
+    "poi_visual_multipolygon_assembly_errors": 0,
+    "poi_visual_dropped_outside_all_provinces": 124,
+    "poi_visual_node_dupes_dropped": {
+      "apartment": 93,
+      "mall": 22,
+      "public": 165,
+      "edu_health": 248
+    },
+    "elapsed_s": 427.2,
+    "poi_demand_total": 17879,
+    "poi_visual_total": 25220,
+    "roads_rows_total": 3420492,
+    "roads_rows_in_province": 2753909,
+    "roads_border_duplication_share": 0.1949,
+    "provinces_with_zero_poi": [],
+    "per_province": {
+      "01 Thành phố Hà Nội": {
+        "poi_demand": 3919,
+        "poi_visual": 5896,
+        "roads_rows": 240215
+      },
+      "04 Tỉnh Cao Bằng": {
+        "poi_demand": 123,
+        "poi_visual": 84,
+        "roads_rows": 17787
+      },
+      "08 Tỉnh Tuyên Quang": {
+        "poi_demand": 151,
+        "poi_visual": 180,
+        "roads_rows": 123861
+      },
+      "11 Tỉnh Điện Biên": {
+        "poi_demand": 44,
+        "poi_visual": 88,
+        "roads_rows": 26826
+      },
+      "12 Tỉnh Lai Châu": {
+        "poi_demand": 69,
+        "poi_visual": 128,
+        "roads_rows": 21088
+      },
+      "14 Tỉnh Sơn La": {
+        "poi_demand": 98,
+        "poi_visual": 54,
+        "roads_rows": 53564
+      },
+      "15 Tỉnh Lào Cai": {
+        "poi_demand": 180,
+        "poi_visual": 166,
+        "roads_rows": 92032
+      },
+      "19 Tỉnh Thái Nguyên": {
+        "poi_demand": 115,
+        "poi_visual": 506,
+        "roads_rows": 128891
+      },
+      "20 Tỉnh Lạng Sơn": {
+        "poi_demand": 94,
+        "poi_visual": 88,
+        "roads_rows": 68335
+      },
+      "22 Tỉnh Quảng Ninh": {
+        "poi_demand": 286,
+        "poi_visual": 415,
+        "roads_rows": 53994
+      },
+      "24 Tỉnh Bắc Ninh": {
+        "poi_demand": 575,
+        "poi_visual": 1419,
+        "roads_rows": 216362
+      },
+      "25 Tỉnh Phú Thọ": {
+        "poi_demand": 224,
+        "poi_visual": 328,
+        "roads_rows": 218927
+      },
+      "31 Thành phố Hải Phòng": {
+        "poi_demand": 368,
+        "poi_visual": 627,
+        "roads_rows": 128909
+      },
+      "33 Tỉnh Hưng Yên": {
+        "poi_demand": 330,
+        "poi_visual": 558,
+        "roads_rows": 131692
+      },
+      "37 Tỉnh Ninh Bình": {
+        "poi_demand": 413,
+        "poi_visual": 531,
+        "roads_rows": 125942
+      },
+      "38 Tỉnh Thanh Hóa": {
+        "poi_demand": 174,
+        "poi_visual": 200,
+        "roads_rows": 92184
+      },
+      "40 Tỉnh Nghệ An": {
+        "poi_demand": 266,
+        "poi_visual": 172,
+        "roads_rows": 107327
+      },
+      "42 Tỉnh Hà Tĩnh": {
+        "poi_demand": 227,
+        "poi_visual": 165,
+        "roads_rows": 74910
+      },
+      "44 Tỉnh Quảng Trị": {
+        "poi_demand": 315,
+        "poi_visual": 163,
+        "roads_rows": 58770
+      },
+      "46 Thành phố Huế": {
+        "poi_demand": 173,
+        "poi_visual": 190,
+        "roads_rows": 28514
+      },
+      "48 Thành phố Đà Nẵng": {
+        "poi_demand": 590,
+        "poi_visual": 886,
+        "roads_rows": 65981
+      },
+      "51 Tỉnh Quảng Ngãi": {
+        "poi_demand": 249,
+        "poi_visual": 249,
+        "roads_rows": 64238
+      },
+      "52 Tỉnh Gia Lai": {
+        "poi_demand": 268,
+        "poi_visual": 349,
+        "roads_rows": 135648
+      },
+      "56 Tỉnh Khánh Hòa": {
+        "poi_demand": 535,
+        "poi_visual": 681,
+        "roads_rows": 37889
+      },
+      "66 Tỉnh Đắk Lắk": {
+        "poi_demand": 365,
+        "poi_visual": 303,
+        "roads_rows": 59616
+      },
+      "68 Tỉnh Lâm Đồng": {
+        "poi_demand": 749,
+        "poi_visual": 723,
+        "roads_rows": 90129
+      },
+      "75 Tỉnh Đồng Nai": {
+        "poi_demand": 497,
+        "poi_visual": 931,
+        "roads_rows": 185663
+      },
+      "79 Thành phố Hồ Chí Minh": {
+        "poi_demand": 4989,
+        "poi_visual": 6446,
+        "roads_rows": 251978
+      },
+      "80 Tỉnh Tây Ninh": {
+        "poi_demand": 246,
+        "poi_visual": 466,
+        "roads_rows": 145795
+      },
+      "82 Tỉnh Đồng Tháp": {
+        "poi_demand": 272,
+        "poi_visual": 363,
+        "roads_rows": 122107
+      },
+      "86 Tỉnh Vĩnh Long": {
+        "poi_demand": 203,
+        "poi_visual": 329,
+        "roads_rows": 91324
+      },
+      "91 Tỉnh An Giang": {
+        "poi_demand": 385,
+        "poi_visual": 648,
+        "roads_rows": 57238
+      },
+      "92 Thành phố Cần Thơ": {
+        "poi_demand": 356,
+        "poi_visual": 772,
+        "roads_rows": 52869
+      },
+      "96 Tỉnh Cà Mau": {
+        "poi_demand": 31,
+        "poi_visual": 116,
+        "roads_rows": 49887
+      }
+    }
+  },
+  "checks": [
+    {
+      "name": "every_province_has_a_shard",
+      "status": "PASS",
+      "detail": "tỉnh không có dòng nào vẫn có file rỗng, không phải thiếu file"
+    },
+    {
+      "name": "roads_duplicated_only_at_borders",
+      "status": "PASS",
+      "detail": "3,420,492 dòng · 2,753,909 thuộc tỉnh (19.5% là bản sao vành đệm)"
+    },
+    {
+      "name": "poi_not_duplicated_across_provinces",
+      "status": "PASS",
+      "detail": "POI vào đúng một tỉnh theo điểm-trong-đa-giác — cộng dồn toàn quốc không nhân đôi"
+    }
+  ]
+}

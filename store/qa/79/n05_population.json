@@ -1,0 +1,47 @@
+{
+  "layer": "n05_population",
+  "province_name": "Thành phố Hồ Chí Minh",
+  "method": "dasymetric: WorldPop 2025 R2024B (trọng số) neo theo VNSDI danso (tổng kiểm soát)",
+  "weight_raster": "/home/n91ym1nhky/Work/internVSF/aGiang-evcs/data/raw/worldpop/vnm_pop_2025_CN_100m_R2024B_v1.tif",
+  "province_code": "79",
+  "stats": {
+    "population_total": 14690773.8,
+    "population_published_vnsdi": 14668098.0,
+    "population_worldpop_raw": 14472638.1,
+    "anchor_ratio_province": 1.0135,
+    "anchor_ratio_commune_median": 1.0572,
+    "anchor_ratio_commune_p90": 1.6226,
+    "n_communes_unanchored_implausible": 1,
+    "n_communes_without_weight": 0,
+    "n_cells": 8519,
+    "n_cells_with_pop": 7826,
+    "pop_source_counts": {
+      "WORLDPOP2025_ANCHORED_VNSDI": 7805,
+      "ZERO_NO_WEIGHT": 693,
+      "WORLDPOP2025_UNANCHORED_OFFICIAL_IMPLAUSIBLE": 21
+    },
+    "max_cell_population": 73861.3
+  },
+  "checks": [
+    {
+      "name": "total_matches_official_plus_declared_substitutions",
+      "status": "PASS",
+      "detail": "14,690,774 vs kỳ vọng 14,690,790 (công bố 14,668,098 − 107,721 + 130,413 thay thế)"
+    },
+    {
+      "name": "no_negative",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "worldpop_covers_the_province",
+      "status": "PASS",
+      "detail": "91.9% ô có trọng số WorldPop"
+    },
+    {
+      "name": "anchor_ratio_is_reported_not_judged",
+      "status": "PASS",
+      "detail": "tỉnh này neo ×1.01 so với bề mặt WorldPop — số đo, không phải phán quyết"
+    }
+  ]
+}

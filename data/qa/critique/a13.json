@@ -1,0 +1,113 @@
+{
+  "code": "A13",
+  "verdict": "KHONG_HONG",
+  "cau_hoi": "chỗ khoảng cách nhảy giữa hai ô kề là rào cản thật hay lỗi neo",
+  "phuong_phap": "mọi cặp ô r8 kề nhau (grid_disk k=1) cùng tới được; |Δ dist_station_network_m|; rồi thử giải thích bằng mặt nước và tỉ số đi vòng, KHÔNG bằng một ngưỡng tự đặt",
+  "khoang_cach_tam_hai_o_ke_m": 800,
+  "nguong_goi_la_nhay_m": 2000.0,
+  "0_phan_bo": {
+    "n_cap_o_ke": 12498,
+    "trung_vi_m": 734.9,
+    "p90_m": 1636.7,
+    "p99_m": 4269.8,
+    "max_m": 20523.0,
+    "n_nhay_lon": 807,
+    "share_nhay_lon": 0.0646
+  },
+  "1_doi_chung_duong_song_ho": {
+    "share_nhay_lon_o_cap_VEN_NUOC": 0.0724,
+    "share_nhay_lon_o_cap_KHONG_ven_nuoc": 0.0588,
+    "ti_le_tang": 1.23,
+    "dien_giai": "nếu tỉ lệ tăng > 1 rõ rệt thì chỗ nhảy ĐANG bám vào rào cản thật — phép đo hoạt động đúng, không phải nhiễu"
+  },
+  "2_di_vong": {
+    "detour_trung_vi_cap_NHAY": 2.434,
+    "detour_trung_vi_cap_THUONG": 1.617,
+    "share_cap_nhay_co_detour_gt_2": 0.7522
+  },
+  "3_con_lai_chua_giai_thich": {
+    "n_cap": 107,
+    "share_tren_tong_cap_ke": 0.00856,
+    "share_tren_so_nhay_lon": 0.1326,
+    "offset_neo_trung_vi_m": 187.9,
+    "offset_neo_trung_vi_TOAN_CUC_m": 61.6,
+    "vai_cap": [
+      {
+        "a": "8841430d4bfffff",
+        "b": "8841430f35fffff",
+        "jump_m": 4924.152268676439,
+        "detour_max": 1.990965959015902,
+        "offset_max": 682.7335215902066
+      },
+      {
+        "a": "88415dd4d9fffff",
+        "b": "88415dd4dbfffff",
+        "jump_m": 4468.325966590746,
+        "detour_max": 1.9029293427077112,
+        "offset_max": 1371.7067642041097
+      },
+      {
+        "a": "88415dd487fffff",
+        "b": "88415dd4abfffff",
+        "jump_m": 4070.5003716670317,
+        "detour_max": 1.9067913826503564,
+        "offset_max": 532.721021348012
+      },
+      {
+        "a": "8841430f35fffff",
+        "b": "8841430f37fffff",
+        "jump_m": 3881.534557661327,
+        "detour_max": 1.990965959015902,
+        "offset_max": 559.9368293489047
+      },
+      {
+        "a": "8841430d19fffff",
+        "b": "8841430d1bfffff",
+        "jump_m": 3828.5039936278863,
+        "detour_max": 1.9873206294047923,
+        "offset_max": 1007.0827340763917
+      },
+      {
+        "a": "88415d8b65fffff",
+        "b": "88415dd4d9fffff",
+        "jump_m": 3758.033115594775,
+        "detour_max": 1.9029293427077112,
+        "offset_max": 1371.7067642041097
+      },
+      {
+        "a": "88415dd119fffff",
+        "b": "88415dd11bfffff",
+        "jump_m": 3676.79341943989,
+        "detour_max": 1.9995077886863193,
+        "offset_max": 96.76313020821706
+      },
+      {
+        "a": "8841430c65fffff",
+        "b": "8841430d59fffff",
+        "jump_m": 3597.20793729439,
+        "detour_max": 1.76302627271153,
+        "offset_max": 1044.8366779001108
+      },
+      {
+        "a": "88415cad89fffff",
+        "b": "88415cadc7fffff",
+        "jump_m": 3463.9532940330037,
+        "detour_max": 1.9739642771323944,
+        "offset_max": 604.8149908917293
+      },
+      {
+        "a": "88415dc441fffff",
+        "b": "88415dc44dfffff",
+        "jump_m": 3245.32057194375,
+        "detour_max": 1.9885992667158743,
+        "offset_max": 433.5154862262058
+      }
+    ]
+  },
+  "ket_luan": [
+    "Nhảy trung vị 735 m — đúng cỡ khoảng cách giữa hai tâm ô (~800 m), nên bản thân việc 'nhảy' KHÔNG phải triệu chứng.",
+    "Cặp ven sông/hồ nhảy lớn ở tỉ lệ 7.2% so với 5.9% ở cặp khô — gấp 1.2× ⇒ chỗ nhảy bám vào rào cản thật.",
+    "Cặp nhảy lớn có đi vòng trung vị 2.43× so với 1.62× ở cặp thường.",
+    "Chưa giải thích được: 107 cặp = 0.86% tổng số cặp kề."
+  ]
+}

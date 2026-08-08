@@ -1,0 +1,59 @@
+{
+  "layer": "n04_grid",
+  "resolution": 8,
+  "province_name": "Tỉnh Khánh Hòa",
+  "province_code": "56",
+  "stats": {
+    "n_cells": 18981,
+    "n_inside": 12150,
+    "n_border": 6831,
+    "n_sliver_excluded": 433,
+    "grid_area_km2_weighted": 12199.86,
+    "boundary_area_km2": 12149.72,
+    "cells_with_supply": 92,
+    "cells_with_poi": 282,
+    "share_cells_with_zero_poi": 0.9851,
+    "n_poi_assigned": 535,
+    "road_len_total_km": 11047.8,
+    "road_len_arterial_km": 2347.1,
+    "road_len_in_province_km": 10995.1,
+    "road_outside_boundary_share": 0.0048,
+    "share_cells_with_road": 0.2004,
+    "n_poi_1km_median": 0,
+    "n_poi_without_commune": 0,
+    "communes_with_zero_poi": 9,
+    "n_communes": 65
+  },
+  "checks": [
+    {
+      "name": "h3_unique",
+      "status": "PASS",
+      "detail": "18981 ô"
+    },
+    {
+      "name": "every_cell_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "grid_area_matches_boundary_lt_1pct",
+      "status": "PASS",
+      "detail": "lưới 12,199.9 km² vs đa giác 12,149.7 km² (lệch 0.41%)"
+    },
+    {
+      "name": "commune_frac_sums_to_province_frac",
+      "status": "PASS",
+      "detail": "max lệch 5.08e-13"
+    },
+    {
+      "name": "clipped_road_le_full_cell",
+      "status": "PASS",
+      "detail": "phần ngoài ranh giới 0.48% tổng chiều dài"
+    },
+    {
+      "name": "every_station_cell_in_grid",
+      "status": "PASS",
+      "detail": "0 trạm thuộc tỉnh rơi ra ngoài lưới báo cáo"
+    }
+  ]
+}

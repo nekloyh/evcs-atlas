@@ -1,0 +1,38 @@
+{
+  "layer": "n06_landcover",
+  "province_name": "Thành phố Cần Thơ",
+  "source": "ESA WorldCover 10 m v200 (2021)",
+  "no_buildable_field": "Trường `buildable` đã bị bỏ ở DECISIONS §7: ngưỡng không có cơ sở (hàm trơn, không có vai) và loại nhầm 3,3% trạm đang vận hành. Ảnh nguồn 2021 dùng cho 2026.",
+  "province_code": "92",
+  "stats": {
+    "n_cells": 7716,
+    "n_cells_uncovered": 0,
+    "tiles_used": [
+      "ESA_WorldCover_10m_2021_v200_N09E105_Map.tif"
+    ],
+    "raster_blocks_read": 7,
+    "median_px_per_cell": 10089,
+    "built_frac_mean": 0.0537,
+    "built_frac_p90": 0.1317,
+    "water_frac_mean": 0.0824,
+    "crop_frac_mean": 0.5658,
+    "tree_frac_mean": 0.2552
+  },
+  "checks": [
+    {
+      "name": "every_cell_covered",
+      "status": "PASS",
+      "detail": "0 ô không có pixel WorldCover nào"
+    },
+    {
+      "name": "fracs_sum_to_1",
+      "status": "PASS",
+      "detail": "max lệch 2.22e-16"
+    },
+    {
+      "name": "all_grid_cells_present",
+      "status": "PASS",
+      "detail": "7716/7716"
+    }
+  ]
+}

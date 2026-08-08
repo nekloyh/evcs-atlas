@@ -1,0 +1,59 @@
+{
+  "layer": "n04_grid",
+  "resolution": 8,
+  "province_name": "Tỉnh Lạng Sơn",
+  "province_code": "20",
+  "stats": {
+    "n_cells": 10856,
+    "n_inside": 10080,
+    "n_border": 776,
+    "n_sliver_excluded": 49,
+    "grid_area_km2_weighted": 8330.4,
+    "boundary_area_km2": 8293.4,
+    "cells_with_supply": 35,
+    "cells_with_poi": 72,
+    "share_cells_with_zero_poi": 0.9934,
+    "n_poi_assigned": 94,
+    "road_len_total_km": 11624.8,
+    "road_len_arterial_km": 1713.1,
+    "road_len_in_province_km": 11370.9,
+    "road_outside_boundary_share": 0.0218,
+    "share_cells_with_road": 0.5757,
+    "n_poi_1km_median": 0,
+    "n_poi_without_commune": 0,
+    "communes_with_zero_poi": 35,
+    "n_communes": 65
+  },
+  "checks": [
+    {
+      "name": "h3_unique",
+      "status": "PASS",
+      "detail": "10856 ô"
+    },
+    {
+      "name": "every_cell_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "grid_area_matches_boundary_lt_1pct",
+      "status": "PASS",
+      "detail": "lưới 8,330.4 km² vs đa giác 8,293.4 km² (lệch 0.45%)"
+    },
+    {
+      "name": "commune_frac_sums_to_province_frac",
+      "status": "PASS",
+      "detail": "max lệch 5.07e-13"
+    },
+    {
+      "name": "clipped_road_le_full_cell",
+      "status": "PASS",
+      "detail": "phần ngoài ranh giới 2.18% tổng chiều dài"
+    },
+    {
+      "name": "every_station_cell_in_grid",
+      "status": "PASS",
+      "detail": "0 trạm thuộc tỉnh rơi ra ngoài lưới báo cáo"
+    }
+  ]
+}

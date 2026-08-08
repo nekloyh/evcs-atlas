@@ -1,0 +1,66 @@
+{
+  "code": "A20_POI_TRAM",
+  "verdict": "KHONG_HONG",
+  "cau_hoi": "dựng đặc trưng POI quanh từng trạm, hai loại bán kính, để kiểm bằng util",
+  "n_tram": 660,
+  "n_tram_co_util_do_duoc": 632,
+  "n_poi": 20691,
+  "lop_poi": [
+    "AN_UONG",
+    "APARTMENT",
+    "BAN_LE_KHAC",
+    "BEN_XE_GA",
+    "CUA_HANG_TIEN_LOI",
+    "DEPT_STORE",
+    "FUEL",
+    "GIAI_TRI",
+    "GIAO_DUC",
+    "KHACH_SAN",
+    "MALL",
+    "MARKET",
+    "NGAN_HANG",
+    "PARKING_OFF",
+    "PARKING_STREET",
+    "SUPERMARKET",
+    "VAN_PHONG",
+    "Y_TE"
+  ],
+  "ban_kinh_m": [
+    300,
+    500,
+    1000,
+    1500
+  ],
+  "so_poi_trung_vi_quanh_tram": {
+    "eu300": 2.0,
+    "eu500": 5.0,
+    "eu1000": 18.5,
+    "eu1500": 44.5,
+    "rd300": 0.0,
+    "rd500": 2.0,
+    "rd1000": 7.0,
+    "rd1500": 19.0
+  },
+  "chim_bay_vs_mang_duong": {
+    "R300": {
+      "ti_le_poi_mang_tren_chim_bay_trung_vi": 0.25,
+      "n_tram_mang_it_hon_mot_nua": 330
+    },
+    "R500": {
+      "ti_le_poi_mang_tren_chim_bay_trung_vi": 0.333,
+      "n_tram_mang_it_hon_mot_nua": 354
+    },
+    "R1000": {
+      "ti_le_poi_mang_tren_chim_bay_trung_vi": 0.467,
+      "n_tram_mang_it_hon_mot_nua": 332
+    },
+    "R1500": {
+      "ti_le_poi_mang_tren_chim_bay_trung_vi": 0.5,
+      "n_tram_mang_it_hon_mot_nua": 316
+    }
+  },
+  "ket_luan": [
+    "632/660 trạm có `util` đo được tin cậy — đây là trần của mọi phép kiểm chứng POI.",
+    "Bán kính mạng đường luôn bắt ít POI hơn chim bay ở cùng R; chênh lệch đó chính là thứ §9 dùng để kiểm giả thuyết 'POI ảnh hưởng qua đường đi thật'."
+  ]
+}

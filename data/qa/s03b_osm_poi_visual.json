@@ -1,0 +1,36 @@
+{
+  "layer": "osm_poi_visual",
+  "source_pbf": "/home/n91ym1nhky/Work/internVSF/aGiang-evcs/data/raw/osm/vietnam-latest.osm.pbf",
+  "aoi": "ranh giới VNSDI Hà Nội + đệm 5 km (đa giác thật, không phải bbox)",
+  "stats": {
+    "poi": 6633,
+    "by_group": {
+      "apartment": {
+        "n": 2561,
+        "n_polygon": 2501,
+        "n_point_only": 60,
+        "node_dupes_dropped": 8
+      },
+      "mall": {
+        "n": 143,
+        "n_polygon": 54,
+        "n_point_only": 89,
+        "node_dupes_dropped": 4
+      },
+      "public": {
+        "n": 1698,
+        "n_polygon": 1603,
+        "n_point_only": 95,
+        "node_dupes_dropped": 44
+      },
+      "edu_health": {
+        "n": 2231,
+        "n_polygon": 1908,
+        "n_point_only": 323,
+        "node_dupes_dropped": 58
+      }
+    },
+    "multipolygon_assembly_errors": 0,
+    "elapsed_s": 97.3
+  }
+}

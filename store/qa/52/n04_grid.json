@@ -1,0 +1,59 @@
+{
+  "layer": "n04_grid",
+  "resolution": 8,
+  "province_name": "Tỉnh Gia Lai",
+  "province_code": "52",
+  "stats": {
+    "n_cells": 26740,
+    "n_inside": 25698,
+    "n_border": 1042,
+    "n_sliver_excluded": 48,
+    "grid_area_km2_weighted": 21665.82,
+    "boundary_area_km2": 21569.61,
+    "cells_with_supply": 143,
+    "cells_with_poi": 202,
+    "share_cells_with_zero_poi": 0.9924,
+    "n_poi_assigned": 268,
+    "road_len_total_km": 28568.2,
+    "road_len_arterial_km": 3057.3,
+    "road_len_in_province_km": 28456.4,
+    "road_outside_boundary_share": 0.0039,
+    "share_cells_with_road": 0.3987,
+    "n_poi_1km_median": 0,
+    "n_poi_without_commune": 0,
+    "communes_with_zero_poi": 67,
+    "n_communes": 135
+  },
+  "checks": [
+    {
+      "name": "h3_unique",
+      "status": "PASS",
+      "detail": "26740 ô"
+    },
+    {
+      "name": "every_cell_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "grid_area_matches_boundary_lt_1pct",
+      "status": "PASS",
+      "detail": "lưới 21,665.8 km² vs đa giác 21,569.6 km² (lệch 0.45%)"
+    },
+    {
+      "name": "commune_frac_sums_to_province_frac",
+      "status": "PASS",
+      "detail": "max lệch 6.38e-13"
+    },
+    {
+      "name": "clipped_road_le_full_cell",
+      "status": "PASS",
+      "detail": "phần ngoài ranh giới 0.39% tổng chiều dài"
+    },
+    {
+      "name": "every_station_cell_in_grid",
+      "status": "PASS",
+      "detail": "0 trạm thuộc tỉnh rơi ra ngoài lưới báo cáo"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "layer": "admin",
+  "source": "VNSDI (crawl aGiang-evcs data/interim/vnsdi)",
+  "valid_from": "16/6/2025",
+  "published": "13/07/2025",
+  "stats": {
+    "n_communes": 126,
+    "population_total": 8732930,
+    "area_km2_published": 3359.77,
+    "area_km2_geom": 3348.92,
+    "bbox_boundary": [
+      105.288836,
+      20.563769,
+      106.020184,
+      21.383219
+    ],
+    "bbox_buffered": [
+      105.240731,
+      20.51869,
+      106.068146,
+      21.428432
+    ],
+    "buffer_m": 5000
+  },
+  "checks": [
+    {
+      "name": "commune_code_unique",
+      "status": "PASS",
+      "detail": "126 mã"
+    },
+    {
+      "name": "all_geoms_valid",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "single_province",
+      "status": "PASS",
+      "detail": "['01']"
+    },
+    {
+      "name": "area_published_vs_geom_lt_2pct",
+      "status": "PASS",
+      "detail": "lệch 0.32%"
+    },
+    {
+      "name": "boundary_is_single_polygon",
+      "status": "PASS",
+      "detail": "Polygon"
+    },
+    {
+      "name": "buffer_contains_boundary",
+      "status": "PASS",
+      "detail": ""
+    }
+  ]
+}

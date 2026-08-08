@@ -1,0 +1,59 @@
+{
+  "layer": "n04_grid",
+  "resolution": 8,
+  "province_name": "Thành phố Hồ Chí Minh",
+  "province_code": "79",
+  "stats": {
+    "n_cells": 8519,
+    "n_inside": 7478,
+    "n_border": 1041,
+    "n_sliver_excluded": 58,
+    "grid_area_km2_weighted": 6765.57,
+    "boundary_area_km2": 6735.67,
+    "cells_with_supply": 630,
+    "cells_with_poi": 1031,
+    "share_cells_with_zero_poi": 0.879,
+    "n_poi_assigned": 4989,
+    "road_len_total_km": 37320.1,
+    "road_len_arterial_km": 4827.1,
+    "road_len_in_province_km": 36304.3,
+    "road_outside_boundary_share": 0.0272,
+    "share_cells_with_road": 0.8109,
+    "n_poi_1km_median": 0,
+    "n_poi_without_commune": 0,
+    "communes_with_zero_poi": 6,
+    "n_communes": 168
+  },
+  "checks": [
+    {
+      "name": "h3_unique",
+      "status": "PASS",
+      "detail": "8519 ô"
+    },
+    {
+      "name": "every_cell_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "grid_area_matches_boundary_lt_1pct",
+      "status": "PASS",
+      "detail": "lưới 6,765.6 km² vs đa giác 6,735.7 km² (lệch 0.44%)"
+    },
+    {
+      "name": "commune_frac_sums_to_province_frac",
+      "status": "PASS",
+      "detail": "max lệch 6.12e-13"
+    },
+    {
+      "name": "clipped_road_le_full_cell",
+      "status": "PASS",
+      "detail": "phần ngoài ranh giới 2.72% tổng chiều dài"
+    },
+    {
+      "name": "every_station_cell_in_grid",
+      "status": "PASS",
+      "detail": "0 trạm thuộc tỉnh rơi ra ngoài lưới báo cáo"
+    }
+  ]
+}

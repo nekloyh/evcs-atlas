@@ -1,0 +1,124 @@
+{
+  "code": "A01",
+  "verdict": "HONG",
+  "cau_hoi": "road/POI/landcover tính trên toàn ô, population chỉ tính phần trong ranh giới — có lệch thật không?",
+  "do_duoc": {
+    "n_border": 523,
+    "border_area_frac_median": 0.4800766344743975,
+    "area_outside_km2": 214.27814124814913,
+    "road_total_now_km": 30616.666259959275,
+    "road_total_clipped_km": 29297.07523323332,
+    "road_outside_km": 1319.5910267259517,
+    "road_outside_pct": 4.310041516347985,
+    "road_arterial_outside_pct": 5.912554332588127,
+    "poi_total_now": 3958,
+    "poi_total_clipped": 3919,
+    "poi_outside": 39,
+    "border_road_now_km": 2512.415518473016,
+    "border_road_clipped_km": 1192.8244917470618,
+    "border_road_loss_pct": 52.52280194193233
+  },
+  "ti_le_tren_dau_nguoi": {
+    "note": "road_len_m / population, chỉ ô có >50 dân",
+    "border_median_rel_change_pct": -21.023017569308706,
+    "border_p10_rel_change_pct": -83.37340703791519,
+    "inside_median_rel_change_pct": 0.0,
+    "n_border_cells_shift_gt_20pct": 147,
+    "n_border_cells_with_pop": 289
+  },
+  "o_cuc_doan_area_frac_lt_0_01": {
+    "n_cells": 27,
+    "road_km_now": 139.9386867677146,
+    "road_km_clipped": 0.2906259219383467,
+    "population": 78.46754848804873,
+    "poi": 3,
+    "n_stations": 0
+  },
+  "bat_bien_khong_duoc_doi": {
+    "population_total": 8831204.35287416,
+    "n_stations_total": 2521,
+    "n_ports_total": 9596
+  },
+  "10_o_bien_lech_nhat": [
+    {
+      "h3_r8": "88415dd859fffff",
+      "area_frac": 5.35692258416706e-05,
+      "road_now": 5873.581932329111,
+      "road_clipped": 0.0,
+      "population": 0.0,
+      "loss": 1.0
+    },
+    {
+      "h3_r8": "8841430dc5fffff",
+      "area_frac": 0.23824968011132522,
+      "road_now": 679.5686875217225,
+      "road_clipped": 0.0,
+      "population": 0.0,
+      "loss": 1.0
+    },
+    {
+      "h3_r8": "8841430d97fffff",
+      "area_frac": 0.051226849860501966,
+      "road_now": 1837.247558238208,
+      "road_clipped": 0.0,
+      "population": 1.6056644526313397,
+      "loss": 1.0
+    },
+    {
+      "h3_r8": "8841430d4dfffff",
+      "area_frac": 0.3049442048144664,
+      "road_now": 211.42391115831066,
+      "road_clipped": 0.0,
+      "population": 16.477619123653,
+      "loss": 1.0
+    },
+    {
+      "h3_r8": "8841430d49fffff",
+      "area_frac": 0.7842423524430046,
+      "road_now": 795.3032049498638,
+      "road_clipped": 0.0,
+      "population": 60.6723598560615,
+      "loss": 1.0
+    },
+    {
+      "h3_r8": "88415dd847fffff",
+      "area_frac": 0.009644232676279514,
+      "road_now": 6021.368441525636,
+      "road_clipped": 0.0,
+      "population": 1.8584949483134723,
+      "loss": 1.0
+    },
+    {
+      "h3_r8": "88415dd6cbfffff",
+      "area_frac": 0.04656170270494171,
+      "road_now": 1463.8585401675996,
+      "road_clipped": 0.0,
+      "population": 0.7280546113389165,
+      "loss": 1.0
+    },
+    {
+      "h3_r8": "88415dd69bfffff",
+      "area_frac": 0.08622585473897364,
+      "road_now": 461.9675038440833,
+      "road_clipped": 0.0,
+      "population": 0.0,
+      "loss": 1.0
+    },
+    {
+      "h3_r8": "88415dce23fffff",
+      "area_frac": 0.019494715363548947,
+      "road_now": 7073.5866217984085,
+      "road_clipped": 0.0,
+      "population": 0.0,
+      "loss": 1.0
+    },
+    {
+      "h3_r8": "88415dd197fffff",
+      "area_frac": 0.3070882853030902,
+      "road_now": 1259.097816102918,
+      "road_clipped": 0.0,
+      "population": 18.42467527982435,
+      "loss": 1.0
+    }
+  ]
+}

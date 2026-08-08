@@ -1,0 +1,111 @@
+{
+  "code": "A05",
+  "verdict": "KHONG_HONG",
+  "cau_hoi": "dist_station_network_m đo chiều nào, nhãn có đúng không, lệch bao nhiêu",
+  "do_thi": {
+    "dinh": 1334688,
+    "canh_co_huong": 2773510,
+    "tram_neo_duoc": 833,
+    "o": 4400,
+    "o_co_ca_hai_chieu": 4349
+  },
+  "1_kiem_nhan": {
+    "phuong_phap": "Dijkstra một nguồn từ đỉnh neo của ô trên đồ thị GỐC, min qua đỉnh-trạm — không dùng đồ thị đảo, không chia giả định nào với s08",
+    "n_o_kiem": 50,
+    "nhan_dung_o_den_tram": true,
+    "trung_voi_d_from_thay_vi_d_to": false,
+    "lech_tuyet_doi_max_m": 0.0,
+    "vai_vi_du": [
+      {
+        "h3_r8": "8841430997fffff",
+        "doc_lap_o_den_tram_m": 1446.7868421722274,
+        "s08_d_to_m": 1446.7868421722278,
+        "d_from_m": 1446.7868421722278,
+        "lech_m": -4.547473508864641e-13
+      },
+      {
+        "h3_r8": "8841430d61fffff",
+        "doc_lap_o_den_tram_m": 618.1770915141503,
+        "s08_d_to_m": 618.1770915141502,
+        "d_from_m": 618.1770915141502,
+        "lech_m": 1.1368683772161603e-13
+      },
+      {
+        "h3_r8": "88414344bbfffff",
+        "doc_lap_o_den_tram_m": 3688.1078523664382,
+        "s08_d_to_m": 3688.1078523664396,
+        "d_from_m": 3688.1078523664396,
+        "lech_m": -1.3642420526593924e-12
+      },
+      {
+        "h3_r8": "8841436017fffff",
+        "doc_lap_o_den_tram_m": 1331.5538631936217,
+        "s08_d_to_m": 1331.553863193622,
+        "d_from_m": 1331.553863193622,
+        "lech_m": -2.2737367544323206e-13
+      },
+      {
+        "h3_r8": "88414368abfffff",
+        "doc_lap_o_den_tram_m": 10855.955870540563,
+        "s08_d_to_m": 10855.955870540562,
+        "d_from_m": 2089.290364593962,
+        "lech_m": 1.8189894035458565e-12
+      },
+      {
+        "h3_r8": "88414368adfffff",
+        "doc_lap_o_den_tram_m": 1832.675785199151,
+        "s08_d_to_m": 1832.675785199151,
+        "d_from_m": 3646.53712297389,
+        "lech_m": 0.0
+      },
+      {
+        "h3_r8": "8841436985fffff",
+        "doc_lap_o_den_tram_m": 1664.98700775717,
+        "s08_d_to_m": 1664.9870077571695,
+        "d_from_m": 1664.9870077571695,
+        "lech_m": 4.547473508864641e-13
+      },
+      {
+        "h3_r8": "88414369dbfffff",
+        "doc_lap_o_den_tram_m": 2469.0775512505693,
+        "s08_d_to_m": 2469.0775512505693,
+        "d_from_m": 4880.315999020195,
+        "lech_m": 0.0
+      }
+    ]
+  },
+  "2_bat_doi_xung": {
+    "lech_tuyet_doi_m": {
+      "trung_vi": 0.0,
+      "p90": 155.0,
+      "p99": 1059.2,
+      "max": 16293.0,
+      "trung_binh": 75.7
+    },
+    "ti_so_d_to_tren_d_from": {
+      "trung_vi": 1.0,
+      "p90": 1.005,
+      "max": 8.954
+    },
+    "n_o_lech_gt_100m": 532,
+    "n_o_lech_gt_500m": 187,
+    "share_o_lech_gt_500m": 0.043,
+    "dan_o_lech_gt_500m": 450943,
+    "spearman_d_to_vs_d_from": 0.985708
+  },
+  "3_khu_hoi": {
+    "khu_hoi_trung_vi_m": 4607.7,
+    "mot_chieu_trung_vi_m": 2306.1,
+    "ti_le_khu_hoi_tren_2_lan_mot_chieu": 0.999,
+    "spearman_d_to_vs_khu_hoi": 0.996484,
+    "top200_thieu_hut_trung_mot_chieu_vs_khu_hoi": 0.975
+  },
+  "ket_luan": [
+    "NHÃN ĐÚNG: phép tính độc lập trên đồ thị gốc khớp d_to tới dưới 1 m.",
+    "Bảng đã build khớp lại được, lệch tối đa 0 m.",
+    "Bất đối xứng: trung vị 0 m, p90 155 m, 4.30% số ô lệch quá 500 m; Spearman hai chiều 0.9857."
+  ],
+  "khop_bang_da_build": {
+    "lech_max_m": 0.0
+  }
+}

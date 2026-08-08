@@ -1,0 +1,47 @@
+{
+  "layer": "n05_population",
+  "province_name": "Tỉnh Đồng Nai",
+  "method": "dasymetric: WorldPop 2025 R2024B (trọng số) neo theo VNSDI danso (tổng kiểm soát)",
+  "weight_raster": "/home/n91ym1nhky/Work/internVSF/aGiang-evcs/data/raw/worldpop/vnm_pop_2025_CN_100m_R2024B_v1.tif",
+  "province_code": "75",
+  "stats": {
+    "population_total": 4486913.8,
+    "population_published_vnsdi": 4491408.0,
+    "population_worldpop_raw": 4509129.8,
+    "anchor_ratio_province": 0.9961,
+    "anchor_ratio_commune_median": 1.1811,
+    "anchor_ratio_commune_p90": 1.5671,
+    "n_communes_unanchored_implausible": 1,
+    "n_communes_without_weight": 0,
+    "n_cells": 15663,
+    "n_cells_with_pop": 12990,
+    "pop_source_counts": {
+      "WORLDPOP2025_ANCHORED_VNSDI": 12913,
+      "ZERO_NO_WEIGHT": 2673,
+      "WORLDPOP2025_UNANCHORED_OFFICIAL_IMPLAUSIBLE": 77
+    },
+    "max_cell_population": 17190.7
+  },
+  "checks": [
+    {
+      "name": "total_matches_official_plus_declared_substitutions",
+      "status": "PASS",
+      "detail": "4,486,914 vs kỳ vọng 4,486,916 (công bố 4,491,408 − 8,234 + 3,742 thay thế)"
+    },
+    {
+      "name": "no_negative",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "worldpop_covers_the_province",
+      "status": "PASS",
+      "detail": "82.9% ô có trọng số WorldPop"
+    },
+    {
+      "name": "anchor_ratio_is_reported_not_judged",
+      "status": "PASS",
+      "detail": "tỉnh này neo ×1.00 so với bề mặt WorldPop — số đo, không phải phán quyết"
+    }
+  ]
+}

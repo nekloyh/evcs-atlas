@@ -1,0 +1,59 @@
+{
+  "layer": "n04_grid",
+  "resolution": 8,
+  "province_name": "Tỉnh Tây Ninh",
+  "province_code": "80",
+  "stats": {
+    "n_cells": 10491,
+    "n_inside": 9597,
+    "n_border": 894,
+    "n_sliver_excluded": 47,
+    "grid_area_km2_weighted": 8557.13,
+    "boundary_area_km2": 8519.2,
+    "cells_with_supply": 164,
+    "cells_with_poi": 181,
+    "share_cells_with_zero_poi": 0.9827,
+    "n_poi_assigned": 246,
+    "road_len_total_km": 26235.3,
+    "road_len_arterial_km": 2826.8,
+    "road_len_in_province_km": 25294.0,
+    "road_outside_boundary_share": 0.0359,
+    "share_cells_with_road": 0.8104,
+    "n_poi_1km_median": 0,
+    "n_poi_without_commune": 0,
+    "communes_with_zero_poi": 31,
+    "n_communes": 96
+  },
+  "checks": [
+    {
+      "name": "h3_unique",
+      "status": "PASS",
+      "detail": "10491 ô"
+    },
+    {
+      "name": "every_cell_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "grid_area_matches_boundary_lt_1pct",
+      "status": "PASS",
+      "detail": "lưới 8,557.1 km² vs đa giác 8,519.2 km² (lệch 0.45%)"
+    },
+    {
+      "name": "commune_frac_sums_to_province_frac",
+      "status": "PASS",
+      "detail": "max lệch 5.04e-13"
+    },
+    {
+      "name": "clipped_road_le_full_cell",
+      "status": "PASS",
+      "detail": "phần ngoài ranh giới 3.59% tổng chiều dài"
+    },
+    {
+      "name": "every_station_cell_in_grid",
+      "status": "PASS",
+      "detail": "0 trạm thuộc tỉnh rơi ra ngoài lưới báo cáo"
+    }
+  ]
+}

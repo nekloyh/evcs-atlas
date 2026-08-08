@@ -1,0 +1,73 @@
+{
+  "layer": "n07_distance",
+  "province_name": "Thành phố Hồ Chí Minh",
+  "method": "Dijkstra đa nguồn trên đồ thị đường OSM (đúng chiều một chiều), trọng số MÉT",
+  "no_time_field": "Không phát trường thời gian: bảng tốc độ giả định chi phối 100% giá trị và 62% ô đổi nhóm ngưỡng phút khi đổi bảng ±30% (DECISIONS §6).",
+  "province_code": "79",
+  "stats": {
+    "n_cells": 8519,
+    "n_reachable": 7913,
+    "share_reachable": 0.9289,
+    "dist_median_m": 4295.3,
+    "dist_p90_m": 11650.2,
+    "euclid_median_m": 2995.9,
+    "detour_ratio_median": 1.491,
+    "detour_ratio_p90": 2.343,
+    "cells_where_euclid_understates_gt_2x": 1338,
+    "detour_ratio_null_cells": 708,
+    "asym_median_m": 0.3,
+    "cells_asym_gt_500m": 1192,
+    "neighbor_jump_median_m": 835.7,
+    "neighbor_pairs_jump_gt_2km_share": 0.1092
+  },
+  "checks": [
+    {
+      "name": "network_ge_euclid",
+      "status": "PASS",
+      "detail": "min tỉ số 1.006 (đường mạng không thể ngắn hơn chim bay)"
+    },
+    {
+      "name": "no_negative_distance",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "no_time_field",
+      "status": "PASS",
+      "detail": "bộ dữ liệu không phát trường thời gian nào — chỉ mét"
+    },
+    {
+      "name": "all_anchors_can_drive_on",
+      "status": "PASS",
+      "detail": "mọi điểm neo (ô và trạm) nằm trong một SCC ≥ 100 đỉnh — xe đi tiếp được, không phải đầu cụt"
+    },
+    {
+      "name": "most_cells_reachable",
+      "status": "FAIL",
+      "detail": "7913/8519 = 92.9%"
+    }
+  ],
+  "graph": {
+    "ways_total": 251978,
+    "ways_dropped_access_blocked": 1015,
+    "access_blocked_values": [
+      "customers",
+      "delivery",
+      "no",
+      "permit",
+      "private",
+      "residents"
+    ],
+    "nodes": 1333613,
+    "nodes_in_core_sccs": 1323677,
+    "n_core_components": 38,
+    "min_scc_nodes": 100,
+    "n_strongly_connected_components": 2394,
+    "directed_edges": 2722949,
+    "stations_total": 881,
+    "stations_snapped": 881,
+    "station_source_nodes": 838,
+    "snap_max_m": 2000.0,
+    "m_per_deg_lon": 109325.4
+  }
+}

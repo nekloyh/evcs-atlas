@@ -1,0 +1,59 @@
+{
+  "layer": "n04_grid",
+  "resolution": 8,
+  "province_name": "Tỉnh Phú Thọ",
+  "province_code": "25",
+  "stats": {
+    "n_cells": 11996,
+    "n_inside": 11099,
+    "n_border": 897,
+    "n_sliver_excluded": 48,
+    "grid_area_km2_weighted": 9370.84,
+    "boundary_area_km2": 9329.27,
+    "cells_with_supply": 279,
+    "cells_with_poi": 175,
+    "share_cells_with_zero_poi": 0.9854,
+    "n_poi_assigned": 224,
+    "road_len_total_km": 32052.6,
+    "road_len_arterial_km": 3189.5,
+    "road_len_in_province_km": 31204.1,
+    "road_outside_boundary_share": 0.0265,
+    "share_cells_with_road": 0.7477,
+    "n_poi_1km_median": 0,
+    "n_poi_without_commune": 0,
+    "communes_with_zero_poi": 82,
+    "n_communes": 148
+  },
+  "checks": [
+    {
+      "name": "h3_unique",
+      "status": "PASS",
+      "detail": "11996 ô"
+    },
+    {
+      "name": "every_cell_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "grid_area_matches_boundary_lt_1pct",
+      "status": "PASS",
+      "detail": "lưới 9,370.8 km² vs đa giác 9,329.3 km² (lệch 0.45%)"
+    },
+    {
+      "name": "commune_frac_sums_to_province_frac",
+      "status": "PASS",
+      "detail": "max lệch 5.71e-13"
+    },
+    {
+      "name": "clipped_road_le_full_cell",
+      "status": "PASS",
+      "detail": "phần ngoài ranh giới 2.65% tổng chiều dài"
+    },
+    {
+      "name": "every_station_cell_in_grid",
+      "status": "PASS",
+      "detail": "0 trạm thuộc tỉnh rơi ra ngoài lưới báo cáo"
+    }
+  ]
+}

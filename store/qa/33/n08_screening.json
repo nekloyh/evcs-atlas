@@ -1,0 +1,68 @@
+{
+  "layer": "n08_screening",
+  "province_name": "Tỉnh Hưng Yên",
+  "rule": {
+    "nguong_m": {
+      "PHUONG": 500.0,
+      "XA": 2000.0,
+      "DAC_KHU": 500.0
+    },
+    "nguong_ngoai_le_m": 500.0,
+    "cao_tai_nguong_util": 0.4,
+    "khoang_cach": "CHIM BAY (dist_station_euclid_m) — khách hàng chốt",
+    "dac_khu": "áp ngưỡng của PHƯỜNG. Rule viết trước khi cấp đặc khu tồn tại nên không nói gì về chúng — đây là suy luận, được đếm riêng ở stats.n_o_dac_khu."
+  },
+  "province_code": "33",
+  "stats": {
+    "n_cells": 3386,
+    "DE_XUAT": 2003,
+    "DE_XUAT_NEU_CO_DC": 48,
+    "TU_CHOI": 1335,
+    "share_de_xuat": 0.6057,
+    "dan_o_DE_XUAT": 1834251,
+    "dan_o_TU_CHOI": 1674362,
+    "theo_loai_don_vi": {
+      "PHUONG": {
+        "n_o": 331,
+        "DE_XUAT": 299,
+        "TU_CHOI": 32
+      },
+      "XA": {
+        "n_o": 3055,
+        "DE_XUAT": 1704,
+        "TU_CHOI": 1303
+      },
+      "DAC_KHU": {
+        "n_o": 0,
+        "DE_XUAT": 0,
+        "TU_CHOI": 0
+      }
+    },
+    "n_o_dac_khu": 0,
+    "margin_median_m": 329.6,
+    "n_o_sat_nguong_100m": 197,
+    "n_tram_cao_tai": 14
+  },
+  "checks": [
+    {
+      "name": "all_cells_present",
+      "status": "PASS",
+      "detail": "3386/3386"
+    },
+    {
+      "name": "decision_matches_margin",
+      "status": "PASS",
+      "detail": "DE_XUAT khi và chỉ khi vượt ngưỡng — ngoại lệ nằm ở nhãn riêng"
+    },
+    {
+      "name": "exception_only_in_xa",
+      "status": "PASS",
+      "detail": "ngoại lệ cao tải chỉ áp cho Xã, đúng như rule"
+    }
+  ],
+  "KHOANG_TRONG": {
+    "tram_sap_van_hanh": "Rule yêu cầu xét cả trạm chuẩn bị vận hành / đang xây / đã cấp phép. Nguồn không có trạng thái đó. Engine vì thế sẽ ĐỀ XUẤT ở những chỗ sắp có trạm — sai theo hướng nới lỏng.",
+    "khong_co_ho_so_that": "Không tồn tại tập đơn thật (được duyệt/bị từ chối) để kiểm chứng đầu-cuối.",
+    "n_o_ngoai_le_bi_chan_vi_thieu_util": 191
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "layer": "n04_grid",
+  "resolution": 8,
+  "province_name": "Tỉnh Lai Châu",
+  "province_code": "12",
+  "stats": {
+    "n_cells": 11615,
+    "n_inside": 10775,
+    "n_border": 840,
+    "n_sliver_excluded": 40,
+    "grid_area_km2_weighted": 9095.29,
+    "boundary_area_km2": 9054.8,
+    "cells_with_supply": 19,
+    "cells_with_poi": 53,
+    "share_cells_with_zero_poi": 0.9954,
+    "n_poi_assigned": 69,
+    "road_len_total_km": 6408.8,
+    "road_len_arterial_km": 1190.9,
+    "road_len_in_province_km": 6310.3,
+    "road_outside_boundary_share": 0.0154,
+    "share_cells_with_road": 0.333,
+    "n_poi_1km_median": 0,
+    "n_poi_without_commune": 0,
+    "communes_with_zero_poi": 18,
+    "n_communes": 38
+  },
+  "checks": [
+    {
+      "name": "h3_unique",
+      "status": "PASS",
+      "detail": "11615 ô"
+    },
+    {
+      "name": "every_cell_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "grid_area_matches_boundary_lt_1pct",
+      "status": "PASS",
+      "detail": "lưới 9,095.3 km² vs đa giác 9,054.8 km² (lệch 0.45%)"
+    },
+    {
+      "name": "commune_frac_sums_to_province_frac",
+      "status": "PASS",
+      "detail": "max lệch 5.42e-13"
+    },
+    {
+      "name": "clipped_road_le_full_cell",
+      "status": "PASS",
+      "detail": "phần ngoài ranh giới 1.54% tổng chiều dài"
+    },
+    {
+      "name": "every_station_cell_in_grid",
+      "status": "PASS",
+      "detail": "0 trạm thuộc tỉnh rơi ra ngoài lưới báo cáo"
+    }
+  ]
+}

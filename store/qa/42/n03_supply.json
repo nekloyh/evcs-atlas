@@ -1,0 +1,97 @@
+{
+  "layer": "n03_supply",
+  "source": "aGiang-evcs data/interim/canonical + data/interim/occ (evcs.vn, đã dedup vật lý)",
+  "province_name": "Tỉnh Hà Tĩnh",
+  "province_code": "42",
+  "stats": {
+    "n_stations_national_pool": 19598,
+    "n_stations_in": 99,
+    "n_stations_buffer_ring": 32,
+    "n_connectors_rows": 237,
+    "n_ports_total": 825,
+    "power_kw_site_total": 23736.5,
+    "power_kw_per_station": 239.8,
+    "op_status": {
+      "OPERATIONAL": 97,
+      "MAINTENANCE": 1,
+      "UNKNOWN": 1
+    },
+    "current_type": {
+      "DC": 62,
+      "MIXED": 36,
+      "nan": 1
+    },
+    "commune_kind": {
+      "XA": 58,
+      "PHUONG": 41
+    },
+    "access": {
+      "PUBLIC": 98,
+      "UNKNOWN": 1
+    },
+    "verified_official_share": 0.9899,
+    "n_communes_with_station": 44,
+    "n_stations_with_occ": 98,
+    "occ_coverage": 0.9899,
+    "occ_grade": {
+      "GOOD": 68,
+      "PARTIAL": 20,
+      "INSUFFICIENT": 10
+    },
+    "util_median": 0.1028,
+    "n_profile_rows": 15177,
+    "upstream_province_label_agreement": 1.0
+  },
+  "checks": [
+    {
+      "name": "station_id_unique",
+      "status": "PASS",
+      "detail": "131 trạm"
+    },
+    {
+      "name": "every_in_station_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "buffer_stations_have_no_commune",
+      "status": "PASS",
+      "detail": "trạm ngoài tỉnh không được gán xã của tỉnh này"
+    },
+    {
+      "name": "no_private_ac_left",
+      "status": "PASS",
+      "detail": "đã loại 217 trạm 1-súng-AC (68.7% số trạm, nhưng 7.9% công suất)"
+    },
+    {
+      "name": "upstream_province_label_agrees",
+      "status": "PASS",
+      "detail": "100.00% trạm IN có admin_l1_code khớp phép gán hình học ở đây"
+    },
+    {
+      "name": "connectors_fk_ok",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "occ_only_for_in_scope",
+      "status": "PASS",
+      "detail": "occupancy chỉ cho trạm thuộc tỉnh, không cho trạm vành đệm"
+    },
+    {
+      "name": "profile_cells_le_168",
+      "status": "PASS",
+      "detail": "max 168 ô/trạm"
+    }
+  ],
+  "dropped_private_ac": {
+    "predicate": "n_guns_installed == 1 AND current_type_asset == 'AC'",
+    "n_dropped_total": 299,
+    "n_dropped_in": 217,
+    "n_dropped_buffer": 82,
+    "n_stations_in_before": 316,
+    "share_of_stations_before": 0.6867,
+    "share_of_ports_before": 0.2083,
+    "share_of_power_before": 0.079
+  }
+}

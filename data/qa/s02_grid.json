@@ -1,0 +1,80 @@
+{
+  "layer": "grid",
+  "resolution": 8,
+  "stats": {
+    "n_cells": 4400,
+    "n_inside": 3904,
+    "n_border": 496,
+    "n_buffered_cells": 6659,
+    "grid_area_km2_weighted": 3363.86,
+    "boundary_area_km2": 3348.92,
+    "median_commune_area_frac": 1.0,
+    "cells_with_ambiguous_commune_lt_0_6": 573,
+    "sliver_cells_excluded": {
+      "min_area_frac": 0.01,
+      "n": 27,
+      "max_area_frac_among_excluded": 0.009644,
+      "cells": [
+        "8841430929fffff",
+        "8841430dd5fffff",
+        "8841430f23fffff",
+        "8841434441fffff",
+        "8841434519fffff",
+        "8841434623fffff",
+        "8841434cd1fffff",
+        "88414360bbfffff",
+        "8841436e35fffff",
+        "8841437731fffff",
+        "88415c32cdfffff",
+        "88415ca035fffff",
+        "88415ca185fffff",
+        "88415ca2e7fffff",
+        "88415caa95fffff",
+        "88415cacabfffff",
+        "88415cad95fffff",
+        "88415d8925fffff",
+        "88415dc1b3fffff",
+        "88415dc1d9fffff",
+        "88415dc42bfffff",
+        "88415dc439fffff",
+        "88415dc61bfffff",
+        "88415dd847fffff",
+        "88415dd859fffff",
+        "88415ddb05fffff",
+        "88415ddb0dfffff"
+      ]
+    }
+  },
+  "checks": [
+    {
+      "name": "h3_unique",
+      "status": "PASS",
+      "detail": "4400 ô"
+    },
+    {
+      "name": "no_sliver_cells_in_grid",
+      "status": "PASS",
+      "detail": "27 ô vụn đã bị loại (area_frac < 0.01)"
+    },
+    {
+      "name": "every_cell_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "area_frac_in_0_1",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "grid_area_matches_boundary_lt_1pct",
+      "status": "PASS",
+      "detail": "lưới 3,363.9 km² vs đa giác 3,348.9 km² (lệch 0.45%)"
+    },
+    {
+      "name": "commune_frac_sums_to_province_frac",
+      "status": "PASS",
+      "detail": "max lệch 5.21e-13"
+    }
+  ]
+}

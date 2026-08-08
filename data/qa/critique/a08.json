@@ -1,0 +1,30 @@
+{
+  "code": "A08",
+  "verdict": "CANH_BAO",
+  "cau_hoi": "Hình dạng dân số bên trong xã có được biến độc lập nào xác nhận không?",
+  "tuong_quan_doi_chung": {
+    "spearman_pop_vs_built_frac": 0.901,
+    "spearman_pop_vs_built_km2": 0.942,
+    "spearman_pop_vs_apartment_levels_sum": 0.3,
+    "spearman_pop_vs_road_len_m": 0.836,
+    "spearman_trong_xa_median": 0.903,
+    "spearman_trong_xa_p10": 0.692,
+    "n_xa_du_o_de_tinh": 98,
+    "n_xa_tuong_quan_am": 0
+  },
+  "o_mau_thuan": {
+    "note": "mật độ dân ở nhóm 10% cao nhất nhưng built_frac < 0,05",
+    "n_o": 0,
+    "dan_so": 0.0,
+    "n_o_dong_dan_tren_ruong_hoac_nuoc": 2,
+    "dan_so_tren_ruong_hoac_nuoc": 10680.972373381679,
+    "cum_lien_ke_lon_nhat": 0,
+    "n_cum": 0,
+    "cum_lon_nhat_o": []
+  },
+  "nghi_bo_sot_chung_cu": {
+    "note": "apartment_levels_sum ở nhóm 25% cao nhất nhưng mật độ dân dưới trung vị",
+    "n_o": 0,
+    "vi_du": []
+  }
+}

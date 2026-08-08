@@ -1,0 +1,73 @@
+{
+  "layer": "n07_distance",
+  "province_name": "Tỉnh Tuyên Quang",
+  "method": "Dijkstra đa nguồn trên đồ thị đường OSM (đúng chiều một chiều), trọng số MÉT",
+  "no_time_field": "Không phát trường thời gian: bảng tốc độ giả định chi phối 100% giá trị và 62% ô đổi nhóm ngưỡng phút khi đổi bảng ±30% (DECISIONS §6).",
+  "province_code": "08",
+  "stats": {
+    "n_cells": 17758,
+    "n_reachable": 15200,
+    "share_reachable": 0.856,
+    "dist_median_m": 14887.3,
+    "dist_p90_m": 35458.8,
+    "euclid_median_m": 8651.6,
+    "detour_ratio_median": 1.812,
+    "detour_ratio_p90": 2.855,
+    "cells_where_euclid_understates_gt_2x": 5577,
+    "detour_ratio_null_cells": 2573,
+    "asym_median_m": 0.0,
+    "cells_asym_gt_500m": 626,
+    "neighbor_jump_median_m": 1049.9,
+    "neighbor_pairs_jump_gt_2km_share": 0.2292
+  },
+  "checks": [
+    {
+      "name": "network_ge_euclid",
+      "status": "PASS",
+      "detail": "min tỉ số 1.008 (đường mạng không thể ngắn hơn chim bay)"
+    },
+    {
+      "name": "no_negative_distance",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "no_time_field",
+      "status": "PASS",
+      "detail": "bộ dữ liệu không phát trường thời gian nào — chỉ mét"
+    },
+    {
+      "name": "all_anchors_can_drive_on",
+      "status": "PASS",
+      "detail": "mọi điểm neo (ô và trạm) nằm trong một SCC ≥ 100 đỉnh — xe đi tiếp được, không phải đầu cụt"
+    },
+    {
+      "name": "most_cells_reachable",
+      "status": "FAIL",
+      "detail": "15200/17758 = 85.6%"
+    }
+  ],
+  "graph": {
+    "ways_total": 123861,
+    "ways_dropped_access_blocked": 42,
+    "access_blocked_values": [
+      "customers",
+      "delivery",
+      "no",
+      "permit",
+      "private",
+      "residents"
+    ],
+    "nodes": 1998048,
+    "nodes_in_core_sccs": 1983159,
+    "n_core_components": 186,
+    "min_scc_nodes": 100,
+    "n_strongly_connected_components": 1035,
+    "directed_edges": 4010496,
+    "stations_total": 102,
+    "stations_snapped": 102,
+    "station_source_nodes": 95,
+    "snap_max_m": 2000.0,
+    "m_per_deg_lon": 102854.6
+  }
+}

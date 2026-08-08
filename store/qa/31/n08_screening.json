@@ -1,0 +1,68 @@
+{
+  "layer": "n08_screening",
+  "province_name": "Thành phố Hải Phòng",
+  "rule": {
+    "nguong_m": {
+      "PHUONG": 500.0,
+      "XA": 2000.0,
+      "DAC_KHU": 500.0
+    },
+    "nguong_ngoai_le_m": 500.0,
+    "cao_tai_nguong_util": 0.4,
+    "khoang_cach": "CHIM BAY (dist_station_euclid_m) — khách hàng chốt",
+    "dac_khu": "áp ngưỡng của PHƯỜNG. Rule viết trước khi cấp đặc khu tồn tại nên không nói gì về chúng — đây là suy luận, được đếm riêng ở stats.n_o_dac_khu."
+  },
+  "province_code": "31",
+  "stats": {
+    "n_cells": 4196,
+    "DE_XUAT": 3255,
+    "DE_XUAT_NEU_CO_DC": 84,
+    "TU_CHOI": 857,
+    "share_de_xuat": 0.7958,
+    "dan_o_DE_XUAT": 3167887,
+    "dan_o_TU_CHOI": 1378083,
+    "theo_loai_don_vi": {
+      "PHUONG": {
+        "n_o": 1511,
+        "DE_XUAT": 1400,
+        "TU_CHOI": 111
+      },
+      "XA": {
+        "n_o": 2279,
+        "DE_XUAT": 1452,
+        "TU_CHOI": 743
+      },
+      "DAC_KHU": {
+        "n_o": 406,
+        "DE_XUAT": 403,
+        "TU_CHOI": 3
+      }
+    },
+    "n_o_dac_khu": 406,
+    "margin_median_m": 994.5,
+    "n_o_sat_nguong_100m": 203,
+    "n_tram_cao_tai": 21
+  },
+  "checks": [
+    {
+      "name": "all_cells_present",
+      "status": "PASS",
+      "detail": "4196/4196"
+    },
+    {
+      "name": "decision_matches_margin",
+      "status": "PASS",
+      "detail": "DE_XUAT khi và chỉ khi vượt ngưỡng — ngoại lệ nằm ở nhãn riêng"
+    },
+    {
+      "name": "exception_only_in_xa",
+      "status": "PASS",
+      "detail": "ngoại lệ cao tải chỉ áp cho Xã, đúng như rule"
+    }
+  ],
+  "KHOANG_TRONG": {
+    "tram_sap_van_hanh": "Rule yêu cầu xét cả trạm chuẩn bị vận hành / đang xây / đã cấp phép. Nguồn không có trạng thái đó. Engine vì thế sẽ ĐỀ XUẤT ở những chỗ sắp có trạm — sai theo hướng nới lỏng.",
+    "khong_co_ho_so_that": "Không tồn tại tập đơn thật (được duyệt/bị từ chối) để kiểm chứng đầu-cuối.",
+    "n_o_ngoai_le_bi_chan_vi_thieu_util": 44
+  }
+}

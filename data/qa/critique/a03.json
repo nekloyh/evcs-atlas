@@ -1,0 +1,32 @@
+{
+  "code": "A03",
+  "verdict": "CANH_BAO",
+  "cau_hoi": "tâm hình học lệch bao nhiêu so với tâm dân số, và có đủ nhỏ để bỏ qua không",
+  "phuong_phap": "tâm có trọng số dân tính từ pixel WorldPop 100 m trong từng ô (cùng raster s04 dùng), so với tâm hình học H3 mà s08 dùng làm điểm neo",
+  "canh_luc_giac_r8_m": 461,
+  "n_o_do_duoc": 4313,
+  "n_o_khong_co_dan": 87,
+  "do_lech_m": {
+    "trung_vi": 171.9,
+    "p75": 250.3,
+    "p90": 320.2,
+    "p95": 359.3,
+    "p99": 446.5,
+    "max": 524.4,
+    "trung_binh_co_trong_so_dan": 131.0
+  },
+  "so_voi_khoang_cach_toi_tram": {
+    "ti_le_do_lech_tren_dist_trung_vi": 0.0745,
+    "ti_le_p90": 0.2136,
+    "n_o_do_lech_vuot_20pct_dist": 481,
+    "dan_o_do_lech_vuot_20pct_dist": 1305379
+  },
+  "n_o_lech_gt_150m": 2494,
+  "share_o_lech_gt_150m": 0.5783,
+  "n_o_lech_gt_300m": 588,
+  "ket_luan": [
+    "Độ lệch tâm hình học ↔ tâm dân số: trung vị 172 m, p90 320 m, max 524 m (cạnh lục giác 461 m).",
+    "So với khoảng cách tới trạm: trung vị 7.5% — 481 ô có độ lệch vượt 20% khoảng cách của chính nó.",
+    "KHÔNG đạt tiêu chí trung vị < 150 m."
+  ]
+}

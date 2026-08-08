@@ -1,0 +1,1146 @@
+{
+  "layer": "n01_admin",
+  "vintage": {
+    "name": "VNSDI 2025-07 (sau cải cách 01/7/2025)",
+    "source": "VNSDI qua aGiang-evcs data/interim/vnsdi/communes.parquet",
+    "valid_from": "16/6/2025",
+    "published": "13/07/2025",
+    "levels": [
+      "tỉnh/thành phố",
+      "phường/xã/đặc khu"
+    ],
+    "n_provinces": 34,
+    "n_communes": 3321,
+    "province_key": "province_code (2 ký tự, = VNSDI matinh)",
+    "commune_key": "commune_code (5 ký tự, = VNSDI maxa)",
+    "rejected": {
+      "evcs-dataset data/ref/vn_admin/valid_from=2025-07-01": "ranh giới dựng từ OSM adm6 — 3.930 đơn vị so với 3.321 chính thức (lệch 609). Chính báo cáo của nó ghi 'KHÔNG coi là danh mục HC chuẩn'. Thêm nữa nó là dẫn xuất ODbL, ràng buộc phát hành khác với dữ liệu nhà nước.",
+      "cấu trúc 63 tỉnh trước sáp nhập": "hết hiệu lực 01/7/2025. Còn tồn tại như khoá phân mảnh của bảng canonical; xem crosswalk_legacy — và crosswalk chỉ để ĐỌC di sản, không để gán địa bàn."
+    }
+  },
+  "stats": {
+    "n_provinces": 34,
+    "n_communes": 3321,
+    "commune_kind": {
+      "XA": 2621,
+      "PHUONG": 687,
+      "DAC_KHU": 13
+    },
+    "population_total": 113625653,
+    "area_km2_published_total": 347573.6,
+    "area_km2_geom_total": 333522.6,
+    "commune_names_used_in_more_than_one_province": 246,
+    "worst_name_collisions": {
+      "Xã Tân Tiến": 7,
+      "Xã Tân Thành": 7,
+      "Xã Tân An": 6,
+      "Xã Tân Phú": 5,
+      "Xã Châu Thành": 5
+    },
+    "commune_code_prefix_equals_province_code_share": 0.0,
+    "n_communes_flagged": 116,
+    "quality_flag_counts": {
+      "DIENTICH_LECH_HINH_HOC": 67,
+      "DANSO_CONG_BO_QUA_THAP": 52,
+      "DIENTICH_CONG_BO_SAI_BAC": 1
+    },
+    "flagged_communes": [
+      {
+        "commune_code": "00328",
+        "commune_name": "Phường Lĩnh Nam",
+        "province_name": "Thành phố Hà Nội",
+        "area_km2": 10.86,
+        "area_km2_geom": 9.39,
+        "population": 21,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "01147",
+        "commune_name": "Xã Khuôn Lùng",
+        "province_name": "Tỉnh Tuyên Quang",
+        "area_km2": 120.28,
+        "area_km2_geom": 121.36,
+        "population": 802,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "03085",
+        "commune_name": "Xã Nậm Xé",
+        "province_name": "Tỉnh Lào Cai",
+        "area_km2": 170.96,
+        "area_km2_geom": 170.49,
+        "population": 1478,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "03158",
+        "commune_name": "Xã Sín Thầu",
+        "province_name": "Tỉnh Điện Biên",
+        "area_km2": 516.42,
+        "area_km2_geom": 515.54,
+        "population": 6058,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "03217",
+        "commune_name": "Xã Tủa Chùa",
+        "province_name": "Tỉnh Điện Biên",
+        "area_km2": 108.33,
+        "area_km2_geom": 70.47,
+        "population": 17817,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "03442",
+        "commune_name": "Xã Pa Ủ",
+        "province_name": "Tỉnh Lai Châu",
+        "area_km2": 444.58,
+        "area_km2_geom": 443.94,
+        "population": 6084,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "03451",
+        "commune_name": "Xã Mù Cả",
+        "province_name": "Tỉnh Lai Châu",
+        "area_km2": 384.04,
+        "area_km2_geom": 383.99,
+        "population": 3299,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "03460",
+        "commune_name": "Xã Hua Bum",
+        "province_name": "Tỉnh Lai Châu",
+        "area_km2": 355.72,
+        "area_km2_geom": 355.42,
+        "population": 5697,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "03463",
+        "commune_name": "Xã Tà Tổng",
+        "province_name": "Tỉnh Lai Châu",
+        "area_km2": 512.01,
+        "area_km2_geom": 509.9,
+        "population": 7967,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "03472",
+        "commune_name": "Xã Mường Mô",
+        "province_name": "Tỉnh Lai Châu",
+        "area_km2": 395.16,
+        "area_km2_geom": 393.63,
+        "population": 7335,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "04240",
+        "commune_name": "Xã Mường Lèo",
+        "province_name": "Tỉnh Sơn La",
+        "area_km2": 375.76,
+        "area_km2_geom": 375.45,
+        "population": 4277,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "04489",
+        "commune_name": "Xã Chế Tạo",
+        "province_name": "Tỉnh Lào Cai",
+        "area_km2": 234.44,
+        "area_km2_geom": 234.92,
+        "population": 2650,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "06625",
+        "commune_name": "Xã Kiên Mộc",
+        "province_name": "Tỉnh Lạng Sơn",
+        "area_km2": 417.78,
+        "area_km2_geom": 402.5,
+        "population": 7976,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "06637",
+        "commune_name": "Xã Châu Sơn",
+        "province_name": "Tỉnh Lạng Sơn",
+        "area_km2": 301.31,
+        "area_km2_geom": 312.79,
+        "population": 5948,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "06652",
+        "commune_name": "Phường Hà Tu",
+        "province_name": "Tỉnh Quảng Ninh",
+        "area_km2": 37.6,
+        "area_km2_geom": 55.91,
+        "population": 29643,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "06685",
+        "commune_name": "Phường Hồng Gai",
+        "province_name": "Tỉnh Quảng Ninh",
+        "area_km2": 5.0,
+        "area_km2_geom": 29.76,
+        "population": 51333,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "06688",
+        "commune_name": "Phường Hạ Long",
+        "province_name": "Tỉnh Quảng Ninh",
+        "area_km2": 6.08,
+        "area_km2_geom": 18.05,
+        "population": 52905,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "06709",
+        "commune_name": "Phường Móng Cái 2",
+        "province_name": "Tỉnh Quảng Ninh",
+        "area_km2": 72.97,
+        "area_km2_geom": 22.96,
+        "population": 29189,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "06712",
+        "commune_name": "Phường Móng Cái 1",
+        "province_name": "Tỉnh Quảng Ninh",
+        "area_km2": 82.47,
+        "area_km2_geom": 65.9,
+        "population": 46588,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "06733",
+        "commune_name": "Xã Hải Ninh",
+        "province_name": "Tỉnh Quảng Ninh",
+        "area_km2": 93.18,
+        "area_km2_geom": 70.27,
+        "population": 10427,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "06736",
+        "commune_name": "Phường Móng Cái 3",
+        "province_name": "Tỉnh Quảng Ninh",
+        "area_km2": 90.03,
+        "area_km2_geom": 65.86,
+        "population": 22565,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "06757",
+        "commune_name": "Xã Vĩnh Thực",
+        "province_name": "Tỉnh Quảng Ninh",
+        "area_km2": 49.11,
+        "area_km2_geom": 37.34,
+        "population": 5407,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "06799",
+        "commune_name": "Xã Hải Hòa",
+        "province_name": "Tỉnh Quảng Ninh",
+        "area_km2": 95.87,
+        "area_km2_geom": 74.58,
+        "population": 5731,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "06886",
+        "commune_name": "Xã Hải Lạng",
+        "province_name": "Tỉnh Quảng Ninh",
+        "area_km2": 131.03,
+        "area_km2_geom": 74.36,
+        "population": 9827,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "06895",
+        "commune_name": "Xã Đầm Hà",
+        "province_name": "Tỉnh Quảng Ninh",
+        "area_km2": 142.43,
+        "area_km2_geom": 73.23,
+        "population": 25947,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "06922",
+        "commune_name": "Xã Quảng Hà",
+        "province_name": "Tỉnh Quảng Ninh",
+        "area_km2": 134.37,
+        "area_km2_geom": 65.26,
+        "population": 40988,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "07168",
+        "commune_name": "Phường Hà An",
+        "province_name": "Tỉnh Quảng Ninh",
+        "area_km2": 100.18,
+        "area_km2_geom": 57.54,
+        "population": 21314,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "09052",
+        "commune_name": "Xã Nguyệt Đức",
+        "province_name": "Tỉnh Phú Thọ",
+        "area_km2": 19.0,
+        "area_km2_geom": 27.57,
+        "population": 34166,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "09064",
+        "commune_name": "Xã Liên Châu",
+        "province_name": "Tỉnh Phú Thọ",
+        "area_km2": 26.0,
+        "area_km2_geom": 17.35,
+        "population": 35029,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "10369",
+        "commune_name": "Xã Ứng Thiên",
+        "province_name": "Thành phố Hà Nội",
+        "area_km2": 38.4,
+        "area_km2_geom": 38.38,
+        "population": 54,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "11411",
+        "commune_name": "Phường Đông Hải",
+        "province_name": "Thành phố Hải Phòng",
+        "area_km2": 57.65,
+        "area_km2_geom": 44.85,
+        "population": 50748,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "11455",
+        "commune_name": "Phường Đồ Sơn",
+        "province_name": "Thành phố Hải Phòng",
+        "area_km2": 25.54,
+        "area_km2_geom": 19.19,
+        "population": 36494,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "11914",
+        "commune_name": "Đặc khu Cát Hải",
+        "province_name": "Thành phố Hải Phòng",
+        "area_km2": 286.98,
+        "area_km2_geom": 214.91,
+        "population": 71211,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "12466",
+        "commune_name": "Phường Vũ Phúc",
+        "province_name": "Tỉnh Hưng Yên",
+        "area_km2": 23.99,
+        "area_km2_geom": 18.4,
+        "population": 41428,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "13741",
+        "commune_name": "Xã Vụ Bản",
+        "province_name": "Tỉnh Ninh Bình",
+        "area_km2": 21.56,
+        "area_km2_geom": 14.59,
+        "population": 26675,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "13894",
+        "commune_name": "Xã Rạng Đông",
+        "province_name": "Tỉnh Ninh Bình",
+        "area_km2": 32.39,
+        "area_km2_geom": 56.38,
+        "population": 30956,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "14161",
+        "commune_name": "Xã Giao Minh",
+        "province_name": "Tỉnh Ninh Bình",
+        "area_km2": 27.74,
+        "area_km2_geom": 60.35,
+        "population": 29261,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "14182",
+        "commune_name": "Xã Giao Hòa",
+        "province_name": "Tỉnh Ninh Bình",
+        "area_km2": 29.62,
+        "area_km2_geom": 41.21,
+        "population": 41717,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "14698",
+        "commune_name": "Xã Kim Đông",
+        "province_name": "Tỉnh Ninh Bình",
+        "area_km2": 81.82,
+        "area_km2_geom": 27.26,
+        "population": 9409,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "16108",
+        "commune_name": "Xã Tân Tiến",
+        "province_name": "Tỉnh Thanh Hóa",
+        "area_km2": 28.54,
+        "area_km2_geom": 21.9,
+        "population": 21529,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "16744",
+        "commune_name": "Xã Thông Thụ",
+        "province_name": "Tỉnh Nghệ An",
+        "area_km2": 706.75,
+        "area_km2_geom": 708.7,
+        "population": 8481,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "16885",
+        "commune_name": "Xã Hữu Khuông",
+        "province_name": "Tỉnh Nghệ An",
+        "area_km2": 263.79,
+        "area_km2_geom": 263.78,
+        "population": 2939,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "19147",
+        "commune_name": "Xã Thượng Trạch",
+        "province_name": "Tỉnh Quảng Trị",
+        "area_km2": 1095.78,
+        "area_km2_geom": 1089.4,
+        "population": 3615,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "19204",
+        "commune_name": "Xã Trường Sơn",
+        "province_name": "Tỉnh Quảng Trị",
+        "area_km2": 935.96,
+        "area_km2_geom": 935.47,
+        "population": 8484,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "19318",
+        "commune_name": "Xã Kim Ngân",
+        "province_name": "Tỉnh Quảng Trị",
+        "area_km2": 881.06,
+        "area_km2_geom": 879.62,
+        "population": 9776,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "19435",
+        "commune_name": "Xã Hướng Lập",
+        "province_name": "Tỉnh Quảng Trị",
+        "area_km2": 219.64,
+        "area_km2_geom": 219.34,
+        "population": 3539,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "20050",
+        "commune_name": "Xã A Lưới 5",
+        "province_name": "Thành phố Huế",
+        "area_km2": 464.4,
+        "area_km2_geom": 464.16,
+        "population": 3760,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "20333",
+        "commune_name": "Đặc khu Hoàng Sa",
+        "province_name": "Thành phố Đà Nẵng",
+        "area_km2": 350.0,
+        "area_km2_geom": 747.13,
+        "population": 0,
+        "flag": "DANSO_CONG_BO_QUA_THAP|DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "20494",
+        "commune_name": "Xã Bến Hiên",
+        "province_name": "Thành phố Đà Nẵng",
+        "area_km2": 255.85,
+        "area_km2_geom": 256.17,
+        "population": 4588,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "20698",
+        "commune_name": "Xã La Êê",
+        "province_name": "Thành phố Đà Nẵng",
+        "area_km2": 243.12,
+        "area_km2_geom": 242.47,
+        "population": 2371,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "20704",
+        "commune_name": "Xã La Dêê",
+        "province_name": "Thành phố Đà Nẵng",
+        "area_km2": 184.81,
+        "area_km2_geom": 183.02,
+        "population": 2930,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "20707",
+        "commune_name": "Xã Nam Giang",
+        "province_name": "Thành phố Đà Nẵng",
+        "area_km2": 262.94,
+        "area_km2_geom": 264.68,
+        "population": 4979,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "20710",
+        "commune_name": "Xã Bến Giằng",
+        "province_name": "Thành phố Đà Nẵng",
+        "area_km2": 535.96,
+        "area_km2_geom": 534.79,
+        "population": 8277,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "20716",
+        "commune_name": "Xã Đắc Pring",
+        "province_name": "Thành phố Đà Nẵng",
+        "area_km2": 412.49,
+        "area_km2_geom": 412.59,
+        "population": 3060,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "20728",
+        "commune_name": "Xã Phước Hiệp",
+        "province_name": "Thành phố Đà Nẵng",
+        "area_km2": 340.05,
+        "area_km2_geom": 340.22,
+        "population": 4529,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "20752",
+        "commune_name": "Xã Phước Thành",
+        "province_name": "Thành phố Đà Nẵng",
+        "area_km2": 286.65,
+        "area_km2_geom": 287.05,
+        "population": 4651,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "21548",
+        "commune_name": "Đặc khu Lý Sơn",
+        "province_name": "Tỉnh Quảng Ngãi",
+        "area_km2": 10.4,
+        "area_km2_geom": 20.41,
+        "population": 25639,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "21622",
+        "commune_name": "Xã An Toàn",
+        "province_name": "Tỉnh Gia Lai",
+        "area_km2": 295.34,
+        "area_km2_geom": 295.0,
+        "population": 1790,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "21787",
+        "commune_name": "Xã Vĩnh Sơn",
+        "province_name": "Tỉnh Gia Lai",
+        "area_km2": 328.89,
+        "area_km2_geom": 327.52,
+        "population": 6029,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "21997",
+        "commune_name": "Xã Canh Liên",
+        "province_name": "Tỉnh Gia Lai",
+        "area_km2": 331.67,
+        "area_km2_geom": 325.27,
+        "population": 2357,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "22096",
+        "commune_name": "Xã Phú Mỡ",
+        "province_name": "Tỉnh Đắk Lắk",
+        "area_km2": 547.2,
+        "area_km2_geom": 547.1,
+        "population": 9007,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "22333",
+        "commune_name": "Phường Bắc Nha Trang",
+        "province_name": "Tỉnh Khánh Hòa",
+        "area_km2": 97.0,
+        "area_km2_geom": 138.15,
+        "population": 128239,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "22366",
+        "commune_name": "Phường Nha Trang",
+        "province_name": "Tỉnh Khánh Hòa",
+        "area_km2": 47.1,
+        "area_km2_geom": 8.3,
+        "population": 136118,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "22736",
+        "commune_name": "Đặc khu Trường Sa",
+        "province_name": "Tỉnh Khánh Hòa",
+        "area_km2": 496.3,
+        "area_km2_geom": 4066.36,
+        "population": 153,
+        "flag": "DANSO_CONG_BO_QUA_THAP|DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "23008",
+        "commune_name": "Xã Phan Sơn",
+        "province_name": "Tỉnh Lâm Đồng",
+        "area_km2": 584.52,
+        "area_km2_geom": 584.6,
+        "population": 7428,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "23344",
+        "commune_name": "Xã Đăk Plô",
+        "province_name": "Tỉnh Quảng Ngãi",
+        "area_km2": 433.41,
+        "area_km2_geom": 432.64,
+        "population": 5629,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "23368",
+        "commune_name": "Xã Đăk Long",
+        "province_name": "Tỉnh Quảng Ngãi",
+        "area_km2": 280.5,
+        "area_km2_geom": 280.24,
+        "population": 5193,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "23476",
+        "commune_name": "Xã Kon Plông",
+        "province_name": "Tỉnh Quảng Ngãi",
+        "area_km2": 556.8,
+        "area_km2_geom": 558.76,
+        "population": 9334,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "23485",
+        "commune_name": "Xã Đăk Kôi",
+        "province_name": "Tỉnh Quảng Ngãi",
+        "area_km2": 450.48,
+        "area_km2_geom": 450.68,
+        "population": 5950,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "23535",
+        "commune_name": "Xã Ia Đal",
+        "province_name": "Tỉnh Quảng Ngãi",
+        "area_km2": 218.11,
+        "area_km2_geom": 300.88,
+        "population": 5069,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "23536",
+        "commune_name": "Xã Mô Rai",
+        "province_name": "Tỉnh Quảng Ngãi",
+        "area_km2": 583.92,
+        "area_km2_geom": 579.6,
+        "population": 6375,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "23538",
+        "commune_name": "Xã Ia Tơi",
+        "province_name": "Tỉnh Quảng Ngãi",
+        "area_km2": 762.1,
+        "area_km2_geom": 670.64,
+        "population": 7210,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "23644",
+        "commune_name": "Xã Đak Rong",
+        "province_name": "Tỉnh Gia Lai",
+        "area_km2": 516.25,
+        "area_km2_geom": 513.8,
+        "population": 6277,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "23650",
+        "commune_name": "Xã Krong",
+        "province_name": "Tỉnh Gia Lai",
+        "area_km2": 311.58,
+        "area_km2_geom": 311.33,
+        "population": 6046,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "23737",
+        "commune_name": "Xã Ia Mơ",
+        "province_name": "Tỉnh Gia Lai",
+        "area_km2": 435.6,
+        "area_km2_geom": 437.53,
+        "population": 3380,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "23842",
+        "commune_name": "Xã Đăk Song",
+        "province_name": "Tỉnh Gia Lai",
+        "area_km2": 327.49,
+        "area_km2_geom": 328.06,
+        "population": 4764,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "23917",
+        "commune_name": "Xã Ia Púch",
+        "province_name": "Tỉnh Gia Lai",
+        "area_km2": 267.3,
+        "area_km2_geom": 266.79,
+        "population": 4185,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "24235",
+        "commune_name": "Xã Buôn Đôn",
+        "province_name": "Tỉnh Đắk Lắk",
+        "area_km2": 1113.79,
+        "area_km2_geom": 1113.29,
+        "population": 6582,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "24490",
+        "commune_name": "Xã Krông Pắc",
+        "province_name": "Tỉnh Đắk Lắk",
+        "area_km2": 112.52,
+        "area_km2_geom": 161.42,
+        "population": 68682,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "24505",
+        "commune_name": "Xã Ea Knuếc",
+        "province_name": "Tỉnh Đắk Lắk",
+        "area_km2": 122.39,
+        "area_km2_geom": 77.01,
+        "population": 43748,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "24736",
+        "commune_name": "Xã Quảng Trực",
+        "province_name": "Tỉnh Lâm Đồng",
+        "area_km2": 558.78,
+        "area_km2_geom": 560.1,
+        "population": 11168,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "24848",
+        "commune_name": "Xã Lạc Dương",
+        "province_name": "Tỉnh Lâm Đồng",
+        "area_km2": 828.01,
+        "area_km2_geom": 826.29,
+        "population": 14912,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "25750",
+        "commune_name": "Phường Phú Lợi",
+        "province_name": "Thành phố Hồ Chí Minh",
+        "area_km2": 17956.0,
+        "area_km2_geom": 17.97,
+        "population": 107721,
+        "flag": "DIENTICH_CONG_BO_SAI_BAC|DANSO_CONG_BO_QUA_THAP|DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "26119",
+        "commune_name": "Xã Đak Lua",
+        "province_name": "Tỉnh Đồng Nai",
+        "area_km2": 415.1,
+        "area_km2_geom": 413.94,
+        "population": 8234,
+        "flag": "DANSO_CONG_BO_QUA_THAP"
+      },
+      {
+        "commune_code": "26536",
+        "commune_name": "Phường Rạch Dừa",
+        "province_name": "Thành phố Hồ Chí Minh",
+        "area_km2": 19.7,
+        "area_km2_geom": 12.07,
+        "population": 76281,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "26968",
+        "commune_name": "Phường Tân Sơn Nhất",
+        "province_name": "Thành phố Hồ Chí Minh",
+        "area_km2": 3.19,
+        "area_km2_geom": 1.95,
+        "population": 84639,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "28696",
+        "commune_name": "Xã Tân Phú Đông",
+        "province_name": "Tỉnh Đồng Tháp",
+        "area_km2": 175.2,
+        "area_km2_geom": 103.82,
+        "population": 23630,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "28747",
+        "commune_name": "Xã Gò Công Đông",
+        "province_name": "Tỉnh Đồng Tháp",
+        "area_km2": 106.4,
+        "area_km2_geom": 53.67,
+        "population": 30104,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "29413",
+        "commune_name": "Xã Long Hòa",
+        "province_name": "Tỉnh Vĩnh Long",
+        "area_km2": 52.67,
+        "area_km2_geom": 79.76,
+        "population": 13309,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "29533",
+        "commune_name": "Xã Long Vĩnh",
+        "province_name": "Tỉnh Vĩnh Long",
+        "area_km2": 96.37,
+        "area_km2_geom": 65.59,
+        "population": 16344,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "30781",
+        "commune_name": "Xã Tiên Hải",
+        "province_name": "Tỉnh An Giang",
+        "area_km2": 2.54,
+        "area_km2_geom": 5.13,
+        "population": 1872,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "30823",
+        "commune_name": "Xã Bình Sơn",
+        "province_name": "Tỉnh An Giang",
+        "area_km2": 281.7,
+        "area_km2_geom": 182.6,
+        "population": 61517,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31369",
+        "commune_name": "Xã Đông Phước",
+        "province_name": "Thành phố Cần Thơ",
+        "area_km2": 40.0,
+        "area_km2_geom": 25.91,
+        "population": 40105,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31825",
+        "commune_name": "Phường Bạc Liêu",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 5.98,
+        "area_km2_geom": 29.68,
+        "population": 24456,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31834",
+        "commune_name": "Phường Vĩnh Trạch",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 10.22,
+        "area_km2_geom": 49.52,
+        "population": 23085,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31840",
+        "commune_name": "Phường Hiệp Thành",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 29.05,
+        "area_km2_geom": 66.33,
+        "population": 11864,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31843",
+        "commune_name": "Xã Hồng Dân",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 15.62,
+        "area_km2_geom": 125.77,
+        "population": 13838,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31849",
+        "commune_name": "Xã Ninh Quới",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 32.42,
+        "area_km2_geom": 72.69,
+        "population": 13994,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31858",
+        "commune_name": "Xã Vĩnh Lộc",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 48.47,
+        "area_km2_geom": 94.96,
+        "population": 12047,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31864",
+        "commune_name": "Xã Ninh Thạnh Lợi",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 66.4,
+        "area_km2_geom": 133.55,
+        "population": 14437,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31867",
+        "commune_name": "Xã Phước Long",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 49.48,
+        "area_km2_geom": 98.22,
+        "population": 24984,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31876",
+        "commune_name": "Xã Vĩnh Phước",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 75.5,
+        "area_km2_geom": 127.13,
+        "population": 20014,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31882",
+        "commune_name": "Xã Vĩnh Thanh",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 37.37,
+        "area_km2_geom": 75.96,
+        "population": 19291,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31885",
+        "commune_name": "Xã Phong Hiệp",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 55.97,
+        "area_km2_geom": 115.69,
+        "population": 13523,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31891",
+        "commune_name": "Xã Hòa Bình",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 26.54,
+        "area_km2_geom": 114.68,
+        "population": 25794,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31894",
+        "commune_name": "Xã Châu Thới",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 23.04,
+        "area_km2_geom": 91.73,
+        "population": 12491,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31900",
+        "commune_name": "Xã Vĩnh Lợi",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 31.98,
+        "area_km2_geom": 61.18,
+        "population": 17236,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31906",
+        "commune_name": "Xã Hưng Hội",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 28.38,
+        "area_km2_geom": 62.76,
+        "population": 14748,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31918",
+        "commune_name": "Xã Vĩnh Mỹ",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 40.72,
+        "area_km2_geom": 115.68,
+        "population": 15558,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31942",
+        "commune_name": "Phường Giá Rai",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 11.76,
+        "area_km2_geom": 104.54,
+        "population": 21974,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31951",
+        "commune_name": "Phường Láng Tròn",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 32.18,
+        "area_km2_geom": 106.9,
+        "population": 21468,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31957",
+        "commune_name": "Xã Phong Thạnh",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 27.08,
+        "area_km2_geom": 143.92,
+        "population": 11110,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31972",
+        "commune_name": "Xã Gành Hào",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 13.4,
+        "area_km2_geom": 71.19,
+        "population": 17587,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31985",
+        "commune_name": "Xã Long Điền",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 87.72,
+        "area_km2_geom": 118.45,
+        "population": 29479,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31988",
+        "commune_name": "Xã An Trạch",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 49.22,
+        "area_km2_geom": 99.65,
+        "population": 15251,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      },
+      {
+        "commune_code": "31993",
+        "commune_name": "Xã Định Thành",
+        "province_name": "Tỉnh Cà Mau",
+        "area_km2": 31.58,
+        "area_km2_geom": 116.47,
+        "population": 13056,
+        "flag": "DIENTICH_LECH_HINH_HOC"
+      }
+    ],
+    "legacy_crosswalk": {
+      "n_legacy_codes": 65,
+      "n_pairs": 394,
+      "n_legacy_codes_ambiguous": 44
+    }
+  },
+  "checks": [
+    {
+      "name": "province_count_is_34",
+      "status": "PASS",
+      "detail": "34"
+    },
+    {
+      "name": "commune_count_is_3321",
+      "status": "PASS",
+      "detail": "3321"
+    },
+    {
+      "name": "commune_code_unique",
+      "status": "PASS",
+      "detail": "3321"
+    },
+    {
+      "name": "commune_kind_has_no_unknown",
+      "status": "PASS",
+      "detail": "0 dòng không rơi vào PHUONG/XA/DAC_KHU"
+    },
+    {
+      "name": "dac_khu_exists_nationally",
+      "status": "PASS",
+      "detail": "luật hai nhánh PHUONG/XA của gói hanoi sẽ dán nhãn XA cho 13 đặc khu"
+    },
+    {
+      "name": "commune_code_is_not_nested_in_province_code",
+      "status": "PASS",
+      "detail": "mã xã KHÔNG lồng mã tỉnh — cấm suy mã tỉnh từ mã xã"
+    },
+    {
+      "name": "commune_name_is_not_a_key",
+      "status": "PASS",
+      "detail": "246 tên xã dùng ở nhiều hơn một tỉnh — bằng chứng cho luật khoá bằng mã"
+    },
+    {
+      "name": "all_geoms_valid",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "province_01_matches_hanoi_package",
+      "status": "PASS",
+      "detail": "chênh lệch đối xứng 0.000e+00 độ² so với hanoi.aoi.boundary()"
+    }
+  ]
+}

@@ -1,0 +1,214 @@
+{
+  "code": "A18_L8",
+  "verdict": "CANH_BAO",
+  "cau_hoi": "vì sao đường cong nhịp trông giống nhau; nguồn có đủ dày cho 10/15/20′ không",
+  "nguon_tho": "/home/n91ym1nhky/Work/internVSF/aGiang-evcs/data/raw/evcs/timeseries_runs/load_ts_2026-07-29-full.csv",
+  "1_nhip_lay_mau": {
+    "n_quan_sat_ha_noi": 3617911,
+    "n_tram_co_du_lieu": 703,
+    "bat_dau_utc": "2026-06-29T05:50:00+00:00",
+    "ket_thuc_utc": "2026-07-29T06:00:00+00:00",
+    "do_dai_cua_so_ngay": 30.01,
+    "so_ngay_lich_co_du_lieu": 31,
+    "khoang_cach_quan_sat_phut": {
+      "p5": 5.0,
+      "p25": 5.0,
+      "trung_vi": 5.0,
+      "p75": 5.0,
+      "p90": 15.0,
+      "p95": 20.0,
+      "p99": 50.0
+    },
+    "share_khoang_le_5p": 0.7537,
+    "share_khoang_le_10p": 0.8817,
+    "share_khoang_le_15p": 0.9305,
+    "share_khoang_le_30p": 0.9762,
+    "share_khoang_le_60p": 0.9931,
+    "share_khoang_gt_60p_bi_bo": 0.0069
+  },
+  "2_do_phu_theo_do_phan_giai": {
+    "ngay_5p": {
+      "n_o": 288,
+      "do_dai_o_phut": 5,
+      "gop_moi_tram__o_co_quan_sat": 288,
+      "gop_moi_tram__share": 1.0,
+      "gop_moi_tram__share_ke_ca_carry": 0.9965,
+      "tung_tram__share_o_trung_vi": 0.5556,
+      "tung_tram__share_o_p10": 0.2889,
+      "tung_tram__n_tram_phu_tren_80pct": 148,
+      "tung_tram__n_tram_phu_duoi_50pct": 273
+    },
+    "tuan_10p": {
+      "n_o": 1008,
+      "do_dai_o_phut": 10,
+      "gop_moi_tram__o_co_quan_sat": 1008,
+      "gop_moi_tram__share": 1.0,
+      "gop_moi_tram__share_ke_ca_carry": 0.999,
+      "tung_tram__share_o_trung_vi": 0.755,
+      "tung_tram__share_o_p10": 0.4696,
+      "tung_tram__n_tram_phu_tren_80pct": 296,
+      "tung_tram__n_tram_phu_duoi_50pct": 85
+    },
+    "tuan_15p": {
+      "n_o": 672,
+      "do_dai_o_phut": 15,
+      "gop_moi_tram__o_co_quan_sat": 672,
+      "gop_moi_tram__share": 1.0,
+      "gop_moi_tram__share_ke_ca_carry": 0.9985,
+      "tung_tram__share_o_trung_vi": 0.8378,
+      "tung_tram__share_o_p10": 0.5866,
+      "tung_tram__n_tram_phu_tren_80pct": 430,
+      "tung_tram__n_tram_phu_duoi_50pct": 53
+    },
+    "tuan_20p": {
+      "n_o": 504,
+      "do_dai_o_phut": 20,
+      "gop_moi_tram__o_co_quan_sat": 504,
+      "gop_moi_tram__share": 1.0,
+      "gop_moi_tram__share_ke_ca_carry": 0.998,
+      "tung_tram__share_o_trung_vi": 0.8849,
+      "tung_tram__share_o_p10": 0.6687,
+      "tung_tram__n_tram_phu_tren_80pct": 550,
+      "tung_tram__n_tram_phu_duoi_50pct": 26
+    },
+    "thang_15p": {
+      "n_o": 2880,
+      "do_dai_o_phut": 15,
+      "gop_moi_tram__o_co_quan_sat": 2880,
+      "gop_moi_tram__share": 1.0,
+      "gop_moi_tram__share_ke_ca_carry": 0.9997,
+      "tung_tram__share_o_trung_vi": 0.8479,
+      "tung_tram__share_o_p10": 0.5648,
+      "tung_tram__n_tram_phu_tren_80pct": 450,
+      "tung_tram__n_tram_phu_duoi_50pct": 48
+    },
+    "thang_30p": {
+      "n_o": 1440,
+      "do_dai_o_phut": 30,
+      "gop_moi_tram__o_co_quan_sat": 1440,
+      "gop_moi_tram__share": 1.0,
+      "gop_moi_tram__share_ke_ca_carry": 0.9993,
+      "tung_tram__share_o_trung_vi": 0.9382,
+      "tung_tram__share_o_p10": 0.7401,
+      "tung_tram__n_tram_phu_tren_80pct": 608,
+      "tung_tram__n_tram_phu_duoi_50pct": 21
+    },
+    "thang_60p": {
+      "n_o": 720,
+      "do_dai_o_phut": 60,
+      "gop_moi_tram__o_co_quan_sat": 720,
+      "gop_moi_tram__share": 1.0,
+      "gop_moi_tram__share_ke_ca_carry": 0.9986,
+      "tung_tram__share_o_trung_vi": 0.9806,
+      "tung_tram__share_o_p10": 0.8728,
+      "tung_tram__n_tram_phu_tren_80pct": 670,
+      "tung_tram__n_tram_phu_duoi_50pct": 12
+    }
+  },
+  "3_mui_gio": {
+    "phuong_phap": "dựng lại hồ sơ 168 với UTC+7 và UTC+0, so tương quan hình dạng với bảng đã build",
+    "ket_qua": {
+      "UTC+7_dia_phuong": {
+        "n_o_doi_chieu": 115792,
+        "n_tram": 661,
+        "tuong_quan_trung_vi": 0.5859,
+        "share_tram_r_gt_0_9": 0.0257
+      },
+      "UTC+0": {
+        "n_o_doi_chieu": 115322,
+        "n_tram": 661,
+        "tuong_quan_trung_vi": -0.0977,
+        "share_tram_r_gt_0_9": 0.0
+      }
+    },
+    "ket_luan": "giờ ĐỊA PHƯƠNG (UTC+7)"
+  },
+  "4_dinh_vs_trung_binh": {
+    "gio_168": {
+      "dinh_trung_binh": 3.512,
+      "trung_binh_trung_binh": 2.76,
+      "ti_le_dinh_tren_tb": 1.272,
+      "bien_thien_duong_cong_tong_hop_CV": {
+        "dinh": 0.2055,
+        "trung_binh": 0.216
+      }
+    },
+    "ngay_30": {
+      "dinh_trung_binh": 5.618,
+      "trung_binh_trung_binh": 2.658,
+      "ti_le_dinh_tren_tb": 2.113,
+      "bien_thien_duong_cong_tong_hop_CV": {
+        "dinh": 0.0328,
+        "trung_binh": 0.0597
+      }
+    }
+  },
+  "5_tram_lon_nuot_duong_tong_hop": {
+    "n_tram_lon_top10pct": 82,
+    "cong_trung_vi_tram_lon": 36.0,
+    "cong_trung_vi_tram_nho": 4.0,
+    "gio_dinh_trung_binh_khong_trong_so": 9,
+    "gio_dinh_co_trong_so_cong": 9,
+    "gio_dinh_chi_tram_lon": 9,
+    "gio_dinh_chi_tram_nho": 9,
+    "tuong_quan_duong_tongtrongso_vs_tramlon": 0.9218,
+    "tuong_quan_duong_tongtrongso_vs_tramnho": 0.7579
+  },
+  "6_gop_triet_tieu_nhip": {
+    "n_tram_du_o": 670,
+    "n_tram_bo_qua_vi_thieu_gio": 37,
+    "CV_tung_tram_trung_vi": 0.6193,
+    "CV_duong_da_gop_tho": 0.2055,
+    "CV_duong_da_gop_theo_hinh_dang": 0.3005,
+    "ti_le_biên_do_bi_mat": 0.6681,
+    "gio_dinh_theo_hinh_dang": 3,
+    "phan_bo_gio_dinh_tung_tram": {
+      "0": 56,
+      "1": 27,
+      "2": 43,
+      "3": 40,
+      "4": 46,
+      "5": 29,
+      "6": 45,
+      "7": 16,
+      "8": 46,
+      "9": 125,
+      "10": 8,
+      "11": 4,
+      "12": 4,
+      "13": 4,
+      "14": 2,
+      "15": 38,
+      "16": 9,
+      "17": 6,
+      "18": 13,
+      "19": 18,
+      "20": 13,
+      "21": 9,
+      "22": 7,
+      "23": 25
+    },
+    "share_tram_dinh_trong_22_23_0h": 0.139,
+    "so_gio_khac_nhau_lam_dinh": 24
+  },
+  "7_max_co_bao_hoa_khong": {
+    "share_o_gio_cham_tran_cua_tram__trung_vi": 0.122,
+    "n_tram_cham_tran_tren_50pct_so_o": 125,
+    "CV_tung_tram__gop_MAX": 0.6193,
+    "CV_tung_tram__gop_TRUNG_BINH": 0.7277,
+    "tan_man_gio_dinh__gop_MAX": 0.6442,
+    "tan_man_gio_dinh__gop_TRUNG_BINH": 0.6485,
+    "gio_dinh_hinh_dang__gop_MAX": 3,
+    "gio_dinh_hinh_dang__gop_TRUNG_BINH": 9,
+    "dien_giai": "tản mạn gần 1 = giờ đỉnh rải đều quanh đồng hồ (không có nhịp chung); nếu MAX tản mạn hơn hẳn TRUNG BÌNH thì phẳng là do PHÉP GỘP, không do dữ liệu"
+  },
+  "ket_luan": [
+    "Cửa sổ thật: 30.0 ngày (31 ngày lịch có dữ liệu).",
+    "Nhịp lấy mẫu thật: trung vị 5.0 phút, p90 15.0 phút — 75.4% số khoảng ≤ 5 phút.",
+    "Múi giờ: giờ ĐỊA PHƯƠNG (UTC+7).",
+    "Gộp ĐỈNH cho giá trị lớn hơn trung bình 1.27× ở ô giờ; CV đường tổng hợp đỉnh 0.205 vs trung bình 0.216.",
+    "Giờ đỉnh: không trọng số 9h · trọng số cổng 9h · trạm lớn 9h · trạm nhỏ 9h.",
+    "Biên độ: từng trạm CV trung vị 0.619, đường đã gộp CV 0.205 — mất 66.8% biên độ khi gộp; đỉnh của từng trạm rải ra 24 giờ khác nhau.",
+    "Bão hoà MAX: 12.2% số ô giờ chạm đúng trần của trạm; tản mạn giờ đỉnh MAX 0.644 vs TRUNG BÌNH 0.648."
+  ]
+}

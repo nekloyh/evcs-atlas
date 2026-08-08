@@ -1,0 +1,93 @@
+{
+  "layer": "n03_supply",
+  "source": "aGiang-evcs data/interim/canonical + data/interim/occ (evcs.vn, đã dedup vật lý)",
+  "province_name": "Tỉnh Lạng Sơn",
+  "province_code": "20",
+  "stats": {
+    "n_stations_national_pool": 19598,
+    "n_stations_in": 40,
+    "n_stations_buffer_ring": 2,
+    "n_connectors_rows": 81,
+    "n_ports_total": 319,
+    "power_kw_site_total": 9925.0,
+    "power_kw_per_station": 248.1,
+    "op_status": {
+      "OPERATIONAL": 38,
+      "MAINTENANCE": 2
+    },
+    "current_type": {
+      "DC": 20,
+      "MIXED": 20
+    },
+    "commune_kind": {
+      "XA": 23,
+      "PHUONG": 17
+    },
+    "access": {
+      "PUBLIC": 40
+    },
+    "verified_official_share": 1.0,
+    "n_communes_with_station": 20,
+    "n_stations_with_occ": 40,
+    "occ_coverage": 1.0,
+    "occ_grade": {
+      "GOOD": 38,
+      "PARTIAL": 2
+    },
+    "util_median": 0.1006,
+    "n_profile_rows": 6342,
+    "upstream_province_label_agreement": 1.0
+  },
+  "checks": [
+    {
+      "name": "station_id_unique",
+      "status": "PASS",
+      "detail": "42 trạm"
+    },
+    {
+      "name": "every_in_station_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "buffer_stations_have_no_commune",
+      "status": "PASS",
+      "detail": "trạm ngoài tỉnh không được gán xã của tỉnh này"
+    },
+    {
+      "name": "no_private_ac_left",
+      "status": "PASS",
+      "detail": "đã loại 73 trạm 1-súng-AC (64.6% số trạm, nhưng 6.9% công suất)"
+    },
+    {
+      "name": "upstream_province_label_agrees",
+      "status": "PASS",
+      "detail": "100.00% trạm IN có admin_l1_code khớp phép gán hình học ở đây"
+    },
+    {
+      "name": "connectors_fk_ok",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "occ_only_for_in_scope",
+      "status": "PASS",
+      "detail": "occupancy chỉ cho trạm thuộc tỉnh, không cho trạm vành đệm"
+    },
+    {
+      "name": "profile_cells_le_168",
+      "status": "PASS",
+      "detail": "max 167 ô/trạm"
+    }
+  ],
+  "dropped_private_ac": {
+    "predicate": "n_guns_installed == 1 AND current_type_asset == 'AC'",
+    "n_dropped_total": 94,
+    "n_dropped_in": 73,
+    "n_dropped_buffer": 21,
+    "n_stations_in_before": 113,
+    "share_of_stations_before": 0.646,
+    "share_of_ports_before": 0.1862,
+    "share_of_power_before": 0.0688
+  }
+}

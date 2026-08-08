@@ -1,0 +1,80 @@
+{
+  "layer": "n12_national",
+  "target": "web/public/data/vn",
+  "resolution": 6,
+  "stats": {
+    "r8_rows_read": 425778,
+    "r8_cells_unique": 417185,
+    "n_cells_r6": 9813,
+    "median_r8_per_r6": 49,
+    "n_cells_multi_province": 1279,
+    "n_stations": 6380,
+    "n_poi": 25220,
+    "bbox": [
+      102.1433929384005,
+      6.930017473184509,
+      117.83534998250828,
+      23.392339255908023
+    ],
+    "view_bbox": [
+      103.0078,
+      8.8891,
+      109.3084,
+      23.0517
+    ],
+    "bytes": {
+      "grid_h3_r6.parquet": 464197,
+      "stations.parquet": 269437,
+      "poi.parquet": 777397,
+      "provinces.json": 58090
+    },
+    "ngan_sach_tai_lan_dau_MB": 0.52,
+    "ngan_sach_ke_ca_lop_nap_luoi_MB": 1.57,
+    "totals": {
+      "population": 113732608,
+      "n_stations": 6380,
+      "n_ports": 55960,
+      "power_mw": 1611.1,
+      "n_apartment": 6024,
+      "n_poi_total": 17879,
+      "area_km2": 335017
+    }
+  },
+  "checks": [
+    {
+      "name": "stations_khop_bang_tinh",
+      "status": "PASS",
+      "detail": "r6 6380 · tỉnh 6380 · bảng trạm 6380"
+    },
+    {
+      "name": "ports_khop_bang_tinh",
+      "status": "PASS",
+      "detail": "r6 55960 · tỉnh 55960"
+    },
+    {
+      "name": "dan_so_lech_duoi_1_phan_tram",
+      "status": "PASS",
+      "detail": "113,732,608 so với 113,625,653 công bố — lệch 0.09%"
+    },
+    {
+      "name": "khong_trung_tram",
+      "status": "PASS",
+      "detail": "6380 trạm, 6380 mã duy nhất"
+    },
+    {
+      "name": "moi_o_co_tinh_chu",
+      "status": "PASS",
+      "detail": "0 ô không gán được tỉnh chủ"
+    },
+    {
+      "name": "bon_nhom_poi_du_va_khong_mat_cai_nao",
+      "status": "PASS",
+      "detail": "apartment 5,962 (5,766 đa giác, 3.3 MB) · edu_health 10,867 (9,141 đa giác, 5.9 MB) · mall 1,377 (238 đa giác, 0.5 MB) · public 7,014 (6,327 đa giác, 4.1 MB)"
+    },
+    {
+      "name": "tai_lan_dau_duoi_1MB",
+      "status": "PASS",
+      "detail": "0.52 MB (lưới gộp + bảng tỉnh); thêm 1.05 MB nạp lười cho trạm + POI"
+    }
+  ]
+}

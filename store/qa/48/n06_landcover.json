@@ -1,0 +1,41 @@
+{
+  "layer": "n06_landcover",
+  "province_name": "Thành phố Đà Nẵng",
+  "source": "ESA WorldCover 10 m v200 (2021)",
+  "no_buildable_field": "Trường `buildable` đã bị bỏ ở DECISIONS §7: ngưỡng không có cơ sở (hàm trơn, không có vai) và loại nhầm 3,3% trạm đang vận hành. Ảnh nguồn 2021 dùng cho 2026.",
+  "province_code": "48",
+  "stats": {
+    "n_cells": 15933,
+    "n_cells_uncovered": 1451,
+    "tiles_used": [
+      "ESA_WorldCover_10m_2021_v200_N12E105_Map.tif",
+      "ESA_WorldCover_10m_2021_v200_N12E108_Map.tif",
+      "ESA_WorldCover_10m_2021_v200_N15E105_Map.tif",
+      "ESA_WorldCover_10m_2021_v200_N15E108_Map.tif"
+    ],
+    "raster_blocks_read": 18,
+    "median_px_per_cell": 9961,
+    "built_frac_mean": 0.0244,
+    "built_frac_p90": 0.0535,
+    "water_frac_mean": 0.0278,
+    "crop_frac_mean": 0.0455,
+    "tree_frac_mean": 0.724
+  },
+  "checks": [
+    {
+      "name": "every_cell_covered",
+      "status": "FAIL",
+      "detail": "1451 ô không có pixel WorldCover nào"
+    },
+    {
+      "name": "fracs_sum_to_1",
+      "status": "PASS",
+      "detail": "max lệch 2.22e-16"
+    },
+    {
+      "name": "all_grid_cells_present",
+      "status": "PASS",
+      "detail": "15933/15933"
+    }
+  ]
+}

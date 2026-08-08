@@ -1,0 +1,59 @@
+{
+  "layer": "n04_grid",
+  "resolution": 8,
+  "province_name": "Tỉnh Đồng Nai",
+  "province_code": "75",
+  "stats": {
+    "n_cells": 15663,
+    "n_inside": 14638,
+    "n_border": 1025,
+    "n_sliver_excluded": 53,
+    "grid_area_km2_weighted": 12781.0,
+    "boundary_area_km2": 12724.39,
+    "cells_with_supply": 242,
+    "cells_with_poi": 257,
+    "share_cells_with_zero_poi": 0.9836,
+    "n_poi_assigned": 497,
+    "road_len_total_km": 32507.8,
+    "road_len_arterial_km": 2791.5,
+    "road_len_in_province_km": 31714.8,
+    "road_outside_boundary_share": 0.0244,
+    "share_cells_with_road": 0.6706,
+    "n_poi_1km_median": 0,
+    "n_poi_without_commune": 0,
+    "communes_with_zero_poi": 25,
+    "n_communes": 95
+  },
+  "checks": [
+    {
+      "name": "h3_unique",
+      "status": "PASS",
+      "detail": "15663 ô"
+    },
+    {
+      "name": "every_cell_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "grid_area_matches_boundary_lt_1pct",
+      "status": "PASS",
+      "detail": "lưới 12,781.0 km² vs đa giác 12,724.4 km² (lệch 0.44%)"
+    },
+    {
+      "name": "commune_frac_sums_to_province_frac",
+      "status": "PASS",
+      "detail": "max lệch 5.66e-13"
+    },
+    {
+      "name": "clipped_road_le_full_cell",
+      "status": "PASS",
+      "detail": "phần ngoài ranh giới 2.44% tổng chiều dài"
+    },
+    {
+      "name": "every_station_cell_in_grid",
+      "status": "PASS",
+      "detail": "0 trạm thuộc tỉnh rơi ra ngoài lưới báo cáo"
+    }
+  ]
+}

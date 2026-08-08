@@ -1,0 +1,59 @@
+{
+  "layer": "n04_grid",
+  "resolution": 8,
+  "province_name": "Tỉnh Cà Mau",
+  "province_code": "96",
+  "stats": {
+    "n_cells": 9267,
+    "n_inside": 8604,
+    "n_border": 663,
+    "n_sliver_excluded": 42,
+    "grid_area_km2_weighted": 7666.76,
+    "boundary_area_km2": 7632.73,
+    "cells_with_supply": 64,
+    "cells_with_poi": 26,
+    "share_cells_with_zero_poi": 0.9972,
+    "n_poi_assigned": 31,
+    "road_len_total_km": 10049.4,
+    "road_len_arterial_km": 1411.2,
+    "road_len_in_province_km": 9861.5,
+    "road_outside_boundary_share": 0.0187,
+    "share_cells_with_road": 0.5731,
+    "n_poi_1km_median": 0,
+    "n_poi_without_commune": 0,
+    "communes_with_zero_poi": 49,
+    "n_communes": 64
+  },
+  "checks": [
+    {
+      "name": "h3_unique",
+      "status": "PASS",
+      "detail": "9267 ô"
+    },
+    {
+      "name": "every_cell_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "grid_area_matches_boundary_lt_1pct",
+      "status": "PASS",
+      "detail": "lưới 7,666.8 km² vs đa giác 7,632.7 km² (lệch 0.45%)"
+    },
+    {
+      "name": "commune_frac_sums_to_province_frac",
+      "status": "PASS",
+      "detail": "max lệch 5.70e-13"
+    },
+    {
+      "name": "clipped_road_le_full_cell",
+      "status": "PASS",
+      "detail": "phần ngoài ranh giới 1.87% tổng chiều dài"
+    },
+    {
+      "name": "every_station_cell_in_grid",
+      "status": "PASS",
+      "detail": "0 trạm thuộc tỉnh rơi ra ngoài lưới báo cáo"
+    }
+  ]
+}

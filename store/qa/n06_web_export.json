@@ -1,0 +1,82 @@
+{
+  "layer": "n06_web_export",
+  "target": "web/public/data",
+  "stats": {
+    "n_provinces_exported": 34,
+    "ngan_sach_tai_lan_dau_bytes": 315791,
+    "ngan_sach_tai_lan_dau_MB": 0.32,
+    "ngan_sach_moi_tinh_MB": {
+      "min": 1.31,
+      "min_province": "Thành phố Huế",
+      "median": 2.85,
+      "max": 7.04,
+      "max_province": "Thành phố Hồ Chí Minh"
+    },
+    "tong_store_web_MB": 104.0,
+    "per_province_MB": {
+      "01 Thành phố Hà Nội": 6.19,
+      "04 Tỉnh Cao Bằng": 1.48,
+      "08 Tỉnh Tuyên Quang": 3.57,
+      "11 Tỉnh Điện Biên": 1.8,
+      "12 Tỉnh Lai Châu": 1.56,
+      "14 Tỉnh Sơn La": 2.88,
+      "15 Tỉnh Lào Cai": 3.19,
+      "19 Tỉnh Thái Nguyên": 2.58,
+      "20 Tỉnh Lạng Sơn": 2.1,
+      "22 Tỉnh Quảng Ninh": 2.86,
+      "24 Tỉnh Bắc Ninh": 3.48,
+      "25 Tỉnh Phú Thọ": 3.88,
+      "31 Thành phố Hải Phòng": 2.55,
+      "33 Tỉnh Hưng Yên": 2.38,
+      "37 Tỉnh Ninh Bình": 2.67,
+      "38 Tỉnh Thanh Hóa": 3.42,
+      "40 Tỉnh Nghệ An": 3.83,
+      "42 Tỉnh Hà Tĩnh": 2.19,
+      "44 Tỉnh Quảng Trị": 2.85,
+      "46 Thành phố Huế": 1.31,
+      "48 Thành phố Đà Nẵng": 3.47,
+      "51 Tỉnh Quảng Ngãi": 3.23,
+      "52 Tỉnh Gia Lai": 4.61,
+      "56 Tỉnh Khánh Hòa": 3.88,
+      "66 Tỉnh Đắk Lắk": 3.64,
+      "68 Tỉnh Lâm Đồng": 4.45,
+      "75 Tỉnh Đồng Nai": 3.96,
+      "79 Thành phố Hồ Chí Minh": 7.04,
+      "80 Tỉnh Tây Ninh": 2.67,
+      "82 Tỉnh Đồng Tháp": 2.31,
+      "86 Tỉnh Vĩnh Long": 2.18,
+      "91 Tỉnh An Giang": 2.36,
+      "92 Thành phố Cần Thơ": 2.01,
+      "96 Tỉnh Cà Mau": 1.45
+    },
+    "breakdown_tinh_lon_nhat": {
+      "poi.geojson": 3.091,
+      "roads.parquet": 2.413,
+      "commune.geojson": 0.524,
+      "station_occupancy_profile_168h.parquet": 0.422,
+      "grid_h3_r8.parquet": 0.327,
+      "stations.parquet": 0.113,
+      "station_occupancy.parquet": 0.074,
+      "admin_boundary.geojson": 0.036,
+      "connectors.parquet": 0.036,
+      "manifest.json": 0.008
+    }
+  },
+  "checks": [
+    {
+      "name": "legacy_hanoi_bundle_untouched",
+      "status": "PASS",
+      "detail": "bộ Hà Nội cũ ở đường dẫn không tiền tố vẫn nguyên — web hiện tại không đổi hành vi"
+    },
+    {
+      "name": "first_load_under_2MB",
+      "status": "PASS",
+      "detail": "0.32 MB cho chỉ mục 34 tỉnh"
+    },
+    {
+      "name": "every_province_declares_missing_columns",
+      "status": "PASS",
+      "detail": "manifest từng tỉnh khai cột vắng ⇒ giao diện không hỏi cột không tồn tại"
+    }
+  ]
+}

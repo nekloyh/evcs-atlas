@@ -1,0 +1,59 @@
+{
+  "layer": "n04_grid",
+  "resolution": 8,
+  "province_name": "Tỉnh Sơn La",
+  "province_code": "14",
+  "stats": {
+    "n_cells": 17836,
+    "n_inside": 16826,
+    "n_border": 1010,
+    "n_sliver_excluded": 53,
+    "grid_area_km2_weighted": 14167.11,
+    "boundary_area_km2": 14104.14,
+    "cells_with_supply": 57,
+    "cells_with_poi": 79,
+    "share_cells_with_zero_poi": 0.9956,
+    "n_poi_assigned": 98,
+    "road_len_total_km": 16542.1,
+    "road_len_arterial_km": 1889.5,
+    "road_len_in_province_km": 16340.7,
+    "road_outside_boundary_share": 0.0122,
+    "share_cells_with_road": 0.5188,
+    "n_poi_1km_median": 0,
+    "n_poi_without_commune": 0,
+    "communes_with_zero_poi": 47,
+    "n_communes": 75
+  },
+  "checks": [
+    {
+      "name": "h3_unique",
+      "status": "PASS",
+      "detail": "17836 ô"
+    },
+    {
+      "name": "every_cell_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "grid_area_matches_boundary_lt_1pct",
+      "status": "PASS",
+      "detail": "lưới 14,167.1 km² vs đa giác 14,104.1 km² (lệch 0.45%)"
+    },
+    {
+      "name": "commune_frac_sums_to_province_frac",
+      "status": "PASS",
+      "detail": "max lệch 6.43e-13"
+    },
+    {
+      "name": "clipped_road_le_full_cell",
+      "status": "PASS",
+      "detail": "phần ngoài ranh giới 1.22% tổng chiều dài"
+    },
+    {
+      "name": "every_station_cell_in_grid",
+      "status": "PASS",
+      "detail": "0 trạm thuộc tỉnh rơi ra ngoài lưới báo cáo"
+    }
+  ]
+}

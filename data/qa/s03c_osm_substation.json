@@ -1,0 +1,19 @@
+{
+  "layer": "osm_substations",
+  "source_pbf": "/home/n91ym1nhky/Work/internVSF/aGiang-evcs/data/raw/osm/vietnam-latest.osm.pbf",
+  "aoi": "ranh giới VNSDI Hà Nội + đệm 5 km (đa giác thật, không phải bbox)",
+  "tag": "power=substation (không đọc substation=* — phân hạng điện áp là công suất lưới, §12)",
+  "scope_note": "LỚP ĐIỂM để vẽ. Không có trường khoảng cách tới trạm biến áp; khả năng đấu nối lưới ngoài phạm vi (DECISIONS §8 sửa đổi).",
+  "stats": {
+    "n_total": 132,
+    "n_with_usable_coords": 132,
+    "by_osm_type": {
+      "way": 128,
+      "node": 4
+    },
+    "n_named": 41,
+    "node_dupes_dropped": 1,
+    "multipolygon_assembly_errors": 0,
+    "elapsed_s": 99.3
+  }
+}

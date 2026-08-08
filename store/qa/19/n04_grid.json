@@ -1,0 +1,59 @@
+{
+  "layer": "n04_grid",
+  "resolution": 8,
+  "province_name": "Tỉnh Thái Nguyên",
+  "province_code": "19",
+  "stats": {
+    "n_cells": 10838,
+    "n_inside": 10183,
+    "n_border": 655,
+    "n_sliver_excluded": 36,
+    "grid_area_km2_weighted": 8403.8,
+    "boundary_area_km2": 8366.48,
+    "cells_with_supply": 109,
+    "cells_with_poi": 92,
+    "share_cells_with_zero_poi": 0.9915,
+    "n_poi_assigned": 115,
+    "road_len_total_km": 17262.6,
+    "road_len_arterial_km": 1984.5,
+    "road_len_in_province_km": 16941.8,
+    "road_outside_boundary_share": 0.0186,
+    "share_cells_with_road": 0.5977,
+    "n_poi_1km_median": 0,
+    "n_poi_without_commune": 0,
+    "communes_with_zero_poi": 55,
+    "n_communes": 92
+  },
+  "checks": [
+    {
+      "name": "h3_unique",
+      "status": "PASS",
+      "detail": "10838 ô"
+    },
+    {
+      "name": "every_cell_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "grid_area_matches_boundary_lt_1pct",
+      "status": "PASS",
+      "detail": "lưới 8,403.8 km² vs đa giác 8,366.5 km² (lệch 0.45%)"
+    },
+    {
+      "name": "commune_frac_sums_to_province_frac",
+      "status": "PASS",
+      "detail": "max lệch 4.77e-13"
+    },
+    {
+      "name": "clipped_road_le_full_cell",
+      "status": "PASS",
+      "detail": "phần ngoài ranh giới 1.86% tổng chiều dài"
+    },
+    {
+      "name": "every_station_cell_in_grid",
+      "status": "PASS",
+      "detail": "0 trạm thuộc tỉnh rơi ra ngoài lưới báo cáo"
+    }
+  ]
+}

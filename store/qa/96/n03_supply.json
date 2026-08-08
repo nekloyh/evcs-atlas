@@ -1,0 +1,99 @@
+{
+  "layer": "n03_supply",
+  "source": "aGiang-evcs data/interim/canonical + data/interim/occ (evcs.vn, đã dedup vật lý)",
+  "province_name": "Tỉnh Cà Mau",
+  "province_code": "96",
+  "stats": {
+    "n_stations_national_pool": 19598,
+    "n_stations_in": 76,
+    "n_stations_buffer_ring": 5,
+    "n_connectors_rows": 129,
+    "n_ports_total": 496,
+    "power_kw_site_total": 15392.5,
+    "power_kw_per_station": 202.5,
+    "op_status": {
+      "OPERATIONAL": 52,
+      "OUT_OF_SERVICE": 11,
+      "MAINTENANCE": 9,
+      "UNKNOWN": 4
+    },
+    "current_type": {
+      "DC": 32,
+      "MIXED": 31,
+      "nan": 10,
+      "AC": 3
+    },
+    "commune_kind": {
+      "PHUONG": 44,
+      "XA": 32
+    },
+    "access": {
+      "PUBLIC": 68,
+      "UNKNOWN": 8
+    },
+    "verified_official_share": 0.8947,
+    "n_communes_with_station": 27,
+    "n_stations_with_occ": 67,
+    "occ_coverage": 0.8816,
+    "occ_grade": {
+      "GOOD": 62,
+      "PARTIAL": 4,
+      "INSUFFICIENT": 1
+    },
+    "util_median": 0.1494,
+    "n_profile_rows": 11082,
+    "upstream_province_label_agreement": 1.0
+  },
+  "checks": [
+    {
+      "name": "station_id_unique",
+      "status": "PASS",
+      "detail": "81 trạm"
+    },
+    {
+      "name": "every_in_station_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "buffer_stations_have_no_commune",
+      "status": "PASS",
+      "detail": "trạm ngoài tỉnh không được gán xã của tỉnh này"
+    },
+    {
+      "name": "no_private_ac_left",
+      "status": "PASS",
+      "detail": "đã loại 154 trạm 1-súng-AC (67.0% số trạm, nhưng 8.8% công suất)"
+    },
+    {
+      "name": "upstream_province_label_agrees",
+      "status": "PASS",
+      "detail": "100.00% trạm IN có admin_l1_code khớp phép gán hình học ở đây"
+    },
+    {
+      "name": "connectors_fk_ok",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "occ_only_for_in_scope",
+      "status": "PASS",
+      "detail": "occupancy chỉ cho trạm thuộc tỉnh, không cho trạm vành đệm"
+    },
+    {
+      "name": "profile_cells_le_168",
+      "status": "PASS",
+      "detail": "max 168 ô/trạm"
+    }
+  ],
+  "dropped_private_ac": {
+    "predicate": "n_guns_installed == 1 AND current_type_asset == 'AC'",
+    "n_dropped_total": 168,
+    "n_dropped_in": 154,
+    "n_dropped_buffer": 14,
+    "n_stations_in_before": 230,
+    "share_of_stations_before": 0.6696,
+    "share_of_ports_before": 0.2369,
+    "share_of_power_before": 0.0884
+  }
+}

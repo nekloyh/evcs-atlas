@@ -1,0 +1,58 @@
+{
+  "layer": "grid_features",
+  "stats": {
+    "road_len_total_km": 30476.7,
+    "road_len_arterial_km": 3109.4,
+    "road_len_by_class_km": {
+      "local": 19840.2,
+      "motorway": 411.0,
+      "primary": 1008.3,
+      "secondary": 973.6,
+      "service": 5667.2,
+      "tertiary": 1859.9,
+      "trunk": 716.6
+    },
+    "poi_in_hanoi": 3955,
+    "poi_by_class": {
+      "fuel": 321,
+      "parking_off": 509,
+      "parking_street": 67,
+      "mall": 47,
+      "dept_store": 83,
+      "supermarket": 253,
+      "market": 193,
+      "apartment": 2482
+    },
+    "road_len_in_hanoi_km": 29296.8,
+    "road_outside_boundary_share": 0.0387,
+    "cells_with_supply": 449,
+    "ports_total": 7785
+  },
+  "checks": [
+    {
+      "name": "road_total_equals_class_sum",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "cells_with_road",
+      "status": "PASS",
+      "detail": "4219/4400 = 95.9%"
+    },
+    {
+      "name": "poi_total_matches",
+      "status": "PASS",
+      "detail": "3955 vs 3955"
+    },
+    {
+      "name": "supply_matches_station_table",
+      "status": "PASS",
+      "detail": "710 vs 710"
+    },
+    {
+      "name": "clipped_road_le_full_cell",
+      "status": "PASS",
+      "detail": "phần ngoài ranh giới 3.87% tổng chiều dài"
+    }
+  ]
+}

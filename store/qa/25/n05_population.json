@@ -1,0 +1,46 @@
+{
+  "layer": "n05_population",
+  "province_name": "Tỉnh Phú Thọ",
+  "method": "dasymetric: WorldPop 2025 R2024B (trọng số) neo theo VNSDI danso (tổng kiểm soát)",
+  "weight_raster": "/home/n91ym1nhky/Work/internVSF/aGiang-evcs/data/raw/worldpop/vnm_pop_2025_CN_100m_R2024B_v1.tif",
+  "province_code": "25",
+  "stats": {
+    "population_total": 4022481.6,
+    "population_published_vnsdi": 4022493.0,
+    "population_worldpop_raw": 3697437.3,
+    "anchor_ratio_province": 1.0879,
+    "anchor_ratio_commune_median": 1.1,
+    "anchor_ratio_commune_p90": 1.3896,
+    "n_communes_unanchored_implausible": 0,
+    "n_communes_without_weight": 0,
+    "n_cells": 11996,
+    "n_cells_with_pop": 10410,
+    "pop_source_counts": {
+      "WORLDPOP2025_ANCHORED_VNSDI": 10410,
+      "ZERO_NO_WEIGHT": 1586
+    },
+    "max_cell_population": 11526.7
+  },
+  "checks": [
+    {
+      "name": "total_matches_official_plus_declared_substitutions",
+      "status": "PASS",
+      "detail": "4,022,482 vs kỳ vọng 4,022,493 (công bố 4,022,493 − 0 + 0 thay thế)"
+    },
+    {
+      "name": "no_negative",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "worldpop_covers_the_province",
+      "status": "PASS",
+      "detail": "86.8% ô có trọng số WorldPop"
+    },
+    {
+      "name": "anchor_ratio_is_reported_not_judged",
+      "status": "PASS",
+      "detail": "tỉnh này neo ×1.09 so với bề mặt WorldPop — số đo, không phải phán quyết"
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "layer": "n05_quality",
+  "vintage": "VNSDI 2025-07 (sau cải cách 01/7/2025)",
+  "note": "mọi con số ở đây tính lại từ phân mảnh của chính tỉnh — không hằng số toàn quốc",
+  "stats": {
+    "n_provinces_in_store": 34,
+    "n_stations_total": 6380,
+    "n_ports_total": 55960,
+    "power_mw_total": 1611.1,
+    "n_poi_demand_total": 17879,
+    "n_poi_visual_total": 25220,
+    "do_tan_private_ac_share_stations": {
+      "min": 0.4863,
+      "min_province": "Tỉnh Gia Lai",
+      "p25": 0.5931,
+      "median": 0.6745,
+      "p75": 0.7377,
+      "max": 0.7869,
+      "max_province": "Tỉnh Bắc Ninh",
+      "hanoi": 0.7184
+    },
+    "do_tan_private_ac_share_power": {
+      "min": 0.043,
+      "min_province": "Tỉnh Lâm Đồng",
+      "p25": 0.0569,
+      "median": 0.0727,
+      "p75": 0.1028,
+      "max": 0.1591,
+      "max_province": "Tỉnh Cao Bằng",
+      "hanoi": 0.0701
+    },
+    "do_tan_power_kw_per_station": {
+      "min": 144.7,
+      "min_province": "Tỉnh Đắk Lắk",
+      "p25": 200.85,
+      "median": 240.7,
+      "p75": 274.725,
+      "max": 344.6,
+      "max_province": "Tỉnh Thái Nguyên",
+      "hanoi": 327.9
+    },
+    "do_tan_ports_per_10k_pop": {
+      "min": 1.72,
+      "min_province": "Tỉnh Lai Châu",
+      "p25": 2.9375,
+      "median": 3.99,
+      "p75": 5.535,
+      "max": 10.96,
+      "max_province": "Tỉnh Thái Nguyên",
+      "hanoi": 8.91
+    },
+    "do_tan_share_communes_zero_poi": {
+      "min": 0.0357,
+      "min_province": "Thành phố Hồ Chí Minh",
+      "p25": 0.3231,
+      "median": 0.4814,
+      "p75": 0.5398,
+      "max": 0.7656,
+      "max_province": "Tỉnh Cà Mau",
+      "hanoi": 0.0714
+    },
+    "do_tan_poi_bias_phuong_vs_xa": {
+      "min": 1.6,
+      "min_province": "Tỉnh Hưng Yên",
+      "p25": 7.9425,
+      "median": 12.9,
+      "p75": 18.5975,
+      "max": 78.15,
+      "max_province": "Thành phố Đà Nẵng",
+      "hanoi": 41.37
+    },
+    "flag_counts": {
+      "DIA_GIOI_CO_SO_CONG_BO_HONG": 29,
+      "POI_KHONG_DIEN_GIAI_DUOC": 12,
+      "KHONG_DO_DUOC_SU_DUNG": 4,
+      "QUA_IT_TRAM": 1
+    },
+    "n_de_nghi_loai": 4,
+    "de_nghi_loai": [
+      "04 Tỉnh Cao Bằng: KHONG_DO_DUOC_SU_DUNG",
+      "11 Tỉnh Điện Biên: KHONG_DO_DUOC_SU_DUNG",
+      "12 Tỉnh Lai Châu: KHONG_DO_DUOC_SU_DUNG,QUA_IT_TRAM",
+      "14 Tỉnh Sơn La: KHONG_DO_DUOC_SU_DUNG"
+    ],
+    "n_cam_dien_giai_poi": 12,
+    "partition_check": {
+      "n_national_after_filters": 6387,
+      "n_union_of_IN": 6380,
+      "n_duplicated_across_partitions": 0,
+      "n_not_in_any_province": 7,
+      "note_not_in_any_province": "trạm nằm ngoài MỌI đa giác tỉnh (ven biển/đảo nhỏ). Nguồn thượng nguồn gán chúng bằng 'nearest' chứ không phải 'inside'. Ở đây chúng chỉ tồn tại với scope='BUFFER' — không bị mất, nhưng không tỉnh nào nhận là của mình."
+    }
+  },
+  "checks": [
+    {
+      "name": "no_national_constant_for_private_ac",
+      "status": "PASS",
+      "detail": "tỉ lệ trải 48.6%–78.7% ⇒ con số Hà Nội KHÔNG dùng làm hằng số toàn quốc"
+    },
+    {
+      "name": "station_partitions_do_not_double_count",
+      "status": "PASS",
+      "detail": "0 trạm xuất hiện với scope=IN ở nhiều hơn một tỉnh"
+    },
+    {
+      "name": "station_partitions_lose_nothing_silently",
+      "status": "PASS",
+      "detail": "Σ(IN) = 6,380 / 6,387 toàn quốc · 7 trạm không thuộc đa giác tỉnh nào (đã khai báo, không im lặng)"
+    },
+    {
+      "name": "poi_coverage_measured_for_every_province",
+      "status": "PASS",
+      "detail": "0 tỉnh thiếu chỉ số độ phủ POI"
+    }
+  ]
+}

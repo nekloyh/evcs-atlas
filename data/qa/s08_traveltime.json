@@ -1,0 +1,106 @@
+{
+  "layer": "distance",
+  "method": "Dijkstra đa nguồn trên đồ thị đường OSM (đúng chiều một chiều), trọng số MÉT",
+  "no_time_field": "Không phát trường thời gian: bảng tốc độ giả định chi phối 100% giá trị (bỏ tag maxspeed đi Spearman vẫn 0,9991) và 62% ô đổi nhóm ngưỡng phút khi đổi bảng ±30%.",
+  "graph": {
+    "nodes": 1327212,
+    "nodes_in_giant_scc": 1318913,
+    "n_strongly_connected_components": 2043,
+    "directed_edges": 2757052,
+    "roads_total": 240212,
+    "roads_dropped_access_blocked": 2014,
+    "access_blocked_values": [
+      "customers",
+      "delivery",
+      "no",
+      "permit",
+      "private",
+      "residents"
+    ],
+    "station_sources": 833,
+    "stations_snapped": 886,
+    "stations_total": 886,
+    "snap_max_m": 2000.0
+  },
+  "stats": {
+    "n_cells": 4400,
+    "n_reachable": 4399,
+    "dist_median_m": 2322.8,
+    "dist_p90_m": 4832.8,
+    "euclid_median_m": 1487.2,
+    "detour_ratio_median": 1.474,
+    "detour_ratio_p90": 2.289,
+    "detour_ratio_max": 36.08,
+    "cells_where_euclid_understates_gt_2x": 696,
+    "detour_ratio_null_cells": 88,
+    "asym_median_m": 0.0,
+    "asym_p90_m": 151.9,
+    "asym_max_m": 16293.0,
+    "cells_asym_gt_500m": 182,
+    "neighbor_pairs": 12768,
+    "neighbor_jump_median_m": 740.6,
+    "neighbor_jump_p90_m": 1664.6,
+    "neighbor_jump_p99_m": 4367.6,
+    "neighbor_jump_max_m": 20523.0,
+    "neighbor_pairs_jump_gt_2km": 860,
+    "neighbor_pairs_jump_gt_2km_share": 0.0674,
+    "euclid_coverage_error_by_radius": {
+      "1000m": {
+        "cells_covered_euclid": 1325,
+        "cells_covered_network": 595,
+        "false_positive_cells": 730,
+        "false_positive_share": 0.5509
+      },
+      "2000m": {
+        "cells_covered_euclid": 2964,
+        "cells_covered_network": 1837,
+        "false_positive_cells": 1127,
+        "false_positive_share": 0.3802
+      },
+      "3000m": {
+        "cells_covered_euclid": 3864,
+        "cells_covered_network": 2879,
+        "false_positive_cells": 985,
+        "false_positive_share": 0.2549
+      },
+      "5000m": {
+        "cells_covered_euclid": 4369,
+        "cells_covered_network": 4011,
+        "false_positive_cells": 358,
+        "false_positive_share": 0.0819
+      }
+    }
+  },
+  "checks": [
+    {
+      "name": "all_cells_present",
+      "status": "PASS",
+      "detail": "4400/4400"
+    },
+    {
+      "name": "network_ge_euclid",
+      "status": "PASS",
+      "detail": "min tỉ số 1.009 (đường mạng không thể ngắn hơn chim bay)"
+    },
+    {
+      "name": "most_cells_reachable",
+      "status": "PASS",
+      "detail": "4399/4400 = 100.0%"
+    },
+    {
+      "name": "no_negative_distance",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "no_time_field",
+      "status": "PASS",
+      "detail": "bộ dữ liệu không phát trường thời gian nào — chỉ mét"
+    },
+    {
+      "name": "all_anchors_in_giant_scc",
+      "status": "PASS",
+      "detail": "mọi điểm neo (ô và trạm) đều nằm trong SCC lớn — xe đi tiếp được"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "layer": "n06_landcover",
+  "province_name": "Tỉnh Khánh Hòa",
+  "source": "ESA WorldCover 10 m v200 (2021)",
+  "no_buildable_field": "Trường `buildable` đã bị bỏ ở DECISIONS §7: ngưỡng không có cơ sở (hàm trơn, không có vai) và loại nhầm 3,3% trạm đang vận hành. Ảnh nguồn 2021 dùng cho 2026.",
+  "province_code": "56",
+  "stats": {
+    "n_cells": 18981,
+    "n_cells_uncovered": 8406,
+    "tiles_used": [
+      "ESA_WorldCover_10m_2021_v200_N06E105_Map.tif",
+      "ESA_WorldCover_10m_2021_v200_N09E105_Map.tif",
+      "ESA_WorldCover_10m_2021_v200_N09E108_Map.tif",
+      "ESA_WorldCover_10m_2021_v200_N12E105_Map.tif",
+      "ESA_WorldCover_10m_2021_v200_N12E108_Map.tif"
+    ],
+    "raster_blocks_read": 15,
+    "median_px_per_cell": 9803,
+    "built_frac_mean": 0.0173,
+    "built_frac_p90": 0.023,
+    "water_frac_mean": 0.0335,
+    "crop_frac_mean": 0.0519,
+    "tree_frac_mean": 0.367
+  },
+  "checks": [
+    {
+      "name": "every_cell_covered",
+      "status": "FAIL",
+      "detail": "8406 ô không có pixel WorldCover nào"
+    },
+    {
+      "name": "fracs_sum_to_1",
+      "status": "FAIL",
+      "detail": "max lệch 1.00e+00"
+    },
+    {
+      "name": "all_grid_cells_present",
+      "status": "PASS",
+      "detail": "18981/18981"
+    }
+  ]
+}

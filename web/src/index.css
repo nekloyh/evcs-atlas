@@ -1,0 +1,53 @@
+@import "tailwindcss";
+@import "maplibre-gl/dist/maplibre-gl.css";
+
+/* Token màu — DESIGN.md §4. Mọi giá trị đã qua scripts/validate_palette.js của skill
+   dataviz trên surface #f2f3f0 (nền thật của positron). Đừng sửa bằng mắt. */
+@theme {
+  /* ramp choropleth — cam tuần tự 7 bậc */
+  --color-c1: #e7997e;
+  --color-c2: #dd7c58;
+  --color-c3: #d35c2d;
+  --color-c4: #b94918;
+  --color-c5: #9b380b;
+  --color-c6: #7e2a03;
+  --color-c7: #601e01;
+
+  /* họ màu lạnh dùng chung cho overlay */
+  --color-cold-1: #3987e5;
+  --color-cold-2: #1c5cab;
+  --color-cold-3: #0d366b;
+
+  /* chrome & mực */
+  --color-panel: #f9f9f7;
+  --color-basemap: #f2f3f0;
+  --color-hairline: #e1e0d9;
+  --color-ink: #0b0b0b;
+  --color-ink-2: #52514e;
+  --color-ink-muted: #898781;
+  --color-warn: #fab219;
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--color-panel);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Không thẻ nổi, không bo góc, không đổ bóng — DESIGN.md §3.
+   MapLibre tự thêm bo góc + shadow cho control; gỡ ra. */
+.maplibregl-ctrl-group {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: 1px solid var(--color-hairline);
+}

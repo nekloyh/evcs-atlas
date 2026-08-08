@@ -1,0 +1,1134 @@
+/**
+ * 45 trường bản đồ hoá được, gom đúng 5 nhóm của DESIGN.md §6.
+ *
+ * 53 cột của `grid_h3_r8.parquet` = 45 trường ở đây + 8 cột ĐỊNH DANH & XUẤT XỨ
+ * (`h3_r8` `lat` `lng` `cell_state` `commune_code` `commune_name` `commune_area_frac`
+ * `pop_source`). Tám cột đó **cố tình không có mặt** trong danh sách này — tô màu chúng
+ * lên bản đồ là vô nghĩa; chúng chỉ xuất hiện trong panel Ô và khối NGUỒN.
+ *
+ * File này chỉ giữ CÂU CHỮ. Mọi con số (phủ %, số trạm biến áp, tỉ lệ tag) đến từ
+ * `manifest.json` — ràng buộc 4, DESIGN.md §7c. Đừng gõ phần trăm vào đây.
+ */
+
+import { pct, type Manifest } from "./data/manifest";
+import type { ReadingUnit } from "./state/types";
+import { OBSERVED_H_MIN } from "./viz/occ";
+import type { Polarity } from "./viz/palette";
+
+export type FieldKind = "numeric" | "bool" | "categorical";
+export type GroupId = "cau" | "dat" | "duong" | "cung" | "tiepcan" | "sosanh";
+
+export const GROUPS: { id: GroupId; label: string; hint: string }[] = [
+  { id: "cau", label: "CẦU", hint: "ai cần sạc" },
+  { id: "dat", label: "ĐẤT", hint: "đặt được không" },
+  { id: "duong", label: "ĐƯỜNG", hint: "xe tới được không" },
+  { id: "cung", label: "CUNG", hint: "đã có gì" },
+  { id: "tiepcan", label: "TIẾP CẬN & SỬ DỤNG", hint: "hiện trạng tốt tới đâu" },
+  // Nhóm thứ 6 — DESIGN §13c. Nó gom theo CÁCH ĐỌC, không theo bảng: một trường ở đây có
+  // thể là cột thật (`detour_ratio`) hoặc đại lượng tính ra (§13c-1). Điểm chung là cả
+  // bốn đều vẽ ĐỘ LỆCH khỏi một kỳ vọng, chứ không vẽ MỨC.
+  { id: "sosanh", label: "SO SÁNH", hint: "so với kỳ vọng" },
+];
+
+/** Tiền tố của trường thuộc bảng xã — §6b. Tên trần vẫn là trường của ô. */
+export const COMMUNE_PREFIX = "commune:";
+
+/** Tiền tố của trường thuộc mạng đường — §6b, thêm ở M3.1. Cùng quy tắc với `commune:`. */
+export const ROAD_PREFIX = "road:";
+
+/** Tiền tố của trường thuộc TRẠM — §6b, thêm ở M4 cho scrubber (§3e). */
+export const STATION_PREFIX = "station:";
+
+/** Trường nhịp trạm — id đầy đủ. Scrubber và dock đều cần trỏ tới nó bằng một hằng. */
+export const STATION_OCC_FIELD = `${STATION_PREFIX}occ`;
+
+export interface FieldMeta {
+  /**
+   * Định danh dùng ở state và ở khoá `f` của hash. Trường của xã mang tiền tố
+   * `commune:` (§6b); trường của ô là tên trần.
+   */
+  id: string;
+  /** Tên cột/thuộc tính thật trong dữ liệu. Khác `id` ở trường của xã. */
+  column: string;
+  /** Đơn vị đọc — quyết định hình học nào được tô. Ràng buộc 2 mở rộng, §6b.
+   *  Tên là `readAs` chứ không phải `unit` vì `unit` đã là câu đơn vị của legend. */
+  readAs: ReadingUnit;
+  /**
+   * Biểu thức SELECT khi trường KHÔNG phải một cột thô (§13c-1). Bảng ô có bí danh `g`.
+   * Đặt ngay cạnh `desc` là có chủ ý: công thức và câu mô tả nó phải sửa cùng một chỗ,
+   * nếu không chúng sẽ trôi khỏi nhau và UI sẽ mô tả một phép tính khác phép tính đang chạy.
+   */
+  expr?: string;
+  /** File parquet mà `expr` cần đăng ký thêm ngoài lưới. */
+  deps?: string[];
+  /**
+   * Cực tính — M2.1-(B). Vắng = trung tính (đậm = NHIỀU, nguyên trạng). `high-good` thì
+   * ĐẢO thứ tự gán màu để **đậm luôn là chỗ cần can thiệp** ở mọi bản đồ.
+   *
+   * Khai từng trường một, không suy ra: "nhiều đường trong ô" không tốt cũng không xấu,
+   * và đoán hộ người đọc là bịa thêm một phát biểu mà dữ liệu không nói.
+   */
+  polarity?: Polarity;
+  /**
+   * Trường này vẽ được thành **mặt liên tục** (`ContourLayer`, §1b) — chỉ đúng với đại
+   * lượng **cộng được**: cộng dân số của mấy ô lại thì ra dân số của vùng, còn cộng
+   * `built_frac` hay `detour_ratio` lại thì ra một con số vô nghĩa. Đây là lý do cờ này
+   * phải khai từng trường một chứ không suy ra từ `kind: "numeric"`.
+   */
+  surface?: boolean;
+  group: GroupId;
+  label: string;
+  /** mô tả một câu — ô tìm kiếm lọc trên cả trường này, không chỉ trên tên cột */
+  desc: string;
+  /** vế sau dấu · của câu đơn vị ở legend (§3b). null với bool và hạng mục. */
+  unit: string | null;
+  kind: FieldKind;
+  /**
+   * Null ở trường này CÓ NGHĨA — §7a. Đặt chuỗi này là chặn badge ⚠ phủ ô lại:
+   * "⚠ chỉ dành cho 'không biết', không dành cho 'biết là không'".
+   */
+  nullMeans?: string;
+  /** nhãn của swatch ô-trống ở legend; mặc định “không đo được” */
+  nullLabel?: string;
+  /**
+   * Null của trường này có **HAI nguyên nhân** — mở rộng §7a (M3-Q3).
+   *
+   * §7a chia null làm hai loại: "không biết" (có ⚠) và "biết là không" (không ⚠). Cờ
+   * `nullMeans` diễn đạt được điều đó ở cấp TRƯỜNG. Nhưng `detour_ratio` có cả hai loại
+   * **trong cùng một trường**, và gộp chúng vào một vân xám là để 86 ô SÁT TRẠM — nhóm
+   * được phục vụ tốt nhất thành phố — đeo cùng ký hiệu với 50 ô hoang không tới được.
+   *
+   * `by` là một cột **bool đã có sẵn** trong hàng. `true` ⇒ null loại "không áp dụng"
+   * (vân 90°, KHÔNG tính vào ⚠). `false` ⇒ null loại "không biết" (vân 45°, có ⚠).
+   */
+  nullSplit?: {
+    by: "network_reachable";
+    /** nhãn cho nhóm "không áp dụng" ở legend */
+    label: string;
+    /** vì sao câu hỏi không áp dụng — hiện cạnh badge */
+    explain: string;
+  };
+  /**
+   * Câu giải thích đi kèm badge ⚠ phủ ô, khi số thô chưa nói hết.
+   *
+   * Nhận **hàm của manifest** khi câu đó cần một con số — §7c cấm gõ phần trăm vào file
+   * này. `util_cell` là ví dụ đúng của trường hợp đó: câu "9,9% ô" một mình đọc thành
+   * "đo kém", mà sự thật là "chỉ tồn tại ở nơi có trạm"; nói được điều đó cần hai số nữa,
+   * và chúng phải đến từ dữ liệu chứ không từ trí nhớ của người viết câu.
+   */
+  coverageNote?: string | ((m: Manifest) => string);
+  /** badge ⚠ NGUỒN — khuyết ở thượng nguồn, cột vẫn 100% không-null */
+  sourceBadge?: (m: Manifest) => { text: string; explain: string } | null;
+  /** cảnh báo riêng, không phải chuyện phủ */
+  caveat?: (m: Manifest) => string | null;
+}
+
+const FRAC = "tỉ lệ diện tích ô, 0–1";
+
+/** Khai báo một trường trước khi gắn đơn vị đọc — `unit`/`column` do bảng dưới suy ra. */
+type Spec = Omit<FieldMeta, "readAs" | "column">;
+
+// ── Trường của Ô (bảng grid_h3_r8.parquet) ─────────────────────────────────────
+
+const CELL_SPECS: Spec[] = [
+  // ── 1. CẦU — ai cần sạc (12) ──────────────────────────────────────────────
+  {
+    id: "population",
+    group: "cau",
+    label: "Dân số",
+    desc: "Phân bổ dasymetric: bề mặt WorldPop 2025 neo theo số dân công bố của từng xã VNSDI.",
+    unit: "người trên ô ~0,74 km²",
+    kind: "numeric",
+    // Trường DUY NHẤT có mặt liên tục ở M2 (§13d-A: "cầu vón cục, không đều" là luận điểm
+    // A, và mặt độ là mark của nó). Dân số cộng được, và nó không có ô null nào — nên phép
+    // cộng không âm thầm bỏ sót ô. Trường có null mà đem cộng thì mặt sẽ trũng xuống ở
+    // đúng chỗ ta không biết, tức vẽ "ít người" ở nơi thật ra là "không đo được".
+    surface: true,
+  },
+  {
+    id: "pop_density_ppkm2",
+    group: "cau",
+    label: "Mật độ dân số",
+    desc: "Dân số chia cho diện tích ô.",
+    unit: "người/km²",
+    kind: "numeric",
+  },
+  {
+    id: "n_apartment",
+    group: "cau",
+    label: "Chung cư",
+    desc: "Số toà chung cư OSM nằm trong ô.",
+    unit: "toà",
+    kind: "numeric",
+  },
+  {
+    id: "apartment_levels_sum",
+    group: "cau",
+    label: "Tổng tầng chung cư",
+    desc: "Cộng số tầng của các toà chung cư trong ô — chặn dưới, vì phần lớn toà không có tag số tầng trong OSM.",
+    unit: "tầng",
+    kind: "numeric",
+    sourceBadge: (m) => {
+      const a = m.source_metrics?.apartment_levels_tagged;
+      if (!a) return null;
+      return {
+        text: `nguồn ${pct(a.share)}`,
+        explain:
+          `Chỉ ${a.n_tagged.toLocaleString("vi-VN")}/${a.n_total.toLocaleString("vi-VN")} toà chung cư ` +
+          `trong OSM có tag số tầng. Cột không có ô null, nhưng con số là CHẶN DƯỚI chứ không phải số đo.`,
+      };
+    },
+  },
+  {
+    id: "n_poi_1km",
+    group: "cau",
+    label: "Điểm quan tâm trong 1 km",
+    desc: "Số POI trong bán kính 1 km quanh tâm ô — PHƠI NHIỄM, khác với “có gì trong ô”.",
+    unit: "POI trong bán kính 1 km",
+    kind: "numeric",
+    // Khác `n_poi_total` ở KHÁI NIỆM, không phải ở thang đo. `n_poi_total` là KIỂM KÊ
+    // (ô này chứa gì); trường này là PHƠI NHIỄM (quanh điểm này có gì). Đo được là phơi
+    // nhiễm mới dự báo nhu cầu: trên 632 trạm có `util` tin cậy, thêm nó vào mô hình đưa
+    // R² từ 0,266 lên 0,313 — hơn cả khối 18 lớp cơ cấu POI.
+    // §7c: con số phải là HÀM của manifest, không được gõ tay — nếu không nó sẽ âm thầm
+    // sai khi dữ liệu đổi. Chỉ ngưỡng ĐỊNH NGHĨA mới được viết cứng, và ở đây không có.
+    coverageNote: (m) => {
+      const z = m.source_metrics?.poi_empty_1km;
+      const head = z
+        ? `${pct(z.share_cells)} số ô có ĐÚNG 0 POI trong 1 km, và ${pct(z.share_pop)} dân Hà Nội sống ở những ô đó. `
+        : "";
+      return (
+        head +
+        "Số 0 ở đây phần lớn KHÔNG có nghĩa “không có hoạt động” mà có nghĩa “OpenStreetMap chưa vẽ tới”: gần một nửa số xã/phường không có một cái chợ nào trong OSM, dù ở Việt Nam điều đó không thể đúng. Đừng đọc trường này như mật độ kinh tế — xem notebook `poi_chat_luong`."
+      );
+    },
+  },
+  {
+    id: "n_poi_total",
+    group: "cau",
+    label: "Tổng điểm quan tâm",
+    desc: "Cộng 8 loại POI: chung cư, bãi đỗ, đỗ lòng đường, cây xăng, siêu thị, chợ, trung tâm thương mại, bách hoá.",
+    unit: "điểm",
+    kind: "numeric",
+  },
+  {
+    id: "n_mall",
+    group: "cau",
+    label: "Trung tâm thương mại",
+    desc: "Số trung tâm thương mại OSM trong ô.",
+    unit: "điểm",
+    kind: "numeric",
+  },
+  {
+    id: "n_dept_store",
+    group: "cau",
+    label: "Cửa hàng bách hoá",
+    desc: "Số cửa hàng bách hoá OSM trong ô.",
+    unit: "điểm",
+    kind: "numeric",
+  },
+  {
+    id: "n_supermarket",
+    group: "cau",
+    label: "Siêu thị",
+    desc: "Số siêu thị OSM trong ô.",
+    unit: "điểm",
+    kind: "numeric",
+  },
+  {
+    id: "n_market",
+    group: "cau",
+    label: "Chợ",
+    desc: "Số chợ OSM trong ô.",
+    unit: "điểm",
+    kind: "numeric",
+  },
+  {
+    id: "n_parking_off",
+    group: "cau",
+    label: "Bãi đỗ xe",
+    desc: "Số bãi đỗ xe tách khỏi lòng đường.",
+    unit: "điểm",
+    kind: "numeric",
+  },
+  {
+    id: "n_parking_street",
+    group: "cau",
+    label: "Chỗ đỗ lòng đường",
+    desc: "Số chỗ đỗ xe dọc lòng đường.",
+    unit: "điểm",
+    kind: "numeric",
+  },
+  {
+    id: "n_fuel",
+    group: "cau",
+    label: "Cây xăng",
+    desc: "Số cây xăng OSM trong ô.",
+    unit: "điểm",
+    kind: "numeric",
+  },
+
+  // ── 2. ĐẤT — đặt được không (12) ──────────────────────────────────────────
+  {
+    id: "built_frac",
+    group: "dat",
+    label: "Đã xây dựng",
+    desc: "Phần diện tích ô là mặt bằng đã xây dựng, lớp phủ ESA WorldCover.",
+    unit: FRAC,
+    kind: "numeric",
+  },
+  {
+    id: "water_frac",
+    group: "dat",
+    label: "Mặt nước",
+    desc: "Phần diện tích ô là mặt nước.",
+    unit: FRAC,
+    kind: "numeric",
+  },
+  {
+    id: "crop_frac",
+    group: "dat",
+    label: "Đất trồng trọt",
+    desc: "Phần diện tích ô là đất canh tác.",
+    unit: FRAC,
+    kind: "numeric",
+  },
+  {
+    id: "tree_frac",
+    group: "dat",
+    label: "Cây gỗ",
+    desc: "Phần diện tích ô có tán cây gỗ.",
+    unit: FRAC,
+    kind: "numeric",
+  },
+  {
+    id: "grass_frac",
+    group: "dat",
+    label: "Cỏ",
+    desc: "Phần diện tích ô là thảm cỏ.",
+    unit: FRAC,
+    kind: "numeric",
+  },
+  {
+    id: "shrub_frac",
+    group: "dat",
+    label: "Cây bụi",
+    desc: "Phần diện tích ô là cây bụi.",
+    unit: FRAC,
+    kind: "numeric",
+  },
+  {
+    id: "bare_frac",
+    group: "dat",
+    label: "Đất trống",
+    desc: "Phần diện tích ô là đất trống hoặc thưa thực vật.",
+    unit: FRAC,
+    kind: "numeric",
+  },
+  {
+    id: "wetland_frac",
+    group: "dat",
+    label: "Đất ngập nước",
+    desc: "Phần diện tích ô là đất ngập nước.",
+    unit: FRAC,
+    kind: "numeric",
+  },
+  {
+    id: "area_km2",
+    group: "dat",
+    label: "Diện tích ô",
+    desc: "Diện tích hình học của ô H3 độ phân giải 8.",
+    unit: "km²",
+    kind: "numeric",
+  },
+  {
+    id: "area_frac",
+    group: "dat",
+    label: "Phần ô trong tỉnh",
+    // Câu chữ trung tính theo tỉnh, không phải vì "tổng quát hoá cho đẹp": nhãn này hiện
+    // ở MỌI tỉnh của store toàn quốc, và "Phần ô trong Hà Nội" ở bản đồ Cà Mau là một câu
+    // sai đang hiển thị. Hà Nội cũng là một tỉnh, nên câu mới đúng ở cả hai bộ.
+    desc: "Phần diện tích ô nằm trong ranh giới cấp tỉnh — ô ven biên chỉ thuộc một phần.",
+    unit: "tỉ lệ, 0–1",
+    kind: "numeric",
+  },
+
+  // ── 3. ĐƯỜNG — xe tới được không (9) ──────────────────────────────────────
+  {
+    id: "road_len_m",
+    group: "duong",
+    label: "Tổng chiều dài đường",
+    desc: "Tổng chiều dài đường ô tô đi được trong ô. Không tính lối bộ, đường mòn, làn xe đạp.",
+    unit: "mét",
+    kind: "numeric",
+  },
+  {
+    // Cột này sinh ra để chênh lệch ở ô BIÊN đo được chứ không âm thầm: `road_len_m` đếm
+    // cả phần đường chạy ra ngoài ranh giới, cột này chỉ đếm phần trong Hà Nội. Ô nằm trọn
+    // trong thành phố thì hai số bằng nhau; ô biên thì không, và hiệu số đó là thật.
+    id: "road_len_in_hanoi_m",
+    group: "duong",
+    label: "Đường trong ranh giới",
+    desc: "Phần chiều dài đường nằm TRONG ranh giới Hà Nội. Bằng tổng chiều dài ở ô nằm trọn trong thành phố; nhỏ hơn ở ô biên.",
+    unit: "mét",
+    kind: "numeric",
+  },
+  {
+    // Cùng khái niệm với `road_len_in_hanoi_m`, khác TÊN CỘT — và hai dòng cùng tồn tại là
+    // cố ý, không phải trùng lặp. Bộ Hà Nội đặt tên cột mang tên tỉnh (`..._in_hanoi_m`);
+    // store toàn quốc không thể làm vậy nên nó là `..._in_province_m`. Đổi tên cột của bộ
+    // cũ sẽ dựng lại mọi con số đã công bố của Hà Nội, nên hai tên sống cạnh nhau và
+    // `fieldAvailable` cho đúng MỘT trong hai hiện lên tuỳ bộ dữ liệu đang mở.
+    id: "road_len_in_province_m",
+    group: "duong",
+    label: "Đường trong ranh giới",
+    desc: "Phần chiều dài đường nằm TRONG ranh giới tỉnh. Bằng tổng chiều dài ở ô nằm trọn trong tỉnh; nhỏ hơn ở ô biên.",
+    unit: "mét",
+    kind: "numeric",
+  },
+  {
+    id: "road_len_arterial_m",
+    group: "duong",
+    label: "Đường trục chính",
+    desc: "Cộng 4 cấp cao nhất: cao tốc, quốc lộ, đường chính, đường thứ cấp.",
+    unit: "mét",
+    kind: "numeric",
+  },
+  {
+    id: "road_len_motorway_m",
+    group: "duong",
+    label: "Cao tốc",
+    desc: "Chiều dài đường cấp cao tốc trong ô.",
+    unit: "mét",
+    kind: "numeric",
+  },
+  {
+    id: "road_len_trunk_m",
+    group: "duong",
+    label: "Quốc lộ",
+    desc: "Chiều dài đường cấp quốc lộ trong ô.",
+    unit: "mét",
+    kind: "numeric",
+  },
+  {
+    id: "road_len_primary_m",
+    group: "duong",
+    label: "Đường chính",
+    desc: "Chiều dài đường cấp chính trong ô.",
+    unit: "mét",
+    kind: "numeric",
+  },
+  {
+    id: "road_len_secondary_m",
+    group: "duong",
+    label: "Đường thứ cấp",
+    desc: "Chiều dài đường cấp thứ cấp trong ô.",
+    unit: "mét",
+    kind: "numeric",
+  },
+  {
+    id: "road_len_tertiary_m",
+    group: "duong",
+    label: "Đường cấp ba",
+    desc: "Chiều dài đường cấp ba trong ô.",
+    unit: "mét",
+    kind: "numeric",
+  },
+  {
+    id: "road_len_local_m",
+    group: "duong",
+    label: "Đường nội bộ",
+    desc: "Chiều dài đường khu dân cư, ngõ phố trong ô.",
+    unit: "mét",
+    kind: "numeric",
+  },
+  {
+    id: "road_len_service_m",
+    group: "duong",
+    label: "Đường phục vụ",
+    desc: "Chiều dài đường dẫn nội khu — lối vào bãi xe, sân, kho — trong ô.",
+    unit: "mét",
+    kind: "numeric",
+  },
+
+  // ── 4. CUNG — đã có gì (5) ────────────────────────────────────────────────
+  {
+    id: "n_stations",
+    group: "cung",
+    label: "Số trạm sạc",
+    desc: "Số trạm sạc trong ô theo ảnh chụp canonical evcs.vn.",
+    unit: "trạm",
+    kind: "numeric",
+  },
+  {
+    id: "n_stations_operational",
+    group: "cung",
+    label: "Trạm đang vận hành",
+    desc: "Trong số đó, những trạm có trạng thái vận hành là OPERATIONAL.",
+    unit: "trạm",
+    kind: "numeric",
+  },
+  {
+    id: "n_ports",
+    group: "cung",
+    label: "Số súng sạc",
+    desc: "Số súng LẮP ĐẶT (tầng tài sản), không phải số súng đang báo cáo — hai con số này khác nhau và không nên bằng nhau.",
+    unit: "súng",
+    kind: "numeric",
+  },
+  {
+    id: "power_kw_site",
+    group: "cung",
+    label: "Công suất điểm",
+    desc: "Tổng công suất các tủ sạc trong ô, cộng theo tủ chứ không cộng nameplate từng súng.",
+    unit: "kW",
+    kind: "numeric",
+  },
+  {
+    id: "dist_station_network_m",
+    group: "tiepcan",
+    label: "Cách trạm gần nhất, theo đường",
+    desc: "Khoảng cách theo mạng đường từ tâm ô tới trạm gần nhất, Dijkstra đa nguồn, tôn trọng đường một chiều.",
+    unit: "mét, theo mạng đường",
+    kind: "numeric",
+    polarity: "high-bad",
+    coverageNote:
+      "Ô không tới được để trống, không điền một giá trị lớn tuỳ tiện. Trường này KHÔNG phụ thuộc bảng tốc độ giả định — cần số cứng thì dùng nó chứ không dùng phút.",
+  },
+  {
+    id: "dist_station_euclid_m",
+    group: "tiepcan",
+    label: "Cách trạm gần nhất, chim bay",
+    desc: "Khoảng cách đường thẳng từ tâm ô tới trạm gần nhất. Đây KHÔNG phải bản dự phòng của trường theo đường — nó là một khái niệm riêng, dùng cho câu hỏi về BỐ TRÍ không gian (hai trạm có gần nhau quá không), không dùng để trả lời “ô này đã được phủ chưa”.",
+    unit: "mét, đường chim bay",
+    kind: "numeric",
+    caveat: () =>
+      "Đừng dùng bán kính chim bay để kết luận độ phủ: ở bán kính 3 km nó báo phủ nhầm khoảng một phần tư số ô nó nói là đã phủ, và sai LUÔN VỀ MỘT PHÍA (đường đi thật không bao giờ ngắn hơn chim bay). Xem trường Hệ số đi vòng.",
+  },
+  {
+    // Trường SO SÁNH đầu tiên (DESIGN §13c): không vẽ MỨC mà vẽ ĐỘ LỆCH — ở đây là sai số
+    // của phép đo đã bị loại. Đây là trường duy nhất hiện có mà bản đồ của nó là một phát
+    // biểu ("chim bay nói dối ở đâu, và sông là lý do") chứ không phải một bảng màu.
+    //
+    // Cột thuộc bảng ô và vẫn được đếm trong 8 cột của nhóm TIẾP CẬN ở §6; nhóm ở đây là
+    // `sosanh` vì rail gom theo CÁCH ĐỌC (§6, đoạn "Nhóm thứ 6").
+    id: "detour_ratio",
+    group: "sosanh",
+    label: "Hệ số đi vòng",
+    desc: "Đường thật dài gấp mấy lần đường chim bay: khoảng cách theo mạng đường chia cho khoảng cách thẳng tới trạm gần nhất.",
+    unit: "lần, mạng ÷ chim bay",
+    kind: "numeric",
+    polarity: "high-bad",
+    // Hai loại null, không một — xem `nullSplit`. `s08` từ chối tính tỉ số khi khoảng cách
+    // chim bay < 200 m (`DETOUR_MIN_EUCLID_M`), vì ở cỡ đó `dist_station_network_m` bị
+    // `road_access_offset_m` chi phối: tỉ số đo ĐỘ LỆCH CỦA TÂM Ô so với mặt đường, không
+    // đo hình học sông/cầu mà trường này nói về. Câu hỏi không áp dụng — khác hẳn "chưa biết".
+    nullSplit: {
+      by: "network_reachable",
+      label: "sát trạm, không tính tỉ số",
+      explain:
+        "Ô có khoảng cách chim bay dưới 200 m tới trạm. Ở cỡ đó tỉ số đo quãng từ tâm ô ra mặt đường chứ không đo đường vòng, nên bộ dữ liệu không tính — đây là “biết là không áp dụng”, không phải “không biết”, nên nó KHÔNG vào badge ⚠ (§7a).",
+    },
+    coverageNote:
+      "Ô để trống có HAI nguyên nhân khác hẳn nhau, và chúng vẽ bằng hai vân khác nhau: ô không tới được bằng đường bộ (vân chéo — thật sự không biết), và ô sát trạm dưới 200 m (vân dọc — câu hỏi không áp dụng). Về phần có giá trị: 1 nghĩa là đi thẳng được, 2 nghĩa là chim bay nói ô này gần gấp đôi thực tế; sông Hồng và số cầu ít là nguyên nhân hình học của phần lớn ô cao.",
+  },
+  {
+    id: "dist_station_asym_m",
+    group: "sosanh",
+    label: "Chênh lệch đi ↔ về",
+    desc: "Quãng đường tới trạm khác quãng đường từ trạm về bao nhiêu mét, do đường một chiều.",
+    unit: "m, |đi − về|",
+    kind: "numeric",
+    polarity: "high-bad",
+    // Trường này KHÔNG phải cột khoảng cách thứ hai — nó là phần thông tin duy nhất mà chiều
+    // về có mà chiều đi không có. Phát cả `dist_from` sẽ cho hai cột trùng nhau 95,7%, và
+    // hai cột gần giống nhau chỉ mời người đọc chia chúng cho nhau (A5).
+    //
+    // 0 trên hơn nửa số ô là GIÁ TRỊ THẬT, không phải thiếu dữ liệu: phần lớn Hà Nội là đường
+    // hai chiều nên đi và về bằng nhau đúng bằng 0 m. Đừng gắn ⚠ cho nhóm này.
+    coverageNote:
+      "Trung vị đúng bằng 0 m — phần lớn đường Hà Nội hai chiều nên đi và về bằng nhau. Chỉ 182 ô lệch quá 500 m, và chúng bám vào các cặp đường một chiều; đó mới là chỗ trường này có ý nghĩa. Ô để trống là ô không tới được bằng đường bộ.",
+  },
+  {
+    id: "road_access_offset_m",
+    group: "tiepcan",
+    label: "Quãng ra tới mạng đường",
+    desc: "Khoảng cách đường thẳng từ tâm ô ra điểm vào mạng đường; đã cộng vào hai trường trên.",
+    unit: "mét",
+    kind: "numeric",
+  },
+  {
+    id: "util_cell",
+    group: "tiepcan",
+    label: "Mức sử dụng của ô",
+    desc: "Trung bình có trọng số số cổng, trên các trạm đủ điều kiện công bố trong ô. Ô không có trạm đo được để TRỐNG, không phải 0.",
+    unit: "tỉ lệ cổng-giờ bận, 0–1",
+    kind: "numeric",
+    coverageNote: (m) => {
+      const c = m.coverage["util_cell"];
+      const ok = m.source_metrics?.occ_status_ok;
+      const n = c?.cells_with_station;
+      const share = c?.share_measured_among_cells_with_station;
+      // Thiếu số thì nói câu không có số, KHÔNG bịa — §12.
+      const denom =
+        n !== undefined && share !== undefined
+          ? `Chỉ ${n.toLocaleString("vi-VN")} ô có trạm công cộng, và ${pct(share)} trong số đó đo được`
+          : "Trường này chỉ tồn tại ở ô có trạm công cộng";
+      const tier = ok ? ` Ở tầng TRẠM con số lại khác nữa: ${pct(ok.share)} trạm báo cáo đủ chuẩn.` : "";
+      return (
+        `Mẫu số toàn lưới dễ đọc nhầm thành “đo kém”. ${denom} — trường này không đo kém, ` +
+        `nó chỉ TỒN TẠI ở nơi có trạm.${tier} Ba tầng, ba mẫu số, đừng trộn.`
+      );
+    },
+  },
+  {
+    id: "n_stations_measured",
+    group: "tiepcan",
+    label: "Số trạm đo được",
+    desc: "Số trạm trong ô đóng góp vào mức sử dụng của ô.",
+    unit: "trạm",
+    kind: "numeric",
+  },
+  {
+    id: "network_reachable",
+    group: "tiepcan",
+    label: "Tới được bằng đường bộ",
+    desc: "Có đường đi hợp lệ từ tâm ô tới một trạm sạc không.",
+    unit: null,
+    kind: "bool",
+  },
+  {
+    id: "evidence_grade_distance",
+    group: "tiepcan",
+    label: "Hạng bằng chứng khoảng cách",
+    desc: "Con số khoảng cách được tạo ra bằng cách nào, hoặc vì sao không có.",
+    unit: null,
+    kind: "categorical",
+  },
+
+  // ── 6. SO SÁNH — trường phái sinh (§13c-1) ────────────────────────────────
+  // Không có cột nào của riêng chúng. `expr` ngay dưới `desc` là hợp đồng của §13c-1:
+  // mọi con số hiện ra truy được về một cột thật, không có hằng số nào bịa ra.
+  {
+    id: "screen_decision",
+    group: "sosanh",
+    label: "Engine sàng lọc: quyết định",
+    desc: "Nếu có đơn xin đặt trạm ở ô này, engine quy hoạch trả về gì — ĐỀ XUẤT, ĐỀ XUẤT NẾU CÓ DC, hay TỪ CHỐI.",
+    unit: null,
+    kind: "categorical",
+    // Đây là ĐẦU RA CỦA RULE, không phải một số đo về thành phố. Nó đổi khi rule đổi.
+    // Ngưỡng: Phường > 500 m, Xã > 2.000 m, đo bằng CHIM BAY (khách hàng chốt); ngoại lệ
+    // hạ Xã xuống 500 m khi trạm gần nhất có util ≥ 40%.
+    coverageNote:
+      "Trường này là ĐẦU RA CỦA MỘT BỘ RULE, không phải một số đo về thành phố — nó đổi khi rule đổi. Chạy ngược bộ rule trên các trạm ĐANG VẬN HÀNH thì nó từ chối phần lớn trong số đó, tuỳ cách giải nghĩa ba chỗ mơ hồ. Và nguồn không có trạm “sắp vận hành”, nên engine sẽ ĐỀ XUẤT ở cả những chỗ sắp có trạm.",
+  },
+  {
+    id: "screen_margin_m",
+    group: "sosanh",
+    label: "Cách ngưỡng phê duyệt",
+    desc: "Khoảng cách chim bay tới trạm gần nhất TRỪ đi ngưỡng của loại đơn vị (Phường 500 m, Xã 2.000 m). Dương = đủ xa.",
+    unit: "m, âm = chưa đủ xa",
+    kind: "numeric",
+    polarity: "high-good",
+    coverageNote:
+      "Số 0 là ranh giới quyết định: trên 0 thì ĐỀ XUẤT, dưới 0 thì TỪ CHỐI. Ô càng gần 0 thì quyết định càng nhạy với việc chọn ngưỡng — và ngưỡng là quy định, không phải phép đo.",
+  },
+  {
+    id: "pop_beyond_2km",
+    group: "sosanh",
+    label: "Dân ngoài 2 km đường",
+    desc: "Số người trong ô mà trạm gần nhất ở xa hơn 2 km TÍNH THEO ĐƯỜNG ĐI. Đây là CẦU CHƯA ĐƯỢC PHỤC VỤ — chính là đối tượng của bài toán đặt trạm.",
+    unit: "người, ngưỡng 2 km theo mạng đường",
+    kind: "numeric",
+    polarity: "high-bad",
+    // Ngưỡng bằng MÉT chứ không bằng PHÚT là có chủ đích: bộ dữ liệu không còn phát trường
+    // thời gian nào, vì con số phút hoàn toàn do một bảng tốc độ giả định quyết định.
+    // Mét thì đo trên chính hình học đường — ngưỡng vẫn là lựa chọn, nhưng ĐẠI LƯỢNG thì không.
+    //
+    // `NULL` khi không tới được: không biết xa bao nhiêu thì không được nói là 0 (ràng buộc 1).
+    // `0` khi tới được trong ≤2 km: đó là "biết là không", một phát biểu đúng (§7a).
+    expr:
+      'CASE WHEN g."dist_station_network_m" IS NULL THEN NULL ' +
+      'WHEN g."dist_station_network_m" > 2000 THEN g."population" ELSE 0 END',
+    coverageNote:
+      "Ô để trống là ô KHÔNG TỚI ĐƯỢC bằng đường bộ — không biết xa bao nhiêu nên không được ghi 0. Ô ghi 0 thì khác hẳn: nó nằm trong 2 km đường, tức thật sự không có ai ngoài ngưỡng. Hai trạng thái đó vẽ khác nhau: 0 là một bậc màu, trống là gạch chéo.",
+  },
+  {
+    id: "util_pctl_cell",
+    group: "sosanh",
+    label: "Bận so với trạm cùng loại",
+    desc: "Các trạm trong ô đứng ở phân vị nào so với những trạm CÙNG LOẠI dòng điện trong Hà Nội. 0,5 là đúng mức trung vị của nhóm; cao hơn nghĩa là bận bất thường.",
+    unit: "phân vị trong nhóm cùng loại, 0,5 = trung vị",
+    kind: "numeric",
+    deps: ["stations.parquet", "station_occupancy.parquet"],
+    // Trung bình có trọng số SỐ CỔNG, cùng khuôn với `util_cell` ở B10 — một trạm 30 cổng
+    // nói nhiều hơn một trạm 2 cổng về mức bận của cả ô.
+    //
+    // Dùng `util_pctl` có sẵn chứ KHÔNG tự chia cho trung vị: `util_pctl` đã là "vị trí
+    // trong nhóm cùng loại", tính lại trong phạm vi Hà Nội ở B6, và 0,5 CHÍNH LÀ trung vị.
+    // Tự dựng một phép chia nữa là tạo khái niệm thứ hai cho cùng một thứ (§13c-1).
+    expr:
+      "(SELECT sum(o.util_pctl / 100.0 * greatest(o.util_denominator_ports, 1))" +
+      " / sum(greatest(o.util_denominator_ports, 1))" +
+      " FROM read_parquet('stations.parquet') s" +
+      " JOIN read_parquet('station_occupancy.parquet') o ON o.station_code = s.station_code" +
+      ' WHERE s.h3_r8 = g."h3_r8" AND o.util_pctl IS NOT NULL)',
+    coverageNote:
+      "Thưa hơn cả mức sử dụng: phân vị chỉ tính cho trạm hạng GOOD, nên ô có trạm nhưng chưa đủ quan sát vẫn để trống. Trống ở đây là “chưa xếp hạng được”, không phải “bận bằng 0”.",
+  },
+];
+
+// ── Trường của XÃ (bảng commune.parquet → commune.geojson) ─────────────────────
+//
+// Đơn vị đọc thứ hai — §6b. Đây là từ vựng của zoom thấp: 126 mảng gọi được tên, thay cho
+// 4.4 nghìn hạt 9 px. Ràng buộc 2 không đổi, vì vẫn chỉ MỘT trường được tô mỗi lúc và đơn vị
+// của trường đó quyết định hình học nào được tô.
+//
+// Mọi trường ở đây là CỘT THẬT của `commune.parquet` (dựng ở B11) — không có đại lượng nào
+// tính lại ở phía web.
+
+const COMMUNE_SPECS: Spec[] = [
+  {
+    id: "population",
+    group: "cau",
+    label: "Dân số xã",
+    desc: "Số dân của xã/phường: số công bố VNSDI, trừ 2 xã có số hỏng đã thay bằng WorldPop có khai báo.",
+    unit: "người trên toàn xã",
+    kind: "numeric",
+  },
+  {
+    id: "pop_density_ppkm2",
+    group: "cau",
+    label: "Mật độ dân số xã",
+    desc: "Dân số xã chia cho diện tích xã. So sánh được giữa các xã, khác với mật độ theo ô.",
+    unit: "người/km²",
+    kind: "numeric",
+  },
+  {
+    id: "n_stations",
+    group: "cung",
+    label: "Số trạm trong xã",
+    desc: "Số trạm sạc công cộng nằm trong ranh giới xã. Điểm sạc cá nhân 1 súng AC không được tính.",
+    unit: "trạm",
+    kind: "numeric",
+  },
+  {
+    id: "n_ports",
+    group: "cung",
+    label: "Số súng trong xã",
+    desc: "Tổng số súng lắp đặt của các trạm trong xã — tầng tài sản, không phải số súng đang báo cáo.",
+    unit: "súng",
+    kind: "numeric",
+  },
+  {
+    id: "power_kw_site",
+    group: "cung",
+    label: "Công suất của xã",
+    desc: "Tổng công suất tủ sạc trong xã.",
+    unit: "kW",
+    kind: "numeric",
+  },
+  {
+    id: "dist_station_m_pop_weighted",
+    group: "tiepcan",
+    label: "Khoảng cách trung bình theo dân",
+    desc: "Trung bình khoảng cách theo đường tới trạm gần nhất, có trọng số DÂN SỐ — nên nó nói về người dân của xã chứ không về diện tích xã.",
+    unit: "mét theo mạng đường, trọng số dân",
+    kind: "numeric",
+    polarity: "high-bad",
+  },
+  {
+    id: "util_mean_port_weighted",
+    group: "tiepcan",
+    label: "Mức sử dụng của xã",
+    desc: "Trung bình mức sử dụng các trạm trong xã, trọng số số cổng. Xã không có trạm đo được để TRỐNG, không phải 0.",
+    unit: "tỉ lệ cổng-giờ bận, 0–1",
+    kind: "numeric",
+    coverageNote:
+      "Xã trống là xã không có trạm công cộng nào báo cáo đủ chuẩn — không phải xã có trạm rảnh.",
+  },
+  {
+    // Trường SO SÁNH ở đơn vị xã (§13c-1). Ở tầng ô nó vô nghĩa: phần lớn ô có 0 cổng và
+    // vài trăm dân, nên tỉ số ra 0 hoặc ra một số khổng lồ tuỳ mẫu số. Xã là đơn vị nhỏ
+    // nhất mà "cổng trên 10k dân" còn đọc được.
+    id: "ports_per_10k_pop",
+    group: "sosanh",
+    label: "Cổng trên 10k dân",
+    desc: "Số súng sạc trên mỗi 10.000 dân của xã — cung và cầu gộp vào MỘT con số, nên đọc được ngay là xã nào đang lệch.",
+    unit: "súng trên 10.000 dân",
+    kind: "numeric",
+    polarity: "high-good",
+    coverageNote:
+      "Đây là tỉ số, không phải số đếm: một xã ít dân có vài trạm lớn sẽ vọt lên rất cao mà không có nghĩa là nó được phục vụ tốt hơn. Đọc kèm dân số xã.",
+  },
+];
+
+// ── Trường của MẠNG ĐƯỜNG (roads.parquet, ship ở M3-R) ─────────────────────────
+//
+// Đơn vị đọc thứ ba — §6b. Đi qua đúng cánh cửa mà `commune` đã mở: khi trường này được
+// chọn, **đường LÀ trường** (tô ramp), còn hex và xã không vẽ. Một ramp, một legend.
+//
+// Chỉ MỘT trường, và §6b đã chốt hệ quả của điều đó: công tắc đơn vị trong rail không mở
+// rộng thành 4 vị trí — trường này nằm trong nhóm ĐƯỜNG như một dòng radio thường, mang
+// ghi chú đơn vị ngay trong nhãn.
+
+const ROAD_SPECS: Spec[] = [
+  {
+    id: "dist_station_m",
+    group: "duong",
+    label: "Đoạn đường — cách trạm gần nhất",
+    desc: "Khoảng cách theo mạng đường từ ĐOẠN ĐƯỜNG này tới trạm gần nhất, lấy từ chính phép Dijkstra đa nguồn đã tính khoảng cách cho ô (s08). Đơn vị đọc là đoạn đường, không phải ô — nó cho thấy khoảng cách CHẢY thế nào dọc phố và khựng lại ở đâu.",
+    unit: "mét theo mạng đường · đo trên đoạn đường",
+    kind: "numeric",
+    polarity: "high-bad",
+    // 396/160.823 đoạn không tới được mang null. Ràng buộc 1 áp cho cả đường: chúng không
+    // được rơi vào bậc ramp nào, và cũng không được vẽ thành "gần trạm".
+    coverageNote:
+      "Đoạn không tới được vẽ bằng MỰC XÁM của vân null (§4b), không phải một bậc ramp — đường 1px không mang được vân 45°, nên chất liệu chuyển thành mực, giữ nguyên khái niệm. Đây là cùng một câu “không đo được” mà ô null nói, chỉ khác hình học.",
+  },
+];
+
+// ── Trường của TRẠM (station_occupancy_profile_168h.parquet, M4) ───────────────
+//
+// Đơn vị đọc thứ tư — §6b. Cùng cánh cửa mà `commune` mở và `road` đã đi qua: khi trường
+// này được chọn, **939 chấm trạm LÀ trường** (tô ramp theo giờ `t` của scrubber), còn
+// hex/xã/đường không vẽ. Một ramp, một legend — ràng buộc 2 nguyên vẹn.
+//
+// Đây cũng là câu trả lời cho câu hỏi mà §3e để ngỏ suốt M0–M3: scrubber tác động lên lớp
+// trạm BẰNG KÊNH NÀO. Mọi kênh khác đều vướng luật (overlay không mang thang giá trị §4d;
+// ramp cam chỉ dành cho trường đang tô, ràng buộc 2). Biến trạm thành TRƯỜNG thì không
+// luật nào bị phá.
+
+const STATION_SPECS: Spec[] = [
+  {
+    id: "occ",
+    group: "sosanh",
+    label: "Nhịp trạm tại giờ đang xem",
+    desc: "Tỉ lệ cổng đang bận của từng trạm tại một ô giờ của tuần (7 thứ × 24 giờ). Kéo scrubber ở đáy để đổi giờ. Trạm chưa quan sát đủ ở giờ đó vẽ CHẤM RỖNG, không tô bậc nhạt — “chưa biết” không được đọc thành “vắng khách”.",
+    unit: `cổng bận ÷ cổng lắp đặt tại giờ đang xem · dưới ${OBSERVED_H_MIN} h quan sát thì không tô`,
+    kind: "numeric",
+    polarity: "high-bad",
+    // Không phải một cột — §13c-1. Công thức KHÔNG chạy trong SQL như các trường phái sinh
+    // khác: nó phụ thuộc `t`, thứ đổi 4 lần mỗi giây khi play. Một truy vấn DuckDB mỗi
+    // khung hình là sai kiến trúc, nên hồ sơ 168h nạp một lần vào `Float32Array` và công
+    // thức sống ở `viz/occ.ts` (`stationOccAt`) — vẫn MỘT chỗ, vẫn truy được về cột thật.
+    deps: ["stations.parquet", "station_occupancy_profile_168h.parquet"],
+    coverageNote:
+      "Ba đường vào cùng một chấm rỗng, và cả ba là “không biết” nên chúng đúng là MỘT ký hiệu: 236/939 trạm không có hồ sơ 168h nào · ô giờ có dưới 1 h quan sát · 26/939 trạm khuyết n_ports (không có mẫu số thì không có tỉ số). Mẫu số là số cổng LẮP ĐẶT (tầng tài sản), không phải số cổng đang báo cáo — nên trạm báo cáo thiếu hiện THẤP, và đó là sự thật về báo cáo chứ không phải về khách.",
+  },
+];
+
+// ── Ghép bốn họ ────────────────────────────────────────────────────────────────
+
+/** Tiền tố của một đơn vị đọc trong khoá `f` — §6b. Ô là tên trần, nên nó không có tiền tố. */
+const PREFIX: Record<ReadingUnit, string> = {
+  cell: "",
+  commune: COMMUNE_PREFIX,
+  road: ROAD_PREFIX,
+  station: STATION_PREFIX,
+};
+
+const withUnit = (specs: Spec[], readAs: ReadingUnit): FieldMeta[] =>
+  specs.map((s) => ({
+    ...s,
+    readAs,
+    column: s.id,
+    id: PREFIX[readAs] + s.id,
+  }));
+
+export const FIELDS: FieldMeta[] = [
+  ...withUnit(CELL_SPECS, "cell"),
+  ...withUnit(COMMUNE_SPECS, "commune"),
+  ...withUnit(ROAD_SPECS, "road"),
+  ...withUnit(STATION_SPECS, "station"),
+];
+
+export const FIELD_BY_ID = new Map(FIELDS.map((f) => [f.id, f]));
+
+/**
+ * Cột THẬT SỰ có trong lưới của bộ dữ liệu đang mở — đặt một lần từ `manifest`.
+ *
+ * `null` = **không lọc gì**, và đó là mặc định có chủ ý: bộ Hà Nội gốc có đủ 45 trường và
+ * không có manifest nào cần khai báo điều đó. Chỉ store toàn quốc mới thiếu lớp TÍNH TOÁN,
+ * và chỉ khi ấy danh sách này mới khác `null`.
+ *
+ * Vì sao phải lọc chứ không để `SELECT` tự hỏng: DuckDB ném lỗi ở cột không tồn tại, và lỗi
+ * đó nổ ở tầng truy vấn — người dùng thấy màn hình trắng chứ không thấy "trường này chưa
+ * tính". Đây là cùng một luật với §7a: thiếu phải NHÌN THẤY được, không được thành sự cố.
+ */
+let AVAILABLE: Set<string> | null = null;
+/** Thuộc tính có mặt trong `commune.geojson` — trường của XÃ đọc từ đó, không từ lưới. */
+let AVAILABLE_COMMUNE: Set<string> | null = null;
+
+export function setAvailableColumns(
+  cols: string[] | undefined,
+  communeCols?: string[] | undefined,
+): void {
+  AVAILABLE = cols && cols.length ? new Set(cols) : null;
+  AVAILABLE_COMMUNE = communeCols && communeCols.length ? new Set(communeCols) : null;
+}
+
+/**
+ * LỚP không đọc được ở bộ dữ liệu đang mở — khác "cột không tồn tại".
+ *
+ * Cột vắng thì `SELECT` nổ; lớp không đọc được thì cột CÓ, truy vấn chạy, và trả về gần như
+ * toàn null. Đó là dạng hỏng nguy hiểm hơn: một bản đồ mức sử dụng gần trống trông giống
+ * "mức sử dụng thấp" chứ không giống "không đo được", và không có gì trên màn hình sửa lại
+ * cách đọc đó.
+ *
+ * Đo được ở 4 tỉnh: Điện Biên **0,0%** số trạm có `util` đọc được, Sơn La 4,7%, Cao Bằng
+ * 10,0%, Lai Châu 16,7%. Ngưỡng 50% ở `vn/n05_quality.py`; quyết định giữ tỉnh và TẮT lớp
+ * (thay vì loại tỉnh) là của chủ dự án — lớp cung/POI/đường của 4 tỉnh đó vẫn đúng.
+ */
+let UNUSABLE_LAYERS: Set<string> = new Set();
+
+/** Lớp → trường thuộc lớp đó. Ánh xạ này là chuyện của GIAO DIỆN, nên nó sống ở đây chứ
+ *  không ở tầng xuất dữ liệu: `n06_web_export` chỉ nói tên LỚP, không biết id trường nào. */
+const LAYER_FIELDS: Record<string, string[]> = {
+  occupancy: [
+    STATION_OCC_FIELD,
+    "util_cell",
+    "util_pctl_cell",
+    `${COMMUNE_PREFIX}util_mean_port_weighted`,
+  ],
+};
+
+export function setUnusableLayers(layers: string[] | undefined): void {
+  UNUSABLE_LAYERS = new Set(layers ?? []);
+}
+
+/** Lớp này có đọc được ở bộ dữ liệu đang mở không — dùng để tắt cả scrubber, không chỉ trường. */
+export function layerUsable(layer: string): boolean {
+  return !UNUSABLE_LAYERS.has(layer);
+}
+
+function inUnusableLayer(id: string): boolean {
+  for (const l of UNUSABLE_LAYERS) if (LAYER_FIELDS[l]?.includes(id)) return true;
+  return false;
+}
+
+/** Trường này dựng được trên dữ liệu đang mở chưa? */
+export function fieldAvailable(f: FieldMeta): boolean {
+  // Trường của XÃ / ĐƯỜNG / TRẠM đọc từ file riêng, không từ lưới — danh sách cột của lưới
+  // không nói gì về chúng, nên không lọc.
+  if (inUnusableLayer(f.id)) return false;
+  if (f.readAs === "commune") return AVAILABLE_COMMUNE === null || AVAILABLE_COMMUNE.has(f.column);
+  if (AVAILABLE === null || f.readAs !== "cell") return true;
+  // Trường phái sinh (`expr`) có thể chạm nhiều cột; nó chỉ dựng được khi CÓ ĐỦ. Không có
+  // cách nào biết chắc từ đây, nên luật là: cột trần phải có mặt, biểu thức thì bỏ qua nếu
+  // cột cùng tên không có. Thà giấu một trường dựng được còn hơn hiện một trường sẽ nổ.
+  return AVAILABLE.has(f.column);
+}
+
+/** Trường của một đơn vị đọc, giữ nguyên thứ tự khai báo, ĐÃ lọc theo cột có mặt. */
+export function fieldsOfUnit(unit: ReadingUnit): FieldMeta[] {
+  return FIELDS.filter((f) => f.readAs === unit && fieldAvailable(f));
+}
+
+/**
+ * Một CỘT của lưới có mặt không — dùng ở tầng SQL, khác `fieldAvailable` ở tầng TRƯỜNG.
+ *
+ * `fetchField` kèm mấy cột cố định (`population`, `dist_station_network_m`,
+ * `network_reachable`) bất kể trường nào đang tô, nên nó phải hỏi theo TÊN CỘT chứ không
+ * theo trường. Hai câu hỏi khác nhau, hai hàm khác nhau.
+ */
+export function gridColumnAvailable(column: string): boolean {
+  return AVAILABLE === null || AVAILABLE.has(column);
+}
+
+/** Trường bị ẩn vì lớp sinh ra nó chưa chạy — rail in danh sách này để "vắng" nhìn thấy được. */
+export function unavailableFields(): FieldMeta[] {
+  return AVAILABLE === null ? [] : FIELDS.filter((f) => !fieldAvailable(f));
+}
+
+/**
+ * Màn hình đầu tiên — DESIGN §13b-1 và M2.1-(C).
+ *
+ * Hai điều kiện, và `commune:population` chỉ thoả điều kiện đầu:
+ *   1. **không phải thảm hex** (§13b) — đơn vị XÃ, 126 mảng rộng hàng trăm px ở zoom 9,3;
+ *   2. **không phải một MỨC** (§13a-4) — "người ở giữa" là thứ mentor đã biết trước khi
+ *      mở app. Thứ đáng vẽ là ĐỘ LỆCH khỏi kỳ vọng.
+ *
+ * `ports_per_10k_pop` thoả cả hai: nó gộp cung và cầu vào một con số, và với cực tính
+ * `high-good` (M2.1-B) thì **đậm = thiếu cung** — mở app ra là thấy ngay chỗ có vấn đề.
+ */
+export const DEFAULT_FIELD = `${COMMUNE_PREFIX}ports_per_10k_pop`;
+
+/** Câu đơn vị bên phải dải legend — DESIGN.md §3b. */
+export function unitSentence(f: FieldMeta): string {
+  const label = f.label.charAt(0).toLowerCase() + f.label.slice(1);
+  return f.unit ? `${label} · ${f.unit}` : label;
+}
+
+/**
+ * Chỉ dấu cực tính cho legend — M2.1-(B).
+ *
+ * Đi KÈM phép đảo màu chứ không thay nó. Màu là kênh mạnh (đọc trước), chữ là kênh xác
+ * nhận (đọc sau, khi người xem đã ngờ ngợ). Có cả hai thì không phải đoán; chỉ có chữ thì
+ * nó thua chính cái gestalt nó đang cố sửa.
+ */
+export function polarityNote(f: FieldMeta): string | null {
+  if (f.polarity === "high-bad") return "↑ xấu hơn";
+  if (f.polarity === "high-good") return "↑ tốt hơn · đậm = thiếu";
+  return null;
+}
+
+// ── Badge ⚠ ────────────────────────────────────────────────────────────────────
+
+export interface Badge {
+  /** `cell` = phủ ô · `source` = khuyết ở nguồn. Hai nghĩa khác nhau (§7). */
+  kind: "cell" | "source";
+  text: string;
+  explain: string;
+}
+
+/**
+ * Phủ đo **lúc chạy**, cho trường mà `manifest.coverage` không có: trường phái sinh
+ * (không phải cột) và trường của xã (bảng khác) — DESIGN §13c-1.
+ *
+ * Đây KHÔNG phải lách §7c. §7c cấm *gõ tay* con số vào TS; số đo lúc chạy bám dữ liệu còn
+ * sát hơn số đo lúc export. Cái §7c bảo vệ là "dữ liệu đổi thì badge đổi theo", và đo lúc
+ * chạy thoả điều đó một cách chặt hơn.
+ */
+export interface RuntimeCoverage {
+  n_present: number;
+  n_total: number;
+  share: number;
+  /**
+   * Phần DÂN nằm trong các đơn vị có giá trị.
+   *
+   * `undefined` khi đơn vị đọc không mang dân số — một **đoạn đường** không có dân, nên
+   * "x% dân" ở đó không phải một con số sai mà là một câu không có nghĩa. Ghi 0 sẽ in ra
+   * "0% dân" và đọc thành "những đoạn này không phục vụ ai".
+   */
+  pop_share: number | undefined;
+  /** số ô null vì CÂU HỎI KHÔNG ÁP DỤNG — đã bị trừ khỏi  (§7a mở rộng) */
+  n_not_applicable?: number;
+}
+
+/** Danh từ đơn vị đọc, dùng trong câu badge. Xã không phải "ô", và đoạn đường cũng vậy. */
+export function unitNoun(u: ReadingUnit): string {
+  if (u === "commune") return "xã";
+  if (u === "road") return "đoạn";
+  if (u === "station") return "trạm";
+  return "ô";
+}
+
+/**
+ * Badge ⚠ của một trường. Con số lấy từ manifest **hoặc từ số đo lúc chạy**, câu chữ lấy
+ * từ `FieldMeta` — §7c.
+ *
+ * Badge phủ là một QUY TẮC chạy trên số đo (`share < 1`), không phải danh sách gõ tay; và
+ * nó bị chặn khi trường tự khai `nullMeans` (§7a: ⚠ chỉ dành cho "không biết").
+ */
+export function badgesFor(
+  f: FieldMeta,
+  m: Manifest,
+  runtime?: Map<string, RuntimeCoverage>,
+): Badge[] {
+  const out: Badge[] = [];
+
+  // Cột thô của bảng ô có sẵn số trong manifest; mọi thứ khác đo lúc chạy.
+  // Trường có `nullSplit` phải dùng số đo LÚC CHẠY dù nó là cột thô: `manifest.coverage`
+  // chỉ biết tổng số null, không biết bao nhiêu trong đó là "câu hỏi không áp dụng".
+  const useRuntime = Boolean(f.expr) || Boolean(f.nullSplit);
+  const fromManifest = f.readAs === "cell" && !useRuntime ? m.coverage[f.column] : undefined;
+  const cov: RuntimeCoverage | undefined = fromManifest
+    ? {
+        n_present: fromManifest.n_present,
+        n_total: m.n_cells,
+        share: fromManifest.cell_share,
+        pop_share: fromManifest.pop_share,
+      }
+    : runtime?.get(f.id);
+
+  if (cov && cov.share < 1 && !f.nullMeans) {
+    const note = typeof f.coverageNote === "function" ? f.coverageNote(m) : f.coverageNote;
+    const noun = unitNoun(f.readAs);
+    // Vế "% dân" chỉ có mặt khi đơn vị đọc CÓ dân. Đoạn đường thì không — xem `pop_share`.
+    const popPart = cov.pop_share === undefined ? "" : ` · ${pct(cov.pop_share)} dân`;
+    out.push({
+      kind: "cell",
+      text: `${pct(cov.share)} ${noun}${popPart}`,
+      explain:
+        `${cov.n_present.toLocaleString("vi-VN")}/${cov.n_total.toLocaleString("vi-VN")} ${noun} ` +
+        (cov.pop_share === undefined
+          ? "có giá trị."
+          : `có giá trị, và chúng chứa ${pct(cov.pop_share)} dân số Hà Nội.`) +
+        // Mẫu số đã trừ nhóm "không áp dụng" — phải NÓI RA, nếu không con số trông như
+        // mâu thuẫn với tổng số ô hiện ở khối NGUỒN.
+        (cov.n_not_applicable
+          ? ` Mẫu số đã trừ ${cov.n_not_applicable.toLocaleString("vi-VN")} ${noun} mà câu hỏi không áp dụng.`
+          : "") +
+        (note ? ` ${note}` : ""),
+    });
+  }
+  const src = f.sourceBadge?.(m);
+  if (src) out.push({ kind: "source", ...src });
+  return out;
+}
+
+// ── Hằng số của dữ liệu → câu người đọc được ───────────────────────────────────
+
+/**
+ * `short` dùng ở legend và panel Ô (chỗ hẹp). `note` là câu dịch đầy đủ cho khối NGUỒN
+ * — DESIGN.md §8 liệt kê đúng ba hằng cần dịch, cộng hai hằng `THIEU_*` chốt ở M1.
+ * `withCount` = §8 muốn kèm số ô mang giá trị đó.
+ */
+export const CONSTANTS: Record<string, { short: string; note?: string; withCount?: boolean }> = {
+  // pop_source
+  WORLDPOP2025_ANCHORED_VNSDI: { short: "neo theo VNSDI" },
+  WORLDPOP2025_UNANCHORED_OFFICIAL_IMPLAUSIBLE: {
+    short: "không neo được",
+    note: "WorldPop không neo — số công bố của xã này không hợp lý",
+    withCount: true,
+  },
+  ZERO_NO_WEIGHT: {
+    short: "không dân",
+    note: "không dân — bề mặt WorldPop bằng 0",
+    withCount: true,
+  },
+  // evidence_grade_distance
+  OSM_NETWORK: { short: "đo trên mạng đường OSM" },
+  UNREACHABLE_NO_PATH: {
+    short: "không có đường đi",
+    note: "không tới được bằng đường bộ trong bán kính neo 2 km",
+  },
+  UNREACHABLE_NO_ROAD_ACCESS: {
+    short: "không vào được mạng đường",
+    note: "không tới được bằng đường bộ trong bán kính neo 2 km",
+  },
+  // cell_state
+  INSIDE: { short: "trọn trong ranh giới" },
+  BORDER: { short: "nằm trên biên" },
+  // occ_status (bảng station_occupancy, gộp lên ô ở §8)
+  OK: { short: "OK" },
+  THIEU_COVERAGE: { short: "thiếu quan sát" },
+  THIEU_PEER: { short: "thiếu lớp tham chiếu" },
+
+  // ── M4.1/M4.2 — hằng của bảng TRẠM ────────────────────────────────────────
+  //
+  // Nhãn tiếng Việt của `shape_class` chốt ở §3f-5 và dùng ở HAI chỗ: dòng dịch của panel
+  // TRẠM (§8a-4) và small multiples của chế độ DỮ LIỆU. Một bảng dịch, hai chỗ đọc — chép
+  // ra hai chỗ là cách hai chỗ trôi khỏi nhau (cùng lý do `selectExpr` chỉ có một bản).
+  DEM_TROI: { short: "đêm trội" },
+  HAI_DINH: { short: "hai đỉnh" },
+  BAN_NGAY_PHANG: { short: "ban ngày phẳng" },
+  THAT_THUONG: { short: "thất thường" },
+  KHONG_XEP_LOAI: { short: "không xếp loại" },
+
+  // op_status — §4d-3a. `UNKNOWN` dịch thành một câu chứ không thành một nhãn trống: nguồn
+  // KHÔNG nói gì là một sự thật, và nó khác hẳn "biết là hỏng".
+  OPERATIONAL: { short: "đang vận hành" },
+  MAINTENANCE: { short: "đang bảo trì" },
+  OUT_OF_SERVICE: { short: "ngừng phục vụ" },
+  UNKNOWN: { short: "nguồn không nói" },
+
+  // access
+  PUBLIC: { short: "công cộng" },
+  RESTRICTED: { short: "hạn chế" },
+};
+
+export function constantShort(v: string): string {
+  return CONSTANTS[v]?.short ?? v;
+}

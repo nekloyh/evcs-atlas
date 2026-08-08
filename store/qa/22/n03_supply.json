@@ -1,0 +1,98 @@
+{
+  "layer": "n03_supply",
+  "source": "aGiang-evcs data/interim/canonical + data/interim/occ (evcs.vn, đã dedup vật lý)",
+  "province_name": "Tỉnh Quảng Ninh",
+  "province_code": "22",
+  "stats": {
+    "n_stations_national_pool": 19598,
+    "n_stations_in": 142,
+    "n_stations_buffer_ring": 39,
+    "n_connectors_rows": 306,
+    "n_ports_total": 1113,
+    "power_kw_site_total": 36289.9,
+    "power_kw_per_station": 255.6,
+    "op_status": {
+      "OPERATIONAL": 129,
+      "MAINTENANCE": 10,
+      "OUT_OF_SERVICE": 3
+    },
+    "current_type": {
+      "MIXED": 73,
+      "DC": 63,
+      "AC": 5,
+      "nan": 1
+    },
+    "commune_kind": {
+      "PHUONG": 112,
+      "XA": 25,
+      "DAC_KHU": 5
+    },
+    "access": {
+      "PUBLIC": 142
+    },
+    "verified_official_share": 1.0,
+    "n_communes_with_station": 41,
+    "n_stations_with_occ": 141,
+    "occ_coverage": 0.993,
+    "occ_grade": {
+      "GOOD": 134,
+      "PARTIAL": 5,
+      "INSUFFICIENT": 2
+    },
+    "util_median": 0.2076,
+    "n_profile_rows": 23315,
+    "upstream_province_label_agreement": 1.0
+  },
+  "checks": [
+    {
+      "name": "station_id_unique",
+      "status": "PASS",
+      "detail": "181 trạm"
+    },
+    {
+      "name": "every_in_station_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "buffer_stations_have_no_commune",
+      "status": "PASS",
+      "detail": "trạm ngoài tỉnh không được gán xã của tỉnh này"
+    },
+    {
+      "name": "no_private_ac_left",
+      "status": "PASS",
+      "detail": "đã loại 440 trạm 1-súng-AC (75.6% số trạm, nhưng 10.5% công suất)"
+    },
+    {
+      "name": "upstream_province_label_agrees",
+      "status": "PASS",
+      "detail": "100.00% trạm IN có admin_l1_code khớp phép gán hình học ở đây"
+    },
+    {
+      "name": "connectors_fk_ok",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "occ_only_for_in_scope",
+      "status": "PASS",
+      "detail": "occupancy chỉ cho trạm thuộc tỉnh, không cho trạm vành đệm"
+    },
+    {
+      "name": "profile_cells_le_168",
+      "status": "PASS",
+      "detail": "max 168 ô/trạm"
+    }
+  ],
+  "dropped_private_ac": {
+    "predicate": "n_guns_installed == 1 AND current_type_asset == 'AC'",
+    "n_dropped_total": 511,
+    "n_dropped_in": 440,
+    "n_dropped_buffer": 71,
+    "n_stations_in_before": 582,
+    "share_of_stations_before": 0.756,
+    "share_of_ports_before": 0.2833,
+    "share_of_power_before": 0.105
+  }
+}

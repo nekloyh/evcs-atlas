@@ -1,0 +1,125 @@
+{
+  "code": "A19_L6",
+  "verdict": "CANH_BAO",
+  "cau_hoi": "bộ rule phê duyệt loại nhầm bao nhiêu trạm ĐANG VẬN HÀNH",
+  "tap_thu": {
+    "n_tram_hanoi_du_dieu_kien": 660,
+    "PHUONG": 255,
+    "XA": 405,
+    "n_co_util_do_duoc": 632
+  },
+  "0_KHOANG_TRONG_DU_LIEU": {
+    "trang_thai_op_status_co_that": {
+      "OPERATIONAL": 618,
+      "MAINTENANCE": 57,
+      "OUT_OF_SERVICE": 30,
+      "UNKNOWN": 5
+    },
+    "van_de": "Rule nói xét cả trạm CHUẨN BỊ VẬN HÀNH và trạm ĐANG XÂY / ĐÃ CẤP PHÉP. Nguồn evcs.vn chỉ phát trạm ĐANG SỐNG — không có trạng thái nào tương ứng. Phần rule đó KHÔNG THỰC THI ĐƯỢC với dữ liệu hiện có, và khoảng trống này lệch VỀ MỘT PHÍA: engine sẽ đề xuất những chỗ thật ra sắp có trạm."
+  },
+  "1_do_nhay_ba_cho_mo_ho": {
+    "chim_bay|cao_tai_ca_ngay|tram_XIN_phai_co_DC": {
+      "n_tu_choi": 485,
+      "share_tu_choi": 0.7348,
+      "tu_choi_PHUONG": 172,
+      "tu_choi_XA": 313,
+      "n_duoc_cuu_boi_ngoai_le": 76,
+      "cong_bi_tu_choi": 5433,
+      "kw_bi_tu_choi": 151545.3
+    },
+    "chim_bay|cao_tai_ca_ngay|tram_HIEN_HUU_co_DC": {
+      "n_tu_choi": 484,
+      "share_tu_choi": 0.7333,
+      "tu_choi_PHUONG": 172,
+      "tu_choi_XA": 312,
+      "n_duoc_cuu_boi_ngoai_le": 75,
+      "cong_bi_tu_choi": 5434,
+      "kw_bi_tu_choi": 151565.3
+    },
+    "chim_bay|cao_tai_dinh_khung|tram_XIN_phai_co_DC": {
+      "n_tu_choi": 409,
+      "share_tu_choi": 0.6197,
+      "tu_choi_PHUONG": 172,
+      "tu_choi_XA": 237,
+      "n_duoc_cuu_boi_ngoai_le": 249,
+      "cong_bi_tu_choi": 4720,
+      "kw_bi_tu_choi": 130696.3
+    },
+    "chim_bay|cao_tai_dinh_khung|tram_HIEN_HUU_co_DC": {
+      "n_tu_choi": 403,
+      "share_tu_choi": 0.6106,
+      "tu_choi_PHUONG": 172,
+      "tu_choi_XA": 231,
+      "n_duoc_cuu_boi_ngoai_le": 260,
+      "cong_bi_tu_choi": 4713,
+      "kw_bi_tu_choi": 130628.3
+    },
+    "mang_duong|cao_tai_ca_ngay|tram_XIN_phai_co_DC": {
+      "n_tu_choi": 355,
+      "share_tu_choi": 0.5379,
+      "tu_choi_PHUONG": 99,
+      "tu_choi_XA": 256,
+      "n_duoc_cuu_boi_ngoai_le": 76,
+      "cong_bi_tu_choi": 4037,
+      "kw_bi_tu_choi": 108962.8
+    },
+    "mang_duong|cao_tai_ca_ngay|tram_HIEN_HUU_co_DC": {
+      "n_tu_choi": 355,
+      "share_tu_choi": 0.5379,
+      "tu_choi_PHUONG": 99,
+      "tu_choi_XA": 256,
+      "n_duoc_cuu_boi_ngoai_le": 75,
+      "cong_bi_tu_choi": 4050,
+      "kw_bi_tu_choi": 109190.8
+    },
+    "mang_duong|cao_tai_dinh_khung|tram_XIN_phai_co_DC": {
+      "n_tu_choi": 278,
+      "share_tu_choi": 0.4212,
+      "tu_choi_PHUONG": 99,
+      "tu_choi_XA": 179,
+      "n_duoc_cuu_boi_ngoai_le": 249,
+      "cong_bi_tu_choi": 3389,
+      "kw_bi_tu_choi": 89256.8
+    },
+    "mang_duong|cao_tai_dinh_khung|tram_HIEN_HUU_co_DC": {
+      "n_tu_choi": 273,
+      "share_tu_choi": 0.4136,
+      "tu_choi_PHUONG": 99,
+      "tu_choi_XA": 174,
+      "n_duoc_cuu_boi_ngoai_le": 260,
+      "cong_bi_tu_choi": 3394,
+      "kw_bi_tu_choi": 89396.8
+    }
+  },
+  "2_chim_bay_vs_mang_duong": {
+    "n_quyet_dinh_LECH_NHAU": 130,
+    "share_lech": 0.197,
+    "chim_bay_cho_qua_mang_duong_tu_choi": 0,
+    "mang_duong_cho_qua_chim_bay_tu_choi": 130,
+    "d_chim_bay_trung_vi_m": 448.1,
+    "d_mang_trung_vi_m": 772.0
+  },
+  "3_cao_tai_hai_cach_hieu": {
+    "n_cao_tai_theo_TRUNG_BINH_CA_NGAY": 148,
+    "n_cao_tai_theo_DINH_KHUNG_GIO": 453,
+    "share_ca_ngay": 0.2342,
+    "share_dinh_khung": 0.7168,
+    "util_ca_ngay_trung_vi": 0.2385,
+    "util_dinh_khung_trung_vi": 0.5084
+  },
+  "4_ket_qua_chinh": {
+    "n_tu_choi": 355,
+    "share_tu_choi": 0.5379,
+    "tu_choi_PHUONG": 99,
+    "tu_choi_XA": 256,
+    "n_duoc_cuu_boi_ngoai_le": 76,
+    "cong_bi_tu_choi": 4037,
+    "kw_bi_tu_choi": 108962.8
+  },
+  "ket_luan": [
+    "Bộ rule từ chối 41.4%–73.5% số trạm ĐANG VẬN HÀNH, tuỳ cách giải nghĩa ba chỗ mơ hồ.",
+    "Chim bay vs mạng đường làm lệch 130 quyết định (19.7%).",
+    "'Cao tải 40%': hiểu theo trung bình cả ngày có 148 trạm, theo đỉnh khung giờ có 453 trạm.",
+    "Trạm CHUẨN BỊ VẬN HÀNH / ĐANG XÂY không có trong nguồn — phần rule đó chưa chạy được."
+  ]
+}

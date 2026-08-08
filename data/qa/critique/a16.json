@@ -1,0 +1,188 @@
+{
+  "code": "A16",
+  "verdict": "CANH_BAO",
+  "L3": {
+    "cau_hoi": "Bán kính chim bay có thay được quãng đường mạng không?",
+    "he_so_di_vong": {
+      "trung_vi": 1.47,
+      "p75": 1.767,
+      "p90": 2.26,
+      "p99": 4.375,
+      "max": 36.08,
+      "n_o_tren_1_5x": 1995,
+      "n_o_tren_2x": 677,
+      "n_o_tren_3x": 158,
+      "n_o_do_duoc": 4288
+    },
+    "phan_loai_sai_theo_ban_kinh": {
+      "R=1000m": {
+        "n_o_phu_theo_chim_bay": 1333,
+        "n_o_phu_theo_mang_duong": 599,
+        "duong_tinh_gia_chim_bay_noi_phu_nhung_khong": 734,
+        "ty_le_duong_tinh_gia": 0.5506,
+        "dan_bi_tuong_la_da_phu": 2409729.911816459,
+        "am_tinh_gia": 0
+      },
+      "R=2000m": {
+        "n_o_phu_theo_chim_bay": 2983,
+        "n_o_phu_theo_mang_duong": 1840,
+        "duong_tinh_gia_chim_bay_noi_phu_nhung_khong": 1143,
+        "ty_le_duong_tinh_gia": 0.3832,
+        "dan_bi_tuong_la_da_phu": 1395198.9806248427,
+        "am_tinh_gia": 0
+      },
+      "R=3000m": {
+        "n_o_phu_theo_chim_bay": 3885,
+        "n_o_phu_theo_mang_duong": 2878,
+        "duong_tinh_gia_chim_bay_noi_phu_nhung_khong": 1007,
+        "ty_le_duong_tinh_gia": 0.2592,
+        "dan_bi_tuong_la_da_phu": 797324.5554493254,
+        "am_tinh_gia": 0
+      },
+      "R=5000m": {
+        "n_o_phu_theo_chim_bay": 4395,
+        "n_o_phu_theo_mang_duong": 3994,
+        "duong_tinh_gia_chim_bay_noi_phu_nhung_khong": 401,
+        "ty_le_duong_tinh_gia": 0.0912,
+        "dan_bi_tuong_la_da_phu": 175101.7235874878,
+        "am_tinh_gia": 0
+      }
+    },
+    "12_o_di_vong_nhat": [
+      {
+        "h3_r8": "88414368abfffff",
+        "commune": "Xã Quốc Oai",
+        "chim_bay_m": 301,
+        "mang_duong_m": 10856,
+        "he_so": 36.08,
+        "dan": 2418
+      },
+      {
+        "h3_r8": "88415ca251fffff",
+        "commune": "Xã Phù Đổng",
+        "chim_bay_m": 974,
+        "mang_duong_m": 21162,
+        "he_so": 21.73,
+        "dan": 118
+      },
+      {
+        "h3_r8": "88415ddb29fffff",
+        "commune": "Xã Kim Anh",
+        "chim_bay_m": 973,
+        "mang_duong_m": 11516,
+        "he_so": 11.84,
+        "dan": 205
+      },
+      {
+        "h3_r8": "88414360e1fffff",
+        "commune": "Xã Trần Phú",
+        "chim_bay_m": 346,
+        "mang_duong_m": 3853,
+        "he_so": 11.14,
+        "dan": 360
+      },
+      {
+        "h3_r8": "8841436cadfffff",
+        "commune": "Xã Yên Xuân",
+        "chim_bay_m": 464,
+        "mang_duong_m": 4848,
+        "he_so": 10.45,
+        "dan": 266
+      },
+      {
+        "h3_r8": "88415ca537fffff",
+        "commune": "Xã Nội Bài",
+        "chim_bay_m": 820,
+        "mang_duong_m": 7540,
+        "he_so": 9.19,
+        "dan": 1901
+      },
+      {
+        "h3_r8": "88415d886dfffff",
+        "commune": "Xã Ba Vì",
+        "chim_bay_m": 437,
+        "mang_duong_m": 3551,
+        "he_so": 8.12,
+        "dan": 903
+      },
+      {
+        "h3_r8": "8841436d63fffff",
+        "commune": "Xã Kiều Phú",
+        "chim_bay_m": 440,
+        "mang_duong_m": 3561,
+        "he_so": 8.1,
+        "dan": 747
+      },
+      {
+        "h3_r8": "88415dd539fffff",
+        "commune": "Phường Tùng Thiện",
+        "chim_bay_m": 243,
+        "mang_duong_m": 1952,
+        "he_so": 8.01,
+        "dan": 1002
+      },
+      {
+        "h3_r8": "884143601bfffff",
+        "commune": "Xã Trần Phú",
+        "chim_bay_m": 577,
+        "mang_duong_m": 4086,
+        "he_so": 7.09,
+        "dan": 87
+      },
+      {
+        "h3_r8": "88415cae43fffff",
+        "commune": "Xã Sóc Sơn",
+        "chim_bay_m": 1877,
+        "mang_duong_m": 13090,
+        "he_so": 6.97,
+        "dan": 1104
+      },
+      {
+        "h3_r8": "88415cb681fffff",
+        "commune": "Phường Yên Sở",
+        "chim_bay_m": 601,
+        "mang_duong_m": 3830,
+        "he_so": 6.38,
+        "dan": 7573
+      }
+    ]
+  },
+  "L8": {
+    "cau_hoi": "Hồ sơ 168 giờ có dựng được 'tỉ lệ súng đang bận theo giờ' không?",
+    "quy_mo": {
+      "n_dong_sau_loc": 114889,
+      "n_tram_co_ho_so": 690,
+      "n_tram_giu_lai_tong": 710,
+      "ty_le_tram_co_ho_so": 0.972,
+      "so_o_thoi_gian_day_du": 168
+    },
+    "nhip_tuan_toan_mang": {
+      "ty_le_ban_trung_binh": 0.2372,
+      "dinh": {
+        "dow": 6,
+        "hour": 23,
+        "ty_le_ban": 0.3615
+      },
+      "day": {
+        "dow": 4,
+        "hour": 3,
+        "ty_le_ban": 0.1117
+      },
+      "bien_do_dinh_tren_day": 3.24
+    },
+    "do_tin_cay_theo_o_thoi_gian": {
+      "observed_h_median_min": 2.4166666666666665,
+      "observed_h_median_max": 5.0,
+      "n_o_thoi_gian_median_duoi_2h": 0,
+      "n_tram_du_168_o": 539,
+      "so_o_thoi_gian_trung_vi_moi_tram": 168.0
+    },
+    "shape_class_sau_loc": {
+      "HAI_DINH": 292,
+      "BAN_NGAY_PHANG": 239,
+      "THAT_THUONG": 89,
+      "KHONG_XEP_LOAI": 49,
+      "DEM_TROI": 34
+    }
+  }
+}

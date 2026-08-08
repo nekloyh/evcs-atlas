@@ -1,0 +1,59 @@
+{
+  "layer": "n04_grid",
+  "resolution": 8,
+  "province_name": "Tỉnh Quảng Ninh",
+  "province_code": "22",
+  "stats": {
+    "n_cells": 8640,
+    "n_inside": 6189,
+    "n_border": 2451,
+    "n_sliver_excluded": 167,
+    "grid_area_km2_weighted": 5698.97,
+    "boundary_area_km2": 5674.04,
+    "cells_with_supply": 107,
+    "cells_with_poi": 138,
+    "share_cells_with_zero_poi": 0.984,
+    "n_poi_assigned": 286,
+    "road_len_total_km": 11404.9,
+    "road_len_arterial_km": 1805.8,
+    "road_len_in_province_km": 10986.5,
+    "road_outside_boundary_share": 0.0367,
+    "share_cells_with_road": 0.4932,
+    "n_poi_1km_median": 0,
+    "n_poi_without_commune": 0,
+    "communes_with_zero_poi": 17,
+    "n_communes": 54
+  },
+  "checks": [
+    {
+      "name": "h3_unique",
+      "status": "PASS",
+      "detail": "8640 ô"
+    },
+    {
+      "name": "every_cell_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "grid_area_matches_boundary_lt_1pct",
+      "status": "PASS",
+      "detail": "lưới 5,699.0 km² vs đa giác 5,674.0 km² (lệch 0.44%)"
+    },
+    {
+      "name": "commune_frac_sums_to_province_frac",
+      "status": "PASS",
+      "detail": "max lệch 4.83e-13"
+    },
+    {
+      "name": "clipped_road_le_full_cell",
+      "status": "PASS",
+      "detail": "phần ngoài ranh giới 3.67% tổng chiều dài"
+    },
+    {
+      "name": "every_station_cell_in_grid",
+      "status": "PASS",
+      "detail": "0 trạm thuộc tỉnh rơi ra ngoài lưới báo cáo"
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "code": "A06",
+  "verdict": "HONG",
+  "cau_hoi": "util_cell học được ở đâu, và suy ra được cho đâu?",
+  "phu": {
+    "n_o_co_util": 1320,
+    "n_o_khong_util": 3107,
+    "tat_ca_o_co_util_deu_co_tram": true,
+    "n_o_co_tram_nhung_khong_do_duoc": 13,
+    "dan_so_o_co_util": 5742427.6325460235,
+    "dan_so_o_khong_util": 3088776.7203281363,
+    "ty_trong_dan_khong_quan_sat_duoc": 0.3497571335582194
+  },
+  "so_sanh_mien_gia_tri": {
+    "population": {
+      "median_co_do": 2305.6844448328666,
+      "median_khong_do": 392.04595084362404,
+      "ty_so_median": 5.881158675077193,
+      "auc_phan_biet": 0.838,
+      "p90_khong_do_vuot_p90_co_do": false
+    },
+    "pop_density_ppkm2": {
+      "median_co_do": 2856.029309005982,
+      "median_khong_do": 485.5519217753365,
+      "ty_so_median": 5.88202657825636,
+      "auc_phan_biet": 0.838,
+      "p90_khong_do_vuot_p90_co_do": false
+    },
+    "built_frac": {
+      "median_co_do": 0.28148210707033816,
+      "median_khong_do": 0.06889724806968917,
+      "ty_so_median": 4.085534835667466,
+      "auc_phan_biet": 0.825,
+      "p90_khong_do_vuot_p90_co_do": false
+    },
+    "n_poi_total": {
+      "median_co_do": 0.0,
+      "median_khong_do": 0.0,
+      "ty_so_median": null,
+      "auc_phan_biet": 0.628,
+      "p90_khong_do_vuot_p90_co_do": false
+    },
+    "road_len_arterial_m": {
+      "median_co_do": 882.911834122556,
+      "median_khong_do": 0.0,
+      "ty_so_median": null,
+      "auc_phan_biet": 0.678,
+      "p90_khong_do_vuot_p90_co_do": false
+    },
+    "road_len_m": {
+      "median_co_do": 9393.184630185195,
+      "median_khong_do": 4812.839113294154,
+      "ty_so_median": 1.9516930462601765,
+      "auc_phan_biet": 0.821,
+      "p90_khong_do_vuot_p90_co_do": false
+    },
+    "apartment_levels_sum": {
+      "median_co_do": 0.0,
+      "median_khong_do": 0.0,
+      "ty_so_median": null,
+      "auc_phan_biet": 0.551,
+      "p90_khong_do_vuot_p90_co_do": false
+    },
+    "drive_time_station_min": {
+      "median_co_do": 1.378652606699215,
+      "median_khong_do": 3.696312274971933,
+      "ty_so_median": 0.37298055579183537,
+      "auc_phan_biet": 0.078,
+      "p90_khong_do_vuot_p90_co_do": true
+    }
+  },
+  "ngoai_suy": {
+    "note": "Ô không trạm nằm ngoài khoảng [p5,p95] của ô có trạm ở ÍT NHẤT một biến",
+    "n_o_khong_tram_ngoai_p5_p95_population": 1510,
+    "n_o_khong_tram_ngoai_p5_p95_pop_density_ppkm2": 1510,
+    "n_o_khong_tram_ngoai_p5_p95_built_frac": 1341,
+    "n_o_khong_tram_ngoai_p5_p95_n_poi_total": 12,
+    "n_o_khong_tram_ngoai_p5_p95_road_len_arterial_m": 34,
+    "n_o_khong_tram_ngoai_p5_p95_road_len_m": 1292,
+    "n_o_khong_tram_ngoai_p5_p95_apartment_levels_sum": 5,
+    "n_o_khong_tram_ngoai_p5_p95_drive_time_station_min": 1824
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "layer": "n04_grid",
+  "resolution": 8,
+  "province_name": "Tỉnh Quảng Trị",
+  "province_code": "44",
+  "stats": {
+    "n_cells": 15843,
+    "n_inside": 14852,
+    "n_border": 991,
+    "n_sliver_excluded": 46,
+    "grid_area_km2_weighted": 12717.22,
+    "boundary_area_km2": 12660.95,
+    "cells_with_supply": 131,
+    "cells_with_poi": 237,
+    "share_cells_with_zero_poi": 0.985,
+    "n_poi_assigned": 315,
+    "road_len_total_km": 16839.0,
+    "road_len_arterial_km": 2776.1,
+    "road_len_in_province_km": 16670.0,
+    "road_outside_boundary_share": 0.01,
+    "share_cells_with_road": 0.389,
+    "n_poi_1km_median": 0,
+    "n_poi_without_commune": 0,
+    "communes_with_zero_poi": 20,
+    "n_communes": 78
+  },
+  "checks": [
+    {
+      "name": "h3_unique",
+      "status": "PASS",
+      "detail": "15843 ô"
+    },
+    {
+      "name": "every_cell_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "grid_area_matches_boundary_lt_1pct",
+      "status": "PASS",
+      "detail": "lưới 12,717.2 km² vs đa giác 12,661.0 km² (lệch 0.44%)"
+    },
+    {
+      "name": "commune_frac_sums_to_province_frac",
+      "status": "PASS",
+      "detail": "max lệch 5.40e-13"
+    },
+    {
+      "name": "clipped_road_le_full_cell",
+      "status": "PASS",
+      "detail": "phần ngoài ranh giới 1.00% tổng chiều dài"
+    },
+    {
+      "name": "every_station_cell_in_grid",
+      "status": "PASS",
+      "detail": "0 trạm thuộc tỉnh rơi ra ngoài lưới báo cáo"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "layer": "population",
+  "method": "dasymetric: WorldPop 2025 R2024B (trọng số) neo theo VNSDI danso (tổng kiểm soát)",
+  "weight_raster": "/home/n91ym1nhky/Work/internVSF/aGiang-evcs/data/raw/worldpop/vnm_pop_2025_CN_100m_R2024B_v1.tif",
+  "control_total_source": "VNSDI danso, hiệu lực 16/6/2025",
+  "stats": {
+    "population_total": 8831125.9,
+    "population_published_vnsdi": 8732930.0,
+    "population_expected_after_substitution": 8831204.3,
+    "population_in_excluded_sliver_cells": 78.5,
+    "n_excluded_sliver_cells": 27,
+    "n_cells": 4400,
+    "n_cells_with_pop": 4265,
+    "worldpop_raw_total_in_boundary": 9174421.3,
+    "worldpop_bias_vs_official_pct": 5.06,
+    "pixels_in_boundary": 323396,
+    "pixels_in_bbox_outside_boundary_share": 0.2888,
+    "communes_without_weight": [],
+    "communes_with_implausible_official": [
+      {
+        "commune_code": "00328",
+        "commune_name": "Phường Lĩnh Nam",
+        "danso_published": 21,
+        "worldpop2025_in_commune": 38608.8
+      },
+      {
+        "commune_code": "10369",
+        "commune_name": "Xã Ứng Thiên",
+        "danso_published": 54,
+        "worldpop2025_in_commune": 59740.5
+      }
+    ],
+    "pop_source_counts": {
+      "WORLDPOP2025_ANCHORED_VNSDI": 4210,
+      "ZERO_NO_WEIGHT": 135,
+      "WORLDPOP2025_UNANCHORED_OFFICIAL_IMPLAUSIBLE": 55
+    },
+    "max_cell_population": 46232.4
+  },
+  "checks": [
+    {
+      "name": "total_matches_official_plus_declared_substitutions",
+      "status": "PASS",
+      "detail": "8,831,126 + 78.5 (ô vụn) vs kỳ vọng 8,831,204 (công bố 8,732,930 − 75 + 98,349)"
+    },
+    {
+      "name": "no_negative",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "no_communes_without_weight",
+      "status": "PASS",
+      "detail": "0 xã dùng rải-đều: []"
+    },
+    {
+      "name": "implausible_official_declared_not_silent",
+      "status": "PASS",
+      "detail": "2 xã có danso công bố hỏng → thay bằng WorldPop, gắn cờ pop_source"
+    },
+    {
+      "name": "cells_covered",
+      "status": "PASS",
+      "detail": "4,265/4,400 ô có dân"
+    }
+  ]
+}

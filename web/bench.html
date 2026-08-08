@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EVCS · đo p95 DuckDB-WASM</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 29 9.5v15L16 32 3 24.5v-15z' fill='%239b380b'/%3E%3C/svg%3E"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+        background: #fbfaf8;
+        color: #1c1917;
+      }
+      pre {
+        white-space: pre-wrap;
+      }
+      h1 {
+        font-size: 15px;
+        letter-spacing: 0.1em;
+        margin: 0 0 4px;
+      }
+      p.note {
+        color: #78716c;
+        margin: 0 0 16px;
+        max-width: 78ch;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>ĐO p95 — DuckDB-WASM trên store theo tỉnh</h1>
+    <p class="note">
+      Trang ĐỘC LẬP với app: nó nạp đúng bundle DuckDB-WASM đơn luồng (mvp/eh) mà
+      <code>src/data/duckdb.ts</code> dùng, đăng ký đúng các file parquet đã xuất, và chạy đúng
+      hình dạng truy vấn mà app chạy. Nó không import <code>MapView</code> hay bất kỳ thành phần
+      giao diện nào, nên số đo không lẫn thời gian dựng lớp deck.gl — và nó chạy được cả khi
+      app đang dở dang.
+    </p>
+    <pre id="out">đang chạy…</pre>
+    <script type="module" src="/src/bench.ts"></script>
+  </body>
+</html>

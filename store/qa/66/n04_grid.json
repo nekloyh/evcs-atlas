@@ -1,0 +1,59 @@
+{
+  "layer": "n04_grid",
+  "resolution": 8,
+  "province_name": "Tỉnh Đắk Lắk",
+  "province_code": "66",
+  "stats": {
+    "n_cells": 22482,
+    "n_inside": 21312,
+    "n_border": 1170,
+    "n_sliver_excluded": 66,
+    "grid_area_km2_weighted": 18152.27,
+    "boundary_area_km2": 18071.66,
+    "cells_with_supply": 178,
+    "cells_with_poi": 284,
+    "share_cells_with_zero_poi": 0.9874,
+    "n_poi_assigned": 365,
+    "road_len_total_km": 23220.3,
+    "road_len_arterial_km": 2774.7,
+    "road_len_in_province_km": 23005.4,
+    "road_outside_boundary_share": 0.0093,
+    "share_cells_with_road": 0.4578,
+    "n_poi_1km_median": 0,
+    "n_poi_without_commune": 0,
+    "communes_with_zero_poi": 33,
+    "n_communes": 102
+  },
+  "checks": [
+    {
+      "name": "h3_unique",
+      "status": "PASS",
+      "detail": "22482 ô"
+    },
+    {
+      "name": "every_cell_has_commune",
+      "status": "PASS",
+      "detail": "0 thiếu"
+    },
+    {
+      "name": "grid_area_matches_boundary_lt_1pct",
+      "status": "PASS",
+      "detail": "lưới 18,152.3 km² vs đa giác 18,071.7 km² (lệch 0.45%)"
+    },
+    {
+      "name": "commune_frac_sums_to_province_frac",
+      "status": "PASS",
+      "detail": "max lệch 5.03e-13"
+    },
+    {
+      "name": "clipped_road_le_full_cell",
+      "status": "PASS",
+      "detail": "phần ngoài ranh giới 0.93% tổng chiều dài"
+    },
+    {
+      "name": "every_station_cell_in_grid",
+      "status": "PASS",
+      "detail": "0 trạm thuộc tỉnh rơi ra ngoài lưới báo cáo"
+    }
+  ]
+}

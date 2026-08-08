@@ -1,0 +1,337 @@
+/**
+ * Test cho serialization URL hash — DESIGN.md §9.
+ *
+ * Vì sao có file này: §9 là một **hợp đồng**, không phải một trạng thái. Ảnh chụp chứng
+ * minh được rằng MỘT hash hỏng bị bỏ đúng cách; nó không chứng minh được rằng mọi khoá
+ * hỏng đều bị bỏ RIÊNG khoá đó, rằng khoá để dành của M4 không bị xén, hay rằng vòng
+ * đọc↔ghi hội tụ. Đây là logic thuần trên chuỗi (§12).
+ *
+ * `parseHash`/`serializeHash` cố tình nhận CHUỖI chứ không đụng `window`, đúng để test
+ * được ngoài trình duyệt.
+ */
+
+import { test } from "node:test";
+import assert from "node:assert/strict";
+
+import { parseHash, serializeHash } from "../src/state/hash.ts";
+import type { HashState } from "../src/state/types.ts";
+
+const VIEW = { lng: 105.84, lat: 21, zoom: 9.3, pitch: 0, bearing: 0 };
+const BASE: HashState = {
+  field: "population",
+  mode: "2d",
+  view: VIEW,
+  layers: [],
+  cell: null,
+  scene: null,
+  paintOn: true,
+  dataMode: false,
+  t: 0,
+  brush: {},
+};
+
+// ── Khoá `l` — overlay (§4d, mới ở M2) ─────────────────────────────────────────
+
+test("`l` đọc được danh sách overlay", () => {
+  assert.deepEqual(parseHash("#l=stations,beyond2km").layers, ["stations", "beyond2km"]);
+});
+
+test("ID overlay lạ bị bỏ RIÊNG nó, các ID hợp lệ vẫn bật", () => {
+  // Cùng luật "bỏ từng khoá" của §9 nhưng ở một bậc sâu hơn: một ID gõ sai không được
+  // phép tắt hết những lớp người dùng thật sự yêu cầu.
+  assert.deepEqual(parseHash("#l=stations,khongcothat,beyond2km").layers, ["stations", "beyond2km"]);
+});
+
+test("`l` toàn ID lạ ⇒ danh sách rỗng, KHÔNG phải undefined", () => {
+  // Khác nhau thật: rỗng = "người dùng nói không bật gì"; undefined = "hash không nói gì".
+  assert.deepEqual(parseHash("#l=abc,xyz").layers, []);
+});
+
+test("hash không có khoá `l` thì `layers` là undefined — im lặng khác với nói không", () => {
+  assert.equal(parseHash("#f=population").layers, undefined);
+});
+
+test("ID trùng lặp bị gộp — một lớp không bật được hai lần", () => {
+  assert.deepEqual(parseHash("#l=stations,stations").layers, ["stations"]);
+});
+
+test("khoảng trắng quanh ID vẫn nhận — người ta sửa tay URL thì hay để lọt dấu cách", () => {
+  assert.deepEqual(parseHash("#l=stations, beyond2km").layers, ["stations", "beyond2km"]);
+});
+
+test("`l` ghi theo thứ tự CHUẨN HOÁ, không theo thứ tự bấm", () => {
+  // Cùng một trạng thái phải cho cùng một chuỗi, nếu không hai link giống hệt nhau về nội
+  // dung sẽ trông khác nhau khi so bằng mắt.
+  const a = serializeHash({ ...BASE, layers: ["beyond2km", "stations"] });
+  const b = serializeHash({ ...BASE, layers: ["stations", "beyond2km"] });
+  assert.equal(a, b);
+  assert.match(a, /l=stations,beyond2km/);
+});
+
+test("không overlay nào bật thì KHÔNG ghi khoá `l` rỗng", () => {
+  assert.doesNotMatch(serializeHash(BASE), /l=/);
+});
+
+// ── Khoá `f` — hai họ trường (§6b) ─────────────────────────────────────────────
+
+test("tên trần là trường của Ô, tiền tố `commune:` là trường của XÃ", () => {
+  assert.equal(parseHash("#f=population").field, "population");
+  assert.equal(parseHash("#f=commune:population").field, "commune:population");
+});
+
+test("dấu `:` KHÔNG bị percent-encode — hash là thứ mentor đọc và gửi", () => {
+  const s = serializeHash({ ...BASE, field: "commune:population" });
+  assert.match(s, /f=commune:population/);
+  assert.doesNotMatch(s, /%3A/i);
+});
+
+test("tên trường không có thật bị bỏ", () => {
+  assert.equal(parseHash("#f=khong_co_that").field, undefined);
+  assert.equal(parseHash("#f=commune:khong_co_that").field, undefined);
+  // Trường của Ô mà gắn tiền tố xã cũng là không có thật.
+  assert.equal(parseHash("#f=commune:n_mall").field, undefined);
+});
+
+// ── §9: hash hỏng thì bỏ TỪNG KHOÁ, không reset cả app ─────────────────────────
+
+test("khoá hỏng không kéo theo khoá lành", () => {
+  const p = parseHash("#f=khong_co_that&m=4d&v=xxx&l=stations&c=88415cb637fffff");
+  assert.equal(p.field, undefined);
+  assert.equal(p.mode, undefined);
+  assert.equal(p.view, undefined);
+  // Hai khoá lành vẫn nguyên vẹn.
+  assert.deepEqual(p.layers, ["stations"]);
+  assert.equal(p.cell, "88415cb637fffff");
+});
+
+test("`v` phải đủ 5 số và trong biên; thiếu một số thì bỏ cả khoá", () => {
+  assert.equal(parseHash("#v=105.84,21.00,9.3,0").view, undefined);
+  assert.equal(parseHash("#v=105.84,21.00,9.3,0,0").view?.zoom, 9.3);
+  assert.equal(parseHash("#v=999,21.00,9.3,0,0").view, undefined, "lng ngoài biên");
+  assert.equal(parseHash("#v=105.84,21.00,99,0,0").view, undefined, "zoom ngoài biên");
+  assert.equal(parseHash("#v=105.84,21.00,9.3,99,0").view, undefined, "pitch ngoài biên");
+});
+
+test("`m=3d` là chế độ THẬT từ M3.5; giá trị lạ vẫn bị bỏ", () => {
+  // Luật cũ (bỏ `3d` như khoá hỏng) đứng trên tiền đề "bật nó không vẽ gì khác đi" —
+  // tiền đề đó hết đúng khi M3.5 dựng fill-extrusion + khối POI (§9).
+  assert.equal(parseHash("#m=3d").mode, "3d");
+  assert.equal(parseHash("#m=2d").mode, "2d");
+  assert.equal(parseHash("#m=4d").mode, undefined);
+});
+
+test("`c` sai hình dạng bị bỏ; đúng hình dạng thì nhận", () => {
+  assert.equal(parseHash("#c=khong-phai-h3").cell, undefined);
+  assert.equal(parseHash("#c=88415CB637FFFFF").cell, undefined, "H3 là hex CHỮ THƯỜNG");
+  assert.equal(parseHash("#c=88415cb637fffff").cell, "88415cb637fffff");
+});
+
+// ── `t`/`b` từ khoá ĐỂ DÀNH thành khoá THẬT — M4 (§9b) ─────────────────────────
+//
+// Test cũ khẳng định `t`/`b` được **chép nguyên văn** khi ghi lại, kể cả khi nội dung là
+// rác (`b=pop:120-4400` — cú pháp nháp của §9 trước M4). Tiền đề của nó là "M4 chưa dựng,
+// nên bản hiện tại không có quyền có ý kiến về nội dung hai khoá đó". Tiền đề hết đúng khi
+// M4 dựng dock và scrubber: giờ chúng đi qua bộ kiểm của chính mình, và chép nguyên văn
+// một chuỗi rác chính là thứ §9 cấm ("hash không hợp lệ thì bỏ qua từng khoá một").
+
+test("`t`/`b` KHÔNG còn được chép nguyên văn từ hash cũ — chúng đọc từ state", () => {
+  const s = serializeHash(BASE, "#f=population&t=48&b=pop:120-4400");
+  assert.doesNotMatch(s, /t=48/, "`t` của state là 0, nên không ghi ra");
+  assert.doesNotMatch(s, /b=/, "`b` của state rỗng, và cú pháp cũ `pop:120-4400` là rác");
+});
+
+test("khoá lạ hoàn toàn thì KHÔNG được giữ", () => {
+  assert.doesNotMatch(serializeHash(BASE, "#zzz=1"), /zzz/);
+});
+
+// ── Khoá `t` — vị trí scrubber (§3e) ───────────────────────────────────────────
+
+test("`t` đọc được số nguyên trong 0–167", () => {
+  assert.equal(parseHash("#t=0").t, 0);
+  assert.equal(parseHash("#t=46").t, 46);
+  assert.equal(parseHash("#t=167").t, 167);
+});
+
+test("`t` ngoài biên hoặc không nguyên bị bỏ — không làm tròn hộ người gửi link", () => {
+  for (const bad of ["-1", "168", "999", "48.5", "abc", ""]) {
+    assert.equal(parseHash(`#t=${bad}`).t, undefined, bad);
+  }
+});
+
+test("chỉ ghi `t` khi KHÁC mặc định — cùng khuôn `l` rỗng và `p=1`", () => {
+  assert.doesNotMatch(serializeHash(BASE), /[?&]t=/);
+  assert.match(serializeHash({ ...BASE, t: 75 }), /t=75/);
+});
+
+test("`t` hỏng không kéo theo khoá lành", () => {
+  const p = parseHash("#f=population&t=999&l=stations");
+  assert.equal(p.t, undefined);
+  assert.equal(p.field, "population");
+  assert.deepEqual(p.layers, ["stations"]);
+});
+
+test("`t`/`b` KHÔNG đọc và KHÔNG ghi trong CÂU CHUYỆN — dock/scrubber không dựng ở đó", () => {
+  const p = parseHash("#s=di-vong&t=46&b=h:population:1..2");
+  assert.equal(p.t, undefined);
+  assert.equal(p.brush, undefined);
+  const s = serializeHash({ ...BASE, scene: "von-cuc", t: 46, brush: { win: { dow: { lo: 0, hi: 4 }, hour: { lo: 7, hi: 19 } } } });
+  assert.doesNotMatch(s, /[?&]t=/);
+  assert.doesNotMatch(s, /[?&]b=/);
+});
+
+// ── Khoá `b` — ba loại brush (§9b) ─────────────────────────────────────────────
+
+test("`b` đọc được cả ba loại trong một chuỗi", () => {
+  const b = parseHash(
+    "#b=h:population:120..4400,s:population:120..4400:dist_station_network_m:0..2500,w:0..4:7..19",
+  ).brush!;
+  assert.deepEqual(b.hist, { field: "population", range: { lo: 120, hi: 4400 } });
+  assert.equal(b.scatter?.x, "population");
+  assert.deepEqual(b.scatter?.yr, { lo: 0, hi: 2500 });
+  assert.deepEqual(b.win, { dow: { lo: 0, hi: 4 }, hour: { lo: 7, hi: 19 } });
+});
+
+test("mệnh đề hỏng bị bỏ RIÊNG nó — hai brush kia vẫn sống", () => {
+  // Cùng luật "bỏ từng ID lạ" của khoá `l`, chỉ sâu hơn một bậc.
+  const b = parseHash("#b=h:khong_co_that:1..2,w:0..4:7..19").brush!;
+  assert.equal(b.hist, undefined);
+  assert.deepEqual(b.win, { dow: { lo: 0, hi: 4 }, hour: { lo: 7, hi: 19 } });
+});
+
+test("`b` toàn rác ⇒ như khoá vắng mặt, không phải một brush rỗng", () => {
+  // "nói rác" và "không nói gì" cho ra cùng một trạng thái, nên chúng phải cho cùng kết quả.
+  assert.equal(parseHash("#b=pop:120-4400").brush, undefined, "cú pháp nháp cũ của §9");
+  assert.equal(parseHash("#b=xyz").brush, undefined);
+  assert.equal(parseHash("#b=").brush, undefined);
+});
+
+test("`b` hỏng không kéo theo khoá lành", () => {
+  const p = parseHash("#f=population&b=xyz&t=46&l=stations");
+  assert.equal(p.brush, undefined);
+  assert.equal(p.field, "population");
+  assert.equal(p.t, 46);
+  assert.deepEqual(p.layers, ["stations"]);
+});
+
+test("vòng ghi ↔ đọc của `b` hội tụ ở lần thứ hai", () => {
+  // Điều kiện để listener `hashchange` không lặp vô hạn (§9a): biên đã làm tròn thì đọc
+  // lại phải ra đúng số đó.
+  const state: HashState = {
+    ...BASE,
+    t: 75,
+    brush: {
+      hist: { field: "population", range: { lo: 120.123456, hi: 4400 } },
+      scatter: {
+        x: "population",
+        xr: { lo: 0, hi: 9000 },
+        y: "dist_station_network_m",
+        yr: { lo: 1500, hi: 20000 },
+      },
+      win: { dow: { lo: 1, hi: 5 }, hour: { lo: 6, hi: 22 } },
+    },
+  };
+  const once = serializeHash(state);
+  const back = parseHash(`#${once}`);
+  const twice = serializeHash({ ...state, ...back, brush: back.brush ?? {} }, `#${once}`);
+  assert.equal(once, twice);
+  assert.equal(back.t, 75);
+  assert.equal(back.brush?.hist?.range.lo, 120.1235, "biên làm tròn 4 chữ số");
+});
+
+test("`..` và `-` không bị percent-encode — hash phải đọc được bằng mắt", () => {
+  const s = serializeHash({
+    ...BASE,
+    field: "screen_margin_m",
+    brush: { hist: { field: "screen_margin_m", range: { lo: -2000, hi: 500 } } },
+  });
+  assert.match(s, /b=h:screen_margin_m:-2000\.\.500/);
+  assert.doesNotMatch(s, /%2E|%2D/i);
+});
+
+// ── Vòng đọc ↔ ghi phải hội tụ ─────────────────────────────────────────────────
+
+test("ghi rồi đọc lại cho đúng state ban đầu", () => {
+  const state: HashState = {
+    field: "commune:ports_per_10k_pop",
+    mode: "2d",
+    view: { lng: 105.84, lat: 21, zoom: 11, pitch: 0, bearing: 0 },
+    layers: ["stations", "beyond2km"],
+    cell: "88415cb637fffff",
+    scene: null,
+    paintOn: true,
+    dataMode: false,
+    t: 0,
+    brush: {},
+  };
+  const back = parseHash(`#${serializeHash(state)}`);
+  assert.equal(back.field, state.field);
+  assert.equal(back.mode, state.mode);
+  assert.deepEqual(back.view, state.view);
+  assert.deepEqual(back.layers, state.layers);
+  assert.equal(back.cell, state.cell);
+});
+
+test("ghi hai lần liên tiếp cho cùng một chuỗi — vòng hashchange phải DỪNG", () => {
+  // Đây là điều kiện để listener `hashchange` không lặp vô hạn: nếu chuỗi ghi ra khác
+  // chuỗi vừa đọc vào, mỗi vòng lại sinh một sự kiện nữa.
+  const state: HashState = { ...BASE, layers: ["beyond2km", "stations"], cell: "88415cb637fffff" };
+  const once = serializeHash(state);
+  const parsed = parseHash(`#${once}`);
+  const twice = serializeHash({ ...state, ...parsed, layers: parsed.layers ?? [] }, `#${once}`);
+  assert.equal(once, twice);
+});
+
+// ── Khoá `c` mang HAI loại đối tượng — M2.1-A ──────────────────────────────────
+
+test("`c` nhận cả ô lẫn xã, và phân biệt được chúng", () => {
+  assert.equal(parseHash("#c=88415cb637fffff").cell, "88415cb637fffff");
+  assert.equal(parseHash("#c=commune:00004").cell, "commune:00004");
+});
+
+test("mã xã sai hình dạng bị bỏ — 5 chữ số, không hơn không kém", () => {
+  for (const bad of ["commune:4", "commune:000045", "commune:0000a", "commune:", "commune:abcde"]) {
+    assert.equal(parseHash(`#c=${bad}`).cell, undefined, bad);
+  }
+});
+
+test("`c` hỏng không kéo theo khoá nào khác", () => {
+  const p = parseHash("#f=population&c=commune:xx&l=stations");
+  assert.equal(p.cell, undefined);
+  assert.equal(p.field, "population");
+  assert.deepEqual(p.layers, ["stations"]);
+});
+
+test("chọn xã: ghi rồi đọc lại ra đúng chuỗi cũ, và `:` không bị encode", () => {
+  const s = serializeHash({ ...BASE, cell: "commune:00004" });
+  assert.match(s, /c=commune:00004/);
+  assert.doesNotMatch(s, /%3A/i);
+  assert.equal(parseHash(`#${s}`).cell, "commune:00004");
+});
+
+// ── Khoá `p` — nút TẮT mặt tô, thêm sau M3.5 (§6c) ──────────────────────────────
+
+test("`p=0` tắt mặt tô; `p=1` và vắng mặt đều là bật", () => {
+  assert.equal(parseHash("#p=0").paintOn, false);
+  assert.equal(parseHash("#p=1").paintOn, true);
+  assert.equal(parseHash("#").paintOn, undefined, "vắng mặt ⇒ không set, applyHash tự mặc định true");
+});
+
+test("giá trị `p` lạ bị bỏ như mọi khoá hỏng khác", () => {
+  assert.equal(parseHash("#p=xyz").paintOn, undefined);
+});
+
+test("serializeHash chỉ ghi `p=0` khi tắt — mặc định bật không ghi gì, cùng khuôn với `l` rỗng", () => {
+  assert.doesNotMatch(serializeHash(BASE), /[?&]p=/);
+  assert.match(serializeHash({ ...BASE, paintOn: false }), /p=0/);
+});
+
+test("vòng ghi ↔ đọc `p` hội tụ", () => {
+  const off = { ...BASE, paintOn: false };
+  assert.equal(parseHash(`#${serializeHash(off)}`).paintOn, false);
+  assert.equal(parseHash(`#${serializeHash(BASE)}`).paintOn, undefined);
+});
+
+test("khoá `p` KHÔNG được ghi khi có `s` — cùng luật §9a với f/v/l", () => {
+  const s = serializeHash({ ...BASE, scene: "von-cuc", paintOn: false });
+  assert.doesNotMatch(s, /[?&]p=/);
+});

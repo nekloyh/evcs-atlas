@@ -1,0 +1,83 @@
+{
+  "code": "A11",
+  "verdict": "HONG",
+  "cau_hoi": "Nhãn urban/rural có khớp mật độ dân đo được của ô chứa trạm không?",
+  "phan_bo": {
+    "n_rural": 1734,
+    "n_urban": 757,
+    "mat_do_median_rural": 2640.7526586955437,
+    "mat_do_median_urban": 11378.994565425079,
+    "auc_urban_vs_rural_theo_mat_do": 0.869
+  },
+  "mau_thuan": {
+    "n_rural_o_mat_do_tren_5000": 365,
+    "ty_trong_trong_rural": 0.2104959630911188,
+    "mat_do_max_cua_mot_tram_rural": 18352.922110146046,
+    "n_urban_o_mat_do_duoi_1000": 11,
+    "ty_trong_trong_urban": 0.01453104359313078
+  },
+  "anh_huong_toi_util_pctl": {
+    "note": "util_pctl phân theo current_type, KHÔNG theo urban_rural — nhãn này hiện chỉ mang tính mô tả",
+    "n_tram_grade_GOOD": 1134,
+    "util_median_rural": 0.11576354679802955,
+    "util_median_urban": 0.10224867724867726
+  },
+  "vi_du_mau_thuan": [
+    {
+      "station_code": "C.HNO1318",
+      "commune_name": "Xã Thanh Trì",
+      "pop_density": 18352.922110146046,
+      "built_frac": 0.7123423691788303,
+      "util": 0.08743968416435151
+    },
+    {
+      "station_code": "C.HNO0753",
+      "commune_name": "Xã Thanh Trì",
+      "pop_density": 14928.494252413313,
+      "built_frac": 0.7304753398829017,
+      "util": 0.0
+    },
+    {
+      "station_code": "C.HNO0754",
+      "commune_name": "Xã Thanh Trì",
+      "pop_density": 14928.494252413313,
+      "built_frac": 0.7304753398829017,
+      "util": 0.0
+    },
+    {
+      "station_code": "C.HNO15835",
+      "commune_name": "Xã Đại Thanh",
+      "pop_density": 14928.494252413313,
+      "built_frac": 0.7304753398829017,
+      "util": 0.0
+    },
+    {
+      "station_code": "C.HNO1637",
+      "commune_name": "Xã Đại Thanh",
+      "pop_density": 14928.494252413313,
+      "built_frac": 0.7304753398829017,
+      "util": 0.0
+    },
+    {
+      "station_code": "C.HNO5340",
+      "commune_name": "Xã Phù Đổng",
+      "pop_density": 14687.755622649289,
+      "built_frac": 0.820558703648474,
+      "util": 0.3695350451075642
+    },
+    {
+      "station_code": "C.HNO0543",
+      "commune_name": "Xã Tây Phương",
+      "pop_density": 12929.97162839167,
+      "built_frac": 0.8396591021702507,
+      "util": 0.3289682056279693
+    },
+    {
+      "station_code": "C.HNO10759",
+      "commune_name": "Xã Tây Phương",
+      "pop_density": 12929.97162839167,
+      "built_frac": 0.8396591021702507,
+      "util": 0.020838501612503103
+    }
+  ]
+}

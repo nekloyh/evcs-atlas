@@ -1,0 +1,77 @@
+{
+  "layer": "occupancy",
+  "source": "aGiang-evcs data/interim/occ (telemetry evcs.vn)",
+  "snapshot_id": "evcs_vn_2026-07-29-full",
+  "window_utc": [
+    "2026-06-29T05:50:00+00:00",
+    "2026-07-29T06:00:00+00:00"
+  ],
+  "stats": {
+    "n_stations_hanoi_total": 710,
+    "n_stations_with_occ": 703,
+    "n_profile_rows": 116785,
+    "grade": {
+      "GOOD": 680,
+      "PARTIAL": 14,
+      "INSUFFICIENT": 9
+    },
+    "occ_status": {
+      "OK": 676,
+      "THIEU_COVERAGE": 23,
+      "THIEU_PEER": 4
+    },
+    "util_mean": 0.2592,
+    "util_median": 0.2263,
+    "util_p90_of_stations": 0.5322,
+    "saturation_frac_mean": 0.0562,
+    "n_with_pctl": 676,
+    "shape_class": {
+      "HAI_DINH": 292,
+      "BAN_NGAY_PHANG": 239,
+      "THAT_THUONG": 89,
+      "KHONG_XEP_LOAI": 49,
+      "DEM_TROI": 34
+    },
+    "commune_kind": {
+      "XA": 415,
+      "PHUONG": 288
+    }
+  },
+  "checks": [
+    {
+      "name": "station_code_unique",
+      "status": "PASS",
+      "detail": "703 trạm"
+    },
+    {
+      "name": "all_codes_are_hanoi",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "util_in_0_1",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "pctl_only_on_good_grade",
+      "status": "PASS",
+      "detail": "676 trạm có phân vị"
+    },
+    {
+      "name": "profile_cells_le_168",
+      "status": "PASS",
+      "detail": "max 168 ô/trạm"
+    },
+    {
+      "name": "occ_covers_most_stations",
+      "status": "PASS",
+      "detail": "703/710 = 99.0%"
+    },
+    {
+      "name": "commune_kind_matches_inherited_label",
+      "status": "PASS",
+      "detail": "PHUONG/XA dựng từ VNSDI khớp 100% nhãn urban_rural kế thừa"
+    }
+  ]
+}

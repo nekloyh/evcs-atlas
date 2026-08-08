@@ -1,0 +1,91 @@
+{
+  "code": "A07",
+  "verdict": "CANH_BAO",
+  "cau_hoi": "Phân bố cung theo dân số, hay theo chiến lược đặt trạm của một nhà mạng?",
+  "doc_quyen": {
+    "n_tram_hanoi": 2521,
+    "n_vinfast_cs": 2515,
+    "ty_trong": 0.9976199920666402
+  },
+  "tuong_quan_cap_xa": {
+    "spearman_ports_vs_population": 0.34,
+    "spearman_ports_vs_pop_density": 0.033,
+    "r2_log_ports_tu_log_pop": 0.101,
+    "r2_log_ports_tu_co_khu_do_thi_lon": 0.195,
+    "r2_ca_hai": 0.246
+  },
+  "tap_trung_cung": {
+    "n_xa_co_khu_do_thi_lon": 11,
+    "ty_trong_cong_thuoc_khu_do_thi_lon": 0.2948103376406836,
+    "ty_trong_cong_o_10_xa_dau": 0.44112130054189247,
+    "gini_ports_theo_xa": 0.5839519773450578,
+    "gini_population_theo_xa": 0.21141975621816791,
+    "proxy_khu_do_thi": "khớp chuỗi trong name/address của trạm: vinhomes, ocean park, ocean city, smart city, times city, royal city"
+  },
+  "10_xa_nhieu_cong_nhat": [
+    {
+      "commune_code": "00634",
+      "commune_name": "Phường Tây Mỗ",
+      "population": 46894.0,
+      "ports": 1094,
+      "mega_ports": 1082,
+      "mega_share": 0.9890310786106032
+    },
+    {
+      "commune_code": "00565",
+      "commune_name": "Xã Gia Lâm",
+      "population": 90498.0,
+      "ports": 1007,
+      "mega_ports": 936,
+      "mega_share": 0.929493545183714
+    },
+    {
+      "commune_code": "00136",
+      "commune_name": "Phường Phúc Lợi",
+      "population": 66790.0,
+      "ports": 429,
+      "mega_ports": 306,
+      "mega_share": 0.7132867132867133
+    },
+    {
+      "commune_code": "00454",
+      "commune_name": "Xã Đông Anh",
+      "population": 118183.0,
+      "ports": 409,
+      "mega_ports": 155,
+      "mega_share": 0.37897310513447435
+    },
+    {
+      "commune_code": "00433",
+      "commune_name": "Xã Nội Bài",
+      "population": 70469.0,
+      "ports": 317,
+      "mega_ports": 0,
+      "mega_share": 0.0
+    },
+    {
+      "commune_code": "00118",
+      "commune_name": "Phường Bồ Đề",
+      "population": 120028.0,
+      "ports": 232,
+      "mega_ports": 0,
+      "mega_share": 0.0
+    },
+    {
+      "commune_code": "00376",
+      "commune_name": "Xã Sóc Sơn",
+      "population": 117876.0,
+      "ports": 230,
+      "mega_ports": 0,
+      "mega_share": 0.0
+    },
+    {
+      "commune_code": "00331",
+      "commune_name": "Phường Hoàng Mai",
+      "population": 98502.0,
+      "ports": 182,
+      "mega_ports": 0,
+      "mega_share": 0.0
+    }
+  ]
+}
