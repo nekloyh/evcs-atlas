@@ -52,7 +52,7 @@ import rasterio.windows
 from shapely.geometry import Point
 from shapely.strtree import STRtree
 
-from hanoi.grid import RES
+from evcs.core.grid import RES
 
 from . import admin, paths, qa
 from .runner import Step

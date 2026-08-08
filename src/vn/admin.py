@@ -37,14 +37,21 @@ làm vành đệm sai ~7%. Ở đây hệ số tính lại theo VĨ ĐỘ TÂM c
 from __future__ import annotations
 
 import functools
-import math
 
 import pandas as pd
-from shapely import affinity, wkb
-from shapely.geometry import mapping
+from shapely import wkb
 from shapely.ops import unary_union
 
+from evcs.core import geo
+
 from . import paths
+
+# Quy đổi mét ↔ độ sống ở ``evcs.core.geo``, không ở đây. Module này chỉ ĐỌC NGUỒN và dựng
+# hình học của một tỉnh; nó không được sở hữu một hằng số vật lý nào.
+m_per_deg_lon = geo.m_per_deg_lon
+buffer_degrees = geo.buffer_degrees
+area_km2 = geo.area_km2
+as_geojson = geo.as_geojson
 
 # --- niên bản ------------------------------------------------------------
 VINTAGE = {
@@ -71,7 +78,6 @@ VINTAGE = {
 }
 
 BUFFER_M = 5_000
-_M_PER_DEG_LAT = 110_574.0
 
 # Cột lấy từ nguồn VNSDI. Giữ nguyên tên gốc ở tầng đọc; đổi tên ở tầng phát hành (n01).
 _VNSDI_COLUMNS = [
@@ -129,27 +135,6 @@ def boundary(province_code: str):
     return unary_union(geoms)
 
 
-def m_per_deg_lon(lat_deg: float) -> float:
-    """Chiều dài một độ kinh theo mét ở vĩ độ cho trước.
-
-    Gói ``hanoi`` khoá con số này ở vĩ độ 21° (103.940 m). Ở quy mô toàn quốc nó là một
-    HÀM, không phải hằng số — xem docstring module.
-    """
-    return 111_320.0 * math.cos(math.radians(lat_deg))
-
-
-def buffer_degrees(geom, metres: float):
-    """Nới ``geom`` ra ``metres`` trong hệ toạ độ độ, đẳng hướng theo mét.
-
-    Kéo giãn trục x theo tỉ lệ vĩ/kinh TẠI VĨ ĐỘ TÂM của chính hình, đệm tròn, rồi co lại.
-    """
-    lat0 = geom.centroid.y
-    dy = metres / _M_PER_DEG_LAT
-    dx = metres / m_per_deg_lon(lat0)
-    scaled = affinity.scale(geom, xfact=dy / dx, yfact=1.0, origin=(0, 0))
-    return affinity.scale(scaled.buffer(dy, quad_segs=8), xfact=dx / dy, yfact=1.0, origin=(0, 0))
-
-
 @functools.cache
 def buffered(province_code: str):
     """Ranh giới tỉnh nới 5 km — phạm vi THU THẬP, không phải phạm vi BÁO CÁO.
@@ -166,13 +151,14 @@ def bbox(province_code: str, buffered_aoi: bool = True):
     return (buffered(province_code) if buffered_aoi else boundary(province_code)).bounds
 
 
-def as_geojson(geom) -> dict:
-    return mapping(geom)
+def scale_for(province_code: str) -> tuple[float, float]:
+    """(mét trên độ vĩ, mét trên độ kinh) tại vĩ độ TÂM của tỉnh.
 
-
-def area_km2(geom) -> float:
-    """Diện tích xấp xỉ theo km² của một hình trong hệ độ, quy đổi tại vĩ độ tâm."""
-    return geom.area * _M_PER_DEG_LAT * m_per_deg_lon(geom.centroid.y) / 1e6
+    Một chỗ duy nhất trả lời câu này cho cả pipeline. Trước đây nó được trả lời ở
+    ``roadgraph.scale_for`` và ``n04_grid._scale`` bằng hai khối mã giống hệt nhau, mỗi khối
+    tự khai lại hằng ``110_574.0``.
+    """
+    return geo.scale_of(boundary(province_code))
 
 
 # --- chọn tỉnh -----------------------------------------------------------

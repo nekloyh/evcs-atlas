@@ -11,6 +11,7 @@
  */
 
 import { pct, type Manifest } from "./data/manifest";
+import { dataPath } from "./data/province";
 import type { ReadingUnit } from "./state/types";
 import { OBSERVED_H_MIN } from "./viz/occ";
 import type { Polarity } from "./viz/palette";
@@ -660,7 +661,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Các trạm trong ô đứng ở phân vị nào so với những trạm CÙNG LOẠI dòng điện trong Hà Nội. 0,5 là đúng mức trung vị của nhóm; cao hơn nghĩa là bận bất thường.",
     unit: "phân vị trong nhóm cùng loại, 0,5 = trung vị",
     kind: "numeric",
-    deps: ["stations.parquet", "station_occupancy.parquet"],
+    deps: [dataPath("stations.parquet"), dataPath("station_occupancy.parquet")],
     // Trung bình có trọng số SỐ CỔNG, cùng khuôn với `util_cell` ở B10 — một trạm 30 cổng
     // nói nhiều hơn một trạm 2 cổng về mức bận của cả ô.
     //
@@ -670,8 +671,8 @@ const CELL_SPECS: Spec[] = [
     expr:
       "(SELECT sum(o.util_pctl / 100.0 * greatest(o.util_denominator_ports, 1))" +
       " / sum(greatest(o.util_denominator_ports, 1))" +
-      " FROM read_parquet('stations.parquet') s" +
-      " JOIN read_parquet('station_occupancy.parquet') o ON o.station_code = s.station_code" +
+      ` FROM read_parquet('${dataPath("stations.parquet")}') s` +
+      ` JOIN read_parquet('${dataPath("station_occupancy.parquet")}') o ON o.station_code = s.station_code` +
       ' WHERE s.h3_r8 = g."h3_r8" AND o.util_pctl IS NOT NULL)',
     coverageNote:
       "Thưa hơn cả mức sử dụng: phân vị chỉ tính cho trạm hạng GOOD, nên ô có trạm nhưng chưa đủ quan sát vẫn để trống. Trống ở đây là “chưa xếp hạng được”, không phải “bận bằng 0”.",
@@ -812,7 +813,7 @@ const STATION_SPECS: Spec[] = [
     // khác: nó phụ thuộc `t`, thứ đổi 4 lần mỗi giây khi play. Một truy vấn DuckDB mỗi
     // khung hình là sai kiến trúc, nên hồ sơ 168h nạp một lần vào `Float32Array` và công
     // thức sống ở `viz/occ.ts` (`stationOccAt`) — vẫn MỘT chỗ, vẫn truy được về cột thật.
-    deps: ["stations.parquet", "station_occupancy_profile_168h.parquet"],
+    deps: [dataPath("stations.parquet"), dataPath("station_occupancy_profile_168h.parquet")],
     coverageNote:
       "Ba đường vào cùng một chấm rỗng, và cả ba là “không biết” nên chúng đúng là MỘT ký hiệu: 236/939 trạm không có hồ sơ 168h nào · ô giờ có dưới 1 h quan sát · 26/939 trạm khuyết n_ports (không có mẫu số thì không có tỉ số). Mẫu số là số cổng LẮP ĐẶT (tầng tài sản), không phải số cổng đang báo cáo — nên trạm báo cáo thiếu hiện THẤP, và đó là sự thật về báo cáo chứ không phải về khách.",
   },

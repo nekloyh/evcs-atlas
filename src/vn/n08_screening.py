@@ -38,15 +38,13 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from scipy.spatial import cKDTree
 
-from hanoi.s12_screening import CAO_TAI, NGUONG_M, NGUONG_NGOAI_LE_M
+from evcs.core import screening
+from evcs.core.screening import CAO_TAI, NGUONG_DAC_KHU, NGUONG_M, NGUONG_NGOAI_LE_M
 
 from . import admin, paths, qa, roadgraph
 from .runner import Step
 
 VERSION = "1"
-
-# Đặc khu dùng ngưỡng của PHƯỜNG — xem docstring. Đổi ở ĐÂY nếu khách hàng ra điều khoản.
-NGUONG_DAC_KHU = NGUONG_M["PHUONG"]
 
 
 def run(province_code: str) -> None:
@@ -111,20 +109,12 @@ def run(province_code: str) -> None:
     nn_util = np.array([float(util.get(c, np.nan)) for c in codes])
     nn_cao_tai = nn_do_duoc & (nn_util >= CAO_TAI)
 
-    nguong = np.where(
-        kind == "PHUONG",
-        NGUONG_M["PHUONG"],
-        np.where(kind == "DAC_KHU", NGUONG_DAC_KHU, NGUONG_M["XA"]),
-    )
-    margin = d_eu - nguong
+    # Luật quyết định ở ``evcs.core.screening`` — thuần, vector hoá, 13 test đi kèm. Ba bất
+    # biến nó giữ: đặc khu dùng ngưỡng Phường; ngoại lệ chỉ mở cho Xã và không phá sàn 500 m;
+    # ô không tính được khoảng cách ra ``None`` chứ không phải ``TU_CHOI``.
+    nguong = screening.threshold_for(kind)
     du_xa = d_eu > nguong
-    # Ngoại lệ CHỈ cho Xã: chưa đủ xa theo ngưỡng 2 km, nhưng vẫn trên sàn 500 m và trạm
-    # gần nhất đang cao tải ⇒ đơn có cửa NẾU mang theo trụ DC.
-    ngoai_le = (kind == "XA") & ~du_xa & (d_eu > NGUONG_NGOAI_LE_M) & nn_cao_tai
-
-    decision = np.where(du_xa, "DE_XUAT", np.where(ngoai_le, "DE_XUAT_NEU_CO_DC", "TU_CHOI"))
-    decision = np.where(np.isfinite(d_eu), decision, None)
-    margin = np.where(np.isfinite(d_eu), margin, np.nan)
+    decision, margin = screening.decide(d_eu, kind, nn_cao_tai)
 
     out = pd.DataFrame(
         {

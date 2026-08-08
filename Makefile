@@ -1,4 +1,4 @@
-.PHONY: all setup clean layers docs help web web-data vn vn-plan vn-web vn-quocgia
+.PHONY: all setup clean layers docs help web web-data vn vn-plan vn-web vn-quocgia golden golden-ghi
 PY := uv run python -m hanoi
 
 help:
@@ -77,3 +77,12 @@ vn-web:
 # nhóm POI. Đọc 34 phân mảnh đã có trên đĩa, không chạm nguồn — nên chạy lại rẻ (~2 giây).
 vn-quocgia:
 	uv run python -m vn n12_national
+
+# --- lưới an toàn: vân tay mọi bảng sản phẩm ---------------------------------
+# `make golden` DỪNG nếu một con số nào đổi. Đây là cổng chặn của mọi đợt refactor:
+# đổi cấu trúc mã thì được, đổi kết quả thì phải là một quyết định có người ký.
+golden:
+	uv run python -m golden.capture
+
+golden-ghi:
+	uv run python -m golden.capture --ghi

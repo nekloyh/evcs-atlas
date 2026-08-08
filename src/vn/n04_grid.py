@@ -34,16 +34,14 @@ from shapely.geometry import LineString, Point
 from shapely.prepared import prep
 from shapely.strtree import STRtree
 
-from hanoi.grid import INSIDE_THRESHOLD, MIN_AREA_FRAC, RES, cell_polygon
-from hanoi.s03_osm_extract import ROAD_CLASS
+from evcs.core import grid as cgrid
+from evcs.core.grid import RES, cell_polygon
+from evcs.core.osm import POI_CLASSES, ROAD_CLASS
 
 from . import admin, paths, qa
 from .runner import Step
 
 VERSION = "2"
-
-CANDIDATE_PAD_M = 1_000
-CANDIDATE_SIMPLIFY_DEG = 0.002  # ~200 m, nhỏ hơn hẳn 1 km nới ⇒ vẫn là tập cha
 
 ROAD_CLASSES = sorted(set(ROAD_CLASS.values()))
 
@@ -51,45 +49,6 @@ ROAD_CLASSES = sorted(set(ROAD_CLASS.values()))
 # DECISIONS §17: dưới 1,5 km chim bay dự báo `util` tốt hơn. POI không tác động như ĐIỂM
 # ĐẾN người ta lái xe tới mà như CHỈ BÁO tính chất khu vực, thứ lan theo không gian.
 POI_EXPOSURE_M = 1000.0
-
-POI_CLASSES = [
-    "FUEL",
-    "PARKING_OFF",
-    "PARKING_STREET",
-    "MALL",
-    "DEPT_STORE",
-    "SUPERMARKET",
-    "MARKET",
-    "APARTMENT",
-]
-
-
-def _scale(province_code: str) -> tuple[float, float]:
-    """(mét/độ vĩ, mét/độ kinh) tại vĩ độ tâm tỉnh — xem ``QUYET_DINH_TOAN_QUOC.md`` §2."""
-    lat0 = admin.boundary(province_code).centroid.y
-    return 110_574.0, admin.m_per_deg_lon(lat0)
-
-
-def _candidates(geom) -> list[str]:
-    pad = admin.buffer_degrees(geom, CANDIDATE_PAD_M).simplify(
-        CANDIDATE_SIMPLIFY_DEG, preserve_topology=True
-    )
-    cand = set(h3.h3shape_to_cells(h3.geo_to_h3shape(admin.as_geojson(pad)), RES))
-    p = prep(geom)
-    return sorted(c for c in cand if p.intersects(cell_polygon(c)))
-
-
-def _area_fractions(cells: list[str], geom) -> dict[str, float]:
-    p = prep(geom)
-    out = {}
-    for c in cells:
-        poly = cell_polygon(c)
-        if p.contains(poly):
-            out[c] = 1.0
-        else:
-            a = poly.area
-            out[c] = (poly.intersection(geom).area / a) if a > 0 else 0.0
-    return out
 
 
 def run(province_code: str) -> None:
@@ -100,10 +59,9 @@ def run(province_code: str) -> None:
         province_name=admin.province_names()[province_code],
     )
     b = admin.boundary(province_code)
-    cand = _candidates(b)
-    frac = _area_fractions(cand, b)
-    cells = [c for c in cand if frac[c] >= MIN_AREA_FRAC]
-    sliver = [c for c in cand if frac[c] < MIN_AREA_FRAC]
+    cand = cgrid.candidates(b)
+    frac = cgrid.area_fractions(cand, b)
+    cells, sliver = cgrid.split_slivers(cand, frac)
     pos = {c: i for i, c in enumerate(cells)}
     # Đa giác ô dựng MỘT lần và dùng lại ở ba chỗ (nhãn xã, cắt đường, cắt ranh giới).
     # `cell_polygon` có cache nhưng cache đó khoá theo chuỗi ô, nên gọi lại vẫn tra bảng
@@ -134,7 +92,7 @@ def run(province_code: str) -> None:
                 "lng": lng,
                 "area_km2": h3.cell_area(c, unit="km^2"),
                 "area_frac": frac[c],
-                "cell_state": "INSIDE" if frac[c] >= INSIDE_THRESHOLD else "BORDER",
+                "cell_state": cgrid.cell_state(frac[c]),
                 "commune_code": best[0],
                 "commune_name": best[1],
                 "commune_area_frac": best[2],
@@ -199,10 +157,8 @@ def run(province_code: str) -> None:
     # Đo trên hình học NGUYÊN của `road_graph.parquet`, không trên bản hiển thị đã đơn giản
     # hoá ~10 m: đơn giản hoá cắt góc, và cắt góc thì tổng chiều dài NGẮN đi một cách có hệ
     # thống. Sai số đó nhỏ ở một đoạn nhưng cộng dồn trên 3,4 triệu đoạn thì không còn nhỏ.
-    rg = pq.read_table(
-        pdir / "road_graph.parquet", columns=["road_class", "coords"]
-    ).to_pandas()
-    m_lat, m_lon = _scale(province_code)
+    rg = pq.read_table(pdir / "road_graph.parquet", columns=["road_class", "coords"]).to_pandas()
+    m_lat, m_lon = admin.scale_for(province_code)
     road_m = np.zeros((len(cells), len(ROAD_CLASSES)))
     road_in = np.zeros(len(cells))
     ci = {c: i for i, c in enumerate(ROAD_CLASSES)}
@@ -218,9 +174,7 @@ def run(province_code: str) -> None:
             c = np.asarray(part.coords)
             if len(c) < 2:
                 continue
-            total += float(
-                np.hypot(np.diff(c[:, 0]) * m_lon, np.diff(c[:, 1]) * m_lat).sum()
-            )
+            total += float(np.hypot(np.diff(c[:, 0]) * m_lon, np.diff(c[:, 1]) * m_lat).sum())
         return total
 
     for rc, flat in zip(rg.road_class, rg.coords):

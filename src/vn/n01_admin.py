@@ -28,58 +28,31 @@ from __future__ import annotations
 
 import json
 
-import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
+
+from evcs.core.admin import (
+    AREA_DRIFT_MAX,
+    MAX_COMMUNE_KM2,
+    MIN_DENSITY_PPKM2,
+    commune_kind,
+    quality_flags,
+)
 
 from . import admin, paths, qa
 from .runner import Step
 
 VERSION = "1"
 
-# --- luật bắt số công bố hỏng --------------------------------------------
-# Ngưỡng đặt để bắt LỖI HIỂN NHIÊN, không để bắt xã thưa dân thật. Cả hai đều là lỗi nhập
-# liệu đã nhìn thấy trong chính nguồn này:
-#   · ``danso`` mất chữ số hàng nghìn — Phường Lĩnh Nam (Hà Nội) công bố 21 người trên 10,86 km²
-#   · ``dientich_km2`` sai bậc — Phường Phú Lợi (TP.HCM) công bố 17.956 km², lớn hơn cả
-#     tỉnh lớn nhất nước; một mình nó làm diện tích TP.HCM cộng lại thành 24.718 km² thay
-#     vì 6.762 km².
-# Ngưỡng mật độ 20 người/km² là mức mà không một đơn vị cấp xã có người ở nào của Việt Nam
-# chạm tới; ngưỡng diện tích 1.200 km² lớn hơn xã rộng nhất có thật (Buôn Đôn, 1.113 km²).
-MIN_DENSITY_PPKM2 = 20.0
-MAX_COMMUNE_KM2 = 1_200.0
-AREA_DRIFT_MAX = 0.25  # lệch giữa diện tích công bố và diện tích đo từ đa giác
-
-
-def commune_kind(name: str) -> str:
-    """``PHUONG`` · ``XA`` · ``DAC_KHU`` từ tiền tố tên VNSDI.
-
-    BA nhánh, không phải hai — xem docstring module. Tên VNSDI luôn mang tiền tố loại đơn
-    vị, nên đây là đọc một trường có sẵn chứ không phải suy đoán; ``n01`` kiểm rằng mọi
-    dòng đều rơi vào một trong ba nhánh và không có nhánh "còn lại".
-    """
-    s = str(name)
-    if s.startswith("Phường"):
-        return "PHUONG"
-    if s.startswith("Đặc khu"):
-        return "DAC_KHU"
-    if s.startswith("Xã"):
-        return "XA"
-    return "KHONG_RO"
+# Luật bắt số công bố hỏng và luật ba nhánh ``commune_kind`` ở ``evcs.core.admin`` — thuần,
+# 12 test đi kèm, trong đó có một test liệt kê đủ 13 đặc khu để luật hai nhánh không quay lại.
+# Ngưỡng đặt để bắt LỖI HIỂN NHIÊN, không để bắt xã thưa dân thật; cả hai vết đều nhìn thấy
+# trong chính nguồn này (Phường Lĩnh Nam 21 người/10,86 km²; Phường Phú Lợi 17.956 km²).
 
 
 def _quality_flag(row) -> str | None:
-    flags = []
-    if row.area_km2 > MAX_COMMUNE_KM2:
-        flags.append("DIENTICH_CONG_BO_SAI_BAC")
-    if row.area_km2 > 0 and row.population / row.area_km2 < MIN_DENSITY_PPKM2:
-        flags.append("DANSO_CONG_BO_QUA_THAP")
-    if row.area_km2_geom > 0 and (
-        abs(row.area_km2 - row.area_km2_geom) / row.area_km2_geom > AREA_DRIFT_MAX
-    ):
-        flags.append("DIENTICH_LECH_HINH_HOC")
-    return "|".join(flags) if flags else None
+    return quality_flags(row.area_km2, row.population, row.area_km2_geom)
 
 
 def run() -> None:
@@ -199,6 +172,13 @@ def run() -> None:
             float((cm.commune_code.str[:2] == cm.province_code).mean()), 4
         ),
         n_communes_flagged=int(cm.quality_flag.notna().sum()),
+        # Ngưỡng sinh ra các cờ dưới đây, ghi vào báo cáo để con số đọc được mà không phải
+        # mở mã: một cờ chất lượng vô nghĩa nếu người đọc không biết nó bật ở mức nào.
+        quality_flag_thresholds={
+            "max_commune_km2": MAX_COMMUNE_KM2,
+            "min_density_ppkm2": MIN_DENSITY_PPKM2,
+            "area_drift_max": AREA_DRIFT_MAX,
+        },
         quality_flag_counts={
             str(k): int(v)
             for k, v in cm.quality_flag.dropna().str.split("|").explode().value_counts().items()

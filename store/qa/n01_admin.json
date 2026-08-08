@@ -39,6 +39,11 @@
     },
     "commune_code_prefix_equals_province_code_share": 0.0,
     "n_communes_flagged": 116,
+    "quality_flag_thresholds": {
+      "max_commune_km2": 1200.0,
+      "min_density_ppkm2": 20.0,
+      "area_drift_max": 0.25
+    },
     "quality_flag_counts": {
       "DIENTICH_LECH_HINH_HOC": 67,
       "DANSO_CONG_BO_QUA_THAP": 52,

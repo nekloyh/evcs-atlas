@@ -100,7 +100,7 @@ def run(province_code: str) -> None:
     st = st[st.scope == "IN"].copy()
     import h3
 
-    from hanoi.grid import RES
+    from evcs.core.grid import RES
 
     st["h3_r8"] = [h3.latlng_to_cell(la, ln, RES) for la, ln in zip(st.lat, st.lng)]
     oc = pq.read_table(

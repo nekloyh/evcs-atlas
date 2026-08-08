@@ -63,8 +63,12 @@ SIMPLIFY_TOLERANCE_DEG = 0.0001
 COORD_DECIMALS = 5  # ~1,1 m — dưới sai số vẽ tay của chính OSM
 
 # Phân lớp giữ NGUYÊN của gói ``hanoi`` — hai bộ số phải so sánh được với nhau.
-from hanoi.s03_osm_extract import ROAD_CLASS, classify_poi  # noqa: E402
-from hanoi.s03b_osm_poi_visual import GROUPS, classify_poi_visual  # noqa: E402
+from evcs.core.osm import (  # noqa: E402
+    POI_VISUAL_GROUPS,
+    ROAD_CLASS,
+    classify_poi,
+    classify_poi_visual,
+)
 
 FLUSH_ROWS = 150_000
 
@@ -427,7 +431,7 @@ def _pass_areas(inside: ProvinceIndex, r: qa.Report) -> dict:
     # Làm SAU khi đã có đủ đa giác: một node ở tỉnh A không thể trùng đa giác ở tỉnh B, nhưng
     # dựng cây một lần cho cả nước rẻ hơn dựng 34 cây.
     tree = STRtree(poly_geoms) if poly_geoms else None
-    dropped = dict.fromkeys(GROUPS, 0)
+    dropped = dict.fromkeys(POI_VISUAL_GROUPS, 0)
     for code, row, p in node_rows:
         dup = False
         if tree is not None:

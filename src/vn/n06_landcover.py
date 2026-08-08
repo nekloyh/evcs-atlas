@@ -35,8 +35,8 @@ import rasterio.windows
 from shapely.geometry import box
 from shapely.strtree import STRtree
 
-from hanoi.grid import cell_polygon
-from hanoi.s07_landcover import CLASSES
+from evcs.core.grid import cell_polygon
+from evcs.core.landcover import CLASSES
 
 from . import admin, paths, qa
 from .runner import Step

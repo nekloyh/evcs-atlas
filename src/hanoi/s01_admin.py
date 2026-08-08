@@ -16,7 +16,6 @@ import json
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
-from shapely import wkb
 
 from . import aoi, paths
 

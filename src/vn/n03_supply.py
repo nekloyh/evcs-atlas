@@ -42,7 +42,7 @@ from shapely.geometry import Point
 from shapely.prepared import prep
 from shapely.strtree import STRtree
 
-from hanoi.s05_stations import KEEP, is_private_ac
+from evcs.core.supply import STATION_KEEP, is_private_ac, peer_label, scope_of
 
 from . import admin, paths, qa
 from .runner import Step
@@ -101,11 +101,8 @@ def run(province_code: str) -> None:
     t = _canonical_stations()
     n_national = len(t)
     t = t[t.lng.between(minx, maxx) & t.lat.between(miny, maxy)].copy()
-    pb, pbb = prep(b), prep(bb)
     pts = [Point(x, y) for x, y in zip(t.lng, t.lat)]
-    t["scope"] = [
-        ("IN" if pb.contains(p) else ("BUFFER" if pbb.contains(p) else "OUT")) for p in pts
-    ]
+    t["scope"] = scope_of(pts, prep(b), prep(bb))
     t = t[t.scope != "OUT"].copy()
     if len(t) == 0:
         raise SystemExit(f"Tỉnh {province_code}: không có trạm nào trong ranh giới + vành đệm.")
@@ -153,7 +150,7 @@ def run(province_code: str) -> None:
     t["commune_code"] = [codes[i] if i >= 0 else None for i in idx]
     t["commune_name"] = [names[i] if i >= 0 else None for i in idx]
 
-    out = t[[c for c in KEEP if c in t.columns]].rename(columns=RENAME)
+    out = t[[c for c in STATION_KEEP if c in t.columns]].rename(columns=RENAME)
     out["province_code"] = province_code
     out["commune_code"] = t.commune_code.astype("string")
     out["commune_name"] = t.commune_name.astype("string")
@@ -215,7 +212,7 @@ def run(province_code: str) -> None:
     occ["util_pctl"] = pd.to_numeric(occ.util_pctl, errors="coerce")
     occ["util_pctl_peer"] = pd.Series(
         [
-            f"{province_code}|{c}" if k else pd.NA
+            peer_label(province_code, c) if k else pd.NA
             for c, k in zip(occ.current_type.astype("string"), ok)
         ],
         dtype="string",

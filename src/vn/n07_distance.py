@@ -34,8 +34,8 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from scipy.spatial import cKDTree
 
-from hanoi.roadnet import ACCESS_BLOCKED, SNAP_MAX_M
-from hanoi.s08_traveltime import DETOUR_MIN_EUCLID_M, NEIGHBOR_JUMP_M
+from evcs.core.osm import ACCESS_BLOCKED
+from evcs.core.roadgraph import DETOUR_MIN_EUCLID_M, NEIGHBOR_JUMP_M, SNAP_MAX_M
 
 from . import admin, paths, qa, roadgraph
 from .runner import Step
