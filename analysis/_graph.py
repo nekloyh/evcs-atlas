@@ -46,7 +46,7 @@ M_PER_DEG_LON = 103_940.0
 SNAP_MAX_M = 2_000.0
 CACHE = Path(
     os.environ.get(
-        "EVCS_SCRATCH", "/tmp/claude-1000/-home-n91ym1nhky-Work-internVSF-evcs-hanoi/scratch"
+        "EVCS_SCRATCH", str(ROOT / ".cache" / "graph")
     )
 )
 CACHE.mkdir(parents=True, exist_ok=True)

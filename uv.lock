@@ -466,7 +466,7 @@ wheels = [
 ]
 
 [[package]]
-name = "evcs-hanoi"
+name = "evcs-atlas"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

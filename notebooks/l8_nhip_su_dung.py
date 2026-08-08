@@ -15,7 +15,7 @@
 #
 # | | `station_timeline` | `station_occupancy_profile_168h` |
 # |---|---|---|
-# | Ở đâu | `aGiang-evcs` *(nguồn, chỉ đọc)* | `evcs-hanoi/data/processed` |
+# | Ở đâu | `aGiang-evcs` *(nguồn, chỉ đọc)* | `evcs-atlas/store/p/01` |
 # | Là gì | **chuỗi thời gian thật**, kết thúc 29/07/2026 | **nhịp điển hình**, gộp từ cửa sổ 30 ngày |
 # | Trả lời | *"tối thứ Ba vừa rồi có mấy xe sạc?"* | *"tối thứ Ba **thường** có mấy xe?"* |
 # | Dùng cho | biểu đồ 1, 2 | biểu đồ 3, 4, 5 |

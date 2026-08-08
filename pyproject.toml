@@ -1,7 +1,7 @@
 [project]
-name = "evcs-hanoi"
+name = "evcs-atlas"
 version = "0.1.0"
-description = "Bộ dữ liệu nền cho bài toán đặt trạm sạc EV — phạm vi Hà Nội, một khái niệm một trường"
+description = "Tập bản đồ + bộ dữ liệu nền cho bài toán đặt trạm sạc EV — 34 tỉnh, một khái niệm một trường"
 requires-python = ">=3.12"
 dependencies = [
     "pyarrow>=18",

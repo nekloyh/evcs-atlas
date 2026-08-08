@@ -1,10 +1,14 @@
-# evcs-hanoi
+# evcs-atlas
 
-Bộ dữ liệu nền cho bài toán đặt trạm sạc xe điện — **phạm vi Hà Nội**, dựng lại sạch từ hai
-repo cũ (`evcs-dataset`, `aGiang-evcs`) theo nguyên tắc **một khái niệm một trường**.
+Tập bản đồ + bộ dữ liệu nền cho bài toán đặt trạm sạc xe điện — **34 tỉnh, toàn quốc**,
+dựng lại sạch từ hai repo cũ (`legacy-evcs-dataset`, `aGiang-evcs`) theo nguyên tắc
+**một khái niệm một trường**.
 
 Hai repo cũ **chỉ được đọc**, không file nào trong đó bị sửa. Repo này không kế thừa lược đồ,
 nợ kỹ thuật hay các bảng biến thể trùng lặp của chúng.
+
+Bắt đầu là bộ Hà Nội. Hà Nội nay là mã `01` và **không có gì đặc biệt về mặt cấu trúc** —
+gói `hanoi/` riêng đã bị xoá, xem [`docs/adr/0003-xoa-goi-hanoi.md`](docs/adr/0003-xoa-goi-hanoi.md).
 
 - **Từ điển trường** → [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md)
 - **Mọi quyết định không hiển nhiên** → [`DECISIONS.md`](DECISIONS.md)
@@ -98,7 +102,7 @@ trong bán kính neo 2 km (32.171 người), đánh dấu ở `evidence_grade_di
 ## Tái lập từ đầu
 
 ```bash
-cd ~/Work/internVSF/evcs-hanoi
+cd ~/Work/internVSF/evcs-atlas
 make vn           # cả 34 tỉnh (~20 phút, nặng nhất là 3 lượt quét PBF toàn quốc)
 make vn TINH=01   # chỉ Hà Nội
 ```
