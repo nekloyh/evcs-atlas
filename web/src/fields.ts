@@ -1,7 +1,10 @@
 /**
  * 45 trường bản đồ hoá được, gom đúng 5 nhóm của DESIGN.md §6.
  *
- * 53 cột của `grid_h3_r8.parquet` = 45 trường ở đây + 8 cột ĐỊNH DANH & XUẤT XỨ
+ * Bảng cột đầy đủ ở `docs/COT.md`, SINH TỰ ĐỘNG. Kiểu `GridColumn` ở
+ * `data/columns.generated.ts` chặn việc trỏ tới một cột không tồn tại NGAY LÚC COMPILE.
+ *
+ * Cột ĐỊNH DANH & XUẤT XỨ
  * (`h3_r8` `lat` `lng` `cell_state` `commune_code` `commune_name` `commune_area_frac`
  * `pop_source`). Tám cột đó **cố tình không có mặt** trong danh sách này — tô màu chúng
  * lên bản đồ là vô nghĩa; chúng chỉ xuất hiện trong panel Ô và khối NGUỒN.

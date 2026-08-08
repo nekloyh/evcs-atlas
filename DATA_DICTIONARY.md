@@ -20,7 +20,14 @@ Nguyên tắc xuyên suốt: **một khái niệm một trường**. Khi nguồn
 
 ---
 
-## 1. `grid_h3_r8.parquet` — bảng chính (4.400 dòng × 56 cột)
+## 1. `grid_h3_r8.parquet` — bảng chính
+
+> **Bảng cột đầy đủ ở [`docs/COT.md`](docs/COT.md) — SINH TỰ ĐỘNG từ `src/evcs/schema/`.**
+> Bộ Hà Nội cũ (`data/processed/`) có **56 cột**; store toàn quốc (`store/p/<mã>/`) có
+> **61 cột** — chênh lệch là 3 lớp phủ luôn-bằng-0 mà bộ cũ bỏ khi rỗng, `population_wp`,
+> và `road_len_in_hanoi_m` → `road_len_in_province_m`. Mục dưới đây mô tả bộ Hà Nội.
+
+### 1. `grid_h3_r8.parquet` — bảng chính (4.400 dòng × 56 cột)
 
 Khoá: `h3_r8`. Một dòng một ô lưới H3 độ phân giải 8 giao với ranh giới Hà Nội.
 

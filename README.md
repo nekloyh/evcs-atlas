@@ -20,7 +20,7 @@ Phạm vi: **Thành phố Hà Nội** theo ranh giới hành chính VNSDI hiệu
 
 | Bảng | Dòng | Nội dung |
 |---|---:|---|
-| `data/processed/grid_h3_r8.parquet` | 4.400 | **Bảng chính.** Một dòng một ô lưới, 56 cột: dân số · lớp phủ · đường · POI · cung hiện hữu · khoảng cách tới trạm · mức sử dụng đo được |
+| `data/processed/grid_h3_r8.parquet` | 4.400 | **Bảng chính.** Một dòng một ô lưới, 56 cột ([`docs/COT.md`](docs/COT.md) — store toàn quốc có 61): dân số · lớp phủ · đường · POI · cung hiện hữu · khoảng cách tới trạm · mức sử dụng đo được |
 | `data/processed/commune.parquet` | 126 | Xã/phường: ranh giới, dân số, cung, mức sử dụng, khoảng cách trung bình theo dân |
 | `data/processed/stations.parquet` | 939 | Trạm sạc **công cộng** (710 trong Hà Nội + 229 trong vành đệm 5 km). Điểm sạc cá nhân 1-súng-AC đã loại — DECISIONS §3a |
 | `data/processed/connectors.parquet` | 1.602 | Cổng sạc theo chuẩn/công suất |

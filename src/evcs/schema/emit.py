@@ -26,10 +26,12 @@ import json
 import sys
 from pathlib import Path
 
-from . import GRID
+from . import COMMUNE, GRID
 from .column import Table
 
-OUT = Path(__file__).resolve().parents[3] / "web/src/data/columns.generated.ts"
+ROOT = Path(__file__).resolve().parents[3]
+OUT = ROOT / "web/src/data/columns.generated.ts"
+OUT_MD = ROOT / "docs/COT.md"
 
 
 def _ts(v) -> str:
@@ -98,25 +100,80 @@ export const COLUMNS_BY_LAYER: Record<string, GridColumn[]> = {json.dumps(by_lay
 """
 
 
+# ── tài liệu cột, cũng SINH RA ────────────────────────────────────────────────
+# `README` nói 56, `DATA_DICTIONARY` nói 56, `fields.ts` nói 53, trên đĩa 61 — bốn nơi kể
+# lại một sự thật là bốn cơ hội để nó trôi. Tài liệu nào kể lại schema thì phải được SINH,
+# không được gõ.
+_AGG = {"sum": "cộng", "area_mean": "TB theo diện tích", "none": "—"}
+_ROLE = {"key": "khoá", "identity": "định danh", "measure": "số đo"}
+
+
+def _md_table(t: Table) -> str:
+    dong = [
+        f"### `{t.name}` — {len(t.columns)} cột",
+        "",
+        t.desc,
+        "",
+        "| # | cột | kiểu | vai | lớp | đơn vị | gộp | cả nước | nghĩa |",
+        "|--:|---|---|---|---|---|---|:-:|---|",
+    ]
+    for i, c in enumerate(t.columns, 1):
+        nghia = c.desc.replace("|", "\\|").replace("\n", " ")
+        if c.null_means:
+            nghia += f" **· null =** {c.null_means}"
+        cuc = {"high-bad": " ↓xấu", "high-good": " ↑tốt", None: ""}[c.polarity]
+        dong.append(
+            f"| {i} | `{c.name}` | {c.dtype} | {_ROLE[c.role]} | {c.layer} | "
+            f"{c.unit or '—'}{cuc} | {_AGG[c.agg]} | {'✓' if c.national else ''} | {nghia} |"
+        )
+    return "\n".join(dong)
+
+
+def render_md() -> str:
+    return f"""# Từ điển cột — SINH TỰ ĐỘNG
+
+Đừng sửa file này. Sửa `src/evcs/schema/*.py` rồi chạy:
+
+```bash
+make schema
+```
+
+`make kiem` DỪNG nếu file này trôi khỏi bản khai.
+
+Vì sao nó được sinh chứ không được viết: cùng một sự thật từng được kể lại ở bốn nơi và
+kể ra **bốn con số khác nhau** — `README` 56 · `DATA_DICTIONARY` 56 · `web/src/fields.ts`
+53 · trên đĩa 61. Một tài liệu kể lại schema là một cơ hội nữa để schema trôi.
+
+Cột `vai = định danh` cố ý KHÔNG tô màu lên bản đồ được. Cột `gộp = —` KHÔNG gộp lên bậc
+thô hơn bằng bất kỳ phép nào — khoảng cách tới trạm gần nhất của một vùng không phải trung
+bình khoảng cách của các ô trong nó.
+
+{_md_table(GRID)}
+
+{_md_table(COMMUNE)}
+"""
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="python -m evcs.schema.emit")
     ap.add_argument("--kiem", action="store_true", help="chỉ kiểm, không ghi")
     a = ap.parse_args(argv)
 
-    want = render(GRID)
+    can = [(OUT, render(GRID)), (OUT_MD, render_md())]
     if a.kiem:
-        got = OUT.read_text(encoding="utf-8") if OUT.exists() else ""
-        if got == want:
-            print(f"✓ {OUT.name} khớp khai báo")
+        troi = [
+            f.name for f, w in can if (f.read_text(encoding="utf-8") if f.exists() else "") != w
+        ]
+        if not troi:
+            print(f"✓ {' · '.join(f.name for f, _ in can)} khớp khai báo")
             return 0
-        print(
-            f"✗ {OUT.name} đã trôi khỏi schema — chạy `python -m evcs.schema.emit`", file=sys.stderr
-        )
+        print(f"✗ {troi} đã trôi khỏi schema — chạy `make schema`", file=sys.stderr)
         return 1
 
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(want, encoding="utf-8")
-    print(f"✓ {OUT} · {len(GRID.columns)} cột")
+    for f, w in can:
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(w, encoding="utf-8")
+    print(f"✓ {OUT.name} · {OUT_MD.name} — {len(GRID.columns)} + {len(COMMUNE.columns)} cột")
     return 0
 
 
