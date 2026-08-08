@@ -211,3 +211,114 @@ def test_xy_dung_he_so_cua_chinh_do_thi():
     x, y = g.xy(np.array([2.0]), np.array([3.0]))
     assert x[0] == pytest.approx(2.0 * 104_000.0)
     assert y[0] == pytest.approx(3.0 * 111_000.0)
+
+
+# --- cây đường đi + way_nodes CSR (B1 của ADR-0003) ----------------------
+def test_pred_tra_ve_cay_dai_n_cong_1():
+    g = _g_vong()
+    n = np.array([g.gidx[0]], np.int32)
+    d, pred = rg.multisource(g, n, np.array([0.0]), reverse=True, return_predecessors=True)
+    assert len(d) == g.n_nodes
+    assert len(pred) == g.n_nodes + 1
+    assert int(pred[g.n_super]) == rg.NO_PRED, "siêu-nguồn không có đỉnh liền trước"
+
+
+def test_duong_di_bat_dau_o_o_va_ket_thuc_o_tram():
+    g = _g_vong()
+    src = int(g.gidx[len(g.gidx) // 2])
+    tram = int(g.gidx[0])
+    _, pred = rg.multisource(g, np.array([tram], np.int32), np.array([0.0]), True, True)
+    p = rg.reconstruct_path(pred, src, g.n_super)
+    assert p and p[0] == src and p[-1] == tram
+    assert g.n_super not in p, "siêu-nguồn là đỉnh nhân tạo, không được lọt vào tuyến"
+
+
+def test_do_dai_tuyen_dung_bang_khoang_cach_Dijkstra():
+    """Phép so end-to-end DUY NHẤT cho lớp khoảng cách: cộng cạnh dọc tuyến phải ra đúng
+    con số mà `dist_station_network_m` phát."""
+    g = _g_vong()
+    tram = int(g.gidx[0])
+    d, pred = rg.multisource(g, np.array([tram], np.int32), np.array([0.0]), True, True)
+    src = int(g.gidx[len(g.gidx) // 3])
+    p = rg.reconstruct_path(pred, src, g.n_super)
+    doc_tuyen = sum(
+        float(np.hypot(g.X[a] - g.X[b], g.Y[a] - g.Y[b])) for a, b in zip(p[:-1], p[1:])
+    )
+    assert doc_tuyen == pytest.approx(float(d[src]), rel=1e-9)
+
+
+def test_dinh_khong_toi_duoc_tra_ve_TUYEN_RONG():
+    """Rỗng, không phải một tuyến cụt — một nửa tuyến vẽ ra trông như một sự thật."""
+    lon = _vong(list(range(1000, 1000 + rg.MIN_SCC_NODES + 5)), r=1000.0)
+    xa = _vong(list(range(5000, 5000 + rg.MIN_SCC_NODES + 3)), r=1000.0)
+    xa["coords"] = [c + 500_000 if i % 2 == 0 else c for i, c in enumerate(xa["coords"])]
+    g = rg.build(_ways([lon, xa]), *M)
+    pos = {int(v): i for i, v in enumerate(g.ids)}
+    _, pred = rg.multisource(g, np.array([pos[1000]], np.int32), np.array([0.0]), True, True)
+    assert rg.reconstruct_path(pred, pos[5000], g.n_super) == []
+
+
+def test_reconstruct_path_khong_treo_khi_cay_hong():
+    """Cây `pred` hợp lệ không có chu trình, nhưng một mảng hỏng không được làm treo pipeline."""
+    xau = np.array([1, 0, 3], np.int32)  # 0→1→0, chu trình
+    assert rg.reconstruct_path(xau, 0, 3) == []
+
+
+def test_khong_co_nguon_van_tra_pred_dung_hinh_dang():
+    g = _g_vong()
+    d, pred = rg.multisource(g, np.empty(0, np.int32), np.empty(0), True, True)
+    assert np.isinf(d).all() and len(pred) == g.n_nodes + 1
+
+
+# --- way_nodes CSR -------------------------------------------------------
+def test_mac_dinh_KHONG_dung_way_nodes():
+    """8,7 MB cho một thứ hầu hết bước không dùng là sai mặc định."""
+    g = rg.build(_ways([_chuoi([1, 2, 3])]), *M)
+    assert g.way_ptr is None and g.way_idx is None
+    with pytest.raises(RuntimeError, match="keep_way_nodes"):
+        g.nodes_of_way(0)
+
+
+def test_csr_tra_ve_dung_danh_sach_dinh_cua_tung_doan():
+    ways = _ways([_chuoi([10, 20, 30]), _chuoi([30, 40])])
+    g = rg.build(ways, *M, keep_way_nodes=True)
+    pos = {int(v): i for i, v in enumerate(g.ids)}
+    assert list(g.nodes_of_way(0)) == [pos[10], pos[20], pos[30]]
+    assert list(g.nodes_of_way(1)) == [pos[30], pos[40]]
+
+
+def test_csr_tach_DOAN_HONG_khoi_DOAN_RONG():
+    """Đoạn hỏng có khoảng CSR rỗng; cờ `way_ok` là thứ duy nhất phân biệt được hai chuyện."""
+    hong = {"node_ids": [1, 2, 3], "coords": [0.0, 0.0, 10.0, 0.0], "oneway": 0}
+    g = rg.build(_ways([hong, _chuoi([7, 8])]), *M, keep_way_nodes=True)
+    assert list(g.way_ok) == [False, True]
+    assert len(g.nodes_of_way(0)) == 0
+    assert len(g.nodes_of_way(1)) == 2
+
+
+def test_csr_khong_doi_do_thi():
+    """Giữ way_nodes là thuần BỔ SUNG — cạnh, đỉnh, trọng số phải giống hệt."""
+    ways = _ways([_chuoi([10, 20, 30], oneway=1), _chuoi([30, 40])])
+    a = rg.build(ways, *M)
+    b = rg.build(ways, *M, keep_way_nodes=True)
+    assert list(a.ids) == list(b.ids)
+    assert list(a.src) == list(b.src) and list(a.dst) == list(b.dst)
+    assert np.allclose(a.dist_w, b.dist_w)
+
+
+def test_phan_ra_ba_so_hang_cua_khoang_cach():
+    """Cộng cạnh dọc tuyến KHÔNG ra thẳng `dist_station_network_m` — thiếu hai số hạng neo.
+
+    Đây là chỗ dễ hiểu sai nhất của cả module, và cả hai kiểu thiếu đều cho ra một con số
+    trông như "sai số làm tròn": bỏ `soff` lệch ~27 m, bỏ `cd` lệch ~265 m.
+    """
+    g = _g_vong()
+    tram = int(g.gidx[0])
+    SOFF, CD = 12.5, 33.0
+    d, pred = rg.multisource(g, np.array([tram], np.int32), np.array([SOFF]), True, True)
+    o = int(g.gidx[len(g.gidx) // 3])
+    p = rg.reconstruct_path(pred, o, g.n_super)
+    canh = sum(float(np.hypot(g.X[a] - g.X[b], g.Y[a] - g.Y[b])) for a, b in zip(p[:-1], p[1:]))
+
+    assert canh + SOFF + CD == pytest.approx(float(d[o]) + CD, rel=1e-12)
+    assert canh != pytest.approx(float(d[o]), rel=1e-12), "thiếu soff mà vẫn khớp ⇒ test vô nghĩa"

@@ -74,20 +74,54 @@ class RoadGraph:
     m_lat: float
     m_lon: float
 
+    # ── way_nodes dạng CSR — CHỈ dựng khi được yêu cầu ────────────────────────
+    #
+    # Cần cho nhãn ``dist_station_m`` theo ĐOẠN đường (lấy MIN khoảng cách trên các đỉnh
+    # của đoạn), KHÔNG cần cho cặp tuyến minh hoạ — hai việc khác nhau, và ADR-0003 bản đầu
+    # gộp nhầm chúng làm một.
+    #
+    # CSR phẳng chứ không phải list-of-list: đo được trên TP.HCM (1,33 triệu đỉnh) là
+    # **8,7 MB thay vì 34 MB**. Một list Python cho mỗi đoạn trả 3,4 triệu object header cho
+    # một thứ vốn là hai mảng số.
+    way_ptr: np.ndarray | None = None
+    """Chỉ số bắt đầu của từng đoạn trong ``way_idx``; dài ``n_ways + 1``."""
+    way_idx: np.ndarray | None = None
+    """Chỉ số đỉnh, phẳng. Đỉnh của đoạn i = ``way_idx[way_ptr[i]:way_ptr[i+1]]``."""
+    way_ok: np.ndarray | None = None
+    """Đoạn có hình học khớp ``node_ids`` không. Đoạn hỏng có khoảng CSR rỗng — cờ này
+    tách 'hỏng' khỏi 'rỗng', hai chuyện khác nhau khi đếm QA."""
+
     @property
     def n_nodes(self) -> int:
         return len(self.ids)
+
+    @property
+    def n_super(self) -> int:
+        """Chỉ số của đỉnh SIÊU-NGUỒN trong ma trận (n+1)×(n+1) của ``multisource``."""
+        return len(self.ids)
+
+    def nodes_of_way(self, i: int) -> np.ndarray:
+        """Chỉ số đỉnh của đoạn thứ ``i``. Cần ``build(..., keep_way_nodes=True)``."""
+        if self.way_ptr is None or self.way_idx is None:
+            raise RuntimeError("đồ thị dựng không có way_nodes — gọi build(keep_way_nodes=True)")
+        return self.way_idx[self.way_ptr[i] : self.way_ptr[i + 1]]
 
     def xy(self, lng, lat):
         return np.asarray(lng) * self.m_lon, np.asarray(lat) * self.m_lat
 
 
-def build(ways: pd.DataFrame, m_lat: float, m_lon: float) -> RoadGraph:
+def build(
+    ways: pd.DataFrame, m_lat: float, m_lon: float, keep_way_nodes: bool = False
+) -> RoadGraph:
     """Dựng đồ thị từ bảng đoạn đường có ``node_ids`` + ``coords`` phẳng + ``oneway``.
 
     ``coords`` là list phẳng [x0, y0, x1, y1, …] **chưa đơn giản hoá**. Lớp ĐỂ NHÌN
     (``roads.parquet``) đã đơn giản hoá ~10 m nên số đỉnh không còn khớp ``node_ids`` và
     vĩnh viễn không dựng đồ thị được — đó là lý do hai lớp là hai file.
+
+    ``keep_way_nodes`` giữ lại ánh xạ đoạn → đỉnh dạng CSR. Mặc định TẮT: chỉ bước gán
+    nhãn ``dist_station_m`` theo đoạn cần nó, và bắt mọi bước khác trả 8,7 MB cho một thứ
+    chúng không dùng là sai mặc định.
     """
     node_xy: dict[int, tuple[float, float]] = {}
     way_nodes_raw: list[list[int] | None] = []
@@ -129,6 +163,24 @@ def build(ways: pd.DataFrame, m_lat: float, m_lon: float) -> RoadGraph:
                 dst.append(ia)
                 w.append(d)
 
+    way_ptr = way_idx = way_ok = None
+    if keep_way_nodes:
+        ok = np.fromiter((x is not None for x in way_nodes_raw), bool, len(way_nodes_raw))
+        lens = np.fromiter(
+            ((len(x) if x is not None else 0) for x in way_nodes_raw), np.int64, len(way_nodes_raw)
+        )
+        way_ptr = np.zeros(len(way_nodes_raw) + 1, np.int64)
+        np.cumsum(lens, out=way_ptr[1:])
+        way_idx = np.empty(int(way_ptr[-1]), np.int32)
+        k = 0
+        for nodes in way_nodes_raw:
+            if nodes is None:
+                continue
+            for nd in nodes:
+                way_idx[k] = pos[int(nd)]
+                k += 1
+        way_ok = ok
+
     src = np.asarray(src, dtype=np.int32)
     dst = np.asarray(dst, dtype=np.int32)
     w = np.asarray(w, dtype=np.float64)
@@ -155,6 +207,9 @@ def build(ways: pd.DataFrame, m_lat: float, m_lon: float) -> RoadGraph:
         tree=cKDTree(np.c_[X[gidx], Y[gidx]]),
         m_lat=m_lat,
         m_lon=m_lon,
+        way_ptr=way_ptr,
+        way_idx=way_idx,
+        way_ok=way_ok,
     )
 
 
@@ -173,17 +228,77 @@ def snap(g: RoadGraph, lng: np.ndarray, lat: np.ndarray):
     return off.index.to_numpy().astype(np.int32), off.to_numpy(), ok, sx, sy
 
 
-def multisource(g: RoadGraph, snodes: np.ndarray, soff: np.ndarray, reverse: bool):
+# Giá trị scipy dùng cho "không có đỉnh liền trước" trong mảng predecessors.
+NO_PRED = -9999
+
+
+def multisource(
+    g: RoadGraph,
+    snodes: np.ndarray,
+    soff: np.ndarray,
+    reverse: bool,
+    return_predecessors: bool = False,
+):
     """Dijkstra đa nguồn qua một đỉnh siêu-nguồn.
 
     ``reverse=True``  → đồ thị NGƯỢC ⇒ khoảng cách Ô → TRẠM (chiều đi sạc, trường chính).
     ``reverse=False`` → đồ thị GỐC   ⇒ khoảng cách TRẠM → Ô (chiều về).
+
+    Với ``return_predecessors=True`` trả ``(d, pred)``. ``pred`` dài ``n + 1`` và tính trên
+    đồ thị ĐÃ ĐẢO, nên chuỗi ``pred`` đọc từ một đỉnh ngược về siêu-nguồn chính là đường
+    LÁI XE theo đúng chiều đi — xem ``reconstruct_path``. Chi phí đo được trên TP.HCM
+    (1,33 triệu đỉnh): **5,3 MB và 0 giây thêm**.
     """
     n = g.n_nodes
     if len(snodes) == 0:
-        return np.full(n, np.inf)
+        d = np.full(n, np.inf)
+        return (d, np.full(n + 1, NO_PRED, np.int32)) if return_predecessors else d
     a, b = (g.dst, g.src) if reverse else (g.src, g.dst)
     rs = np.concatenate([a, np.full(len(snodes), n, np.int32)])
     rd = np.concatenate([b, snodes])
     gm = csr_matrix((np.concatenate([g.dist_w, soff]), (rs, rd)), shape=(n + 1, n + 1))
+    if return_predecessors:
+        d, pred = dijkstra(gm, directed=True, indices=n, return_predecessors=True)
+        return d[:n], pred
     return dijkstra(gm, directed=True, indices=n)[:n]
+
+
+def reconstruct_path(pred: np.ndarray, start: int, n_super: int) -> list[int]:
+    """Đường đi từ ``start`` về trạm, theo cây ``pred`` của ``multisource(reverse=True)``.
+
+    Trả danh sách chỉ số đỉnh: phần tử ĐẦU là ``start`` (đỉnh neo của ô), phần tử CUỐI là
+    đỉnh mà trạm neo vào. Siêu-nguồn KHÔNG nằm trong kết quả — nó là một đỉnh nhân tạo,
+    không có toạ độ.
+
+    Hàm THUẦN trên ba con số. Không dùng ``way_nodes``, không dùng hình học đoạn — chỉ toạ
+    độ từng đỉnh. Đó là lý do cặp tuyến minh hoạ KHÔNG cần ``keep_way_nodes``.
+
+    Trả rỗng nếu ``start`` không tới được. Có chặn vòng lặp vô hạn: cây ``pred`` hợp lệ thì
+    không có chu trình, nhưng một mảng hỏng không được làm treo cả pipeline.
+
+    ── PHÂN RÃ CỦA ``dist_station_network_m`` ───────────────────────────────────────────
+
+    Cộng cạnh dọc tuyến KHÔNG ra thẳng con số mà bộ dữ liệu phát. Đủ ba số hạng:
+
+        dist_station_network_m  =  Σ cạnh dọc tuyến
+                                +  soff   độ lệch neo của TRẠM  (đã nằm trong ``d``)
+                                +  cd     độ lệch neo của Ô     (``road_access_offset_m``)
+
+    ``soff`` nằm trong ``d`` vì nó là trọng số của cạnh siêu-nguồn → đỉnh-trạm; nó KHÔNG
+    nằm trong tổng cạnh vì siêu-nguồn không thuộc tuyến. Bỏ sót nó cho lệch trung vị
+    ~27 m, bỏ sót ``cd`` cho lệch trung vị ~265 m — cả hai đều đủ nhỏ để trông như "sai số
+    làm tròn" và đủ lớn để sai.
+
+    Kiểm trên tỉnh 01 với đủ ba số hạng: **500/500 ô, lệch tối đa 0,000000000 m**.
+    """
+    out: list[int] = []
+    v = int(start)
+    seen = set()
+    while 0 <= v < n_super:
+        if v in seen:
+            break
+        seen.add(v)
+        out.append(v)
+        v = int(pred[v])
+    # Chuỗi hợp lệ phải KẾT THÚC ở siêu-nguồn; dừng vì `NO_PRED` nghĩa là không tới được.
+    return out if v == n_super else []
