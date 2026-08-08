@@ -46,8 +46,8 @@ vị **1,47×**, phân vị 90 **2,29×**, và **696/4.400 ô** bị đường c
 thực tế **hơn 2 lần** — 1.280.464 người sống trong các ô đó.
 
 Và sai số đó **chỉ lệch về một phía**: đường đi thật không bao giờ ngắn hơn chim bay. Ở bán
-kính phục vụ 3 km, chim bay nói **3.864** ô đã được phủ, mạng đường nói **2.860** —
-**1.004 ô (26,0%) là dương tính giả**, không một ô nào là âm tính giả. Vì thế bộ dữ liệu
+kính phục vụ 3 km, chim bay nói **3.864** ô đã được phủ, mạng đường nói **2.879** —
+**985 ô (25,5%) là dương tính giả**, không một ô nào là âm tính giả. Vì thế bộ dữ liệu
 vẫn phát `dist_station_euclid_m` (nó là khái niệm riêng, dùng cho câu hỏi về **bố trí** —
 hai trạm có gần nhau quá không) nhưng **không được dùng nó để kết luận độ phủ**.
 

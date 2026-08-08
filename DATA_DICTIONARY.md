@@ -148,7 +148,7 @@ Loại đường **không** tính vào: `footway`, `path`, `cycleway`, `pedestri
 >
 > **Đừng dùng chim bay để kết luận độ phủ.** Sai số của nó chỉ lệch **về một phía** — đường
 > đi thật không bao giờ ngắn hơn chim bay, đó là ràng buộc hình học. Ở bán kính 3 km, chim
-> bay nói 3.864 ô đã phủ, mạng đường nói 2.860: **1.004 ô (26,0%) dương tính giả, 0 âm tính
+> bay nói 3.864 ô đã phủ, mạng đường nói 2.879: **985 ô (25,5%) dương tính giả, 0 âm tính
 > giả**. Bảng đầy đủ theo bán kính 1/2/3/5 km ở `data/qa/s08_traveltime.json`.
 >
 > **KHÔNG có trường thời gian.** Bản trước có `drive_time_station_min`, tính từ bảng 7 con số

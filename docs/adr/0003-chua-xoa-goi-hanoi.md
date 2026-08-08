@@ -34,16 +34,60 @@ Xoá `src/hanoi/` hôm nay là bỏ lớp trạm biến áp, bỏ cặp tuyến 
 
 Ba việc phải xong trước khi xoá, theo thứ tự:
 
-1. **Port lớp trạm biến áp** — một bước `n` quét `power=substation` toàn quốc, ghi
-   `substations.geojson` theo tỉnh. Kèm ghi chú của `DECISIONS §8`: trạm biến áp là lớp
-   **ĐỂ NHÌN**, `dist_substation_m` đã bị bỏ và không được khôi phục (133 trạm/3.360 km²,
-   một trạm làm láng giềng gần nhất cho 236 ô).
-2. **Trả `way_nodes` + `return_predecessors` vào `core.roadgraph`** — hai thứ này bị bỏ vì
-   "chỉ M3-R cần", mà M3-R là thứ đang phải port.
-3. **Đưa `euclid_coverage_error_by_radius` vào `n07`.**
+1. **Port lớp trạm biến áp** — một lượt quét `power=substation` toàn quốc, ghi
+   `substations.parquet` theo tỉnh rồi `substations.geojson` cho web. Kèm hàng rào của
+   `DECISIONS §8`: trạm biến áp là lớp **ĐỂ NHÌN**; `dist_substation_m`, `voltage`,
+   `substation=*` và mọi cột công suất **không được khôi phục**.
+
+   *Đo được (2026-08-08, trên chính PBF đã đóng băng):* lượt quét thứ ba toàn quốc tốn
+   **107,3 s**, ra **1.387 đối tượng** (1.376 way · 2 relation · 9 node, 0 lỗi lắp
+   multipolygon). Trong đó **972/1.387 CÓ tag `voltage`** và **733/1.387 có `substation=*`**
+   — ở Hà Nội cám dỗ này nhỏ, ở toàn quốc nó là một cột phân hạng gần như đầy nằm sẵn
+   trong nguồn. Hàng rào phải port **nguyên vẹn**, kèm `_selftest_is_substation` (15 case).
+
+2. **Trả `return_predecessors` vào `core.roadgraph`** — và `way_nodes` là một việc KHÁC.
+
+   *ADR này ban đầu gộp nhầm hai điều kiện.* Cặp tuyến minh hoạ CHỈ cần
+   `return_predecessors`. `way_nodes` phục vụ sản phẩm thứ hai của M3-R: nhãn
+   `dist_station_m` **theo đoạn đường**, thứ mà 34 tỉnh cũng đang thiếu và là nguyên nhân
+   trực tiếp của một crash đã sửa ở `#tinh=01`.
+
+   *Chi phí đã đo trên TP.HCM (1,33 triệu đỉnh):* `pred` tốn **5,3 MB, 0 giây thêm**;
+   `way_nodes` dạng CSR phẳng tốn **8,7 MB** thay vì 34 MB của list-of-list. Một nguyên mẫu
+   chạy bằng đúng `core.roadgraph` hiện tại **tái lập tỉnh 01 nguyên vẹn** — cùng 3 ô, cùng
+   148/154/75 điểm, chiều dài polyline khớp `dist_station_network_m` tới **0,000%**.
+
+   *Cảnh báo phạm vi:* luật chọn ô minh hoạ không khoá cứng mã H3 nào, nhưng ba bậc dân số
+   1k/5k/10k là hằng số mật độ Hà Nội — đo được là **gãy ở 16/34 tỉnh** (4 tỉnh chỉ lấp
+   được một bậc). Dựng cho 34 tỉnh thì phải hiệu chuẩn bậc theo phân phối trong tỉnh, hoặc
+   chỉ dựng cho tỉnh 01 và nói ra điều đó.
+
+3. **Đưa `euclid_coverage_error_by_radius` vào `n07`.** ~16 dòng, không cần đọc thêm dữ
+   liệu nào (`eu`, `dist_m`, `reachable` đã nằm sẵn trong bộ nhớ).
+
+   *Và nó đã lộ ra một chỗ tài liệu nói sai:* `README.md:49-50` và `DATA_DICTIONARY.md:144`
+   viết **2.860 / 1.004 / 26,0%**, trong khi QA json và cả ba file parquet đều cho
+   **2.879 / 985 / 25,49%**. Web thì không đọc QA json — `fetchDetourStats` tính lại lúc
+   chạy nên màn hình đang hiện 25,5%. Tài liệu và màn hình đang bất đồng.
+   **Con số này KHÔNG phải hằng số toàn quốc** (tỉ lệ báo phủ nhầm ở 3 km trải rộng giữa
+   các tỉnh) — cùng luật với `QUYET_DINH §3`.
 
 Chỉ khi ba việc xong và golden vẫn xanh thì `src/hanoi/`, `data/`, và các lối vào không
 tiền tố ở web mới được gỡ.
+
+### Đã làm trước, vì cổng chặn nói dối đúng lúc cần nó nhất
+
+Trước khi port bất cứ thứ gì, bốn chỗ sau đã được vá (2026-08-08) — không chỗ nào đổi một
+con số nào của golden:
+
+* `tests/test_analysis_imports.py` — `make kiem` từng **mù** với `analysis/` và
+  `notebooks/`, nên xoá gói `hanoi` sẽ cho kiem XANH trong khi hàng chục script đã chết.
+* `fieldAvailable` lọc được trường của **ĐƯỜNG và TRẠM**, không chỉ của Ô và XÃ. Đây là
+  một crash ĐANG SỐNG: `road:dist_station_m` luôn hiện trong rail ở mọi tỉnh.
+* `formatNumber(undefined)` trả `—` thay vì ném `TypeError`.
+* Chế độ CÂU CHUYỆN có **hai cổng**: biên tập (`n11`, "văn cảnh viết cho tỉnh này chưa")
+  và dữ liệu (`storyDataReady`, "dữ liệu đỡ nổi không"). Hệ quả cố ý: cảnh **tắt** ở
+  `#tinh=01` cho tới khi việc (2) xong, rồi **tự bật lại**.
 
 ## Nợ vẫn còn tính lãi
 
