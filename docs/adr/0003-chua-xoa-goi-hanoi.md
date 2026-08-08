@@ -1,6 +1,15 @@
 # ADR-0003 — Chưa xoá gói `hanoi`, và điều kiện để xoá
 
-**Ngày** 2026-08-08 · **Trạng thái** chấp nhận · **Thay cho** ghi chú ở `src/vn/__init__.py:10-14`
+**Ngày** 2026-08-08 · **Trạng thái** ĐÃ GIẢI TOẢ · **Thay cho** ghi chú ở `src/vn/__init__.py:10-14`
+
+> **Cập nhật 2026-08-08, cùng ngày.** Cả ba điều kiện đã xong (B1 · B3 · B4). Đo lại hôm
+> nay, bộ Hà Nội và `p/01` **không còn khác nhau một file nào**, và `roads.parquet` hai bên
+> có đúng cùng 5 cột. Chênh lệch duy nhất còn lại là ở bảng lưới, và cả hai chiều đều đã
+> biết: `road_len_in_hanoi_m` ↔ `road_len_in_province_m` (cùng khái niệm, khác tên), cộng
+> 5 cột mà `p/01` có thêm (3 lớp phủ luôn-phát, `population_wp`, `province_code`).
+>
+> Gói `hanoi` nay **xoá được**. Việc còn lại là di cư lối vào `/` và trỏ lại `analysis/` —
+> xem "Bước còn lại" ở cuối.
 
 ## Bối cảnh
 
@@ -74,6 +83,29 @@ Ba việc phải xong trước khi xoá, theo thứ tự:
 
 Chỉ khi ba việc xong và golden vẫn xanh thì `src/hanoi/`, `data/`, và các lối vào không
 tiền tố ở web mới được gỡ.
+
+### Trạng thái ba việc — XONG cả ba
+
+| | việc | kết quả đo được |
+|---|---|---|
+| 1 | trạm biến áp | 1.384 đối tượng toàn quốc · tỉnh 01 ra **132 = 98 IN + 34 BUFFER**, trùng khít cả 4 số đếm của bộ Hà Nội |
+| 2 | `return_predecessors` + `way_nodes` | dựng lại tuyến khớp `dist_station_network_m` **0,000000000 m** trên 500 ô · `dist_station_m` theo đoạn nay có ở cả 34 tỉnh |
+| 3 | `euclid_coverage_error_by_radius` | có ở 34 tỉnh; và nó chứng minh con số KHÔNG phải hằng số — **25,5% (Hà Nội) → 61,0% (Cà Mau)** |
+
+Cặp tuyến minh hoạ dựng cho **tỉnh 01** (`SHOWCASE_PROVINCES`), theo quyết định của chủ dự
+án. Lý do không phải chi phí mà là luật chọn ô: ba bậc dân số 1k/5k/10k là hằng số mật độ
+Hà Nội và **16/34 tỉnh không đủ ô lấp cả ba**.
+
+### Bước còn lại để xoá
+
+* **B5** dọn nốt khối `manifest` và các hằng số gõ tay còn lại ở web
+* **B6** đổi lối vào `/` — redirect sang `#tinh=01`, hoặc xuất thêm một bản không tiền tố
+* **B7** trỏ `analysis/` (21 script) và `notebooks/` sang `store/` và `evcs.core`
+  — `tests/test_analysis_imports.py` là danh sách việc, và sau B8 nó là cổng
+* **B8** xoá `src/hanoi/` + `data/` + bộ web không tiền tố, MỘT lần
+
+Golden sẽ báo **12 khoá BIẾN MẤT, 0 dòng ĐỔI SỐ** ở B8. Bất kỳ dòng ĐỔI SỐ nào ở bước ấy
+nghĩa là bộ Hà Nội và `p/01` chưa thật sự tương đương, và phải dừng lại.
 
 ### Đã làm trước, vì cổng chặn nói dối đúng lúc cần nó nhất
 
