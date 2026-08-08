@@ -1,7 +1,7 @@
 /**
  * Cổng chặn CẤU TRÚC cho chiều tỉnh: không được có đường dẫn dữ liệu trần trong mã.
  *
- * Bối cảnh: `AUDIT_TOAN_QUOC.md §E` đã bắt đúng lỗi này một lần ở `duckdb.ts` — khoá đăng ký
+ * Bối cảnh: một lượt rà đã bắt đúng lỗi này một lần ở `duckdb.ts` — khoá đăng ký
  * là tên file trần, nên đổi tỉnh xong `registerParquet("grid_h3_r8.parquet")` thấy tên đã
  * đăng ký và **im lặng dùng lại file của tỉnh trước**. Bản đồ đổi tiêu đề mà không đổi số.
  *

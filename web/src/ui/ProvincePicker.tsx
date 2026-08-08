@@ -17,7 +17,7 @@ import {
  * **vị trí đã mã hoá tỉnh một cách hoàn hảo** — 34 tỉnh rời nhau theo định nghĩa. Thêm một
  * kênh nữa cho tỉnh là mã hoá trùng, tốn một kênh khan hiếm để nói lại điều bản đồ đã nói.
  *
- * Xem `QUYET_DINH_TOAN_QUOC.md` §6 cho lập luận đầy đủ và đánh đổi.
+ * Xem `docs/adr/0004-chieu-tinh-khong-ma-hoa-bang-kenh-thi-giac.md`.
  *
  * Tỉnh chưa có trong store hiện MỜ và không chọn được — cùng luật §3a với nav "chưa dựng":
  * nhìn bấm được mà bấm không ra gì là nói dối bằng giao diện.

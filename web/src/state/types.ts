@@ -83,7 +83,7 @@ export const dowOf = (t: number) => Math.floor(t / 24);
 export const hourOf = (t: number) => t % 24;
 export const tOf = (dow: number, hour: number) => dow * 24 + hour;
 
-/** Nhãn thứ — dữ liệu gốc `dow = 0` là Thứ Hai (DATA_DICTIONARY §6), không phải Chủ Nhật. */
+/** Nhãn thứ — dữ liệu gốc `dow = 0` là Thứ Hai (`docs/COT.md`), không phải Chủ Nhật. */
 export const DOW_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"] as const;
 
 /**

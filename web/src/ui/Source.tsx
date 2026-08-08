@@ -130,7 +130,7 @@ const pctOf = (v: number) =>
 
 /**
  * Hằng số xuất xứ → chữ. Ba hằng ở §8 được DỊCH và kèm số ô; các hằng còn lại giữ nguyên
- * — chúng chính là mã xuất xứ, và mentor tra được chúng trong DATA_DICTIONARY.
+ * — chúng chính là mã xuất xứ, và mentor tra được chúng trong docs/COT.md.
  */
 function provenance(value: string, column: string, m: Manifest): string {
   const c = CONSTANTS[value];

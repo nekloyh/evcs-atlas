@@ -64,7 +64,7 @@ def is_private_ac(n_guns, current_type):
     với dtype nullable của pandas thì phép ``&`` cho ``NA`` và dùng nó làm mask sẽ NỔ.
 
     Tỉ lệ bị loại KHÁC NHAU THEO TỈNH và không được hằng số hoá: đo được 48,6% (Gia Lai) →
-    78,7% (Bắc Ninh) theo số trạm. Xem ``QUYET_DINH_TOAN_QUOC.md`` §3.
+    78,7% (Bắc Ninh) theo số trạm. Xem ``DECISIONS.md`` §3a.
     """
     mot_sung = n_guns == 1
     la_ac = current_type == "AC"

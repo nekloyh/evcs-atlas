@@ -509,7 +509,7 @@ def export_province(code: str) -> dict:
         "missing_layers": {
             "reason": (
                 "cột có ở bộ Hà Nội đầy đủ nhưng chưa dựng cho tỉnh này "
-                "(xem QUYET_DINH_TOAN_QUOC.md §7)"
+                "(xem DECISIONS.md §7)"
             ),
             "columns": sorted(_reference_columns() - set(grid.columns)),
         },

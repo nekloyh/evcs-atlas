@@ -165,7 +165,7 @@ def _write_markdown(df: pd.DataFrame) -> None:
     """Bảng theo tỉnh ở dạng ĐỌC ĐƯỢC BẰNG MẮT, cạnh bản parquet.
 
     Parquet là để máy đọc; một bảng 34 dòng mà phải mở notebook mới xem được thì trên thực
-    tế không ai xem. Đây là cùng lý do ``hanoi.s11`` sinh ``QA_SUMMARY.md`` bên cạnh các
+    tế không ai xem. Đây là cùng lý do bước này sinh ``BAO_CAO_TINH.md`` bên cạnh các
     file JSON.
     """
 

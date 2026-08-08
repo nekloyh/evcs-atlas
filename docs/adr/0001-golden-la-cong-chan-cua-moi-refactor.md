@@ -4,7 +4,7 @@
 
 ## Bối cảnh
 
-`AUDIT_TOAN_QUOC.md §F` làm một phép đối chứng rất mạnh: chạy `vn/` cho tỉnh 01 rồi so 12
+Một lượt rà trước đó đã làm phép đối chứng rất mạnh: chạy `vn/` cho tỉnh 01 rồi so 12
 chỉ số với bộ `hanoi/`. Hai đường mã hoàn toàn khác nhau, cùng đầu vào, số trùng khít.
 
 Nhưng nó là một bảng Markdown. Nó đúng tại thời điểm ai đó gõ nó, và không có gì bảo nó
@@ -21,7 +21,7 @@ lỗi mới" thì không được phép bắt đầu.
 
 ## Quyết định
 
-`golden/` chụp **vân tay bất biến theo thứ tự** của mọi bảng sản phẩm — 801 bảng, gồm cả
+`golden/` chụp **vân tay bất biến theo thứ tự** của mọi bảng sản phẩm — 863 bảng, gồm cả
 `store/` lẫn `web/public/data/`. Mỗi cột có: số dòng, số null, tổng, tổng bình phương, min,
 max, trung vị (số) hoặc băm tập giá trị duy nhất (chuỗi). Khoá có băm riêng.
 

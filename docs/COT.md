@@ -9,7 +9,7 @@ make schema
 `make kiem` DỪNG nếu file này trôi khỏi bản khai.
 
 Vì sao nó được sinh chứ không được viết: cùng một sự thật từng được kể lại ở bốn nơi và
-kể ra **bốn con số khác nhau** — `README` 56 · `DATA_DICTIONARY` 56 · `web/src/fields.ts`
+kể ra **bốn con số khác nhau** — `README` 56 · `DATA_DICTIONARY` (đã xoá) 56 · `web/src/fields.ts`
 53 · trên đĩa 61. Một tài liệu kể lại schema là một cơ hội nữa để schema trôi.
 
 Cột `vai = định danh` cố ý KHÔNG tô màu lên bản đồ được. Cột `gộp = —` KHÔNG gộp lên bậc
@@ -112,6 +112,115 @@ Một dòng một xã/phường/đặc khu trong một tỉnh
 | 20 | `util_mean_port_weighted` | f64 | số đo | occupancy | tỉ lệ cổng-giờ bận, 0–1 | — |  | Trung bình trọng số SỐ CỔNG — trạm 30 cổng nói nhiều hơn trạm 2 cổng **· null =** xã không có trạm nào đo được — KHÔNG phải bận bằng 0 |
 | 21 | `dist_station_m_pop_weighted` | f64 | số đo | distance | mét theo mạng đường, trọng số dân ↓xấu | — |  | Trọng số DÂN chứ không phải diện tích: câu hỏi là 'người ở đây phải đi bao xa', không phải 'đất ở đây cách bao xa'. **· null =** không ô nào trong xã tới được trạm bằng đường bộ |
 
+### `stations` — 26 cột
+
+Trạm sạc CÔNG CỘNG trong tỉnh và vành đệm 5 km. Điểm sạc cá nhân 1-súng-AC đã loại.
+
+| # | cột | kiểu | vai | lớp | đơn vị | gộp | cả nước | nghĩa |
+|--:|---|---|---|---|---|---|:-:|---|
+| 1 | `station_id` | str | khoá | supply | — | — |  | Slug ASCII — khoá dùng ở URL |
+| 2 | `station_code` | str | định danh | supply | — | — |  | Mã của nguồn. **KHÔNG dùng ở URL**: đo được 6/939 mã chứa dấu cách, dấu phẩy và dấu tiếng Việt, mà dấu phẩy là ký tự phân cách của khoá hash. |
+| 3 | `lat` | f64 | định danh | supply | độ | — |  |  |
+| 4 | `lng` | f64 | định danh | supply | độ | — |  |  |
+| 5 | `name` | str | định danh | supply | — | — |  |  |
+| 6 | `address` | str | định danh | supply | — | — |  |  |
+| 7 | `operator` | str | định danh | supply | — | — |  | Hà Nội: 704/710 là VinFast |
+| 8 | `station_type` | str | định danh | supply | — | — |  |  |
+| 9 | `vehicle_class` | str | định danh | supply | — | — |  |  |
+| 10 | `op_status` | str | số đo | supply | — | — |  | OPERATIONAL · MAINTENANCE · OUT_OF_SERVICE · UNKNOWN. Hai giá trị đầu là 'đủ tư cách phục vụ'. |
+| 11 | `access` | str | số đo | supply | — | — |  | PUBLIC · RESTRICTED · UNKNOWN. RESTRICTED bị loại khỏi nguồn Dijkstra. |
+| 12 | `current_type` | str | số đo | supply | — | — |  | AC · DC · MIXED |
+| 13 | `n_ports` | i64 | số đo | supply | súng | cộng |  |  |
+| 14 | `n_guns_imputed` | i64 | số đo | supply | súng | cộng |  | Phần số súng do SUY RA chứ không do nguồn khai — mẫu số của mọi tỉ lệ theo cổng |
+| 15 | `power_kw_max_port` | f64 | số đo | supply | kW | — |  | Cổng mạnh nhất tại trạm |
+| 16 | `power_kw_site` | f64 | số đo | supply | kW | cộng |  | Tổng công suất trên trụ |
+| 17 | `port_config_source` | str | định danh | supply | — | — |  | Cấu hình cổng lấy từ đâu |
+| 18 | `verified_official` | bool | số đo | supply | — | — |  | Khớp danh mục chính thức |
+| 19 | `freshness` | f64 | số đo | supply | 0–1 | — |  | Độ mới của bản ghi. Nhỏ là mới. |
+| 20 | `has_timeseries` | bool | số đo | supply | — | — |  | Có telemetry để tính mức sử dụng không |
+| 21 | `province_code` | str | định danh | supply | — | — |  |  |
+| 22 | `commune_code` | str | định danh | supply | — | — |  | Gán lại bằng HÌNH HỌC, không tin nhãn nguồn |
+| 23 | `commune_name` | str | định danh | supply | — | — |  |  |
+| 24 | `scope` | str | số đo | supply | — | — |  | IN (trong ranh giới) · BUFFER (trong vành đệm 5 km). Vành đệm hai tỉnh kề nhau CHỒNG nhau ⇒ **mọi phép cộng dồn toàn quốc phải lọc IN**. |
+| 25 | `h3_r8` | str | định danh | supply | — | — |  | Ô chứa trạm — khoá nối trạm ↔ lưới |
+| 26 | `commune_kind` | str | định danh | supply | — | — |  | PHUONG · XA · DAC_KHU |
+
+### `connectors` — 9 cột
+
+Một dòng một cấu hình cổng của một trạm
+
+| # | cột | kiểu | vai | lớp | đơn vị | gộp | cả nước | nghĩa |
+|--:|---|---|---|---|---|---|:-:|---|
+| 1 | `connector_id` | str | khoá | supply | — | — |  |  |
+| 2 | `station_id` | str | định danh | supply | — | — |  |  |
+| 3 | `station_code` | str | định danh | supply | — | — |  |  |
+| 4 | `connector_standard` | str | số đo | supply | — | — |  | CCS2 · TYPE2 · UNKNOWN |
+| 5 | `current_type` | str | số đo | supply | — | — |  | AC · DC |
+| 6 | `power_kw` | f64 | số đo | supply | kW | — |  | Công suất định mức MỘT cổng |
+| 7 | `vehicle_class` | str | định danh | supply | — | — |  |  |
+| 8 | `count_total` | i64 | số đo | supply | cổng | cộng |  | Số cổng cùng cấu hình |
+| 9 | `province_code` | str | định danh | supply | — | — |  |  |
+
+### `station_occupancy` — 25 cột
+
+Mức sử dụng đo được trên cửa sổ telemetry 30 ngày, một dòng một trạm
+
+| # | cột | kiểu | vai | lớp | đơn vị | gộp | cả nước | nghĩa |
+|--:|---|---|---|---|---|---|:-:|---|
+| 1 | `station_code` | str | khoá | occupancy | — | — |  |  |
+| 2 | `util` | f64 | số đo | occupancy | tỉ lệ cổng-giờ bận, 0–1 ↓xấu | — |  | Mẫu số là số cổng LẮP ĐẶT, không phải số cổng đang báo cáo |
+| 3 | `util_p95` | f64 | số đo | occupancy | 0–1 | — |  | Phân vị 95 của mức bận theo giờ |
+| 4 | `saturation_frac` | f64 | số đo | occupancy | 0–1 | — |  | Phần thời gian mọi cổng đều bận |
+| 5 | `duty_cycle` | f64 | số đo | occupancy | 0–1 | — |  |  |
+| 6 | `grade` | str | số đo | occupancy | — | — |  | GOOD · PARTIAL · INSUFFICIENT — hạng bằng chứng của phép đo, không phải của trạm |
+| 7 | `coverage` | f64 | số đo | occupancy | 0–1 | — |  | Phần cửa sổ có quan sát |
+| 8 | `obs_days` | f64 | số đo | occupancy | ngày | — |  |  |
+| 9 | `util_reportable` | bool | số đo | occupancy | — | — |  | Đủ điều kiện để TRÍCH RA NGOÀI |
+| 10 | `occ_status` | str | số đo | occupancy | — | — |  | Cổng thật của `util_pctl` — KHÔNG phải `grade` |
+| 11 | `shape_class` | str | số đo | occupancy | — | — |  | DEM_TROI · HAI_DINH · BAN_NGAY_PHANG · THAT_THUONG · KHONG_XEP_LOAI |
+| 12 | `peak_hour` | i64 | số đo | occupancy | giờ 0–23 | — |  |  |
+| 13 | `peak_dow` | i64 | số đo | occupancy | thứ 0–6 | — |  |  |
+| 14 | `night_share` | f64 | số đo | occupancy | 0–1 | — |  |  |
+| 15 | `weekend_ratio` | f64 | số đo | occupancy | lần | — |  |  |
+| 16 | `util_denominator_ports` | f64 | số đo | occupancy | cổng | — |  | Mẫu số của `util` |
+| 17 | `ever_active` | bool | số đo | occupancy | — | — |  |  |
+| 18 | `province_code` | str | định danh | occupancy | — | — |  |  |
+| 19 | `current_type` | str | định danh | occupancy | — | — |  |  |
+| 20 | `commune_kind` | str | định danh | occupancy | — | — |  |  |
+| 21 | `util_pctl` | f64 | số đo | occupancy | phân vị trong nhóm cùng loại, 0–100 | — |  |  **· null =** trạm chưa đủ quan sát để xếp hạng — KHÔNG phải xếp hạng thấp |
+| 22 | `util_pctl_peer` | str | định danh | occupancy | — | — |  | Lớp tham chiếu của phân vị, dạng `<province_code>\|<current_type>` (ví dụ `01\|AC`). Phân vị chỉ có nghĩa TRONG lớp này; thiếu nhãn là hai tỉnh bị so nhầm mà không ai thấy. |
+| 23 | `window_start_utc` | str | định danh | occupancy | — | — |  |  |
+| 24 | `window_end_utc` | str | định danh | occupancy | — | — |  |  |
+| 25 | `snapshot_id` | str | định danh | occupancy | — | — |  |  |
+
+### `station_occupancy_profile_168h` — 7 cột
+
+Hồ sơ bận theo 168 ô (thứ × giờ) từng trạm — 2,74 triệu dòng toàn quốc
+
+| # | cột | kiểu | vai | lớp | đơn vị | gộp | cả nước | nghĩa |
+|--:|---|---|---|---|---|---|:-:|---|
+| 1 | `station_code` | str | khoá | occupancy | — | — |  |  |
+| 2 | `dow` | i8 | định danh | occupancy | thứ 0–6 | — |  |  |
+| 3 | `hour` | i8 | định danh | occupancy | giờ 0–23 | — |  |  |
+| 4 | `occ` | f64 | số đo | occupancy | cổng bận | — |  |  **· null =** ô giờ này không có quan sát nào |
+| 5 | `observed_h` | f64 | số đo | occupancy | giờ | — |  | Số giờ quan sát rơi vào ô này. Dưới 1 h thì KHÔNG tô — ngưỡng suy từ khớp `var(t) = a + b/t`, xem `web/DESIGN.md`. |
+| 6 | `n_obs` | i32 | số đo | occupancy | mẫu | cộng |  |  |
+| 7 | `province_code` | str | định danh | occupancy | — | — |  |  |
+
+### `substations` — 7 cột
+
+Trạm biến áp OSM — lớp ĐIỂM để vẽ. Bảy cột, và bảy là con số có ý nghĩa.
+
+| # | cột | kiểu | vai | lớp | đơn vị | gộp | cả nước | nghĩa |
+|--:|---|---|---|---|---|---|:-:|---|
+| 1 | `osm_type` | str | định danh | substation | — | — |  | node · way · relation |
+| 2 | `osm_id` | i64 | khoá | substation | — | — |  | `orig_id()` với area — KHÔNG phải id tổng hợp của osmium |
+| 3 | `name` | str | định danh | substation | — | — |  |  **· null =** OSM không đặt tên |
+| 4 | `lat` | f64 | định danh | substation | độ | — |  | TÂM đa giác nếu OSM vẽ bằng đa giác |
+| 5 | `lng` | f64 | định danh | substation | độ | — |  |  |
+| 6 | `province_code` | str | định danh | substation | — | — |  |  |
+| 7 | `scope` | str | số đo | substation | — | — |  | IN · BUFFER — lớp bối cảnh, không cộng dồn ở đâu |
+
 ### `grid_h3_r6` — 30 cột
 
 Lưới gộp toàn quốc cho màn hình CẢ NƯỚC XEM MỘT LẦN
@@ -148,3 +257,4 @@ Lưới gộp toàn quốc cho màn hình CẢ NƯỚC XEM MỘT LẦN
 | 28 | `built_frac` | f32 | số đo | landcover | tỉ lệ, 0–1 | TB theo diện tích |  | Đất đã xây dựng |
 | 29 | `water_frac` | f32 | số đo | landcover | tỉ lệ, 0–1 | TB theo diện tích |  | Mặt nước |
 | 30 | `pop_density_ppkm2` | f32 | số đo | national | người/km² | — |  | `population` gộp chia `area_km2` gộp. TÍNH LẠI, không phải trung bình của các tỉ số con — trung bình của tỉ số không phải tỉ số của trung bình. |
+

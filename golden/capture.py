@@ -4,7 +4,7 @@
     uv run python -m golden.capture --ghi    # ghi đè baseline (chỉ khi thay đổi là CÓ CHỦ Ý)
 
 Vì sao có file này: đợt refactor gộp ``hanoi/`` vào ``vn/`` phải chứng minh được rằng nó
-KHÔNG đổi một con số nào. ``AUDIT_TOAN_QUOC.md §F`` đã làm phép đối chứng ấy một lần, bằng
+KHÔNG đổi một con số nào. Một lượt rà trước đó đã làm phép đối chứng ấy một lần, bằng
 tay, trên 12 chỉ số. File này làm nó trên **mọi cột của mọi bảng của 34 tỉnh**, tự động, và
 hỏng thì báo đúng cột nào đổi.
 

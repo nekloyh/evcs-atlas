@@ -29,7 +29,7 @@ from typing import Literal
 
 Role = Literal["key", "identity", "measure"]
 Agg = Literal["sum", "area_mean", "none"]
-Dtype = Literal["str", "f64", "f32", "i64", "i32", "bool"]
+Dtype = Literal["str", "f64", "f32", "i64", "i32", "i8", "bool"]
 Polarity = Literal["high-bad", "high-good"]
 
 # Kiểu logic → kiểu pyarrow đọc được từ đĩa. Một chỗ, để phép kiểm schema so được kiểu
@@ -40,6 +40,7 @@ ARROW = {
     "f32": ("float",),
     "i64": ("int64",),
     "i32": ("int32",),
+    "i8": ("int8",),
     "bool": ("bool",),
 }
 

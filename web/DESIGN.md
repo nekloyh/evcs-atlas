@@ -1,11 +1,16 @@
-# DESIGN — web app visualization EVCS Hà Nội
+# DESIGN — web app của evcs-atlas
 
 **File này là nguồn sự thật cho mọi quyết định thiết kế của `web/`. Mọi session sau đọc
 file này trước khi viết code.** Quyết định đã chốt thì không bàn lại; muốn đổi thì sửa ở
 đây trước, kèm lý do, rồi mới sửa code.
 
-Bối cảnh dữ liệu: [`../README.md`](../README.md) · [`../DATA_DICTIONARY.md`](../DATA_DICTIONARY.md)
-· [`../DECISIONS.md`](../DECISIONS.md).
+Bối cảnh dữ liệu: [`../README.md`](../README.md) · [`../DECISIONS.md`](../DECISIONS.md) ·
+[`../docs/COT.md`](../docs/COT.md) · [`../HAN_CHE.md`](../HAN_CHE.md).
+
+> **Con số trong file này là số của tỉnh 01 (Hà Nội)** trừ khi ghi khác. Chúng có mặt để
+> làm bằng chứng cho một lựa chọn thiết kế — cái ràng buộc là **hình dạng** của phân bố,
+> không phải giá trị. App đọc số thật từ `manifest.json` của tỉnh đang xem; **§7c cấm gõ
+> con số vào `fields.ts`**, và §11c mở rộng lệnh cấm đó sang cả câu nói về con số.
 
 ---
 
@@ -13,13 +18,13 @@ Bối cảnh dữ liệu: [`../README.md`](../README.md) · [`../DATA_DICTIONARY
 
 Một web app chạy **local** để mentor:
 
-1. **Khám phá được dữ liệu** — 4.400 ô H3 r8 × 52 cột, 126 xã, 939 trạm công cộng, hồ sơ
-   168 giờ.
+1. **Khám phá được dữ liệu** — lưới H3 r8, xã, trạm công cộng, hồ sơ 168 giờ, cho **một
+   tỉnh mỗi lúc** (34 tỉnh), cộng một màn hình toàn quốc ở r6.
 2. **Hiểu vì sao thuật toán đặt trạm (GMM) là hợp lý** — bằng cách nhìn thấy trước cấu
    trúc mà GMM sẽ nắm bắt: cầu tập trung thành cụm, cung lệch, và sai số đường chim bay
    có nguyên nhân hình học.
 
-App **không** ship output của thuật toán (chưa có). Nó dựng nền cho việc đó.
+App **không** ship output của thuật toán (chưa có). Nó dựng nền cho việc đó — §11a.
 
 Người dùng đích là **một người**: mentor, xem trên màn hình rộng, có người ngồi cạnh giải
 thích. Không tối ưu cho mobile, không tối ưu cho người lạ tự mò.
@@ -340,7 +345,7 @@ chỗ: 62 px cho dải 0–48% ⇒ một chênh lệch 5 điểm phần trăm v�
 ### 3e. Scrubber (đáy, 56px)
 
 168 giờ chia **7 khối thứ**, mỗi khối 24 vạch giờ. Nhãn `T2 T3 T4 T5 T6 T7 CN`
-(dữ liệu gốc `dow = 0` là **Thứ Hai** — xem DATA_DICTIONARY §6). Play **lặp vô hạn**,
+(dữ liệu gốc `dow = 0` là **Thứ Hai** — xem `docs/COT.md`). Play **lặp vô hạn**,
 tốc độ mặc định 4 giờ/giây. Vị trí hiện tại đồng bộ hai chiều với heatmap 168h ở dock.
 
 Scrubber chỉ tác động lên các lớp **có chiều thời gian** (occupancy trạm). Nó **không**
@@ -383,12 +388,12 @@ bản đồ. Năm khối, từ trên xuống:
    đó** — 19/710 trạm Hà Nội khuyết `n_ports`, 19 khuyết `power_kw_site`. Một phép cộng
    trên cột có null là một **chặn dưới**, không phải một số đo; in tổng mà im lặng về mẫu
    số là đúng loại nói dối mà ràng buộc 1 cấm trên bản đồ, chỉ khác là bằng chữ.
-2. **Bảng phủ 53 cột** (số hiện hành của §6 — đọc từ `manifest.coverage`, tự đổi theo
+2. **Bảng phủ đủ cột lưới** (số hiện hành của §6 — đọc từ `manifest.coverage`, tự đổi theo
    dữ liệu) — mỗi dòng một cột của `grid`, meter ngang cùng-ramp cho
    `cell_share`/`pop_share` (meter là track cùng họ màu, không phải bar chart mỗi dòng
    một hue), badge ⚠ đúng quy tắc §7. Đây là bản đầy đủ của thứ rail chỉ hé ra.
 3. **Bảng dữ liệu** sort/filter được — bản đọc phẳng của bảng chính, kèm link
-   `DATA_DICTIONARY.md`.
+   `docs/COT.md`.
 4. **Stacked bar ngang connectors** — TYPE2 · CCS2 · UNKNOWN. `UNKNOWN` vẽ **vân xám**,
    không phải bậc màu thứ ba: "không khớp registry" là vắng thông tin, cùng khái niệm
    với ô null (ràng buộc 1), không phải một chuẩn phích thứ ba.
@@ -638,7 +643,7 @@ hai kiểu nét — một kiểu nét, một nghĩa: "không vận hành bình t
 
 **(b) Ô thiếu quan sát trong heatmap 168h — VÂN XÁM, không tô nhạt** (dock §3d và
 mini-heatmap §8a, thi công M4). `occ` của một ô giờ chỉ đáng tin khi `observed_h` đủ
-(DATA_DICTIONARY §6: "đọc `occ` kèm trường này"). Tô nhạt ô thiếu quan sát là để nó đọc
+(`docs/COT.md`: "đọc `occ` kèm trường này"). Tô nhạt ô thiếu quan sát là để nó đọc
 thành "vắng khách" — đúng cái nói dối mà ràng buộc 1 cấm trên bản đồ, chỉ khác trục:
 đây là **ràng buộc 1 mở rộng sang chiều thời gian**. Ngưỡng `observed_h` chốt lúc thi
 công M4 từ phân bố thật (không đặt tay ở đây) và in vào câu đơn vị của heatmap.
@@ -833,33 +838,34 @@ từng bậc trên surface tối và validate lại, không phải lật màu. C
 
 ---
 
-## 5. Dữ liệu — `make web-data`
+## 5. Dữ liệu — `make web`
 
 ### 5a. Ship gì
 
-Target `make web-data` chạy `uv run python -m hanoi.web_export`, ghi vào
-`web/public/data/`:
+`uv run python -m vn n11_web_export` ghi **một gói cho mỗi tỉnh** vào
+`web/public/data/p/<mã>/`, cộng một gói toàn quốc ở `vn/`:
 
-| File | Nguồn | Cách xử lý | Dung lượng |
-|---|---|---|---:|
-| `grid_h3_r8.parquet` | `data/processed/grid_h3_r8.parquet` | copy nguyên | 0,9 MB |
-| `stations.parquet` | `data/processed/stations.parquet` | copy nguyên | 0,35 MB |
-| `connectors.parquet` | `data/processed/connectors.parquet` | copy nguyên | 0,08 MB |
-| `station_occupancy.parquet` | như trên | copy nguyên | 0,17 MB |
-| `station_occupancy_profile_168h.parquet` | như trên | copy nguyên | 0,96 MB |
-| `commune.geojson` | `data/processed/commune.parquet` | **convert `geometry_wkb` → GeoJSON ngay trong Python** | ~1–2 MB |
-| `admin_boundary.geojson` | `data/processed/admin_boundary.geojson` | copy nguyên | 0,07 MB |
-| `manifest.json` | — | sinh mới: danh sách file, số dòng, ngày export | < 4 KB |
-| `roads.parquet` *(M3-R — ĐÃ SHIP)* | `data/raw/osm_hanoi_roads.parquet` + nhãn Dijkstra của `s08` (đồ thị chung `hanoi/roadnet.py`) | lọc bỏ SERVICE (77.375 đoạn), đơn giản hoá ~10 m (1,29 M → 0,43 M điểm), toạ độ giải mã sẵn (không WKB), kèm `dist_station_m` theo đoạn + `road_class` + `bridge` | 3,23 MB · 160.823 đoạn |
-| `poi.geojson` *(M3.5 — ĐÃ SHIP)* | `data/raw/osm_hanoi_poi_visual.parquet` (bước trích mới `s03b`, xem §11 M3.5) | **convert WKB → GeoJSON trong Python** (cùng lý do với commune, §5b): Polygon/MultiPolygon cho POI có hình, Point cho POI chỉ-điểm; toạ độ làm tròn 6 chữ số (~0,11 m, không bỏ đỉnh nào); properties gồm nhóm + tên + tag khớp | **3,39 MB · 6.633 POI** — nạp LƯỜI như roads: chỉ tải khi một nhóm POI bật (hoặc `c=poi:`), phần lớn phiên xem không trả chi phí này |
-| `routes_showcase.geojson` *(M3-R — ĐÃ SHIP)* | cây Dijkstra của export trên + `grid_h3_r8.parquet` | 3 cặp đường minh hoạ (đường đi thật ↔ chim bay); luật chọn cố định: mỗi bậc dân số 1k/5k/10k một ô `detour_ratio` cao nhất (euclid ≥ 1 km) | < 20 KB |
-| `substations.geojson` *(M5 — ĐÃ SHIP)* | `data/raw/osm_hanoi_substations.parquet` (bước trích mới `s03c`, xem §11 M5) | **Point và chỉ Point**: đa giác đã nén thành tâm ngay ở `s03c`, nên file không mang hình học nào ngoài một cặp toạ độ. Properties: `osm_type` · `osm_id` · `name`. **Không cột nào khác** — không công suất, không cấp điện áp, không khoảng cách (§12) | **20,7 KB · 132 trạm biến áp** — nạp LƯỜI như poi/roads |
+| File | Cách xử lý | Vì sao không phải copy nguyên |
+|---|---|---|
+| `grid_h3_r8.parquet` | copy | — |
+| `stations` · `connectors` · `station_occupancy` · `..._profile_168h` | copy | — |
+| `commune.geojson` | **convert `geometry_wkb` → GeoJSON trong Python** | §5b |
+| `admin_boundary.geojson` | copy | — |
+| `roads.parquet` | lọc bỏ SERVICE, đơn giản hoá **~10 m**, toạ độ giải mã sẵn (không WKB), kèm `dist_station_m` theo đoạn | lớp ĐỂ NHÌN. Số đỉnh sau khi đơn giản hoá **không còn khớp `node_ids`** ⇒ vĩnh viễn không dựng đồ thị từ nó được — `docs/adr/0005` |
+| `poi.geojson` | WKB → GeoJSON; Polygon cho POI có hình, Point cho POI chỉ-điểm; toạ độ làm tròn 6 chữ số (~0,11 m, không bỏ đỉnh nào) | §5b |
+| `routes_showcase.geojson` | 3 cặp đường minh hoạ (đường thật ↔ chim bay), luật chọn cố định | dựng **chỉ cho tỉnh 01** (`n14.SHOWCASE_PROVINCES`) — nó cần cây Dijkstra một-nguồn, không phải sản phẩm của mọi tỉnh |
+| `substations.geojson` | **Point và chỉ Point** — đa giác đã nén thành tâm ngay ở `n13`. Properties: `osm_type` · `osm_id` · `name`. **Không cột nào khác** | `DECISIONS §8` |
+| `manifest.json` | sinh mới: `files`, `available_*_columns`, `coverage`, `unusable_layers`, `story_enabled` | mọi cổng của UI đọc từ đây — §7, 11b-4 |
 
-Tổng ~4 MB (M0–M2) · **~7–9 MB khi có lớp mạng đường (M3-R)** · **8,8 MB sau M3.5** ·
-**8,8 MB sau M5** (poi.geojson nạp lười; +20,7 KB của trạm biến áp không đọc được ở một chữ
-số thập phân, và đó chính là lý do lớp này không cần một cuộc bàn về ngân sách). Vượt ngân sách ban đầu
-là quyết định có ý thức, không phải trôi dạt: app chạy local, và lớp này là mark chủ
-lực của luận điểm trung tâm (§13d-C) — lý do đầy đủ ở khối M3 trong §11.
+Đo được: gói tỉnh 01 là **7,7 MB**; cả 34 tỉnh là **161 MB**, gói toàn quốc **15 MB**. Ba
+file to nhất của một gói — `poi.geojson` (3,0 MB), `roads.parquet` (2,8 MB), `grid` (0,96 MB)
+— và hai file đầu **nạp LƯỜI**: chỉ tải khi một nhóm POI hoặc lớp đường được bật. Phần lớn
+phiên xem không trả chi phí đó.
+
+**Gói của tỉnh 01 còn được ghi thêm một bản KHÔNG tiền tố** ở ngay `web/public/data/`, để URL
+không có `#tinh=` vẫn chạy. Đó là một bản sao có chủ ý, không phải rác: nó giữ `/` là một
+trang chạy được mà không cần một nhánh "tỉnh mặc định" trong mã đọc đường dẫn.
+
 
 ### 5b. Hai quyết định về dữ liệu
 
@@ -883,9 +889,11 @@ và để trong `src/data/queries.ts`.
 
 ---
 
-## 6. Năm nhóm trường — bản đồ hoá đủ 53 cột
+## 6. Năm nhóm trường — bản đồ hoá đủ mọi cột lưới
 
-53 cột của `grid_h3_r8.parquet` chia hết, không bỏ sót cột nào (đã cập nhật sau A4/A5):
+Mọi cột của `grid_h3_r8.parquet` chia hết vào năm nhóm, không bỏ sót cột nào. **Số cột
+không gõ ở đây** — nó suy ra từ `src/evcs/schema/grid.py` và đi vào UI qua
+`web/src/data/columns.generated.ts`; xem `docs/COT.md`.
 
 | | Nhóm | Cột | Choropleth được |
 |---|---|---:|---|
@@ -909,14 +917,14 @@ phải cách đọc mạng lưới: gộp một mạng **tuyến tính** vào đ
 mạng là mạng — tính kết nối. Hai ô cùng 5 km đường, một ô là ngõ cụt cạnh sông, một ô
 là nút giao, choropleth nói chúng giống hệt nhau. Cách đọc đúng là đơn vị `road` (§6b).
 
-**Nhóm thứ 6, SO SÁNH (§13c), không phá phép cộng trên.** Bảng này chia hết **53 cột**;
+**Nhóm thứ 6, SO SÁNH (§13c), không phá phép cộng trên.** Bảng này chia hết **mọi cột lưới**;
 SO SÁNH là nhóm của **cách đọc**, không phải của cột. `detour_ratio` và
 `dist_station_asym_m` vẫn được đếm trong 9 cột của nhóm 5 ở trên, nhưng trong rail chúng
 nằm dưới SO SÁNH — vì câu chúng nói là một so sánh, không phải một mức. Bốn trường SO SÁNH
 còn lại là **đại lượng phái sinh**, không có cột nào của riêng chúng (§13c-1) — trường
 thứ tư là `station:occ`, thêm 2026-08-07 cho scrubber M4 (§3e).
 
-**Trường của xã là một danh sách riêng** (§6b), không cộng vào 53 cột này: chúng thuộc
+**Trường của xã là một danh sách riêng** (§6b), không cộng vào các nhóm trên: chúng thuộc
 `commune.parquet`, một bảng khác, một đơn vị đọc khác.
 
 ### 6a. Cách chia bậc (classing)
@@ -1106,7 +1114,7 @@ dùng khi một trường chỉ có một loại null. `detour_ratio` không nh�
 `dist_station_network_m` bị `road_access_offset_m` chi phối — quãng thẳng từ tâm ô ra tới
 mặt đường. Tỉ số ở cỡ đó đo **độ lệch của tâm ô so với lưới đường**, không đo hình học
 sông/cầu mà trường này nói về. Ô cách trạm 40 m mà đường đi 300 m có tỉ số thật là 7,5;
-ghi 1 vào đó là khẳng định "đi thẳng được" trong khi có thể không. `s08` từ chối tính là
+ghi 1 vào đó là khẳng định "đi thẳng được" trong khi có thể không. `n07` từ chối tính là
 **đúng** — cái sai nằm ở chỗ web gộp hai loại null vào một ký hiệu.
 
 **Vì sao gộp là lỗi nặng, không phải lỗi thẩm mỹ.** 86 ô đó là ô **sát trạm nhất thành
@@ -1159,7 +1167,7 @@ Ba tầng, ba mẫu số, không được trộn — rail hiện số **tầng �
 
 ### 7c. Badge sống ở đâu — schema `manifest.json` (M1)
 
-Ràng buộc 4 nói số phủ tính lúc export. Cụ thể hoá: `web_export.py` ghi ba khối, và
+Ràng buộc 4 nói số phủ tính lúc export. Cụ thể hoá: `n11_web_export` ghi ba khối, và
 `fields.ts` **chỉ giữ câu chữ**, không giữ con số nào.
 
 | Khối trong manifest | Nội dung | Ai dùng |
@@ -1399,1059 +1407,125 @@ Hai cái bẫy phải tránh khi nối vòng này:
 |---|---|---|
 | 1 | **null ≠ 0.** Ô null tô gạch chéo xám, không bao giờ tô màu nhạt | §4b. Hàm màu chỉ có một đường vào; giá trị `null`/`undefined`/`NaN` trả về texture, không bao giờ rơi vào ramp. Không dùng `?? 0` ở bất kỳ đâu trên đường dữ liệu → màu. |
 | 2 | **Đúng một trường choropleth mỗi lúc** | §3c + **§6b**. State chứa `field: FieldId` (một chuỗi, không phải mảng). Trường mang **đơn vị đọc** (`cell`/`commune`/`road`/`station`) và đơn vị đó quyết định hình học nào được tô — hình học kia **không vẽ**, nên vẫn chỉ một ramp một legend. Overlay ở khoá khác (`layers: Set`), không overlay nào là mảng màu phẳng (**§4d-1**) và không overlay nào mã hoá giá trị bằng màu **hay bằng kích thước**. |
-| 3 | **Không ship `grid_h3_r8.geojson`** | §5b. `web_export.py` không đụng tới file đó. `H3HexagonLayer` dựng đa giác từ `h3_r8`. |
+| 3 | **Không ship `grid_h3_r8.geojson`** | §5b. `n11_web_export` không đụng tới file đó. `H3HexagonLayer` dựng đa giác từ `h3_r8`. |
 | 4 | **Trường phủ kém có badge ⚠ + % ngay trong rail** | §7. Bảng phủ tính **tại thời điểm export** và ghi vào `manifest.json` — không hardcode trong TS, để khi dữ liệu đổi thì badge đổi theo. |
 | 5 | **Panel Ô có khối NGUỒN xám mờ ở đáy** | §8. |
 
 ---
 
-## 11. Lộ trình
+## 11. Trạng thái, và những cái bẫy đã sập một lần
 
-### M0 — nền — XONG
+### 11a. Đã dựng gì
 
-- [x] `web/DESIGN.md` — file này
-- [x] `web/` scaffold Vite + React + TS + Tailwind v4, pnpm
-- [x] `make web-data` — `hanoi/web_export.py` → `web/public/data/` (3,1 MB)
-- [x] Boot DuckDB-WASM, đọc `grid_h3_r8.parquet`, query thử
-- [x] MapLibre positron nền sáng + `MapboxOverlay` interleaved + `H3HexagonLayer` vẽ
-      `population` lên 4.400 ô, ramp cam 7 bậc, ô null gạch chéo
-- [x] `make web` — dev server
-
-Đã verify bằng **render thật** trong Chrome headless (CDP, WebGL swiftshader), không chỉ
-bằng typecheck: bản đồ vẽ đủ 4.400 ô, nhãn tắt, sông nhấn xanh, legend 7 bậc đúng mực
-chữ. Kiểm riêng ràng buộc 1 bằng cách tạm đổi trường sang `util_cell`: ô null hiện gạch
-chéo xám, không ô nào rơi vào ramp.
-
-> Các con số của `util_cell` trong đoạn này (3.107 ô null · `1.320/4.400 ô · 65% dân`) là
-> số **trước bộ lọc §3a của `DECISIONS.md`**. Số hiện hành ở M1.2 dưới đây. Ràng buộc 1
-> không đổi; chỉ mẫu số đổi.
-
-**M0 KHÔNG có:** rail, dock, scrubber, legend tương tác, tab CÂU CHUYỆN/DỮ LIỆU, 3D,
-overlay, chọn ô, URL hash. Những thứ đó đã được thiết kế ở trên nhưng chưa dựng.
-
-### Ba cái bẫy đã sập một lần trong M0 — đừng sập lại
-
-1. **`INITIAL_VIEW` phải dùng từ vựng MapLibre (`center`), không dùng
-   `longitude`/`latitude` kiểu deck.gl.** MapLibre lặng lẽ bỏ qua khoá lạ ⇒ bản đồ về
-   `[0,0]` giữa Đại Tây Dương, cả màn hình một màu xanh xám của lớp `water`, **không có
-   lỗi nào** trong console. Triệu chứng trông y hệt "style hỏng".
-2. **Container bản đồ dùng `h-full w-full`, KHÔNG dùng `absolute inset-0`.**
-   `maplibre-gl.css` đặt `.maplibregl-map { position: relative }` và được import **sau**
-   Tailwind ⇒ cùng độ ưu tiên thì nó thắng, container tụt về chiều cao 0, canvas kẹt ở
-   `1600×300`.
-3. **Fragment shader không truy cập được `project.*`.** Module `project` của deck.gl chỉ
-   để lại `#define MODULE_PROJECT` trong FS, không mang theo uniform block. `devicePixelRatio`
-   của lớp gạch chéo vì thế đi vào bằng `#define` tính từ JS (`src/viz/hatch-extension.ts`).
-
-**Cái thứ tư, sập ở M3.1 — `m.isStyleLoaded()` là cổng SAI để thêm layer.** Lớp sông của
-cảnh C không bao giờ được thêm, và console **sạch trơn** vì `addLayer` không hề chạy —
-triệu chứng trông y hệt "sông không có trong dữ liệu". Vết chạy thật: effect chạy đúng với
-`wantRiver = true`, `styledata` bắn **ba** lần và cả ba lần `isStyleLoaded()` trả `false`;
-sau lần thứ ba nó không bắn nữa, còn style thì ít lâu sau mới thành "loaded". **Cửa sổ mà
-hai điều kiện cùng đúng không bao giờ tồn tại.**
-
-`isStyleLoaded()` còn đòi mọi *source* nạp xong — chặt hơn hẳn thứ `addLayer` thật sự cần.
-Điều kiện đúng là **source có mặt trong style** (`m.getSource("openmaptiles")`), và nó đúng
-ngay khi style spec được phân tích. Cùng họ với bẫy `INITIAL_VIEW` ở trên: sai lặng lẽ, và
-triệu chứng trỏ vào dữ liệu thay vì vào mã.
-
-### M1 — rail · chọn trường · panel Ô · hash — XONG
-
-- [x] `src/fields.ts` — 45 trường bản đồ hoá được, 5 nhóm §6, nhãn + mô tả một câu + đơn
-      vị + kiểu. 8 cột định danh/xuất xứ không có mặt ở đây (chỉ ở panel Ô và NGUỒN).
-- [x] Rail 320px, 3 tab TRƯỜNG / LAYER / Ô, khối NGUỒN neo đáy ở **cả ba**.
-      TRƯỜNG: radio 5 nhóm + ô tìm kiếm lọc trên **tên cột + nhãn + mô tả**.
-      LAYER: rỗng, có chú thích "overlay ở M2". Ô: thay nội dung rail tại chỗ + `‹ quay lại`.
-- [x] Badge ⚠ đọc từ `manifest.json` (§7c) — không con số nào hardcode trong TS.
-      Badge phủ-ô là quy tắc `cell_share < 1` **và** không phải trường "null có nghĩa";
-      `not_buildable_reason` (33,1% ô) vì thế **không** mang ⚠, đúng §7a.
-- [x] Chọn trường → choropleth + legend đổi theo, đúng một trường mỗi lúc. Classing §6a
-      đủ 5 quy tắc: phân vị · bậc {0} riêng · gộp bậc trùng · bool 2 bậc c2/c6 · hạng mục
-      dùng bậc lạnh + hatch.
-- [x] Click hex → mở tab Ô; ô đang chọn viền `#0d366b` (họ lạnh §4d), không phải bậc ramp.
-- [x] Panel Ô + khối NGUỒN theo §8, có join `station_occupancy ← stations` theo `h3_r8`.
-- [x] URL hash khoá `f` `m` `v` `c`; `l` `t` `b` giữ nguyên cho M2–M3. Ghi debounce 250ms.
-
-Đã verify bằng **render thật** trong Chrome headless (CDP, WebGL swiftshader), 0 lỗi
-console: `util_cell` (ô gạch chéo, ràng buộc 1 còn nguyên — con số của lần verify đó là
-3.107 ô / `1.320/4.400 ô · 65% dân`, **trước** bộ lọc §3a; xem M1.2) · `n_mall` (ngưỡng
-trùng gộp còn **3 bậc**, legend hiện đúng 3 swatch, không
-độn) · `not_buildable_reason` (2 bậc lạnh + hatch nhãn "đặt được", **không** có ⚠) ·
-panel Ô của `88415cb637fffff` (pop_source bất thường → "WorldPop không neo — số công bố
-của xã này không hợp lý (55 ô)", `THIEU_COVERAGE` → "thiếu quan sát · 4 trạm đo được") và
-`88415cb5d1fffff` (UNREACHABLE → "không tới được bằng đường bộ trong bán kính neo 2 km",
-Sử dụng → "không đo được — không có trạm báo cáo đủ chuẩn", **không** phải 0) · hash hỏng
-(`f` sai tên, `m=3d`, `v` thiếu số, `c` sai hình dạng) bị bỏ **từng khoá**, `l`/`t`/`b`
-vẫn còn nguyên.
-
-**M1 KHÔNG có:** overlay, 3D, dock 3 biểu đồ, scrubber 168h, tab CÂU CHUYỆN/DỮ LIỆU.
-
-### M1.2 — bộ lọc điểm sạc cá nhân, và mọi con số đổi theo — XONG
-
-Không phải việc của `web/`, nhưng nó **đứng trước** M2: mọi mark mà M2 sắp dựng (lớp trạm,
-lớp xã, mặt độ cầu) vẽ trực tiếp cái tập trạm này. Dựng M2 trên tập cũ rồi lọc sau là dựng
-xong rồi vẽ lại.
-
-**Quyết định** (đầy đủ ở `../DECISIONS.md` §3a): trạm thoả `n_ports == 1` **và**
-`current_type == 'AC'` — ổ cắm lắp tại nhà — bị loại ở bước B5, tức bị coi như không tồn
-tại trong toàn bộ bộ dữ liệu. 2.408 trạm, **71,8%** số trạm Hà Nội nhưng chỉ **7,0%** công
-suất. Bộ lọc theo **cấu trúc**, không theo tên: chỉ ~64% mang tiền tố `Tư nhân`.
-
-**Hệ quả — bảng này là lý do phải verify lại M0/M1:**
-
-| | Trước | Sau | Vì sao đổi |
-|---|---:|---:|---|
-| trạm (HANOI + BUFFER) | 3.347 | **939** | bộ lọc |
-| `util_cell` phủ ô | 29,8% | **9,9%** | ô "có trạm đo được" trước đây phần lớn là ô có một ổ cắm nhà dân |
-| `util_cell` phủ dân | 65,0% | **27,9%** | như trên |
-| `occ_status = OK` (tầng trạm) | 45,4% | **96,2%** | telemetry vốn không kém — nó đang đo nhầm tập |
-| `detour_ratio` trung vị | 1,575 | **1,477** | trạm còn lại nằm nơi có đường, bớt bị ngõ cụt thổi |
-| ô `detour_ratio > 2` | 1.057 | **726** | như trên |
-| `n_ports` Hà Nội | 9.596 | **7.785** | bộ lọc |
-
-Hai chiều ngược nhau (phủ giảm, chất lượng tăng) có **cùng một nguyên nhân**, và đó chính
-là điều đáng nói với mentor — §7b viết ra thành câu.
-
-**Kéo theo trong `web/`, đã làm:**
-
-- `web_export.py` ghi thêm `coverage.util_cell.cells_with_station` ·
-  `share_measured_among_cells_with_station` · `source_metrics.occ_status_ok` ·
-  `source_metrics.private_ac_dropped`.
-- `FieldMeta.coverageNote` nhận **hàm của manifest**, không chỉ chuỗi. Lý do trực tiếp:
-  câu cũ của `util_cell` ghi *"thưa về DIỆN TÍCH, không thưa về NGƯỜI"* — sau bộ lọc câu đó
-  **sai**, và nó sai âm thầm vì là chuỗi hằng. §7c đã cấm gõ *con số* vào `fields.ts`;
-  lần này cho thấy phải cấm cả **câu nói về con số** khi câu đó thay đổi theo dữ liệu.
-- §7, §7b, §4b, §2a, §13e và các con số ở `../README.md` · `../DECISIONS.md` ·
-  `../DATA_DICTIONARY.md` đã đo lại.
-
-Đã verify bằng **render thật**: `util_cell` (3.990 ô gạch chéo, legend
-`437/4.400 ô · 28% dân`, badge `⚠ 9,9% ô · 28% dân`) · `n_mall` (vẫn gộp còn đúng **3
-bậc** — lớp POI không phụ thuộc lớp trạm, đúng như mong đợi) · 0 lỗi console ngoài
-favicon 404 (nợ (h), sửa ở M2).
-
-### Sau M1 — lộ trình ĐÃ SỬA sau đánh giá lại ở §13
-
-Lộ trình cũ (`M2` overlay + 3D → `M3` dock → `M4` câu chuyện) **bị thay**. Lý do đầy đủ ở
-§13; tóm tắt: nó dồn toàn bộ việc kể chuyện vào M4 nhưng không cấp cho M4 từ vựng thị
-giác nào ngoài "choropleth hex + overlay", nên các cảnh của M4 sẽ lại là thảm hex kèm
-chú thích.
-
-- **M2 — từ vựng kể chuyện — XONG.** Xem mục riêng dưới đây.
-- **M3 — bốn cảnh CÂU CHUYỆN — XONG.** Spec ở **§14**, khoá hash ở **§9a**. Xem mục riêng
-  ở cuối §11.
-  **Chốt số cảnh = 4 = 3 luận điểm + 1 cảnh kết**, giải quyết ba con số đang chọi nhau
-  (ghi chép cũ nói 6 chương · §11 nói 4 · §13d nói 3 luận điểm). Con số 6 thuộc về lộ
-  trình mà chính §13 đã thay, nên nó rụng cùng lộ trình đó. Cảnh thứ tư là *"ba điều ta
-  không biết"* — không phải luận điểm thứ tư mà là chỗ **tự khai giới hạn**, và với một
-  mentor đang đánh giá phương pháp thì nó làm tăng độ tin chứ không giảm.
-
-  | cảnh | luận điểm | mark | trạng thái |
-  |---|---|---|---|
-  | A | cầu vón cục | mặt độ liên tục (§1b) + Lorenz (spec mark ở §13d) | mark đã có ở M2 |
-  | B | cung lệch khỏi cầu | 126 đa giác xã, **gọi tên** 2–3 xã | mark đã có ở M2.1 (panel XÃ) |
-  | C | thước đo phải theo mạng | mạng đường tô theo khoảng cách (đơn vị `road`) + cầu gọi tên + cặp đường minh hoạ | cần **M3-R** (export, dưới đây) + §7a-1 (đã xong) + lớp sông (nợ §2a) |
-  | D | ba điều ta không biết | không có mark mới | — |
-
-  **Cảnh B không lặp lại choropleth.** M2.1-C đã đưa `ports_per_10k_pop` lên *màn hình
-  đầu* với cực tính `đậm = thiếu cung`, nên luận điểm B được trả lời ngay khi mentor mở
-  app. Dựng lại nó thành một cảnh là tiêu một cảnh để nói lại điều vừa nói. §13d-B đề xuất
-  scatter, nhưng biểu đồ đã hoãn — nên cảnh B chuyển sang **gọi tên**: bay camera tới
-  Phường Ba Đình (65.023 dân, **0 cổng**) và Phường Tây Mỗ (230,7 cổng/10k = **49× trung
-  vị**). Một con số trừu tượng thành hai cái tên nhắc lại được, và nó dùng đúng panel XÃ
-  mà F2 vừa dựng.
-
-  **Cảnh C đổi mark chủ lực — quyết định 2026-08-07.** Kế hoạch cũ (thảm hex
-  `detour_ratio` + nhấn sông đơn thuần) bị thay. Lý do: hex nói *ở đâu* sai, không nói
-  *vì sao* sai; còn mạng đường tô theo khoảng cách cho thấy nguyên nhân bằng mắt —
-  khoảng cách chảy dọc phố, khựng lại ở sông Hồng, dồn qua vài cây cầu. **696 ô
-  `detour_ratio > 2` (1.315.068 người) giữ vai trò CON SỐ của cảnh, không còn là mark
-  chính.** Ba thành phần:
-
-  1. **Đơn vị đọc `road`** (§6b) — khi trường của đường được chọn, đường LÀ trường:
-     tô ramp tuần tự, hex/xã không vẽ. Một ramp, một legend — ràng buộc 2 nguyên vẹn.
-  2. **M3-R — bước export đứng trước cảnh C.** `make web-data` giữ lại nhãn
-     khoảng-cách-tới-trạm theo **đoạn** từ Dijkstra đa nguồn của `s08` (đồ thị:
-     `analysis/_graph.py`; hình học: `data/raw/osm_hanoi_roads.parquet`, 240.212 đoạn,
-     có `road_class` + cờ `bridge`). Đây là lần thứ hai cùng một loại lỗi được sửa:
-     §13e đã bắt `s08` tính `detour_ratio` từng ô rồi ném mảng đi — nhãn khoảng cách
-     trên đoạn đường cũng đang bị ném đúng như thế. Ship từ **LOCAL trở lên, bỏ
-     SERVICE** (79k đoạn lối nội bộ/sân trong — không chở luận điểm nào), đơn giản hoá
-     hình học ~10 m, **toạ độ giải mã sẵn, không WKB** (§5b vẫn đúng nguyên văn).
-     Payload +3–5 MB — chấp nhận, lý do ghi ở §5a. Đường đồng mức isodistance (nếu
-     cảnh cần) dựng từ chính trường này, không cần export riêng.
-  3. **Hai lớp của cảnh:** (a) **CẦU** — 4.523 đoạn `bridge = true`, kẻ đậm + **gọi
-     tên** các cầu qua sông Hồng (cùng thủ pháp gọi tên của cảnh B: một con số trừu
-     tượng thành vài cái tên nhắc lại được); (b) **2–3 cặp đường minh hoạ**,
-     precompute lúc export: polyline đường đi thật (nét liền) ↔ đoạn chim bay (nét
-     đứt) cho ô có `detour_ratio` cao — lời giải thích một-giây của tỉ số, kế thừa
-     đúng ý đồ morph của §13e bằng một mark rẻ hơn và trung thực hơn (vẽ đường đi
-     có thật, không vẽ hình tròn nội suy).
-
-  **M3-R phần dữ liệu — XONG (2026-08-07).** `hanoi/web_export_roads.py`, chạy trong
-  `make web-data`. Đồ thị tách ra `hanoi/roadnet.py` dùng chung với `s08` — refactor
-  verify bằng hash `traveltime_cell.parquet` + QA JSON **giống hệt trước**, và
-  `analysis/_graph.py` là bằng chứng vì sao không chép luật lần ba (bản chép đó đã
-  trôi mất bộ lọc `access` và neo SCC). Số đo: 160.823 đoạn ship / 3,23 MB; 396 đoạn
-  không tới được mang `dist_station_m = null` (vẽ như "không đo được", không phải 0
-  — ràng buộc 1 áp cho cả đường); cầu 4.154 đoạn *(4.523 của raw trừ đoạn bị lọc
-  access/service)*. Cặp minh hoạ: **mỗi bậc dân số một ô** thay vì một ngưỡng đơn —
-  ngưỡng đơn cho toàn ô vành ngoài hoặc mất ô cực đoan; ba bậc cho cảnh nói trọn một
-  câu: *rìa 6,97× (Sóc Sơn) · thị trấn 3,86× (Vân Đình) · nội đô 2,22× (Phú Lương)*.
-  Độ dài tuyến dựng lại khớp `dist_station_network_m` của grid tới 0,1%. **Chưa có:**
-  tên cầu — bản trích OSM không mang cột `name`; muốn gọi tên từ dữ liệu thì `s03`
-  phải trích thêm, còn không thì nhãn cầu của cảnh C là chữ biên tập trong web (tên
-  riêng không phải con số, không phạm §12 — nhưng phải chọn một trong hai một cách
-  có ý thức).
-- **M3.1 — cảnh C đổi sang mark chủ lực — XONG.** Hoà giải xung đột §14b ↔ §11/§13d (M3 dựng
-  cảnh C bằng hex-lọc trước khi mark road kịp thi công — trình tự thi công, không phải
-  phản-lý-do; quyết định road không có lý do mới nào chống lại nên **đứng nguyên**).
-  Phạm vi: (1) dựng đơn vị đọc `road` — PathLayer + mở rộng `renderPlan` + legend cho
-  `f=road:dist_station_m`; đây là nợ sẵn của §6b cho chế độ BẢN ĐỒ, cảnh C hưởng ké, và
-  là bản nháp cơ chế cho đơn vị `station` của M4 (cùng cánh cửa §6b); (2) cảnh `di-vong`
-  chuyển state sang trường road + lớp CẦU (`bridge=true`) + cặp tuyến từ
-  `routes_showcase.geojson` (dữ liệu đã ship ở M3-R), sông Hồng §2a giữ vai lớp cảnh;
-  (3) hex-lọc `>2` **không vứt** — thành nhịp kết "hậu quả đo được: 696 ô · 1,32 triệu
-  người", đúng vai CON SỐ đã phân ở §11; (4) sửa dòng `di-vong` của §14b **sau khi dựng
-  xong**, bỏ nhãn BẢN TẠM.
-- **M3.5 — lớp POI 4 nhóm + 3D (mốc chèn ngoài lộ trình, 2026-08-07) — xem mục riêng
-  dưới M3.1.** Kéo phần 3D của M5 lên trước lịch; lý do ghi tại mục đó.
-- **M4 — dock phân tích + scrubber 168h — XONG (2026-08-07).** Xem mục riêng ở cuối §11.
-- **M4.1 — panel TRẠM (§8a) + toggle trạng thái vận hành (§4d-3a) — XONG (2026-08-07).**
-  Gom vào một mốc vì cùng đối tượng: viền đứt trên bản đồ nói "không bình thường", panel
-  nói cụ thể là gì. Hash `c=station:<station_id>` (§9). Xem mục riêng ở cuối §11.
-- **M4.2 — chế độ DỮ LIỆU (§3f) — XONG (2026-08-07).** Kèm một việc export: `web_export`
-  ghi thêm khối `totals` (tổng cổng, MW) vào manifest — KPI row không gõ tay số nào. Xem
-  mục riêng ở cuối §11.
-- **M5 — overlay trạm biến áp OSM — XONG (2026-08-07).** Xem mục riêng ở cuối §11.
-  ~~"overlay còn lại"~~ · ~~"+ 3D. Bị đẩy xuống cuối: `fill-extrusion` nhà cửa không
-  trả lời câu hỏi nào của mentor."~~ **Cả tên lẫn phạm vi của mốc này đều đã lỗi thời khi
-  tới lượt thi công, và sửa lại là việc đầu tiên của lượt đó.** Ba mục bị trừ, mỗi mục một
-  lý do khác nhau — chi tiết ở bảng §4d-1:
-
-  | trừ khỏi M5 | vì sao |
-  |---|---|
-  | 3D | **đã kéo lên M3.5**. Lý do hoãn cũ nói về nhà cửa **của basemap** — lớp trang trí không mang dữ liệu của ta; khối 3D của M3.5 là **POI của ta** (chung cư, TTTM, bệnh viện — chính các thực thể mang cầu sạc), nên lý do đó không áp dụng cho phần được kéo. `fill-extrusion` basemap đi kèm chỉ với vai BỐI CẢNH (§2a-3) |
-  | trạm sạc · ranh giới xã · vùng ngoài ngưỡng | **đã ship ở M2**. Riêng mục thứ ba đổi tên `beyond5` → `beyond2km` vì khái niệm PHÚT bị bỏ ở M2.1(i) |
-  | vùng `buildable` | **không còn đối tượng**: cột `buildable` và `not_buildable_reason` bị bỏ ở M2.1(i). Dựng nó là bịa hình học cho một khái niệm không tồn tại (§12) |
-
-  ⇒ M5 thực chất còn **đúng một** overlay: trạm biến áp OSM. Cụm từ "và các overlay phụ"
-  cũng bỏ — danh sách overlay là quyết định của chủ dự án, không phải một chỗ trống để tự
-  điền, nên nó không được tồn tại như một mục lộ trình mở.
-- **M4.3 — bốn lỗi còn lại của nghiệm thu M0→M5** — XONG (2026-08-07), chi tiết ở khối M4.3.
-- **M4.4 — Hoàng Sa · Trường Sa đọc được trên bản đồ** — XONG (2026-08-07), chi tiết ở khối M4.4.
-- **M4.5 — mặt độ cầu rời khỏi BẢN ĐỒ, ở lại cảnh A** — XONG (2026-08-07), chi tiết ở khối M4.5.
-- **M6 — nạp output GMM** khi thuật toán có kết quả. *(Mục duy nhất còn mở của §11, và nó
-  bị chặn ngoài repo: thuật toán chưa có kết quả để nạp.)*
-
-### M2 — từ vựng kể chuyện — XONG
-
-Mark mới, chọn theo LUẬN ĐIỂM chứ không theo kho lưu trữ.
-
-- [x] **Đơn vị đọc** (§6b) — `FieldMeta.readAs` là `cell` hoặc `commune`; trường đang chọn
-      quyết định hình học nào được tô, hình học kia **không vẽ**. Ràng buộc 2 nguyên vẹn:
-      state vẫn là **một** chuỗi `field`. Rail có công tắc `Ô H3 | XÃ` ở đầu danh sách.
-      *(Tên thuộc tính là `readAs` chứ không phải `unit` vì `unit` đã là câu đơn vị của
-      legend — đụng tên này bị trình biên dịch bắt, không phải bị người đọc bắt.)*
-- [x] **Lớp XÃ** — 8 trường của `commune.parquet`, tô 126 đa giác. Xã không có giá trị
-      dùng **cùng vân 45° xám** với ô null: một chất liệu cho một khái niệm, bất kể hình học.
-- [x] **Lớp TRẠM** — 939 trạm công cộng. HANOI/BUFFER phân biệt bằng **hình** (chấm đặc +
-      vòng viền surface 2px ↔ chấm rỗng viền lạnh 2px), không bằng màu. Bán kính **hằng số**
-      4,5 px. *(Đã thử 3,5 px và render thật cho thấy lỗ giữa chấm rỗng chỉ còn ~4 px —
-      đặc và rỗng gần như một. Con số này đến từ ảnh chụp, không từ cảm giác.)*
-- [x] **Mặt độ cầu** (§1b, §13d-A) — `ContourLayer`, ô gộp **3.000 m**, ngưỡng chia bậc
-      trên chính phép gộp nên legend in được người/km² thật. *(1.500 m đã bị loại sau khi
-      render: ~3 tâm ô H3 mỗi ô gộp ⇒ phương sai lấy mẫu ±33% hiện thành hoa văn hình
-      thoi — một cấu trúc do phép gộp sinh ra, không có trong thành phố. Đúng loại lỗi §12
-      cấm.)*
-- [x] **Nhóm SO SÁNH** (§13c-1) — 5 trường: `detour_ratio` (chuyển nhóm) ·
-      `dist_station_asym_m` (chuyển nhóm, thêm sau A5) · `pop_beyond_2km` ·
-      `util_pctl_cell` · `commune:ports_per_10k_pop`. Phủ của trường
-      phái sinh đo **lúc chạy** và nạp lúc boot, để badge ⚠ vẫn thấy được trước khi bấm
-      (ràng buộc 4).
-- [x] **Tab LAYER thật** — checkbox 3 overlay, chú giải là **mẫu hình** chứ không phải ô
-      màu. Khoá hash `l`, thứ tự chuẩn hoá; ID lạ bị bỏ **riêng nó**.
-- [x] **Ngưỡng zoom hex** (§13b-1) — `HEX_MIN_ZOOM = 11`. Dưới ngưỡng: trường cộng được vẽ
-      mặt liên tục, trường khác **không vẽ và nói vì sao**, kèm nút `phóng tới z11`.
-      Mặc định đổi sang `commune:population` — màn hình đầu là 126 mảng, không phải 4.427 hạt.
-- [x] **Nợ M0/M1** — `hashchange` hai chiều (§9), chặn vòng lặp bằng so chuỗi `lastWritten`;
-      favicon inline `data:` URI.
-
-**Thay đổi so với §4d, đã ghi lý do tại chỗ:** overlay dạng vùng bỏ alpha 0,5, chuyển sang
-**vân 135°** (§4d-1). Va chạm có thật với §6a-5, không phải giả định.
-
-Đã verify bằng **render thật** (Chrome headless, CDP, WebGL swiftshader), **0 lỗi console
-và 0 request 404** ở mọi ảnh — kênh console giờ sạch thật, không phải sạch nhờ bộ lọc:
-
-| # | Chụp gì | Kết luận rút ra được từ ảnh |
+| | ship | ghi chú |
 |---|---|---|
-| 1 | màn hình đầu (`#`) | 126 đa giác xã, legend `126/126 xã`, **không phải thảm hex** |
-| 2 | `l=stations` ở biên z12,6 | chấm đặc trong Hà Nội ↔ chấm rỗng ngoài biên, phân biệt được |
-| 3 | `f=commune:ports_per_10k_pop` | lớp xã tô được trường SO SÁNH; trung tâm **nhạt** = ít cổng trên đầu người — luận điểm B |
-| 4 | `f=not_buildable_reason` + `l=stations,beyond5` | trường hạng mục **phẳng**, overlay vùng **vân**, ô null **vân 45°** — ba thứ cùng họ lạnh mà không cái nào lẫn cái nào |
-| 5 | `f=pop_beyond_5min` z11 | bậc `{0}` riêng (§6a-2) cho ô trong 5 phút, gạch chéo cho 51 ô không tới được — `0 ≠ null` giữ nguyên trên một trường phái sinh |
-| 6 | `f=population` z9,3 | mặt độ liên tục, legend in người/ô gộp 3 km + câu "giả định khai báo, không phải số đo" |
+| nền · basemap sáng · lớp lưới | ✅ | §2, §3 |
+| rail · chọn trường · panel Ô · hash | ✅ | §6, §9 |
+| lớp XÃ · lớp TRẠM · overlay | ✅ | đơn vị đọc §6b |
+| bốn cảnh CÂU CHUYỆN | ✅ | §14 |
+| lớp POI 4 nhóm + `m=3d` | ✅ | khối 3D là **POI của ta**, không phải nhà cửa basemap |
+| dock 3 biểu đồ + scrubber 168 h | ✅ | §3f |
+| overlay trạm biến áp OSM | ✅ | `pickable: false` — lớp bối cảnh, `DECISIONS §8` |
+| panel TRẠM + trạng thái vận hành | ✅ | nét đứt mang `op_status` |
+| chế độ DỮ LIỆU (`d=1`) | ✅ | không có bản đồ nào trong đó (§3f) |
+| Hoàng Sa · Trường Sa có nhãn | ✅ | luật đọc từ `commune_kind = DAC_KHU` |
+| màn hình toàn quốc (r6, 34 tỉnh) | ✅ | `src/national/`, `docs/adr/0004` |
+| **nạp output GMM** | ❌ | **mục duy nhất còn mở**, và bị chặn **ngoài repo**: thuật toán chưa có kết quả để nạp |
+
+Ba thứ từng nằm trong lộ trình và **đã chết cùng trường của chúng**, không phải bị hoãn:
+vùng `buildable` (cột bị bỏ, `DECISIONS §7`), ngưỡng theo **phút** (khái niệm bị bỏ,
+`DECISIONS §6`), và mặt độ cầu trên BẢN ĐỒ (rời sang cảnh A — xem 11c).
+
+### 11b. Mười bẫy đã sập một lần — đừng sập lại
+
+Sắp theo mức độ **im lặng**: bẫy càng không ném lỗi thì càng đắt.
+
+**1 · `INITIAL_VIEW` phải dùng từ vựng MapLibre (`center`), không phải `longitude`/`latitude`
+kiểu deck.gl.** MapLibre lặng lẽ bỏ qua khoá lạ ⇒ bản đồ về `[0,0]` giữa Đại Tây Dương, cả
+màn hình một màu xanh xám của lớp `water`, **không một lỗi nào** trong console. Triệu chứng
+trông y hệt "style hỏng".
+
+**2 · `m.isStyleLoaded()` là cổng SAI để thêm layer.** `styledata` bắn ba lần và cả ba lần
+`isStyleLoaded()` trả `false`; sau đó nó không bắn nữa còn style thì ít lâu sau mới "loaded".
+**Cửa sổ mà hai điều kiện cùng đúng không bao giờ tồn tại** — `addLayer` không hề chạy, console
+**sạch trơn**, và triệu chứng trông y hệt "dữ liệu không có". Điều kiện đúng là **source có
+mặt trong style** (`m.getSource("openmaptiles")`), đúng ngay khi style spec được phân tích.
+
+**3 · `characterSet: "auto"` là bắt buộc cho mọi `TextLayer`.** Tập ký tự mặc định là **ASCII**,
+nên atlas không có `Đ` `ặ` `à` và nhãn render ra `c khu Ho ng Sa` — mỗi chữ có dấu bị nuốt
+**lặng lẽ, không một cảnh báo nào**. Ảnh render bắt được, test không. Một bản đồ tiếng Việt
+không được phép có mặc định đó.
+
+**4 · Một trường khai `bắt buộc` trong kiểu `Manifest` mà dữ liệu không có ⇒ màn hình trắng,
+và `tsc` im.** Manifest tỉnh không có khối `source_metrics`; kiểu khai nó bắt buộc nên TS cho
+qua cả sáu chỗ `m.source_metrics.x`. *Bài học mang được sang chỗ khác:* **`optional` là một
+công cụ tìm lỗi, không phải một lời xin lỗi** — đổi kiểu cho khớp dữ liệu rồi để trình biên
+dịch liệt kê hậu quả, nhanh hơn mọi cách đọc mã.
+
+**5 · Hai bộ dữ liệu đặt tên khác nhau cho cùng một khái niệm.** Bộ cũ ghi `scope = 'HANOI'`,
+store toàn quốc ghi `'IN'`; điều kiện `=== "HANOI"` cho `false` ở khắp nơi ⇒ **mọi trạm của
+mọi tỉnh** vẽ thành chấm rỗng "vành đệm". Cách sửa neo vào `BUFFER` (`isInScope`) — hằng số
+**duy nhất mang cùng nghĩa ở cả hai bộ**, và một bộ thứ ba đặt tên `PROVINCE` sẽ chạy đúng mà
+không phải sửa gì.
+
+**6 · `interleaved: true` ⇒ mọi lớp deck phải khai `depthCompare`.** Thiếu nó, icon POI biến
+mất hẳn sau các khối nhà ở `m=3d`. Đo bằng A/B trên cùng một hash: trước — 5 icon mất sạch sau
+các tháp; sau — đủ 5. Cái giá đã chấp nhận: icon của POI có polygon cũng mất depth test nên
+xuyên qua khối cao đứng chắn — đúng lập luận đã chốt, **lớp icon là chú thích, không phải một
+vật thể trong cảnh 3D**.
+
+**7 · Khoá một cái NÚT không khoá một khoá HASH.** `#tinh=04&s=von-cuc` mở được cảnh CÂU CHUYỆN
+dù nav đã khoá, và văn Hà Nội in đè lên bản đồ Cao Bằng. Cách sửa: cờ module trong `scenes.ts`,
+`parseScene` trả `null` khi tắt ⇒ khoá `s` biến mất **y như một slug lạ** (luật 1 của §9),
+không cần nhánh lỗi mới.
+
+**8 · BA cổng "có cột không", và chúng KHÁC nhau.** `gcol()` hỏi *một cột cố định của lưới*;
+`cellFields()` hỏi *một trường có dựng được không* (chặn `selectExpr()` nhả biểu thức riêng ra
+nguyên văn — đúng chỗ đã bị quên hai lần); `columnsOf()` hỏi *cột của một bảng bất kỳ* bằng
+cách đọc footer parquet (`LIMIT 0`). Gộp chúng lại sẽ phải bịa một cái tên chung cho ba câu
+hỏi khác nhau. Manifest chỉ liệt cột của **LƯỚI** — nó không biết gì về bảng trạm.
+
+**9 · `deps` không đi qua `dataPath()` sẽ đọc dữ liệu của tỉnh khác và trả về một con số trông
+hợp lý.** `util_pctl_cell` có `deps` là `stations.parquet`; ở chế độ tỉnh nó đọc bảng trạm của
+Hà Nội. Không ném lỗi, không rỗng — chỉ sai.
+
+**10 · Fragment shader không truy cập được `project.*`.** Module `project` của deck.gl chỉ để
+lại `#define MODULE_PROJECT` trong FS, không mang theo uniform block. `devicePixelRatio` của
+lớp gạch chéo vì thế đi vào bằng `#define` tính từ JS (`src/viz/hatch-extension.ts`).
+
+**Và một bẫy của bố cục, không của thư viện:** container bản đồ dùng `h-full w-full`, **không**
+`absolute inset-0`. `maplibre-gl.css` đặt `.maplibregl-map { position: relative }` và được
+import **sau** Tailwind ⇒ cùng độ ưu tiên thì nó thắng, container tụt về chiều cao 0, canvas
+kẹt ở `1600×300`.
+
+### 11c. Bốn quyết định chốt trong lúc dựng, không suy ra được từ §3–§9
+
+**Mặt độ cầu rời khỏi BẢN ĐỒ, ở lại trong cảnh A.** Ở z9,3, mặt gộp 3 km với `opacity 0.85`
+phủ kín thành phố thành một khối cam — nó nuốt mạng đường, nuốt ranh giới, và **lấp mất những
+lỗ hổng**, mà lỗ hổng là một nửa nội dung của trường dân số. Vành nhạt nhất còn loang ra ngoài
+ranh giới: sản phẩm của phép làm mượt, không phải người thật. Nó **ở lại** trong cảnh A vì ở
+đó nó **là luận điểm** (§13d-A), không phải một cách tô — cùng khuôn với `bridges`/`routes`:
+**cảnh sở hữu mark của nó**. Cờ đi qua `PlanInput.inStory`, và **cả hai** chỗ gọi `renderPlan`
+phải truyền nó — `Legend` cũng gọi hàm này, thiếu cờ ở đó cho một dải chú giải nói về một bản
+đồ khác.
+
+**Nhãn quần đảo là *chrome của bản đồ*, không phải overlay.** Không có trong tab LAYER, không
+tắt được — cùng vai với đường khung ranh giới BỐI CẢNH: một cái tên địa lý không phải một biến.
+Luật đọc từ `commune_kind = DAC_KHU`, **không** từ danh sách tên gõ trong TS: 13 đặc khu ở 11
+tỉnh, và danh sách gõ tay sẽ lệch khỏi niên bản địa giới ngay lần sáp nhập sau. Neo ở **tâm
+bbox của cả cụm**, không phải trọng tâm mảnh lớn nhất — đặt tên lên đảo lớn nhất là gọi tên
+*một hòn đảo*, không phải cả quần đảo.
+
+**`FieldMeta.coverageNote` nhận HÀM của manifest, không phải chuỗi hằng.** Câu cũ của
+`util_cell` ghi *"thưa về DIỆN TÍCH, không thưa về NGƯỜI"*; sau bộ lọc điểm sạc cá nhân câu đó
+**sai**, và sai âm thầm vì là hằng. §7c đã cấm gõ *con số* vào `fields.ts` — chỗ này cho thấy
+phải cấm cả **câu nói về con số** khi câu đó thay đổi theo dữ liệu.
 
-Thêm một ảnh **phóng 5×** vào chỗ vân null và vân overlay chồng nhau: hai vân vuông góc,
-chỗ chồng thành lưới caro — §4d-1 đúng ở mức pixel, không chỉ ở mức lập luận.
-
-Logic thuần có test (`pnpm test`, `node:test`, **không dependency mới**): **73 test**, gồm
-`render-plan` (mọi tổ hợp đơn vị × zoom cho đúng MỘT mặt tô; biên `HEX_MIN_ZOOM`; hiệu
-chuẩn 9 px tại z9,3), `hash` (khoá `l` bỏ ID lạ riêng lẻ, thứ tự chuẩn hoá, khoá `t`/`b`
-của M4 không bị xén, vòng đọc↔ghi hội tụ), `fields` (id duy nhất, `column` không mang tiền
-tố, badge là quy tắc, §7a chặn đúng, phủ lúc chạy không đọc nhầm sang manifest).
-
-> `test/resolve-ts.mjs` — 12 dòng dùng `module.registerHooks` **sẵn có của Node** để
-> `node --test` giải được import không đuôi của `src/`. Không có nó thì §12 chỉ áp dụng
-> được cho lá của cây phụ thuộc. Hai đường khác đã loại: gõ `.ts` vào ~30 câu import (sửa
-> mã nguồn để chiều bộ chạy test), và thêm `tsx`/`ts-node` (§1 cấm).
-
-**Ba chỗ M2 làm chưa tới, đã tìm ra khi review lại bằng mắt** — sửa ở M2.1: panel Ô in
-"không đo được" cho 10 trường đều biết giá trị · lớp xã không bấm được và không có tên ·
-màn hình đầu vẫn là một MỨC. Xem M2.1.
-
-**M2 KHÔNG có:** 4 cảnh CÂU CHUYỆN, dock 3 biểu đồ, scrubber 168h, 3D, trạm biến áp
-(`web_export` chưa xuất toạ độ — không vẽ thứ không có dữ liệu).
-
-### M2.1 — tầng dữ liệu đổi, và sửa những chỗ M2 làm chưa tới
-
-Hai việc gộp vào một lượt vì chúng đụng cùng các file.
-
-#### (i) Tầng dữ liệu bỏ khái niệm THỜI GIAN LÁI — 54 cột còn 52
-
-Pipeline đổi ngoài phạm vi `web/`; `web/` chạy theo. Cái mất và cái được:
-
-| Cột | | Vì sao web phải đổi theo |
-|---|---|---|
-| `drive_time_station_min` | **bỏ** | `s08` chỉ còn tính khoảng cách. Kéo theo: trường TIẾP CẬN, badge ⚠ maxspeed, trường SO SÁNH `pop_beyond_5min`, overlay `beyond5`, và cột xã `drive_time_min_pop_weighted` |
-| `buildable` · `not_buildable_reason` | **bỏ** | mất 1 trường bool + 1 trường hạng mục; §4d-1 mất luôn ví dụ minh hoạ của chính nó |
-| `dist_substation_m` | **bỏ** | lớp lưới điện ra khỏi phạm vi ⇒ mất badge ⚠ nguồn `osm_substations` |
-| `evidence_grade_travel_time` | **đổi tên** | → `evidence_grade_distance`; giá trị `OSM_NETWORK_FREEFLOW` → `OSM_NETWORK` |
-| `dist_station_euclid_m` | **thêm** | xem ghi chú dưới |
-| `road_len_in_hanoi_m` | **thêm** | phần đường nằm TRONG ranh giới, tách khỏi `road_len_m` để chênh lệch ở ô biên đo được chứ không âm thầm |
-
-**`dist_station_euclid_m` quay lại — §13e phải đọc lại có điều kiện.** §13e từng lập luận:
-ship khoảng cách chim bay là phá nguyên tắc một-khái-niệm-một-trường, nên chỉ ship
-`detour_ratio` (sai số của phép đo đã bị loại). Lập luận đó đứng khi *chỉ có một* cách đo
-khoảng cách. Giờ tầng dữ liệu ship cả hai, và **tỉ số là thương của chúng** — tức cả ba
-cột không còn là ba biến thể cạnh tranh mà là một bộ ba khép kín (`network`, `euclid`,
-`network ÷ euclid`). Web không quyết định điều này; web ghi lại rằng §13e nói về một trạng
-thái không còn nữa.
-
-`pop_beyond_5min` → **`pop_beyond_2km`**: cùng câu hỏi ("cầu chưa được phục vụ"), đổi
-thước từ **phút** sang **mét** vì phút không còn tồn tại. Ngưỡng 2 km thay 5 phút. Đổi lại
-được một thứ: ngưỡng mới **không kế thừa giả định "chạy thông thoáng"** — nó là số cứng,
-đúng như §7 vẫn nói về `dist_station_network_m`. Overlay `beyond5` → `beyond2km` theo.
-
-**Phép cộng của §6 đổi:** `12 + 10 + 10 + 4 + 8 + 8 = 52`.
-
-| | Nhóm | Cột |
-|---|---|---:|
-| 1 | CẦU | 12 *(không đổi)* |
-| 2 | ĐẤT | **10** — mất `buildable`, `not_buildable_reason` |
-| 3 | ĐƯỜNG | **10** — thêm `road_len_in_hanoi_m` |
-| 4 | CUNG | **4** — mất `dist_substation_m` |
-| 5 | TIẾP CẬN & SỬ DỤNG | **8** — mất `drive_time_station_min`, thêm `dist_station_euclid_m` |
-| — | ĐỊNH DANH & XUẤT XỨ | 8 *(không đổi)* |
-
-**Không còn cột nào khai `nullMeans`.** `not_buildable_reason` là cột duy nhất từng khai,
-và nó đã bị bỏ. Quy tắc §7a **vẫn sống** trong `badgesFor`, và test của nó chuyển sang
-dựng một `FieldMeta` tổng hợp thay vì trỏ vào một cột thật — nếu không, quy tắc sẽ im lặng
-biến mất cùng dữ liệu mà không ai biết.
-
-#### (ii) Ba quyết định chốt sau review
-
-**(A) Panel XÃ dùng lại khoá `c`, mang tiền tố: `c=commune:00004`.**
-
-Đối xứng với `f=commune:…` (§6b). Nhưng lý do thật nằm ở chỗ khác: rail có **một** vùng
-chi tiết, nên tại một thời điểm chỉ **một** đối tượng được chọn. Một khoá thì trạng thái
-"chọn cả ô lẫn xã" **không biểu diễn được**; hai khoá thì nó biểu diễn được và ta sẽ phải
-viết luật để cấm. Chọn cách mà trạng thái sai không tồn tại.
-
-Kiểm hình dạng theo tiền tố: `commune:` + 5 chữ số (`/^\d{5}$/`), còn lại là H3 15 hex.
-Tab thứ ba của rail đổi nhãn theo thứ đang chọn — `Ô` hay `XÃ` — chứ không cố định là `Ô`:
-nhãn cố định sẽ nói dối về nội dung bên trong.
-
-**(B) Cực tính: ĐẢO THỨ TỰ GÁN MÀU, không thêm ramp mới.**
-
-Vấn đề: `drive_time`/`dist_station_*` nhạt = TỐT, `ports_per_10k_pop` nhạt = XẤU. Cùng
-ramp cam, nghĩa ngược nhau, nằm cạnh nhau trong một danh sách.
-
-Chốt: `FieldMeta.polarity`, ba giá trị, mặc định là **vắng**:
-
-| `polarity` | ý nghĩa | gán màu |
-|---|---|---|
-| *(vắng)* | trung tính — không có "tốt/xấu" | đậm = NHIỀU *(nguyên trạng, 40+ trường không đổi)* |
-| `"high-bad"` | cao = xấu | đậm = nhiều = xấu |
-| `"high-good"` | cao = tốt | **đảo**: đậm = ÍT = xấu |
-
-Bất biến thu được: **đậm luôn là chỗ cần can thiệp**. Đó là một quy tắc THỊ GIÁC, mạnh hơn
-một dòng chữ — người xem đọc gestalt màu trước khi đọc câu đơn vị, nhất là khi lật qua lại
-hai trường liền kề.
-
-*Vì sao không phải ramp phân kỳ:* nó buộc chạy lại `validate_palette.js` trên surface
-`#f2f3f0` và đo lại toàn bộ §4 (21 cặp, deuteranopia + protanopia, mực chữ §4c). Đảo thứ
-tự gán thì **dùng nguyên 7 hex đã PASS** — không có màu mới nào, nên không có gì để
-validate lại. §4a vẫn đúng nguyên văn: ramp vẫn đơn điệu theo độ sáng; thứ đảo là ánh xạ
-giá trị→bậc, không phải bản thân ramp.
-
-*Vì sao không chỉ thêm chữ:* chữ vẫn được thêm (câu đơn vị mang `↑ tốt hơn` / `↑ xấu hơn`),
-nhưng một mình nó không đủ — nó thua chính cái gestalt nó đang cố sửa.
-
-**(C) Trường mở app: `commune:ports_per_10k_pop`.**
-
-`commune:population` thoả §13b (không phải thảm hex) nhưng vẫn là một **MỨC** ai cũng đoán
-được — chưa thoả §13a-4 (*"ta đang vẽ mức, thứ đáng vẽ là độ lệch khỏi kỳ vọng"*).
-`ports_per_10k_pop` là một ĐỘ LỆCH, và với (B) thì **đậm = thiếu cung**. Nó cũng không phụ
-thuộc khái niệm thời gian lái vừa bị bỏ.
-
-*Kèm theo — trường này lệch rất nặng, phải nói ra:* Ba Đình **0** cổng/10k dân, Tây Mỗ
-**230,7** = **49× trung vị**, tương quan với dân số xã **−0,02**. Bậc cuối của legend là
-`11`, nên mọi giá trị từ 11 tới 230,7 chung một màu. Legend phải in **giá trị lớn nhất**
-cạnh bậc cuối, và mô tả phải nói rằng tỉ số với mẫu số nhỏ thì vọt.
-
-### M3 — bốn cảnh CÂU CHUYỆN — XONG
-
-Spec ở **§14**, khoá hash ở **§9a**. Chế độ thứ hai của app, và là chỗ trả lời "vì sao GMM
-hợp lý".
-
-- [x] **Khoá `s`** (§9a) — MỘT khoá mang cả "đang ở chế độ nào" lẫn "cảnh nào", nên trạng
-      thái sai không biểu diễn được. Slug chứ không phải chữ cái: chữ cái gãy im lặng khi
-      chèn cảnh. Khi có `s` thì `f`/`v`/`l` **không đọc và không ghi** — link tới một cảnh
-      vì thế ngắn: `#s=di-vong&m=2d`.
-- [x] **Một store, không phải hai** (§14a) — cảnh GHI ĐÈ state dùng chung (L1); thoát ra
-      BẢN ĐỒ **không đặt lại gì** (L2). L2 là chỗ giá trị nhất: xem xong cảnh C thì đứng
-      nguyên tại đó, chỉ khác là rail hiện ra và mọi thứ bấm được.
-- [x] **Nav thật** — `CÂU CHUYỆN` mất `disabled`, mất mực mờ, mất nhãn `M3`, có `onClick`.
-      Mặt kia của luật §3a: dựng xong thì phải bỏ dấu hiệu "chưa dựng" đi.
-- [x] **Cột cảnh 400px** thay rail (§14c), chuyển cảnh bằng `IntersectionObserver`.
-- [x] **Cảnh A** — mặt độ liên tục + **đường Lorenz**, biểu đồ đầu tiên của app. Luật màu
-      cho chart chốt ở §4d-2 trước khi vẽ nét đầu tiên.
-- [x] **Cảnh B** — bay tới Phường Ba Đình và Phường Tây Mỗ, mở panel XÃ, số đo lúc chạy.
-- [x] **Cảnh C** — bản M3 dựng bằng hex-lọc; **thay ở M3.1**, xem dưới.
-- [x] **Cảnh D** — ba điều ta không biết + câu ghép §13d.
-
-**Hai chỗ §13b-2 phải mở ra để cảnh C dựng được:** ngưỡng `HEX_MIN_ZOOM` thực thi điều kiện
-(a) của §13b và vô tình chặn luôn điều kiện (b) — chính điều kiện mà §13b lấy cảnh C làm ví
-dụ. `renderPlan` nhận thêm `filtered`.
-
-### M3.1 — cảnh C đổi sang mark chủ lực — XONG
-
-Bốn việc của §11 (mục M3.1) làm đủ:
-
-- [x] **(1) Đơn vị đọc `road`** (§6b) — `PathLayer` + `renderPlan` trả `paint: "road"` +
-      legend. Nợ sẵn của §6b cho chế độ BẢN ĐỒ, cảnh C hưởng ké, và là bản nháp cơ chế cho
-      đơn vị `station` của M4. `f=road:dist_station_m` mở được ở chế độ BẢN ĐỒ.
-      **396/160.823 đoạn null** vẽ bằng **mực xám của vân null**, không phải bậc ramp: đường
-      1px không mang được vân 45°, nên chất liệu chuyển thành mực, khái niệm giữ nguyên —
-      ràng buộc 1 áp cho cả hình học đường. Badge ⚠ của nó **không có vế "% dân"**: một đoạn
-      đường không có dân, nên câu đó không sai số mà là không có nghĩa (`pop_share` để
-      `undefined`, không để 0).
-- [x] **(2) Cảnh `di-vong` đổi state** — nhịp 1 tô `road:dist_station_m`, kèm lớp **cầu lớn**
-      và **3 cặp tuyến** từ `routes_showcase.geojson`; sông Hồng giữ vai lớp cảnh (§2a).
-- [x] **(3) Hex-lọc `>2` không vứt** — thành **nhịp 2**, đúng vai CON SỐ. Cơ chế nhịp chốt
-      ở §14d.
-- [x] **(4) §14b sửa lại**, nhãn BẢN TẠM bỏ; §14d và §4e mới; bẫy `isStyleLoaded()` ghi vào
-      danh sách bẫy của §11.
-
-**Mạng đường nạp LƯỜI**, không nạp lúc boot: 3,2 MB và 427 nghìn điểm là chi phí thật, và
-phần lớn phiên xem không chọn trường của đường. Điều kiện là `readAs === "road"` — cả mark
-cầu lẫn cặp tuyến chỉ sống trong đúng nhịp mà trường đường đang tô, nên không có trường hợp
-nào cần đường mà điều kiện đó sai.
-
-**Con số của cảnh C đã đổi, và app nói đúng còn tài liệu thì không** — ghi lại vì nó là một
-bài học chứ không phải một lần sửa số. `data/processed` đang **cũ hơn mã pipeline**; chạy
-`make layers` (để kiểm nợ `population_total_preserved`) đồng bộ lại và tỉ số đi vòng đổi:
-
-| | tài liệu cũ | hiện hành |
-|---|---:|---:|
-| ô `detour_ratio > 2` | 672 | **696** |
-| người trong các ô đó | 1.280.464 | **1.315.068** |
-| ô báo phủ nhầm ở 3 km | 1.004 · 26,0% | **985 · 25,5%** |
-
-App hiện **696** vì mọi con số của bốn cảnh đo lúc chạy (§14b) — đúng như luật muốn. Các
-mục §2a · §11 · §13b-2 · §13d · §13e · §14b ở trên đã đo lại theo. `data/qa/s08_traveltime.json`
-khớp con số mới, nên ba nguồn (QA · dữ liệu ship · màn hình) cùng nói một điều.
-
-**Đã verify bằng render thật** (Chrome headless, CDP, WebGL swiftshader) — **0 lỗi console
-và 0 request 404** ở mọi ảnh:
-
-| # | Chụp gì | Kết luận rút ra được từ ảnh |
-|---|---|---|
-| 1 | `#s=von-cuc` | mặt độ + Lorenz; **8,4% diện tích chứa một nửa dân** · Gini 0,682 · 4.400 ô |
-| 2 | `#s=cung-lech` | camera ở Ba Đình, viền lạnh, 939 chấm trạm; 65.023 dân/**0 cổng** ↔ Tây Mỗ 231 cổng/10k = **49,16× trung vị 4,69** |
-| 3 | `#s=di-vong` nhịp 1 | mạng đường tô theo khoảng cách, **sông Hồng xanh**, **48 cầu lớn** nằm đúng các nút vượt sông, bờ đông đậm hẳn — nguyên nhân đọc được bằng mắt |
-| 4 | `#s=di-vong` nhịp 2 | **696 ô · 1.315.068 người** · trung vị 1,47× · 985 ô báo phủ nhầm (25,5%) |
-| 5 | `#s=chua-biet` | ba giới hạn, số phủ `util_cell` **9,9% ô · 28% dân** đọc từ manifest |
-| 6 | `f=road:dist_station_m` ở BẢN ĐỒ | đơn vị đọc thứ ba dùng được ngoài cảnh; legend nét xám `không đo được (396 đoạn)`, badge `99,8% đoạn` **không kèm "% dân"** |
-
-Thêm hai phép kiểm **hành vi**, không phải hình: link tới thẳng một cảnh mở đúng cảnh đó
-(cả 4 slug); và bấm `Mở trong BẢN ĐỒ` từ cảnh C cho hash
-`#m=2d&f=road:dist_station_m&v=105.8400,21.0000,9.30,0,0` — **giữ nguyên trường và khung
-nhìn của cảnh**, rail trở lại. Đó chính là luật L2, đo được chứ không phải hứa.
-
-Logic thuần có test (`pnpm test`, `node:test`, không dependency mới): **141 test**, thêm 35
-so với M2 — phép tính Lorenz (sắp theo mật độ chứ không theo dân số · tra ngược lấy điểm đầu
-tiên đạt ngưỡng · Gini hai đầu · ô diện tích 0), luật "cảnh/nhịp nào chốt state gì", ngưỡng
-cầu lớn, khoá `s` (bỏ `f`/`v`/`l` khi có `s`, giữ `c`, vòng đọc↔ghi hội tụ), và `filtered`
-của `renderPlan`.
-
-**M3.1 KHÔNG có:** dock 3 biểu đồ, scrubber 168h, chế độ DỮ LIỆU, panel TRẠM — chúng là
-M4/M4.1/M4.2. ~~3D~~ → kéo lên M3.5.
-
-### M3.5 — lớp POI 4 nhóm + 3D — mốc chèn ngoài lộ trình, chốt 2026-08-07
-
-Yêu cầu trực tiếp từ người hướng dẫn dự án: nhìn thấy **hình học thật** của 4 nhóm POI
-(chung cư/nhà ở tập thể · trung tâm thương mại · công cộng/khu vui chơi · bệnh viện/trường
-học) ở cả 2D lẫn 3D. Đây không phải M4 — nó kéo phần 3D của M5 lên trước lịch, và lý do
-hoãn cũ không còn áp dụng cho phần được kéo (xem dòng M5 ở trên: khối 3D lần này là **POI
-của ta**, không phải nhà cửa của basemap).
-
-**Dữ liệu — polygon POI chưa từng được giữ lại, phải sửa pipeline.** Đo trước khi thiết kế
-(2026-08-07): `s03_osm_extract.py` đọc cả node lẫn way nhưng nén way thành **tâm**
-(`LineString.centroid`, s03:185–200) — `osm_hanoi_poi.parquet` không có cột hình học nào;
-s03 cũng không đọc relation nên multipolygon lớn rớt hẳn. Hai nhóm sau (công cộng, bệnh
-viện/trường học) **chưa từng được trích** — `classify_poi` không có tag của chúng.
-
-**Quyết định (đã hỏi, 2026-08-07): bước trích RIÊNG, không mở rộng s03.**
-`s03b_osm_poi_visual.py` → `data/raw/osm_hanoi_poi_visual.parquet` (4 nhóm, WKB polygon +
-lat/lng, đọc cả relation qua area-assembly). Lý do tách: lớp VISUAL (thực thể để nhìn) và
-lớp ĐẾM-CẦU (`n_poi_*`, taxonomy 8 lớp của s03/s09) là **hai khái niệm**; nhét 2 nhóm mới
-vào s03 sẽ đổi nghĩa `n_poi_total`/`n_poi_1km` (thêm ~4.000 POI) ⇒ mọi số dẫn xuất, R²
-trong DECISIONS §17 và badge đổi theo — đúng loại chấn động số liệu như bộ lọc AC 1 súng,
-mà lần này không có lý do phân tích nào đứng sau. Web **không tự tính lại** các cột đếm
-POI đã có ở tầng ô (`n_mall`, `n_poi_1km`) từ file visual — hai khái niệm cho cùng một
-thứ sẽ trôi khỏi nhau.
-
-**Tag OSM đã chốt cho 4 nhóm** — đếm trên PBF freeze 28/07/2026, AOI = đa giác Hà Nội +
-đệm 5 km, area-assembly (node · way khép kín · relation multipolygon), để sau này truy
-được (§12):
-
-| nhóm | tag | tổng | có polygon | chỉ-điểm |
-|---|---|---:|---:|---:|
-| `apartment` — chung cư/tập thể | `building=apartments` ∪ `residential=apartments` — **đúng luật `APARTMENT` của s03** để hai lớp cùng nói về một tập | 2.569 | 2.501 (97,4%) | 68 |
-| `mall` — TTTM | `shop=mall` ∪ `shop=department_store` — đúng `MALL`+`DEPT_STORE` | 147 | 54 (36,7%) | 93 |
-| `public` — công cộng/vui chơi | `leisure=park` ∪ `leisure=playground` ∪ `leisure=garden` ∪ `amenity=community_centre` | 1.742 | 1.603 (92,0%) | 139 |
-| `edu_health` — bệnh viện/trường học | `amenity=hospital` ∪ `school` ∪ `university` ∪ `college` | 2.289 | 1.908 (83,4%) | 381 |
-
-*Ứng viên đã đo và loại (kèm số, để khỏi tra lại):* `building=dormitory` 165 (ký túc xá ≠
-chung cư — và giữ nhóm 1 = đúng tập `n_apartment`), `leisure=sports_centre` 139 (thường
-thu phí, không "công cộng"), `amenity=clinic` 171 (phòng khám ≠ bệnh viện),
-`amenity=kindergarten` 684 (mầm non — đông, nhỏ, loãng nhóm 4). Các con số trên là số
-**lúc trích**; số hiện hành đọc từ `manifest.json` khối `poi` (ràng buộc 4), không trích
-số ở đây làm số đo.
-
-**Dedup node⊂polygon (đã hỏi, 2026-08-07): loại node.** OSM hay vẽ một thực thể hai lần —
-node tên đặt giữa building của chính nó. Node rơi trong polygon **cùng nhóm** bị loại lúc
-trích, số đã loại ghi vào QA. Không loại thì bản đồ vẽ 2 mark cho 1 thực thể — mark rỗng
-"không biết cạnh" đè lên chính polygon có cạnh, nói dối kiểu P4.
-
-**Phạm vi đã dựng:**
-
-- [x] **P1** — `s03b_osm_poi_visual.py` + `web_export` ship `poi.geojson` (Point cho
-      chỉ-điểm, Polygon/MultiPolygon cho có-hình; thoả yêu cầu "một file json/parquet có
-      lat, lng và polygon"). Số MB đo và ghi vào §5a. Manifest ghi khối `poi`: mỗi nhóm
-      `n`, `n_polygon`, `share_polygon` — tab LAYER đọc từ đó, không hardcode.
-- [x] **P2–P4** — mark 2D theo **§4d-4**: 4 hình dạng, một màu lạnh `#1c5cab`, đặc = có
-      polygon, **rỗng = chỉ biết vị trí** (không biến mất, không vòng tròn bán kính bịa —
-      "không biết cạnh ở đâu" phải nhìn khác "có cạnh"); polygon = viền 2px + vân 135°.
-      Tab LAYER in tỉ lệ có-polygon từng nhóm từ manifest.
-- [x] **P5 — 3D.** `m=3d` vào MODES thật (§9); toggle nav hết `disabled`. Ba lớp:
-      `PolygonLayer` extruded cho POI có polygon · `fill-extrusion` nhà basemap §2a-3
-      (`render_height`/`render_min_height`, lọc `hide_3d != true`, `#e4e4de`, opacity
-      0,9) · pitch 50 (§2b). Interleaved của M0 chính là để depth-sort đúng — kiểm bằng
-      render. POI chỉ-điểm **không có khối** — không đùn hộp giả; mark rỗng của nó vẫn
-      vẽ (billboard) để nhóm không âm thầm mất một nửa thành viên trong 3D.
-      **Chiều cao khối = HẰNG SỐ MỘT GIÁ TRỊ cho mọi POI** — không theo cột nào (kể cả
-      `levels`: chỉ 41,2% chung cư có tag, trộn thật với hằng số là để mark đọc như dữ
-      liệu trong khi 59% là bịa; §4d-1 cấm kích thước chở giá trị nên hằng số là mặc định
-      an toàn, đã chọn theo đúng khuyến nghị đề bài). Hằng số in trong chú thích tab
-      LAYER kèm câu "không phải chiều cao thật". Hệ quả phải khai: POI là toà nhà thì
-      basemap cũng đùn chính toà đó theo chiều cao thật — hai khối giao nhau tại cùng
-      footprint; kiểm bằng ảnh render, nếu đọc sai thì quay lại đây đổi quyết định.
-- [x] **P6** — panel POI trong rail, cùng khuôn CellPanel/panel XÃ (tên → nhóm → thuộc
-      tính → NGUỒN, `‹ quay lại`), hash `c=poi:<n|w|r><osm_id>` (§9). Thuộc tính biết thì
-      hiện, không biết thì **bỏ hẳn dòng** (M2.1-F1) — `name` OSM hay thiếu, không in
-      "không đo được" cho nó. Diện tích polygon tính **lúc chạy** từ hình học đã ship
-      (§13c-1).
-
-**Số thật sau khi trích (2026-08-07, ghi QA `s03b_osm_poi_visual.json`):** 6.633 POI —
-114 node trùng-trong-polygon đã loại; apartment 2.561 (97,7% polygon) · mall 143 (37,8%)
-· public 1.698 (94,4%) · edu_health 2.231 (85,5%). Số hiện hành luôn đọc từ manifest.
-
-**Một cái bẫy mới, sập lúc render:** `HatchExtension` sửa fragment shader của **mọi layer
-con** của `GeoJsonLayer` — kể cả layer vẽ stroke — nên một layer vừa fill-vân vừa stroke
-sẽ có **cạnh bị vân ăn mất** (nhìn thành vệt, đúng thứ P3 cấm). Sửa: fill-vân một layer,
-cạnh đặc một layer riêng. Cùng họ với bẫy `project.*` của M0: extension can thiệp shader
-sâu hơn ranh giới mà API gợi ý.
-
-**Đã verify bằng render thật** (Chrome headless, CDP, WebGL swiftshader) — **0 lỗi console
-và 0 request 404** ở cả 6 ảnh:
-
-| # | Chụp gì | Kết luận rút ra được từ ảnh |
-|---|---|---|
-| 1 | 4 nhóm bật cùng lúc, z13 nội đô, mặt tô `commune:ports_per_10k_pop` | vuông · thoi · tam giác · chữ thập phân biệt được; mặt tô cam vẫn là gestalt chính — POI toàn nét/vân/mark lạnh, không cướp |
-| 2 | cận cảnh Vincom Center Bà Triệu z16,5 | polygon **relation** (multipolygon 2 khối) vẽ đủ, cạnh 2px sắc, fill vân 135° — thấy rõ cạnh chứ không chỉ vệt màu |
-| 3 | cùng khung nhìn, `m=3d` pitch 50 | khối POI cài **đúng thứ tự** giữa nhà basemap (interleaved làm đúng việc M0 chọn nó để làm); tháp cao thật vươn trên khối 40 m cùng footprint — hệ quả đã khai ở P5, đọc được, không đổi quyết định |
-| 4 | nhóm `mall` (37,8% polygon) z14,5 | thoi RỖNG (Royal City chỉ-node) khác hẳn polygon-có-cạnh (Vincom PNT, Chợ Mơ) — không biến mất, không vòng tròn giả |
-| 5 | `c=poi:r11534793` | panel POI: tên → nhóm+tag → diện tích 6.943 m² (đo lúc chạy) → hình học (relation) — không dòng "không đo được" nào |
-| 6 | `#m=3d&l=poi_apartment,poi_edu_health` không kèm `v` | mở ra ĐÃ nghiêng 50, nav 3D active, LAYER badge 2 — link không nói dối một nửa |
-
-Logic thuần có test (`pnpm test`, node:test, không dependency mới): **153 test** (+12) —
-quy tắc có-polygon (`hasShape`, kể cả loại hình lạ), registry 4 nhóm (4 hình dạng khác
-nhau, ID thuộc `OVERLAY_IDS`), tham chiếu `poi:` trong khoá `c` (hình dạng + nghịch đảo),
-khoá `l` với ID nhóm POI, `m=3d` thành giá trị thật (test cũ "3d bị bỏ" viết lại kèm lý
-do), diện tích polygon (shoelace + trừ lỗ). Luật **phân loại tag OSM → 4 nhóm** sống ở
-Python (`s03b`, nơi duy nhất chạm tag thô) nên test của nó là **self-test chạy mỗi lần
-bước đó chạy** (20 case phủ mọi nhánh, nổ to khi luật gãy) — không chép luật sang TS để
-hai bản trôi khỏi nhau.
-
-**M3.5 KHÔNG có:** dock, scrubber, chế độ DỮ LIỆU, panel TRẠM (M4.x); HeatmapLayer (§1b
-cấm); không đụng 4 cảnh CÂU CHUYỆN trừ khi 3D vỡ khung một cảnh; không tính lại cột đếm
-POI tầng ô.
-
-### M4 — dock phân tích + scrubber 168h — XONG (2026-08-07)
-
-Spec đã chốt sẵn từ trước, nên lượt này **đọc rồi thi công**, không thiết kế lại. Bốn chỗ
-spec còn để ngỏ và phải chốt trước khi gõ code — cả bốn đã ghi ở chính chỗ chúng thuộc về:
-
-| chốt | ở đâu |
-|---|---|
-| Đơn vị đọc thứ tư `station`, không có ngưỡng zoom | **§6b** (lý do cùng khuôn `road`) |
-| Ngưỡng `observed_h` = **1 h**, ĐO chứ không đặt tay | **§4d-3b** (khớp `var(t) = a + b/t`) |
-| Cú pháp khoá `b` đủ cho ba loại brush | **§9b** |
-| `t`/`b` từ khoá "giữ nguyên" thành khoá THẬT | **§9b** + `hash.ts` |
-
-**Phạm vi đã dựng:**
-
-- [x] **Trường ảo `station:occ`** (§13c-1) — `occ / n_ports` tại `(dow, hour) = t`. Ba
-      đường vào MỘT ký hiệu "chấm rỗng viền xám": thiếu hồ sơ · `observed_h` dưới ngưỡng ·
-      thiếu `n_ports`. Công thức sống ở `viz/occ.ts` chứ không trong SQL như các trường
-      phái sinh khác, và đó là quyết định: nó phụ thuộc `t`, thứ đổi 4 lần mỗi giây khi
-      play — một truy vấn DuckDB mỗi khung hình là sai kiến trúc. Hồ sơ nạp một lần vào
-      `Float32Array`, vẫn MỘT chỗ, vẫn truy được về cột thật.
-- [x] **Chia bậc tính MỘT LẦN trên cả 168 giờ**, không theo từng giờ (`allOccValues`). Đây
-      là quyết định quan trọng nhất của trường này: chia bậc theo giờ thì cùng một tỉ lệ
-      0,42 rơi vào c3 lúc 3h và c6 lúc 22h — **màu đổi nghĩa 4 lần mỗi giây** và hai giờ
-      không so được với nhau. Đúng lý do §1b loại `HeatmapLayer`, chỉ khác trục: ở đó
-      cường độ đổi theo zoom, ở đây nó đổi theo giờ.
-- [x] **Dock trái 360px** — histogram (trường đang tô) · scatter 2D · heatmap 168h, AND
-      lên bản đồ, ô bị loại **mờ đi không biến mất**. Tab dọc dán mép trái; dock **tự mở
-      khi hash mang `b`**, để ô xám nhạt luôn có chỗ giải thích nó.
-- [x] **Scrubber đáy 56px** — 7 khối thứ `T2…CN` (`dow = 0` là **Thứ Hai**), play lặp vô
-      hạn 4 giờ/giây bằng `requestAnimationFrame` thuần, **không dependency mới**. Đồng bộ
-      HAI CHIỀU với heatmap. Khi trường không phải `station:occ`: vẫn chạy, kèm chú thích
-      + nút đi thẳng tới trường đó.
-- [x] **Brush không áp dụng được thì NÓI RA** (§3d-1) — scatter ở đơn vị xã/đường/trạm in
-      hẳn một câu vì sao nó không lọc gì, thay vì im lặng hoặc loại sạch mark.
-
-**Hai chỗ ẢNH RENDER bác bỏ spec, và cả hai đã sửa kèm số đo** — đây là phần đáng giá nhất
-của lượt này, vì cả hai đều "đúng theo chữ" mà sai theo việc:
-
-1. **Màu ô bị brush loại: `#e1e0d9` @ 0,35 → `#898781` @ 0,25.** Số cũ đo được ΔE **2,1**
-   trên nền bản đồ — dưới hẳn sàn 6–8 của §4b — nên ô bị loại **biến mất thật**, phá đúng
-   câu §3d dựng nó ra để giữ. Bảng đo đầy đủ ở **§4e**. Gốc lỗi: `#e1e0d9` là hairline
-   chọn cho nền PANEL, không phải cho nền BẢN ĐỒ.
-2. **`t` không được kẹp vào cửa sổ ở đường BOOT.** `#b=…w:0..4:7..19` không kèm `t` mở ra ở
-   T2 00:00 — một giờ mà chính cửa sổ đó loại — nên nhãn scrubber tự mâu thuẫn với câu
-   ngay cạnh nó. `applyHash` và `setBrush` đã kẹp, đường thứ ba thì quên. Bất biến giờ có
-   test riêng: **ba đường vào `t` giữ cùng một luật**.
-
-**Một hệ quả đã khai, không giấu:** heatmap thành phố dùng **chung thang** với chấm trạm,
-mà tầng thành phố chỉ chạy **11%–36%** (gộp 939 trạm lại thì không bao giờ đầy, dù từng
-trạm thì có), nên nó tiêu ít bậc và trông khá phẳng. Cấp cho nó một thang riêng sẽ rẻ hơn
-về tương phản nhưng đắt hơn nhiều về nghĩa: cùng một màu cam sẽ nói hai điều khác nhau ở
-hai chỗ trên cùng một màn hình. Dải thật vì thế **in vào câu đơn vị** — cùng thủ pháp §3b
-dùng cho mọi ngưỡng khác.
-
-> **ĐÃ ĐÓNG sau M4 — xem §3d-2.** Câu chữ là đúng nhưng không đủ: một câu không thay được
-> một hình. Cách sửa giữ nguyên thang màu và chuyển biến thiên sang **kênh vị trí** (hồ sơ
-> biên 24 giờ dán ngay dưới heatmap, chung trục giờ). Nhịp ngày 12% → 33% (2,7×) giờ đọc
-> được bằng độ cao, còn màu vẫn nói đúng một điều ở cả hai chỗ.
-
-**Đã verify bằng render thật** (Chrome headless, CDP) — **0 lỗi console và 0 request 404**
-ở cả 6 ảnh:
-
-| # | Chụp gì | Kết luận rút ra được từ ảnh |
-|---|---|---|
-| 1 | `f=station:occ`, `t=46` (T3 22h, giờ bận) | 939 chấm tô ramp; hex/xã **không vẽ** — đơn vị đọc thứ tư đi đúng cánh cửa §6b. Legend in ngưỡng thật + swatch chấm rỗng "250 trạm" |
-| 2 | `t=75` (T5 3h, giờ thiếu quan sát nhất) | swatch đổi thành **417 trạm** — khớp đúng con số đo trước khi code; chấm rỗng viền xám phân biệt rõ với chấm tô, cụm vành đệm gần như rỗng hoàn toàn |
-| 3 | 3 brush cùng bật, `f=population` | **790/4.400 ô** còn lại; ô bị loại xám nhạt **vẫn nhìn thấy** (sau khi sửa màu — ảnh đầu tiên chính là thứ bắt được lỗi). Lưới hex vẫn kín, tức bản đồ không nói dối về mật độ |
-| 4 | play rồi dừng, dock mở | scrubber **T2 11:00** ↔ ô viền đậm của heatmap ở **hàng T2 cột 11** — đồng bộ hai chiều khớp. Scatter mờ hẳn kèm câu vì sao nó không lọc gì ở đơn vị trạm |
-| 5 | `#t=46&b=…` mở nguội | ba brush khôi phục đúng; `t=46` **bị kẹp thành T4 07:00** vì cửa sổ loại nó — link không mở được một trạng thái mà chính UI không tạo ra nổi |
-| 6 | đổi sang `population` khi đang play | chú thích "chỉ tác động khi chọn trường nhịp trạm" + nút chuyển nhanh hiện ra; scrubber **vẫn chạy** |
-
-Logic thuần có test (`pnpm test`, node:test, không dependency mới): **210 test** (+57) —
-công thức `station:occ` (mẫu số `n_ports`, ba đường null, `occ = 0` vẫn là 0 thật), phép
-gộp thành phố có trọng số cổng, chia bậc trên cả tuần ↔ đếm theo giờ, cú pháp `b` cho cả
-ba loại (tên trường chứa `:`, số âm, đầu mở, mệnh đề hỏng bỏ riêng nó, thứ tự chuẩn hoá),
-phép AND ba brush (kể cả luật "không áp dụng được thì không hoạt động"), khoá `t`/`b` bỏ
-riêng khi hỏng, và bất biến `t` luôn trong cửa sổ.
-
-**M4 KHÔNG có:** panel TRẠM chi tiết và toggle MAINTENANCE/OUT_OF_SERVICE (M4.1 — nên chấm
-trạm để `pickable: false`, vì chấm bấm được mà bấm không ra gì là nói dối bằng giao diện,
-§3a); chế độ DỮ LIỆU (M4.2); `HeatmapLayer` (§1b vẫn cấm — heatmap 168h là **chart trong
-dock**, không phải layer trên bản đồ); không đụng 4 cảnh CÂU CHUYỆN hay lớp POI M3.5.
-
-### M5 — overlay trạm biến áp OSM — XONG (2026-08-07)
-
-Việc đầu tiên của lượt này **không phải viết code mà là sửa lộ trình**: M5 như đang viết đã
-lỗi thời ở ba mục (bảng ở dòng M5 trên + §4d-1), và ba mục đó lỗi thời theo ba kiểu khác
-nhau — một cái đã làm ở mốc khác, một cái đã làm nhưng đổi tên, một cái **mất luôn đối
-tượng**. Để nguyên là để nguồn sự thật mang ba lời hứa sai. Sau khi dọn, M5 còn **đúng một
-overlay**.
-
-#### Bước 0 — gỡ chặn dữ liệu, và ba câu trả lời
-
-§4d-1 ghi trạm biến áp *"chưa ship được — `web_export` chưa xuất toạ độ"*. Kiểm trước khi
-vẽ, không tin câu chữ:
-
-| câu hỏi | trả lời ĐO ĐƯỢC |
-|---|---|
-| bước nào đọc tag trạm biến áp từ PBF? | **không bước nào.** `s03_osm_extract.py` mở đầu bằng đúng một câu: *"KHÔNG trích `power=substation`"* (DECISIONS §8). Không phải "đã trích rồi quên xuất" — chưa bao giờ có |
-| `manifest.source_metrics.osm_substations` có chưa? | **chưa.** §7c liệt kê khoá này từ M1 và `web_export.source_metrics()` chưa bao giờ phát nó. Một mục trong hợp đồng không có ai thực hiện |
-| n = 133 của §4d-1 đúng không? | **không — đo lại được 132.** Xem dưới |
-
-**Vì sao 133 → 132, và vì sao đây không phải "số bị trôi".** 133 đến từ A12
-(`analysis/a12_substation.py`), chạy trên `data/raw/osm_hanoi_power.parquet` — file đã bị
-xoá cùng lúc `dist_substation_m` bị bỏ ở M2.1, nên con số đó **không kiểm lại được từ
-repo** cho tới lượt này. Trích lại từ chính PBF freeze 28/07/2026 cho **133 đối tượng thô**
-và **132 sau dedup**: đúng 1 node `power=substation` nằm trong đa giác `power=substation`
-của chính nó. Bước mới dedup node ⊂ đa giác (cùng luật `s03b`, M3.5); bước cũ thì không, vì
-nó không đọc đa giác — `s03` nén way thành tâm. Tức 133 là **132 thực thể đếm thành 133
-mark**, và chênh lệch có nguyên nhân đọc được chứ không phải nhiễu.
-
-**Trích mới theo TIỀN LỆ s03b: bước RIÊNG `s03c_osm_substation.py`, không mở rộng `s03`.**
-Lý do đã ghi ở M3.5 áp nguyên: nhét một khái niệm mới vào `s03` đổi nghĩa các cột đếm POI
-hiện có ⇒ mọi số dẫn xuất đổi theo. Ở đây còn một lý do nữa: câu mở đầu của `s03` vẫn ĐÚNG
-cho việc của `s03` — lớp ĐẾM-CẦU không có chỗ cho trạm biến áp, và sửa câu đó là sửa một
-phát biểu không sai. Ba lần quét PBF thay vì một là giá phải trả, và nó được ghi trong
-`Makefile` kèm lý do.
-
-| số đo (`data/qa/s03c_osm_substation.json`) | |
-|---|---:|
-| trong AOI (Hà Nội + đệm 5 km, đa giác thật) | **132** |
-| **có toạ độ dùng được** | **132 (100%)** |
-| OSM vẽ bằng đa giác (way) — ta ship TÂM | 128 |
-| OSM vẽ bằng node | 4 |
-| có tên trong OSM | 41 |
-| node trùng trong đa giác, đã loại | 1 |
-| lỗi ráp multipolygon | 0 |
-| payload thêm | **20,7 KB** (§5a) |
-
-20,7 KB không đọc được ở một chữ số thập phân của tổng 8,8 MB — nên lớp này **không cần**
-một cuộc bàn về ngân sách, khác hẳn `roads` (+3,2 MB) và `poi` (+3,4 MB). Vẫn nạp LƯỜI, vì
-lý do không phải dung lượng mà là **điều kiện**: một lớp không ai bật thì không đáng một
-request.
-
-#### Ranh giới phải nói ra, vì nó nghe như một mâu thuẫn
-
-DECISIONS §8 (sửa đổi) nói lưới điện **ngoài phạm vi**, và điều đó **không đổi**. Lớp này
-không hồi sinh `dist_substation_m`. Khác biệt không phải chuyện chữ nghĩa:
-
-| | `dist_substation_m` *(đã bỏ, không quay lại)* | overlay M5 |
-|---|---|---|
-| phát biểu gì | *"ô này cách lưới điện bấy nhiêu mét"* — một giá trị cho **cả 4.400 ô** | *"ở đây có một trạm biến áp trong OSM"* — chỉ tại **132 điểm** |
-| n = 132 làm gì với nó | **giết nó.** A12 đo: 1 trạm biến áp làm láng giềng gần nhất cho tới 236 ô; 5 trạm đông nhất phủ 18,6% lưới. Trường đó không đo khoảng cách tới lưới điện, nó đo khoảng cách tới điểm gần nhất trong một mẫu 132 điểm mà OSM tình cờ có tag | **không giết.** Nó chỉ giới hạn phạm vi: lớp khẳng định đúng 132 điểm nó vẽ, và không khẳng định gì về chỗ trống |
-
-> **n nhỏ giết một TRƯỜNG, không giết một LỚP.** Một trường phái sinh trên mẫu thưa bịa ra
-> sự khác biệt giữa những ô mà thực ra ta không biết gì; một lớp điểm chỉ nói về những
-> điểm nó có. Chỗ trống của nó vì thế phải được **nói ra** chứ không được để im — §13b-1
-> gọi im lặng đó là nói dối về phủ.
-
-Ba hàng rào dựng ở **hai tầng**, để "chỉ nói một điều" không phải một lời hứa suông:
-
-1. **Tầng dữ liệu.** `substations.geojson` mang đúng `osm_type` · `osm_id` · `name`. Không
-   cột công suất, không cấp điện áp, không khoảng cách. `s03c` **cố ý không đọc** tag
-   `substation=*` (phân hạng theo cấp điện áp) và `voltage=*` — đọc chúng là mã hoá công
-   suất lưới điện, thứ §12 gọi đích danh. Không có cột thì không có gì để một kênh thị
-   giác sau này lỡ đọc phải.
-2. **Tầng vẽ.** Cỡ mark là hàm CHỈ của `zoom` (chữ ký `(zoom: number) => number` là hàng
-   rào kiểu, có test); một màu duy nhất, không `getColor` theo dữ liệu; **không**
-   `ScatterplotLayer` bán kính theo mét, nên không có đường nào để một "vòng bán kính phục
-   vụ" xuất hiện kể cả do nhầm.
-3. **Tầng câu chữ.** Tab LAYER nói thẳng cả ba thứ KHÔNG có (kVA · bán kính phục vụ ·
-   khoảng cách tới trạm biến áp), chứ không im lặng để người xem tự suy ra.
-
-#### Phạm vi đã dựng
-
-- [x] **`s03c_osm_substation.py`** — quét PBF lần ba với `with_areas()` (128/132 là way;
-      đọc mỗi node thì mất 97%), lọc theo đa giác AOI thật, dedup node ⊂ đa giác, nén đa
-      giác thành **tâm**. Luật phân loại tag sống ở Python (nơi duy nhất chạm tag thô) nên
-      phép kiểm của nó là **self-test chạy mỗi lần bước đó chạy** — `_selftest_is_substation`,
-      **15 case** phủ cả nhánh "có tag phân hạng nhưng ta không đọc nó". Không chép luật
-      sang TS, đúng lý do đã ghi cho `s03b`.
-- [x] **`web_export` xuất toạ độ** — `substations.geojson` (Point và chỉ Point) +
-      `manifest.source_metrics.osm_substations`. §7c hết nợ.
-- [x] **Overlay `substations` trong tab LAYER** — checkbox, bật/tắt độc lập (§3c). Mark:
-      **sao 5 cánh** `#0d366b` đặc + vòng viền 2 px màu surface, đúng công thức §4d cho
-      overlay điểm. Sổ cái kênh hình dạng và lý do chọn sao ở **§4d-4**.
-- [x] **Cảnh báo n nhỏ hiện TRƯỚC KHI BẤM** — và đây là chỗ tab LAYER phải đổi, không chỉ
-      thêm một dòng. Mọi overlay trước đó chỉ mở phần chữ khi checkbox đã bật, và với chúng
-      thế là đủ. Với một lớp mà **bản thân NGUỒN khuyết**, đọc sau khi bật là đọc muộn:
-      người xem đã tin vào thứ vừa hiện ra rồi. Nên `warn` là một trường riêng, render
-      **ngoài** khối `on &&`, kèm icon + chữ (§4e). Con số đọc từ manifest (ràng buộc 4),
-      và câu chữ nói đúng hạng của nó: *"132 trạm biến áp là **chặn dưới**, không phải số
-      đo"* — cùng khuôn `apartment_levels_sum` ở §7.
-- [x] **Khoá hash: dùng lại `l`** với ID `substations` (§9). Không khoá mới, không luật
-      mới — và vì bộ kiểm khoá `l` là một QUY TẮC (bỏ từng ID lạ, thứ tự chuẩn hoá theo
-      `OVERLAY_IDS`) chứ không phải danh sách gõ tay, nó áp cho ID mới mà không phải sửa gì.
-- [x] **Dọn §4d-1 và §11** — bảng "mục cũ ↔ thực tế" thay cho việc xoá lặng lẽ: một danh
-      sách sai bị xoá không dạy ai điều gì, còn một danh sách sai kèm *vì sao nó sai* thì
-      ngăn được lần sau.
-
-**Một chỗ ẢNH RENDER bác bỏ code, và nó bác đúng cái quan trọng nhất của lớp này.** Ở
-`m=3d` ngôi sao bị **cắt mất nửa dưới** và chỉ còn một cái nêm — tức **kênh duy nhất mang
-danh tính** của overlay biến mất, đúng ở chế độ mà M3.5 vừa mở. Nguyên nhân: mark nằm ở cao
-độ 0, đúng mặt phẳng mà mặt tô xã cũng nằm, nên nửa dưới tấm billboard rơi ra sau mặt đó và
-bị depth buffer ăn. Hai cách sửa đã loại và một cách đã chọn:
-
-| cách | vì sao |
-|---|---|
-| nâng mark lên một cao độ **mét** (như khối POI +46 m) | cỡ mark tính bằng **pixel**, nên cao độ cần thiết đổi theo zoom: 23 m ở z15,2 nhưng **428 m** ở z10. Không hằng số nào đúng ở mọi mức phóng |
-| `getPixelOffset` đẩy mark lên nửa cỡ | mark thôi **đứng tại** toạ độ của nó — mà "trạm biến áp ở ĐÂY" là toàn bộ nội dung của lớp |
-| **`parameters: { depthCompare: "always" }`** | phát biểu đúng vai: đây là một **chú thích**, không phải một vật thể trong cảnh 3D. §4d đã nói điều đó bằng cách khác — overlay điểm giữ opacity đầy đủ + vòng viền surface, tức nó luôn ở trên |
-
-*Bẫy kèm theo, cùng họ với `INITIAL_VIEW` của M0:* tên tham số phải là của **luma.gl 9**
-(`depthCompare: "always"`), không phải `depthTest: false` của WebGL cũ. Tên cũ **không nổ
-lúc chạy** — nó chỉ im lặng không có tác dụng; ở đây trình biên dịch bắt được, nhưng chỉ vì
-`Parameters` có kiểu.
-
-**Đã verify bằng render thật** (Chrome headless, CDP, WebGL swiftshader) — **0 lỗi console
-và 0 request 404** ở cả 5 ảnh:
-
-| # | Chụp gì | Kết luận rút ra được từ ảnh |
-|---|---|---|
-| 1 | `l=substations` z9,3 toàn thành phố | 132 sao rải đọc được thành **mật độ** — dày ở nội đô, thưa dần ra vành; mặt tô cam vẫn là gestalt chính, không bị nuốt |
-| 2 | z14,6 nội đô: trạm biến áp + trạm sạc + POI chung cư | **★ ↔ ● ↔ ■ phân biệt được ngay**, không cần đọc chú giải. Sao lõm, chấm tròn trơn, vuông có góc vuông |
-| 3 | tab LAYER, checkbox **chưa bật** | cảnh báo ⚠ *"132 trạm biến áp là CHẶN DƯỚI…"* hiện sẵn, số đọc từ manifest; swatch là **đúng cái mark** trên bản đồ, không phải một ô màu |
-| 4 | `#l=substations,khongcothat,stations` | hash ghi lại thành `l=stations,substations` — ID lạ bỏ **riêng nó**, thứ tự chuẩn hoá, badge LAYER **2**. Bộ kiểm cũ áp cho ID mới, không luật mới nào |
-| 5 | `#m=3d` pitch 50 *(ảnh bắt lỗi ở trên)* | sau khi sửa: sao vẽ **trọn hình** ở 3D, hình dạng còn nguyên |
-
-Logic thuần có test (`pnpm test`, node:test, không dependency mới): **219 test** (+9) — ID
-mới thuộc `OVERLAY_IDS` và `OVERLAY_IDS` không trùng, khoá `l` với ID mới (đọc · bỏ riêng
-ID lạ ở cả hai phía · gộp trùng lặp · thứ tự chuẩn hoá · vòng ghi↔đọc), và **cỡ mark là hàm
-chỉ của zoom** (đơn điệu không giảm, chặn hai đầu, arity 1) — phép kiểm cuối là §12 dựng
-thành test: kích thước là cửa sau dễ nhất để một giá trị lẻn vào.
-
-**M5 KHÔNG có:** panel TRẠM BIẾN ÁP (mark để `pickable: false` — bấm được mà bấm không ra
-gì là nói dối bằng giao diện, §3a); overlay vùng cho ranh giới khuôn viên trạm biến áp
-(`s03c` đã nén thành tâm — lớp này là lớp ĐIỂM, và không luận điểm nào của app cần cạnh);
-`dist_substation_m` hay bất kỳ trường phái sinh nào từ lớp này (DECISIONS §8 sửa đổi);
-overlay `buildable` (cột đã bỏ ở M2.1); không đụng 4 cảnh CÂU CHUYỆN, lớp POI M3.5,
-dock/scrubber M4.
-
-**Một chỗ M5 nhìn thấy nhưng KHÔNG sửa, vì nó nằm ngoài phạm vi lượt này** — ghi lại để
-không mất: ở `m=3d`, icon của **POI chỉ-điểm** (mark rỗng, không có khối để đứng lên) nằm ở
-cao độ 0 y như ngôi sao trước khi sửa, nên nó chịu **đúng cùng một lỗi cắt nửa dưới**. Ảnh
-verify #3 của M3.5 không bắt được vì nó chụp Vincom Center — một POI *có* polygon. Cách sửa
-đã biết (cùng một dòng `depthCompare`), nhưng nó đụng lớp POI của M3.5 nên nó là một mốc
-riêng, không phải một sửa đổi kèm.
-
-### M4.1 — panel TRẠM + trạng thái vận hành — XONG (2026-08-07)
-
-Spec chốt sẵn ở §8a và §4d-3a, nên lượt này **đọc rồi thi công**. Ba chỗ spec để ngỏ và
-phải chốt trước khi gõ code — cả ba đã ghi ở chính chỗ chúng thuộc về:
-
-| chốt | ở đâu |
-|---|---|
-| Khoá `c` mang `station_id`, KHÔNG mang `station_code` | **§9** (6/939 mã chứa dấu phẩy và dấu tiếng Việt) |
-| `UNKNOWN` không mang vòng nét đứt | **§4d-3a** ("không biết" ≠ "biết là hỏng") |
-| Vòng vẽ bằng `IconLayer`, 6 gạch, độ dài suy từ chu vi | **§4d-3a** (ảnh render bác bản đầu) |
-
-**Phạm vi đã dựng:**
-
-- [x] **Panel TRẠM (§8a)** — đúng thứ tự "một con số → vài con số → hình → chữ": hero
-      `util` (proportional figures, không `tabular-nums` — §4e) · ba stat tile
-      (`util_p95` · `saturation_frac` · `duty_cycle`) · mini-heatmap 7×24 · dòng dịch
-      `shape_class` + `peak_hour`/`peak_dow` + `night_share` · khối TÀI SẢN · NGUỒN.
-      Cùng khuôn `CellPanel`/`CommunePanel`/`PoiPanel`: `‹ quay lại`, thay nội dung rail
-      tại chỗ, NGUỒN neo đáy.
-- [x] **Mini-heatmap dùng CHUNG `Scale`** với chấm trạm và heatmap dock — truyền vào, không
-      tính lại từ 168 giá trị của riêng trạm đó. Tính riêng thì trạm vắng nhất thành phố
-      cũng có một ô c7 và "đậm" mất nghĩa. Ở tầng TRẠM luật vân xám **nổ thật** (khác tầng
-      thành phố): 2,11% ô giờ rớt ngưỡng, 236/939 trạm rỗng hoàn toàn.
-- [x] **Chấm trạm `pickable: true`** ở CẢ HAI tư cách — overlay `stations` và mặt tô
-      `station:occ`. Mặt kia của luật §3a: panel đã dựng thì phải bỏ dấu hiệu "chưa dựng"
-      đi. **Chấm RỖNG cũng bấm được**, và đó là quyết định: "chưa quan sát đủ ở giờ này"
-      vẫn là một trạm có thật, có tên, có số cổng, có hồ sơ 30 ngày. Không cho bấm sẽ biến
-      ràng buộc 1 thành một hình phạt — trạm nào dữ liệu mỏng thì càng khó tra.
-- [x] **Overlay `station_status`** (§4d-3a) — vòng nét đứt, mực chính `#0b0b0b`, không hue
-      mới. Nó **bám vào chấm trạm**: không có chấm thì không có gì để chú thích, nên nó tắt
-      theo. Bán kính vòng suy từ **cùng một hàm** mà chấm bên dưới dùng (`stationFieldRadius`
-      / `stationOverlayRadius` tách ra ở lượt này) — hai công thức chép ra hai chỗ là cách
-      vòng lệch khỏi chấm ở nội đô.
-- [x] **NGUỒN của panel TRẠM nói số ở TẦNG TRẠM** (§7b): `occ_status` + `coverage` + cửa sổ
-      quan sát + `port_config_source`. Rail nói phủ của trường trên lưới. **Không trộn mẫu
-      số** — đó là cách một con số 96,2% biến thành 9,9%.
-
-**Đã verify bằng render thật** (Chrome headless, CDP) — **0 lỗi console và 0 request 404**:
-trạm `MAINTENANCE` mở đúng panel với cảnh báo chữ ở đầu, hero 35,8%, mini-heatmap có ô vân;
-vòng nét đứt phóng 5× đọc ra 6 cung đều, tách khỏi chấm và tách khỏi vòng chọn màu lạnh;
-tab LAYER in `103/939 trạm — 70 bảo trì · 33 ngừng hẳn · 5 trạm nguồn KHÔNG nói trạng thái`
-đọc từ manifest.
-
-**M4.1 KHÔNG có:** panel TRẠM BIẾN ÁP (vẫn `pickable: false`, M5 đã ghi lý do); lỗi 3D của
-icon POI chỉ-điểm (vẫn là mốc riêng); không đụng 4 cảnh CÂU CHUYỆN.
-
-### M4.2 — chế độ DỮ LIỆU — XONG (2026-08-07)
-
-Spec ở §3f. Một quyết định phải chốt trước khi gõ code, và nó nằm ở tầng hash:
-
-> **Khoá `d` là một khoá THỨ HAI, không phải một giá trị của `s`** — lý do đầy đủ ở §9.
-> Bất biến "đúng một chế độ" vẫn được giữ, chỉ ở chỗ khác: chiều RA không bao giờ ghi cả
-> hai, chiều VÀO đọc `s` trước.
-
-**Phạm vi đã dựng** — năm khối của §3f, đúng thứ tự đã chốt, cộng một việc export:
-
-- [x] **`web_export.totals`** — tổng cổng · tổng MW · `op_status` · connectors theo chuẩn,
-      cắt theo `scope`. **Mỗi tổng kèm số hàng khuyết của chính cột đó** (19 trạm Hà Nội
-      khuyết `n_ports`, 19 khuyết `power_kw_site`): một phép cộng trên cột có null là một
-      **chặn dưới**, và KPI row in ra điều đó thay vì để một con số tròn trịa đứng một mình.
-- [x] **KPI row** — 5 tile, mọi số từ manifest. Con số "2.408 điểm sạc cá nhân ĐÃ LOẠI"
-      đứng **ngang hàng** với bốn con số kia, đúng như §3f-1 đòi: bản đồ này không vẽ chúng,
-      và im lặng về điều đó là nói dối về cung.
-- [x] **Stacked bar connectors** — `UNKNOWN` vẽ **vân xám**, không phải bậc màu thứ ba.
-      Hai chuẩn thật lấy hai bậc của CÙNG ramp (§4d-2: nhấn bằng độ đậm, không bằng hue thứ hai).
-- [x] **Small multiples 5 dạng `shape_class`** — cùng thang y, **một màu `c5`** cho cả năm,
-      danh tính ở vị trí + nhãn tiếng Việt. Gộp bằng **trọng số cổng** (`Σocc / Σn_ports`),
-      không phải trung bình các tỉ lệ trạm: nó là cùng đại lượng mà `cityProfile` và chấm
-      trạm dùng, nên năm đường so được với heatmap. Giờ không trạm nào đủ quan sát để
-      **ĐỨT ĐOẠN**, không nối liền — ràng buộc 1 trên chiều thời gian.
-- [x] **Bảng phủ 53 cột** — meter ngang một-hue, hai cột `% ô` và `% dân` đi cùng nhau
-      (bản đầy đủ của thứ rail chỉ hé ra qua badge ⚠).
-- [x] **Bảng dữ liệu** sort/filter/phân trang. **Sắp xếp chạy trong SQL, không trong JS**,
-      và lý do là **null** chứ không phải tốc độ: `ORDER BY … NULLS LAST` đặt null ở một
-      đầu xác định ở cả hai chiều, còn `Array.sort` đẩy `undefined` xuống cuối bất kể chiều
-      — tức cùng một bảng sắp xuôi và sắp ngược cho hai tập "dòng đầu" không đối xứng, và
-      người đọc không có cách nào biết. Ô null in ra **bằng chữ**, không bao giờ thành ô trống.
-- [x] **Nav `DỮ LIỆU` thành thật** — hết `ready: false`, hết nhãn `M4.2`, có `go`. Mặt kia
-      của §3a, lần thứ ba (sau CÂU CHUYỆN ở M3 và 3D ở M3.5).
-
-**Một chỗ ảnh render bác bỏ bản đầu, và cách sửa là một luật chứ không phải một con số:**
-ba dải giữa được **THÁO HẲN** khi vào chế độ DỮ LIỆU, không phải `hidden`. Một `<canvas>`
-MapLibre khởi tạo trong lúc bị ẩn đo được kích thước 0×0 và giữ nguyên như thế cho tới khi
-có sự kiện resize — nên link `#d=1` mở nguội rồi bấm sang BẢN ĐỒ sẽ ra một bản đồ trống mà
-**không lỗi nào**. Tháo ra thì khung nhìn dựng lại từ `store.view`, tức đúng chỗ người xem
-rời đi (luật bàn giao L2 của §14a, theo chiều ngược lại).
-
-**Đã verify bằng render thật** — **0 lỗi console và 0 request 404**: trang dữ liệu dựng đủ
-năm khối; KPI in `710 trạm · 7.785 cổng · 232,8 MW · 96,2% · 2.408 đã loại` khớp manifest;
-bar connectors ra `CCS2 69% · TYPE2 31% · không khớp registry 0,2%`; năm sparkline đọc ra
-năm hình dạng khác nhau sau khi tăng chiều cao (xem §3d-2).
-
-Logic thuần có test (`pnpm test`, node:test, không dependency mới): **238 test** (+19) —
-khoá `c=station:` (vòng chuỗi hoá, mã hỏng bị bỏ RIÊNG nó, không nhầm với H3/xã), khoá `d`
-(chỉ `"1"` hợp lệ, `s` thắng `d`, không bao giờ ghi cả hai, vòng đọc↔ghi hội tụ, chế độ
-DỮ LIỆU vẫn ghi trạng thái bản đồ), vòng nét đứt (luôn bao ngoài chấm, cỡ icon đơn điệu,
-không xén nét), `stationSeries` (168 ô, ba đường null giữ nguyên), `hourProfile` (null
-không kéo trung bình xuống, dải lo–hi thật), và `shapeDayProfiles` (**trọng số cổng chứ
-không phải trung bình các tỉ lệ** — test này chặn đúng con số 0,65 thay vì 0,344).
-
-**M4.2 KHÔNG có:** biểu đồ nào trên bản đồ (§3f: "không có bản đồ"); xuất CSV; không đụng
-4 cảnh CÂU CHUYỆN hay dock/scrubber.
-
-#### M4.1/M4.2 trên một TỈNH — bốn chỗ vỡ, và cả bốn vỡ im lặng
-
-M4.1 và M4.2 dựng trên bộ Hà Nội, còn store toàn quốc (`src/vn/`) chạy song song trong cùng
-lượt. Mở `#tinh=04&d=1` là phép thử rẻ nhất cho cả hai, và nó tìm ra bốn lỗi — **ba trong số
-đó không ném lỗi nào**, tức đúng loại mà test không bắt và mắt không nghi.
-
-| # | Triệu chứng | Nguyên nhân | Cách sửa |
-|---|---|---|---|
-| 1 | **màn hình trắng** ở `#tinh=04&d=1` | manifest tỉnh **không có** khối `source_metrics`, mà `Manifest` khai nó là **bắt buộc** ⇒ TS im lặng cho qua cả 6 chỗ `m.source_metrics.x` | khai `optional` để **trình biên dịch chỉ ra cả 6 chỗ**, rồi guard từng chỗ. Vắng khối ⇒ *không hiện*, không đoán |
-| 2 | mọi trạm của mọi tỉnh vẽ thành **chấm RỖNG** ("vành đệm") và panel ghi sai tư cách từng cái | bộ Hà Nội ghi `scope = 'HANOI'`, store toàn quốc ghi `'IN'`; điều kiện `=== "HANOI"` cho `false` ở khắp nơi | neo vào `BUFFER` (`isInScope`) — hằng số **duy nhất mang cùng nghĩa ở cả hai bộ**, và một bộ thứ ba đặt tên `PROVINCE` sẽ chạy đúng mà không phải sửa gì |
-| 3 | cột **`% dân`** trong bảng phủ là một meter dài 0 px | tỉnh chưa có lớp dân số nên `_coverage` **cố ý** không phát `pop_share` | bỏ hẳn CỘT và nói lý do **một lần**, không lặp 23 dòng. Meter rỗng đọc thành "0% dân" — ràng buộc 1, chỉ khác là ở một thanh thay vì một ô |
-| 4 | dải lỗi đỏ che ngang bản đồ ở **mọi tỉnh** | `fetchSurfaceBins` và trường mồi `population` của App gọi thẳng cột `population`; `gcol()` chỉ bọc bốn cột cố định, không bọc tên gõ tay | chặn ở chỗ cái tên được gõ ra (`fieldAvailable` / `gridColumnAvailable`) |
-
-**KPI row đọc được ở tỉnh chứ không chỉ ẩn đi.** `n06_web_export` phát khối `totals` **cùng
-hình dạng** với bản Hà Nội, cộng hai khối tên TRUNG TÍNH (`occ_status_ok`,
-`private_ac_dropped` — bỏ chữ `hanoi` khỏi tên trường). Cả `hanoi/web_export` cũng phát hai
-khối đó, và UI đọc **một** hình dạng. Nếu để mỗi bộ một hình dạng thì mọi chỗ đọc phải biết
-mình đang ở bộ nào, và cái biết đó sẽ rò ra khắp UI.
-
-**Khối nào dựng được nhưng không đáng tin thì NÓI ra, không ẩn.** Small multiples ở Cao Bằng
-vẫn vẽ được — từ **3/30 trạm**. Cảnh báo `unusable_layers` (do `n05_quality` phát, ngưỡng ở
-`MIN_OCC_MEASURED_SHARE`) in **TRƯỚC** hình, không sau: nguyên tắc gốc của dự án là *"một lớp
-vẽ từ một trường đã hỏng thì tệ hơn không vẽ, vì nó làm cái sai trông thuyết phục"*. Ngưỡng
+**Khối dựng được nhưng không đáng tin thì NÓI ra, không ẩn.** Small multiples ở Cao Bằng vẫn
+vẽ được — từ **3/30 trạm**. Cảnh báo `unusable_layers` in **TRƯỚC** hình, không sau. Ngưỡng
 đọc từ manifest chứ không đặt lại trong TS — một ngưỡng thứ hai sẽ trôi khỏi ngưỡng thật.
-
-*Bài học mang sang chỗ khác:* **một trường `optional` trong kiểu Manifest là một công cụ tìm
-lỗi, không phải một lời xin lỗi.** Ba trong bốn lỗi trên đều là "kiểu nói có, dữ liệu nói
-không"; đổi kiểu cho khớp dữ liệu rồi để `tsc` liệt kê hậu quả nhanh hơn mọi cách đọc mã.
-
-### M4.3 — bốn lỗi còn lại của nghiệm thu M0→M5 — XONG (2026-08-07)
-
-Bốn thứ nhặt ở lượt audit sau M4.2. Ba cái đầu là **cùng một hình dạng lỗi**: một sự thật
-đã có trong manifest nhưng **chưa được nối vào cổng boot**. `main.tsx` nạp manifest xong mới
-`import("./App")`, nên mọi cờ đặt ở đó có hiệu lực trước cả lần `parseHash` đầu tiên —
-`available_columns` và `unusable_layers` đã đi qua cổng ấy, `story_enabled` và `files` thì
-chưa.
-
-| # | Triệu chứng | Nguyên nhân | Cách sửa |
-|---|---|---|---|
-| 1 | **panel Ô chết hẳn** ở 33 tỉnh — bấm một ô ra `Binder Error` thay vì 52 cột | `Rail` gọi `fetchCell` + `fetchCellOccStatus` trong **một `Promise.all`**, mà bảng trạm của store toàn quốc **không có `h3_r8`** (nó gắn trạm vào XÃ). Một lỗi giết cả panel | hỏi cột của chính file parquet (`columnsOf`, đọc footer bằng `LIMIT 0`, nhớ theo tên file) — manifest chỉ liệt cột của LƯỚI, không liệt cột của bảng trạm. Không nối được thì `joinable: false`, và dòng "Sử dụng" **nói ra điều đó** thay vì in "không đo được" cho một ô đầy trạm |
-| 2 | `#tinh=04&s=von-cuc` **mở được cảnh CÂU CHUYỆN** dù nav đã khoá — văn Hà Nội ("Nếu người ở **Hà Nội**…") in đè lên bản đồ Cao Bằng | **khoá một cái nút không khoá một khoá hash**: `parseHash` không biết `story_enabled` | cờ module trong `scenes.ts`, `parseScene` trả `null` khi tắt ⇒ khoá `s` biến mất **y như một slug lạ** (luật 1 của §9), không cần nhánh lỗi mới. Kéo theo: `#s=…&d=1` rơi về DỮ LIỆU, vì `d` chỉ được đọc khi không có cảnh |
-| 3 | hai overlay bật lên mà **bản đồ không đổi gì** | tab LAYER liệt 9 overlay vô điều kiện | `data/overlays.ts` — vị từ vắng nhận thẳng `Manifest`: `beyond2km` hỏi **cột**, `substations` hỏi **file** (`m.files`). Hàng vẫn HIỆN nhưng khoá + một câu lý do (cùng lựa chọn với `unavailableFields()`: *vắng phải nhìn thấy được*), và `parseHash` bỏ id vắng khỏi khoá `l` |
-| 4 | icon POI **biến mất hẳn** sau các khối nhà ở `m=3d` | `interleaved: true` ⇒ deck dùng chung depth buffer với basemap; lớp `poi-icon-*` thiếu `depthCompare` mà sao trạm biến áp (M5) và vòng nét đứt (M4.1) đều có | thêm dòng đó. Đo bằng A/B trên cùng một hash: trước — 5 icon mất sạch sau các tháp; sau — đủ 5 |
-
-**Sửa lỗi 1 kéo theo một cổng thứ ba, và ba cổng đó KHÁC nhau:** `gcol()` hỏi *một cột cố
-định của lưới*, `cellFields()` hỏi *một trường có dựng được không* (chặn `selectExpr()` nhả
-biểu thức riêng của trường ra nguyên văn — đúng chỗ đã bị quên hai lần), `columnsOf()` hỏi
-*cột của một bảng bất kỳ*. Gộp chúng lại sẽ phải bịa một cái tên chung cho ba câu hỏi khác
-nhau.
-
-**Về lỗi 4 — cái giá đã chấp nhận:** icon của POI có polygon (bay lên đỉnh khối trong 3D)
-cũng mất depth test, nên nó xuyên qua một khối cao hơn đứng chắn trước. Đúng lập luận M5 đã
-chốt: **lớp icon là chú thích, không phải một vật thể trong cảnh 3D.**
-
-*Lưu ý về niên đại:* dải lỗi đỏ `detour_ratio` và một phần lỗi panel Ô ghi ở audit trước đã
-tự hết — store toàn quốc xuất lại lúc 12:58 UTC cùng ngày và cả 34 tỉnh giờ có lớp TÍNH
-TOÁN. Guard `cellFields()` vẫn giữ, vì nó còn chặn một lỗi **im lặng** khác: `util_pctl_cell`
-có `deps` là `stations.parquet` **không đi qua `dataPath()`**, nên ở chế độ tỉnh nó sẽ đọc
-bảng trạm của **Hà Nội** và trả về một con số trông hợp lý.
-
-### M4.5 — mặt độ cầu rời khỏi BẢN ĐỒ, ở lại trong cảnh A — XONG (2026-08-07)
-
-Quyết định của chủ dự án. Ở `f=population`, dưới `HEX_MIN_ZOOM` thì **BẢN ĐỒ vẽ ô H3**, không
-vẽ mặt liên tục nữa; **cảnh A (`von-cuc`) giữ nguyên mặt**.
-
-- **Vì sao bỏ ở BẢN ĐỒ:** ở z9,3, mặt gộp 3 km với `opacity 0.85` phủ kín thành phố thành
-  một khối cam — nó nuốt mạng đường, nuốt đường ranh giới, và **lấp mất những lỗ hổng**
-  (chỗ không có ai), mà lỗ hổng là một nửa nội dung của trường dân số. Vành nhạt nhất còn
-  loang ra ngoài ranh giới: đó là sản phẩm của phép làm mượt 3 km, không phải người thật.
-- **Cái giá, nói thẳng:** §13a-1 vẫn đúng — 4.400 ô ở 9 px thì **không đọc nổi từng bậc
-  màu**. Cái mua được là hình dạng thật của thành phố, các lỗ hổng, và cái nền dưới nó. Đây
-  là một đánh đổi được chọn, không phải một luật bị bác.
-- **Vì sao mặt Ở LẠI trong cảnh A:** ở đó nó **là luận điểm** (§13d-A: "cầu vón cục"), không
-  phải một cách tô. Cùng khuôn với `bridges`/`routes`: **cảnh sở hữu mark của nó** (§9a, L1)
-  — một mark chỉ sống trong một cảnh là quy tắc đã có, không phải ngoại lệ mới.
-- **Cờ đi qua `PlanInput.inStory`, và CẢ HAI chỗ gọi `renderPlan` phải truyền nó.** `Legend`
-  cũng gọi hàm này; thiếu cờ ở đó sẽ cho một dải chú giải *"mặt độ cầu · ô gộp 3 km"* nằm
-  trên một bản đồ đang vẽ ô H3 — legend nói về một bản đồ khác.
-
-### M4.4 — Hoàng Sa · Trường Sa phải ĐỌC ĐƯỢC trên bản đồ — XONG (2026-08-07)
-
-Hình học **đã đúng từ đầu**: `commune.geojson` của Đà Nẵng có `Đặc khu Hoàng Sa` (39 mảnh,
-`commune_kind = DAC_KHU`), của Khánh Hòa có `Đặc khu Trường Sa`; cả hai vẫn được `commune-*`
-vẽ như mọi xã khác. Nhưng ở mức phóng vừa khít một tỉnh, mỗi đảo chiếm **1–3 pixel** vân xám
-trên nền biển xám và **không có nhãn nào** — hai quần đảo có mặt trong dữ liệu mà không có
-mặt trong cái nhìn thấy. Với một bản đồ Việt Nam, đó không phải một khiếm khuyết thẩm mỹ.
-
-- **Kênh đúng là NHÃN, không phải màu hay cỡ mark.** Thứ đang thiếu là một cái **tên** —
-  *"chỗ này là Hoàng Sa, và nó thuộc Đà Nẵng"* — chứ không phải một giá trị. Phóng to lên
-  thì hình học tự nói phần còn lại.
-- **Không phải overlay.** Không có trong tab LAYER, không tắt được — cùng vai với đường
-  khung ranh giới BỐI CẢNH: đây là *chrome của bản đồ*, và một cái tên địa lý không phải
-  một biến. Mực chính §4e + viền surface, `billboard` + `depthCompare` để `m=3d` đọc y hệt.
-- **Luật đọc từ `commune_kind = DAC_KHU`, KHÔNG từ một danh sách tên gõ trong TS** — 13 đặc
-  khu ở 11 tỉnh, và danh sách gõ tay sẽ lệch khỏi niên bản địa giới ngay lần sáp nhập sau.
-  Bộ Hà Nội không có `commune_kind` ⇒ luật tự im, không cần `if (PROVINCE)` ở chỗ gọi.
-- **Neo ở tâm bbox của CẢ CỤM**, không phải trọng tâm mảnh lớn nhất: đặt tên lên đảo lớn
-  nhất là gọi tên *một hòn đảo*, không phải cả quần đảo.
-- **`characterSet: "auto"` là bắt buộc** — và đây là một lỗi đã sập, không phải phòng xa:
-  tập ký tự mặc định của `TextLayer` là ASCII, nên atlas không có `Đ` `ặ` `à` và nhãn render
-  ra **`c khu Ho ng Sa`**, mỗi chữ có dấu bị nuốt **lặng lẽ, không một cảnh báo nào**. Ảnh
-  render bắt được, test không. Một bản đồ tiếng Việt không được phép có mặc định đó.
+Ngược lại, cột không dựng được thì **bỏ hẳn cột và nói lý do một lần**: một meter dài 0 px đọc
+thành "0% dân", đúng cái ràng buộc 1 cấm.
 
 ---
 
@@ -2581,7 +1655,7 @@ danh sách trường thôi không còn bằng danh sách CỘT nữa: nó gồm 
 **`station:occ` — vì sao mẫu số là `n_ports` (ASSET) chứ không phải `util_denominator_ports`.**
 Trường này trả lời "trạm đang đầy tới đâu so với những gì **lắp đặt**" — cùng mẫu số với
 mọi con số cung của app (`n_ports`, §7). Dùng mẫu số LIVE là trộn hai tầng mà
-DATA_DICTIONARY §4 cấm trộn. Hệ quả trung thực: trạm báo cáo thiếu sẽ hiện *thấp*, và ô
+`DECISIONS §5` cấm trộn. Hệ quả trung thực: trạm báo cáo thiếu sẽ hiện *thấp*, và ô
 giờ thiếu quan sát đã bị chặn riêng bằng `observed_h` nên cái "thấp giả" nguy hiểm nhất
 không lọt qua đường màu.
 
@@ -2659,7 +1733,7 @@ Sửa: giữ lại thành cột `detour_ratio` trong `traveltime_cell.parquet` �
 
 ~~**Vì sao là `detour_ratio` chứ không phải `dist_station_euclid_m`:**~~ **VIẾT LẠI ở M3.**
 
-*Lập luận cũ:* DATA_DICTIONARY §1.7 đã loại khoảng cách chim bay như một **biến thể** của
+*Lập luận cũ:* `DECISIONS §6` đã loại khoảng cách chim bay như một **biến thể** của
 "khoảng cách tới trạm", nên ship lại nó là phá nguyên tắc một-khái-niệm-một-trường; chỉ
 ship tỉ số, vì tỉ số là *sai số của cách đo đã bị loại*, một khái niệm mới. Một cột, không
 phải hai.
@@ -2697,12 +1771,13 @@ Một đường đồng khoảng cách phải là *quỹ tích các điểm các
 cột "tới trạm gần nhất" thì `dist_station_network_m <= r` cho ra **hợp của mọi đĩa**, tức
 vùng phủ — không phải một đường quanh một trạm, nên không có gì để morph từ vòng tròn sang.
 Dựng "đường đồng khoảng cách" từ nó là đặt tên một khái niệm cho một đại lượng khác. Muốn
-làm thật thì phải chạy lại Dijkstra một-nguồn ở `s08` và ship trường khoảng cách riêng của
+làm thật thì phải chạy lại Dijkstra một-nguồn ở `n07` và ship trường khoảng cách riêng của
 trạm đó — việc của tầng dữ liệu, không phải việc của `web/`.
 
-**Cái thay thế mạnh hơn, và nó đã có sẵn:** `s08` đã đo **sai số phủ của chim bay theo bán
-kính**, so đúng hai cột đó trên đúng 4.400 ô. Ở bán kính 3 km, chim bay nói 3.864 ô đã phủ
-còn mạng đường nói 2.879 — **985 ô báo phủ nhầm, 25,5%**. Đó chính là điều mà cảnh morph
+**Cái thay thế mạnh hơn, và nó đã có sẵn:** `n07` đã đo **sai số phủ của chim bay theo bán
+kính**, so đúng hai cột đó trên đúng cùng tập ô. Ở bán kính 3 km (tỉnh 01), chim bay nói
+3.864 ô đã phủ còn mạng đường nói **2.878** — **986 ô báo phủ nhầm, 25,5%**. Tỉ lệ này
+**không phải hằng số giữa các tỉnh** (`HAN_CHE.md`), nên cảnh C đo lại lúc chạy. Đó chính là điều mà cảnh morph
 định nói bằng hình, nói bằng một con số đo được, trên hình học thật chứ không trên một mặt
 nội suy. Cảnh C in con số đó, **đo lại lúc chạy** từ hai cột đã ship (§14b-C).
 
@@ -2830,7 +1905,7 @@ Bản đồ kẻ đậm 48 đoạn; điều đó thì dữ liệu nói được.
 - **Thay đổi tối thiểu.** Không thêm abstraction chưa cần.
 - **Không thêm dependency** ngoài §1 mà không hỏi.
 - **Không bịa số.** Mọi con số trong UI phải truy được về một cột trong
-  `data/processed/`. Không có cột thì không hiện — đặc biệt là kVA lưới điện.
+  `store/p/<mã>/`. Không có cột thì không hiện — đặc biệt là kVA lưới điện.
 - **Logic thuần tuý thì có test, không verify bằng mắt.** Ảnh chụp chứng minh được *một
   phân bố cụ thể*, không chứng minh được *một quy tắc*. Chia bậc (§6a) là hàm thuần, nhiều
   nhánh ⇒ `web/test/*.test.ts`, chạy bằng `pnpm test`. Dùng `node:test` + `node:assert`

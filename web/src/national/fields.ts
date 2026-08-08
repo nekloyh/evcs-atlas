@@ -9,7 +9,7 @@
  *
  * ── KÊNH THỊ GIÁC: TỈNH KHÔNG ĐƯỢC MÃ HOÁ BẰNG HUE ─────────────────────────────────────
  *
- * `QUYET_DINH_TOAN_QUOC.md §6` cấm lấy hue mã hoá chiều tỉnh, và màn hình này không vi
+ * `docs/adr/0004` cấm lấy hue mã hoá chiều tỉnh, và màn hình này không vi
  * phạm: hue ở đây chở **một đại lượng đo được** (dân số, số cổng, tỉ lệ…), đúng vai nó vẫn
  * chở ở mọi choropleth khác của app. Cái KHÔNG được làm — và không được làm ở đây — là cho
  * 34 tỉnh 34 màu để phân biệt danh tính. Danh tính tỉnh đã được **vị trí** mã hoá hoàn hảo:

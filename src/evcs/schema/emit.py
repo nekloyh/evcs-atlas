@@ -26,7 +26,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import COMMUNE, GRID, NATIONAL_R6
+from . import TABLES, COMMUNE, GRID, NATIONAL_R6
 from .column import Table
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -141,18 +141,14 @@ make schema
 `make kiem` DỪNG nếu file này trôi khỏi bản khai.
 
 Vì sao nó được sinh chứ không được viết: cùng một sự thật từng được kể lại ở bốn nơi và
-kể ra **bốn con số khác nhau** — `README` 56 · `DATA_DICTIONARY` 56 · `web/src/fields.ts`
+kể ra **bốn con số khác nhau** — `README` 56 · `DATA_DICTIONARY` (đã xoá) 56 · `web/src/fields.ts`
 53 · trên đĩa 61. Một tài liệu kể lại schema là một cơ hội nữa để schema trôi.
 
 Cột `vai = định danh` cố ý KHÔNG tô màu lên bản đồ được. Cột `gộp = —` KHÔNG gộp lên bậc
 thô hơn bằng bất kỳ phép nào — khoảng cách tới trạm gần nhất của một vùng không phải trung
 bình khoảng cách của các ô trong nó.
 
-{_md_table(GRID)}
-
-{_md_table(COMMUNE)}
-
-{_md_table(NATIONAL_R6)}
+{chr(10).join(_md_table(t) + chr(10) for t in TABLES.values())}
 """
 
 
@@ -175,8 +171,8 @@ def main(argv: list[str] | None = None) -> int:
     for f, w in can:
         f.parent.mkdir(parents=True, exist_ok=True)
         f.write_text(w, encoding="utf-8")
-    n = len(GRID.columns) + len(COMMUNE.columns) + len(NATIONAL_R6.columns)
-    print(f"✓ {OUT.name} · {OUT_MD.name} — 3 bảng, {n} cột")
+    n = sum(len(t.columns) for t in TABLES.values())
+    print(f"✓ {OUT.name} · {OUT_MD.name} — {len(TABLES)} bảng, {n} cột")
     return 0
 
 

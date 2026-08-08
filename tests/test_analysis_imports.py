@@ -35,7 +35,7 @@ NOTEBOOKS = ROOT / "notebooks"
 # DECISIONS §6, sau khi đo được rằng bỏ hẳn tag `maxspeed` vẫn cho Spearman 0,9991.
 #
 # Hệ quả đáng ghi: mũi phản biện **A2** không chạy lại được nữa. Kết luận của nó còn trong
-# `CRITIQUE.md`, nhưng nó đã thành một khẳng định thay vì một phép đo tái lập được. Đây là
+# `HAN_CHE.md`, nhưng nó đã thành một khẳng định thay vì một phép đo tái lập được. Đây là
 # NỢ ĐÃ GHI NHẬN, không phải một chỗ giấu rác.
 # Rỗng — và đó là trạng thái ĐÚNG, không phải trạng thái chưa dùng tới.
 #

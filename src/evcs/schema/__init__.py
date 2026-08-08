@@ -15,7 +15,24 @@ from .column import ARROW, Column, Table
 from .commune import COMMUNE
 from .grid import GRID
 from .national import NATIONAL_R6
+from .supply import CONNECTORS, OCCUPANCY, PROFILE_168H, STATIONS, SUBSTATIONS
 
-__all__ = ["ARROW", "COMMUNE", "GRID", "NATIONAL_R6", "Column", "Table", "TABLES"]
+__all__ = [
+    "ARROW",
+    "COMMUNE",
+    "CONNECTORS",
+    "GRID",
+    "NATIONAL_R6",
+    "OCCUPANCY",
+    "PROFILE_168H",
+    "STATIONS",
+    "SUBSTATIONS",
+    "Column",
+    "Table",
+    "TABLES",
+]
 
-TABLES: dict[str, Table] = {t.name: t for t in (GRID, COMMUNE, NATIONAL_R6)}
+TABLES: dict[str, Table] = {
+    t.name: t
+    for t in (GRID, COMMUNE, STATIONS, CONNECTORS, OCCUPANCY, PROFILE_168H, SUBSTATIONS, NATIONAL_R6)
+}

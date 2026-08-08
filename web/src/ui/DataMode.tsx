@@ -558,7 +558,7 @@ function GridTable() {
       note={
         <>
           Toàn bộ cột của <code>grid_h3_r8.parquet</code>, đúng như đã ship. Định nghĩa từng
-          cột nằm ở <code>DATA_DICTIONARY.md</code> trong repo. Ô ghi “không đo được” là{" "}
+          cột nằm ở <code>docs/COT.md</code> trong repo. Ô ghi “không đo được” là{" "}
           <code>null</code> thật trong dữ liệu — nó không bao giờ được in thành 0 hay thành
           ô trống.
         </>

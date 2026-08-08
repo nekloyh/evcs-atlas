@@ -20,7 +20,7 @@
 công bố của Hà Nội trong cùng một lần thay đổi, và không có cách nào tách 'số đổi vì sửa
 đúng' khỏi 'số đổi vì lỗi mới'."
 
-**Lý do đó đã hết hiệu lực.** ADR-0001 dựng đúng cái baseline ấy: golden phủ 801 bảng và
+**Lý do đó đã hết hiệu lực.** ADR-0001 dựng đúng cái baseline ấy: golden phủ 863 bảng và
 DỪNG khi một con số đổi. Điều kiện chờ đã được đáp ứng.
 
 Nhưng khi chuẩn bị xoá thì lộ ra một ràng buộc khác, và nó là ràng buộc thật.
@@ -77,7 +77,7 @@ Ba việc phải xong trước khi xoá, theo thứ tự:
 3. **Đưa `euclid_coverage_error_by_radius` vào `n07`.** ~16 dòng, không cần đọc thêm dữ
    liệu nào (`eu`, `dist_m`, `reachable` đã nằm sẵn trong bộ nhớ).
 
-   *Và nó đã lộ ra một chỗ tài liệu nói sai:* `README.md:49-50` và `DATA_DICTIONARY.md:144`
+   *Và nó đã lộ ra một chỗ tài liệu nói sai:* `README.md:49-50` và `DATA_DICTIONARY.md:144` (file nay đã xoá)
    viết **2.860 / 1.004 / 26,0%**, trong khi QA json và cả ba file parquet đều cho
    **2.879 / 985 / 25,49%**. Web thì không đọc QA json — `fetchDetourStats` tính lại lúc
    chạy nên màn hình đang hiện 25,5%. Tài liệu và màn hình đang bất đồng.

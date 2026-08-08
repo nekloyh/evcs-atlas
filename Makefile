@@ -1,9 +1,9 @@
-.PHONY: setup clean docs help web vn vn-plan vn-web vn-quocgia golden golden-ghi schema schema-kiem kiem clean-cache
+.PHONY: setup clean help web vn vn-plan vn-web vn-quocgia golden golden-ghi schema schema-kiem kiem clean-cache
 
 help:
 	@echo "make setup    — cài môi trường (uv sync)"
 	@echo "make clean    — xoá store/p, store/cache và QA theo tỉnh"
-	@echo "make web      — chạy dev server của web app (cần make web-data trước)"
+	@echo "make web      — chạy dev server của web app (cần `make vn-web` trước)"
 	@echo ""
 	@echo "  ── toàn quốc (34 tỉnh) ──"
 	@echo "make vn                 — chạy toàn bộ pipeline toàn quốc (resume được)"
@@ -15,7 +15,7 @@ help:
 	@echo ""
 	@echo "  ── cổng chặn (xem docs/adr/) ──"
 	@echo "make kiem      — schema + test Python + test web + golden. Chạy trước mọi commit."
-	@echo "make golden    — DỪNG nếu một con số của 801 bảng sản phẩm đổi"
+	@echo "make golden    — DỪNG nếu một con số của 863 bảng sản phẩm đổi"
 	@echo "make schema    — sinh lại khai báo cột cho web từ src/evcs/schema/grid.py"
 	@echo ""
 	@echo "  ── soi pipeline ──"
@@ -40,7 +40,7 @@ clean-cache:
 web:
 	cd web && pnpm install && pnpm dev
 
-# --- pipeline toàn quốc (xem AUDIT_TOAN_QUOC.md + QUYET_DINH_TOAN_QUOC.md) ---
+# --- pipeline toàn quốc (xem README.md + DECISIONS.md) ---
 # Tham số hoá theo tỉnh và RESUME được: đơn vị ghi nhận là cặp (bước, tỉnh), nên đứt ở tỉnh
 # thứ 19 thì lần sau bắt đầu từ tỉnh thứ 19. Xoá một file sản phẩm hoặc đổi logic một bước
 # là bước đó tự hết hạn — xem docstring `vn/runner.py`.

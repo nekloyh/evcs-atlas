@@ -54,10 +54,41 @@ thật, tôn trọng đường một chiều. Đơn vị **MÉT**. Bộ dữ li�
 lái nào** — đó là quyết định, không phải thiếu sót.
 
 **Khoảng cách chim bay** (`dist_station_euclid_m`) — **khái niệm riêng**, không phải bản dự
-phòng. Dùng cho câu hỏi về **bố trí**. **Không được dùng để kết luận độ phủ**: ở bán kính
-3 km nó báo phủ nhầm 1.004/3.864 ô, và sai chỉ lệch về một phía.
+phòng. Dùng cho câu hỏi về **bố trí**. **Không được dùng để kết luận độ phủ**: tỉ lệ báo phủ nhầm KHÔNG phải
+hằng số toàn quốc — đọc `store/qa/<mã>/n07_distance.json`. Sai chỉ lệch về một phía.
 
-**Hệ số đi vòng** (`detour_ratio`) — mạng chia chim bay. Trung vị Hà Nội 1,47.
+**Hệ số đi vòng** (`detour_ratio`) — mạng chia chim bay. Trung vị Hà Nội 1,47. `null` khi
+chim bay dưới 200 m: dưới ngưỡng đó tỉ số là nhiễu, **không phải "không đi vòng"**.
+
+**Bất đối xứng** (`dist_station_asym_m`) — phần chênh giữa chiều về và chiều đi. **KHÔNG
+phải cột khoảng cách thứ hai**: chiều về trùng chiều đi ở 95,7% số ô, nên phát cả `dist_from`
+sẽ cho hai cột gần y hệt nhau, và hai cột gần y hệt nhau chỉ mời người đọc chia chúng cho
+nhau. Trung vị **đúng bằng 0** là giá trị THẬT — phần lớn đường là hai chiều.
+
+> **BỐN khái niệm, không phải bốn biến thể.** Dùng nhầm cái nào cũng ra một con số trông
+> hợp lý:
+>
+> | Câu hỏi | Trường đúng |
+> |---|---|
+> | *"Ô này đã được phủ chưa? Lái bao xa?"* | `dist_station_network_m` |
+> | *"Hai trạm có gần nhau quá không? Mật độ trạm?"* | `dist_station_euclid_m` |
+> | *"Chỗ nào chim bay nói dối?"* | `detour_ratio` |
+> | *"Chỗ nào chiều về khác chiều đi?"* | `dist_station_asym_m` |
+
+---
+
+## Hai tầng của một trạm: ASSET và LIVE
+
+Cùng một trạm có hai loại số, và chúng **không khớp nhau, cũng không nên khớp**:
+
+| tầng | nghĩa | trường |
+|---|---|---|
+| **ASSET** | cái đã **lắp đặt** | `stations.n_ports` · `current_type` · `power_kw_site` |
+| **LIVE** | cái đang **báo cáo** ngay lúc chụp | `connectors.count_total` · telemetry |
+
+`connectors.count_total` cộng lại **không** bằng `stations.n_ports`. Cần số súng lắp đặt thì
+dùng `n_ports`; đó cũng là mẫu số của `util` (`util_denominator_ports`). Lấy nhầm tầng LIVE
+làm mẫu số thì một trạm báo cáo thiếu sẽ hiện ra là **bận hơn thực tế**.
 
 ---
 

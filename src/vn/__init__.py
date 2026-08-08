@@ -1,6 +1,6 @@
 """Pipeline ETL toàn quốc — 34 đơn vị hành chính cấp tỉnh.
 
-12 bước, tham số hoá theo tỉnh, resume theo cặp (bước, tỉnh). Ghi vào ``store/``.
+14 bước, tham số hoá theo tỉnh, resume theo cặp (bước, tỉnh). Ghi vào ``store/``.
 
 Gói này giữ phần BIẾT VỀ MIỀN NÀY: bước nào đọc gì, ghi gì, và các bảng nguồn nằm ở đâu.
 Phần CƠ CHẾ — Dataset, Step, DAG, vân tay, audit — ở ``evcs.pipeline``; phần LUẬT — hình
@@ -17,7 +17,7 @@ Thứ tự chạy KHÔNG viết tay ở đâu cả — nó là topo sort trên (
 
 Bản trước của docstring này nói việc gộp ``hanoi`` vào đây là ĐÚNG nhưng hoãn, vì "không có
 cách nào tách 'số đổi vì sửa đúng' khỏi 'số đổi vì lỗi mới'". Lý do đó **đã hết hiệu lực**:
-``golden/`` phủ 801 bảng và DỪNG khi một con số đổi.
+``golden/`` phủ 863 bảng và DỪNG khi một con số đổi.
 
 Nay việc gộp bị chặn bởi một ràng buộc khác và là ràng buộc thật — hai lớp chỉ ``hanoi``
 dựng được. Xem ``docs/adr/0003-chua-xoa-goi-hanoi.md`` để biết ba việc phải xong trước.

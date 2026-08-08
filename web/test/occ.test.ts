@@ -51,7 +51,7 @@ test("giá trị là `occ / n_ports`, KHÔNG phải occ trần", () => {
 
 test("mẫu số là số cổng LẮP ĐẶT, nên cùng `occ` mà khác cổng thì khác giá trị", () => {
   // §13c-1: dùng mẫu số LIVE (`util_denominator_ports`) là trộn hai tầng mà
-  // DATA_DICTIONARY §4 cấm trộn. Test này ghim mẫu số lại.
+  // DECISIONS §5 cấm trộn. Test này ghim mẫu số lại.
   const p = make(2, [4, 20]);
   put(p, 0, 10, 2, 5);
   put(p, 1, 10, 2, 5);

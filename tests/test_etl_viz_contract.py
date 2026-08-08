@@ -89,7 +89,7 @@ def test_bbox_cua_tinh_nam_trong_lanh_tho_viet_nam(pdir: Path):
     Cận dưới là **6,9°N / 117,9°E**, không phải cận của phần đất liền: Khánh Hoà mang cả
     Trường Sa, nên bbox của nó rộng 11° kinh và chạm 6,93°N. Đây là dữ liệu ĐÚNG — và nó
     cũng là lý do khung nhìn mặc định fit theo DÂN chứ không theo lãnh thổ
-    (``QUYET_DINH_TOAN_QUOC.md`` §11): fit theo bbox thì mở Khánh Hoà ra là thấy Biển Đông.
+    (``web/DESIGN.md`` §11): fit theo bbox thì mở Khánh Hoà ra là thấy Biển Đông.
     """
     p = _manifest(pdir).get("province")
     assert p, "manifest thiếu khối province ⇒ khung nhìn rơi về mặc định Hà Nội"

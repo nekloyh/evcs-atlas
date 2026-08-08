@@ -1,7 +1,7 @@
 /**
  * Scrubber đáy, 56px — DESIGN.md §3e.
  *
- * 168 giờ chia **7 khối thứ**, nhãn `T2 … CN` (`dow = 0` là **Thứ Hai** — DATA_DICTIONARY
+ * 168 giờ chia **7 khối thứ**, nhãn `T2 … CN` (`dow = 0` là **Thứ Hai** — `docs/COT.md`
  * §6, và đó là chỗ dễ sai nhất của cả mốc này: mọi thư viện ngày tháng mặc định `0` là Chủ
  * Nhật, nên nhãn sẽ lệch một ngày mà không có lỗi nào).
  *

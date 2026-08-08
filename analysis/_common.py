@@ -6,7 +6,7 @@ Mọi script trong thư mục này CHỈ ĐỌC dữ liệu đã build. Kết qu
 ── NGUỒN ĐỌC: ``store/p/01/``, KHÔNG PHẢI ``data/processed/`` ────────────────────────
 
 Bộ Hà Nội cũ đã thành tỉnh 01 của store chung. Mọi mũi phản biện vẫn nói về **cùng một
-thành phố** — bảng đối chứng ``AUDIT_TOAN_QUOC.md §F`` chứng minh hai đường mã cho ra số
+thành phố** — một bảng đối chứng đã chứng minh hai đường mã cho ra số
 trùng khít trên các chỉ số chính.
 
 Hai chỗ KHÁC, phải biết trước khi đọc lại một kết luận cũ:

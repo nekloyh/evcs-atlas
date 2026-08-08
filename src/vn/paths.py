@@ -5,7 +5,7 @@ Ba repo cũ chỉ được ĐỌC. Không hàm nào trong gói này ghi vào ch�
 KHÔNG cào lại gì cả. Mọi nguồn ở đây là ảnh chụp đã đóng băng trong hai repo trước:
 mở rộng phạm vi từ một tỉnh ra 34 tỉnh KHÔNG làm tăng một request nào tới evcs.vn, vì
 bảng canonical đã là bảng TOÀN QUỐC ngay từ đầu — bộ dữ liệu Hà Nội chỉ lọc một phần của
-nó ra. Xem ``QUYET_DINH_TOAN_QUOC.md`` §0.
+nó ra. Xem ``docs/adr/0005-hai-tier-store.md``.
 """
 
 from __future__ import annotations
