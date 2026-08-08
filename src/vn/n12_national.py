@@ -62,6 +62,8 @@ import pyarrow.parquet as pq
 from shapely import wkb
 from shapely.geometry import mapping
 
+from evcs.schema import GRID
+
 from . import admin, paths, qa
 
 # Nhập từ n11 chứ không viết lại: cùng phép làm tròn toạ độ, cùng cách đóng gói
@@ -76,30 +78,19 @@ WEB_VN = WEB_DATA / "vn"
 
 R_NATIONAL = 6
 
-# Cộng thẳng — đại lượng quảng tính, mỗi phân mảnh giữ phần của mình (xem docstring).
-SUM_COLS = [
-    "population",
-    "population_wp",
-    "n_stations",
-    "n_stations_operational",
-    "n_ports",
-    "power_kw_site",
-    "n_fuel",
-    "n_parking_off",
-    "n_parking_street",
-    "n_mall",
-    "n_dept_store",
-    "n_supermarket",
-    "n_market",
-    "n_apartment",
-    "n_poi_total",
-    "apartment_levels_sum",
-    "road_len_in_province_m",
-    "road_len_arterial_m",
-]
+# Hai danh sách dưới đây SUY RA từ `evcs.schema.GRID`, không gõ tay.
+#
+# Trước đây chúng là 22 tên cột chép tay rồi truyền thẳng vào `pq.read_table(columns=…)`,
+# nên đổi tên một cột ở `n09` là bước này NỔ — và không phép kiểm nào bắt trước. Giờ khai
+# một chỗ: `agg` nói cột gộp được bằng phép nào, `national` nói cột có lên màn hình cả
+# nước không. Hai câu hỏi khác nhau: `road_len_local_m` cộng được nhưng không lên, vì ngân
+# sách tải của màn hình ấy đã đo và đã chốt.
+
+# Cộng thẳng — đại lượng quảng tính, mỗi phân mảnh giữ phần của mình.
+SUM_COLS = [c.name for c in GRID.where(agg="sum", national=True)]
 
 # Trung bình có trọng số DIỆN TÍCH — cường tính, cộng vào là vô nghĩa.
-FRAC_COLS = ["built_frac", "water_frac", "tree_frac", "crop_frac"]
+FRAC_COLS = [c.name for c in GRID.where(agg="area_mean", national=True)]
 
 # Cột của bảng trạm được chở ra web. Bỏ hẳn `address`/`operator`/`station_id`: màn hình cả
 # nước không đọc chúng, và 6.380 chuỗi địa chỉ là phần lớn dung lượng của bảng.

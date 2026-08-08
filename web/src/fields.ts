@@ -847,6 +847,17 @@ export const FIELDS: FieldMeta[] = [
 export const FIELD_BY_ID = new Map(FIELDS.map((f) => [f.id, f]));
 
 /**
+ * Cột của LƯỚI mà danh mục này mô tả — đầu vào của cổng ETL→viz (`columns.test.ts`).
+ *
+ * Chỉ lấy trường của ô: trường của xã/đường/trạm đọc từ bảng khác nên chúng không nói gì
+ * về `grid_h3_r8.parquet`. Trường DẪN XUẤT (`expr` thay cho một cột thật) cũng bị loại —
+ * `pop_beyond_2km` và `util_pctl_cell` là công thức, không phải cột.
+ */
+export const CELL_SPECS_COLUMNS: string[] = withUnit(CELL_SPECS, "cell")
+  .filter((f) => !f.expr)
+  .map((f) => f.column);
+
+/**
  * Cột THẬT SỰ có trong lưới của bộ dữ liệu đang mở — đặt một lần từ `manifest`.
  *
  * `null` = **không lọc gì**, và đó là mặc định có chủ ý: bộ Hà Nội gốc có đủ 45 trường và

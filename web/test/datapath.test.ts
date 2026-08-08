@@ -60,12 +60,13 @@ function viPham(duoi: string): string[] {
   for (const f of FILES) {
     const src = boComment(readFileSync(join(SRC, f), "utf8"));
     for (const m of src.matchAll(re)) {
-      if (laToanQuoc(m[2])) continue;
+      const ten = m[2] ?? "";
+      if (laToanQuoc(ten)) continue;
       const truoc = src.slice(Math.max(0, m.index! - 9), m.index!);
       if (truoc.endsWith("dataPath(")) continue;
       // `manifest.files["commune.geojson"]` là một KHOÁ tra bảng, không phải đường dẫn.
       if (truoc.endsWith("[")) continue;
-      pham.push(`${f}: ${m[2]}`);
+      pham.push(`${f}: ${ten}`);
     }
   }
   return pham;
@@ -87,8 +88,9 @@ test("read_parquet chỉ nhận biến nội suy, không nhận tên file cứng
     const src = boComment(readFileSync(join(SRC, f), "utf8"));
     for (const m of src.matchAll(/read_parquet\(\s*(["'])([^"'`]*)\1/g)) {
       // `read_parquet('${GRID}')` là đúng — hằng đã qua `dataPath`. Chỉ chặn chuỗi cứng.
-      if (m[2].includes("${")) continue;
-      pham.push(`${f}: read_parquet('${m[2]}')`);
+      const arg = m[2] ?? "";
+      if (arg.includes("${")) continue;
+      pham.push(`${f}: read_parquet('${arg}')`);
     }
   }
   assert.deepEqual(pham, [], `read_parquet nhận tên file cứng:\n  ${pham.join("\n  ")}`);

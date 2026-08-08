@@ -23,6 +23,8 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
+from evcs.schema import GRID
+
 from . import admin, paths, qa
 from .runner import Step
 
@@ -37,21 +39,6 @@ LAYERS = [
 ]
 DROP = {"n_px_10m"}
 
-FRONT = [
-    "h3_r8",
-    "province_code",
-    "lat",
-    "lng",
-    "area_km2",
-    "area_frac",
-    "cell_state",
-    "commune_code",
-    "commune_name",
-    "commune_area_frac",
-    "population",
-    "pop_density_ppkm2",
-    "pop_source",
-]
 
 # Cột đã bị bỏ CÓ CHỦ Ý ở bộ Hà Nội — chúng không được quay lại qua đường ghép.
 REJECTED = {
@@ -128,9 +115,17 @@ def run(province_code: str) -> None:
         df["n_stations_measured"] = 0
 
     df = df.drop(columns=[c for c in DROP if c in df.columns])
-    front = [c for c in FRONT if c in df.columns]
+    # Thứ tự cột do `evcs.schema.GRID` quyết định, không do thứ tự merge. Cột lạ (nếu có)
+    # đi sau, để phép kiểm ngay dưới đây nhìn thấy chúng thay vì nuốt mất.
+    front = [c for c in GRID.names() if c in df.columns]
     df = df[front + [c for c in df.columns if c not in front]]
     df = df.sort_values("h3_r8").reset_index(drop=True)
+
+    # Cổng chặn schema: bảng ghi ra phải ĐÚNG BẰNG bảng đã khai — đủ cột, đúng thứ tự, đúng
+    # kiểu. Đây là chỗ một cột mới bị quên, hoặc một cột bị đổi tên, dừng lại thay vì đi
+    # tiếp tới `n12` (nơi nó nổ) hoặc tới web (nơi nó im lặng biến mất khỏi giao diện).
+    lech = GRID.validate(list(df.columns))
+    r.check("schema_khop_khai_bao", not lech, "; ".join(lech) if lech else "61 cột, đúng thứ tự")
     pq.write_table(
         pa.Table.from_pandas(df, preserve_index=False),
         pdir / "grid_h3_r8.parquet",

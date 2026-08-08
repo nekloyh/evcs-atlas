@@ -37,6 +37,8 @@ import pyarrow.parquet as pq
 from shapely import wkb
 from shapely.geometry import mapping
 
+from evcs.schema import GRID
+
 from . import admin, paths, qa
 from .n10_quality import MIN_OCC_MEASURED_SHARE
 from .runner import Step
@@ -158,14 +160,20 @@ def _roads_parquet(code: str, dst) -> dict:
 
 
 def _reference_columns() -> set[str]:
-    """Tập cột của bộ Hà Nội đầy đủ — mốc so sánh để biết tỉnh nào còn thiếu gì.
+    """Tập cột ĐẦY ĐỦ theo khai báo — mốc so sánh để biết tỉnh nào còn thiếu gì.
 
-    Đọc từ chính file Hà Nội đang chạy, không từ một hằng số: một danh sách gõ tay sẽ trôi
-    khỏi thực tế đúng lúc ai đó thêm hoặc bỏ một lớp. Thiếu file thì trả tập rỗng — không
-    có mốc thì không kết luận gì, chứ không phải kết luận "không thiếu".
+    Trước đây mốc này đọc từ ``data/processed/grid_h3_r8.parquet``, tức từ bộ **Hà Nội**.
+    Hai chỗ hỏng vì thế:
+
+    * chạy lại pipeline Hà Nội đổi ``missing_layers`` của **cả 34 tỉnh** mà không làm hết
+      hạn một vân tay nào — bước này không hề khai file đó là nguồn;
+    * bộ Hà Nội có ``road_len_in_hanoi_m``, một cột chỉ có nghĩa ở một tỉnh. Đo được:
+      manifest của **cả 34 tỉnh** đều khai thiếu nó. Giao diện được báo là thiếu một lớp
+      không hề tồn tại.
+
+    Mốc đúng là bảng ĐÃ KHAI, không phải một phân mảnh cụ thể nào.
     """
-    ref = paths.ROOT / "data/processed/grid_h3_r8.parquet"
-    return set(pq.read_schema(ref).names) if ref.exists() else set()
+    return set(GRID.names())
 
 
 def _coverage(grid: pd.DataFrame) -> dict:

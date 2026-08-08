@@ -1,4 +1,4 @@
-.PHONY: all setup clean layers docs help web web-data vn vn-plan vn-web vn-quocgia golden golden-ghi
+.PHONY: all setup clean layers docs help web web-data vn vn-plan vn-web vn-quocgia golden golden-ghi schema schema-kiem kiem
 PY := uv run python -m hanoi
 
 help:
@@ -86,3 +86,17 @@ golden:
 
 golden-ghi:
 	uv run python -m golden.capture --ghi
+
+# --- schema: một chỗ khai cột, mọi thứ khác suy ra -------------------------
+# `schema` sinh lại khai báo TypeScript cho web; `schema-kiem` chỉ kiểm nó còn khớp.
+# Đây là nửa web của vòng ETL→viz; nửa dữ liệu là phép kiểm `schema_khop_khai_bao` ở n09.
+schema:
+	uv run python -m evcs.schema.emit
+
+schema-kiem:
+	uv run python -m evcs.schema.emit --kiem
+
+kiem: schema-kiem
+	uv run pytest
+	cd web && pnpm test
+	$(MAKE) golden

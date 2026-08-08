@@ -75,9 +75,38 @@ def _scan(
         doc[f"{label}/{name}"] = table_fingerprint(p, key)
 
 
+# Bảng ĐÃ XUẤT cho web — sản phẩm cuối, thứ người dùng thật sự nhìn thấy. Vân tay chúng
+# riêng vì bước xuất có quyền bỏ cột, đổi kiểu và giảm độ chính xác: một thay đổi ở đây
+# không nhất thiết lộ ra ở `store/`.
+WEB_TABLES: dict[str, str | None] = {
+    "grid_h3_r8.parquet": "h3_r8",
+    "stations.parquet": "station_id",
+    "connectors.parquet": None,
+    "station_occupancy.parquet": "station_code",
+    "station_occupancy_profile_168h.parquet": None,
+    "roads.parquet": None,
+}
+
+WEB_NATIONAL_TABLES: dict[str, str | None] = {
+    "grid_h3_r6.parquet": "h3_r6",
+    "stations.parquet": "station_code",
+    "poi.parquet": None,
+}
+
+
 def capture() -> tuple[dict, list[str]]:
     doc: dict = {}
     missing: list[str] = []
+
+    web = ROOT / "web" / "public" / "data"
+    if web.exists():
+        _scan(web, WEB_TABLES, "web", doc, missing)
+        _scan(web / "vn", WEB_NATIONAL_TABLES, "web/vn", doc, missing)
+        wp = web / "p"
+        if wp.exists():
+            for pdir in sorted(wp.iterdir()):
+                if pdir.is_dir():
+                    _scan(pdir, WEB_TABLES, f"web/p/{pdir.name}", doc, missing)
 
     hanoi = ROOT / "data" / "processed"
     if hanoi.exists():

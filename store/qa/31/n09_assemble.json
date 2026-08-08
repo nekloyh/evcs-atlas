@@ -78,6 +78,11 @@
   },
   "checks": [
     {
+      "name": "schema_khop_khai_bao",
+      "status": "PASS",
+      "detail": "61 cột, đúng thứ tự"
+    },
+    {
       "name": "h3_unique",
       "status": "PASS",
       "detail": "4196 ô"
