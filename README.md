@@ -239,6 +239,18 @@ uv run python -m vn all --tinh 01 --soi   # chạy VÀ đo bản khai reads có 
 cũ hỏng: 7/12 bước đọc file mà không khai, nên chạy lại một bước thượng nguồn để lại bước
 hạ nguồn ở trạng thái "đã xong" với dữ liệu cũ.
 
+Đo được trên chính store này — chạm `store/admin/communes.parquet` (đầu ra của `n01`) rồi
+`make vn-plan`:
+
+```
+n03_supply  34 tỉnh   n05_population  34 tỉnh   n08_screening  34 tỉnh
+n09_assemble 34 tỉnh  n10_quality      1        n11_web_export  1
+```
+
+Đúng 6 bước đọc bảng đó, không thừa không thiếu. `n02`/`n04`/`n06`/`n07`/`n12` không đọc nó
+nên không hết hạn. Ở bản cũ, **bốn bước đầu sẽ không hết hạn** vì chúng không khai bảng ấy
+là nguồn.
+
 ### Thêm một nguồn dữ liệu mới
 
 1. thêm một dòng `Dataset(...)` ở `src/vn/datasets.py`
