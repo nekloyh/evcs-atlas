@@ -30,3 +30,12 @@ web/public/data/
 web/tsconfig.tsbuildinfo
 *.tmp
 .cache/
+
+# Tài liệu .md thì để ngoài git — theo dõi qua memory thay vì file.
+# Riêng báo cáo QA vẫn GIỮ (xem dòng 7-8): phủ định sau *.md mới có tác dụng.
+*.md
+!store/qa/*.md
+*.parquet
+
+# Gói giao nộp POI (toạ độ OSM) — gửi file trực tiếp, không qua git.
+data/qa/eda/export/
