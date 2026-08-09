@@ -1,0 +1,825 @@
+{
+  "git_sha": "e6c7348a1c7a9419e2a6058bf48fdbe1dac753bc",
+  "git_dirty_khi_chay": true,
+  "scope": "vn",
+  "bo_goc": {
+    "file": "data/qa/critique/poi_extended_vn.parquet",
+    "n_dong": 410426
+  },
+  "thu_tu_chuoi": [
+    "chungcu",
+    "luutru",
+    "thuongmai",
+    "giaitri",
+    "thamquan",
+    "truonghoc",
+    "benhvien",
+    "hanhchinh",
+    "vanphong"
+  ],
+  "artefacts": {
+    "poi_benhvien_vn_b1.parquet": {
+      "n_dong": 8982,
+      "n_uid_unique": 8982,
+      "sha256_file": "2af1e6ae7784d958130929d0450a1404e3828520b8b8188d231d1ea393167980",
+      "sha256_uid_set": "ef50a717f6c34773eab508f48c45dcfd3b8c99391490e9edd83da73ae5b2e93e"
+    },
+    "poi_benhvien_vn_b3.parquet": {
+      "n_dong": 5420,
+      "n_uid_unique": 5420,
+      "sha256_file": "542e481cabaa63ad38269d1c87e50c962b04f764f12dd1c700198fd075166580",
+      "sha256_uid_set": "a89d10d392c4e379964bb45e505ac9aeb3d31a4ec6e3d29f45c6a022b57b2a46"
+    },
+    "poi_benhvien_vn_b3_bi_xoa.parquet": {
+      "n_dong": 3562,
+      "n_uid_unique": 3562,
+      "sha256_file": "c521d79e19d38085a27a5ae636cbdaff34235b2ce1147a8edb84ce66b11c9a54",
+      "sha256_uid_set": "62d473ba21e8f7d5e9469033c7d85f9e9d9f88f33ae941ff9f467c6af80fb679"
+    },
+    "poi_benhvien_vn_final.parquet": {
+      "n_dong": 5420,
+      "n_uid_unique": 5420,
+      "sha256_file": "cc8dec23e2bbac68a13a3c267be2bb7e1a18d6b3cb083260e68bfde5e8e45666",
+      "sha256_uid_set": "a89d10d392c4e379964bb45e505ac9aeb3d31a4ec6e3d29f45c6a022b57b2a46"
+    },
+    "poi_benhvien_vn_thieu_bang_chung.parquet": {
+      "n_dong": 69,
+      "n_uid_unique": 69,
+      "sha256_file": "19b898948233891f3325f9569a76a4a5deb1af07aa31e61673736f633d90706d",
+      "sha256_uid_set": "9d53d733d4c2aff3c1020609f4edc248b4aa5c656064a139e46e73b391f432be"
+    },
+    "poi_chungcu_vn.parquet": {
+      "n_dong": 20374,
+      "n_uid_unique": 20374,
+      "sha256_file": "2b1fac833c575e358bfff8eff2e62898d9e516cca284018fc72c08d1c1b5937f",
+      "sha256_uid_set": "79eaf122909a84dbc1cfa1c29c6341eda4bd29783ffeeb0b4e2eb60f2dd20d17"
+    },
+    "poi_chungcu_vn_b3.parquet": {
+      "n_dong": 17813,
+      "n_uid_unique": 17813,
+      "sha256_file": "9b8c0a35fe76719b8d3f9465d7c139fe17714c4eec82587e7e8e2f65852b59ea",
+      "sha256_uid_set": "575da03e8322f512c4b608eb14e459b626ecad97c9db367ddf4f13f9111a8063"
+    },
+    "poi_chungcu_vn_b3_bi_xoa.parquet": {
+      "n_dong": 2561,
+      "n_uid_unique": 2561,
+      "sha256_file": "3b51e0c47badb756c8574c07a2864ded883a74125645a2ce6aae09741a928b98",
+      "sha256_uid_set": "4bbec4989911e6757004694e87a708e2f72d7c33c9181d932cc66f91cd3784a6"
+    },
+    "poi_chungcu_vn_final.parquet": {
+      "n_dong": 17815,
+      "n_uid_unique": 17815,
+      "sha256_file": "4097c88ccb7b15b457adfbafd17e185f90a5855be7665352169a6a2cf8129756",
+      "sha256_uid_set": "c2dc14cb171ef742c201e992244de69e3921f08e010751bcb5176d5bcc3eae37"
+    },
+    "poi_extended_vn_con_lai.parquet": {
+      "n_dong": 392611,
+      "n_uid_unique": 392611,
+      "sha256_file": "b0c8ba41b5935ea4f0e8a3587d21483ebdb6c4f887cccdd6e3356a58775c49ba",
+      "sha256_uid_set": "0074bd8ef88238417cb6a8db59cb66d7da3a383619944f96b0de3fbb6f24082d"
+    },
+    "poi_extended_vn_con_lai_cuoi.parquet": {
+      "n_dong": 311598,
+      "n_uid_unique": 311598,
+      "sha256_file": "e782f116306a1bee910898f8e5499d932765eaf1ec099b2474000a2dad57b7ba",
+      "sha256_uid_set": "192b54e8ec1eb1177d9e3729d6d2e244af3d7e0b1d0565ed9350a54b14fe77c3"
+    },
+    "poi_extended_vn_con_lai_sau_benhvien.parquet": {
+      "n_dong": 323765,
+      "n_uid_unique": 323765,
+      "sha256_file": "632f1340a6dd2fc2b968fe8c58623aab2d555e9cd3268b405cf65f640bec2f23",
+      "sha256_uid_set": "b397b1667d7c360785a3c69141741437815d25c82fffea1117d982a00a835145"
+    },
+    "poi_extended_vn_con_lai_sau_giaitri.parquet": {
+      "n_dong": 367635,
+      "n_uid_unique": 367635,
+      "sha256_file": "e0eca1bbe824d922ac75432c49e7d5dca2bf1fb7a0e488025a2b0657b3711d28",
+      "sha256_uid_set": "06a7fbe482cac8df095800a586be245cc6dcda97515d258e1fece083559f069a"
+    },
+    "poi_extended_vn_con_lai_sau_hanhchinh.parquet": {
+      "n_dong": 316305,
+      "n_uid_unique": 316305,
+      "sha256_file": "52513985d4409bfc21b3d5e449847f762dd771bd9e09bccd419e7a0315a1df09",
+      "sha256_uid_set": "9ae389b9bae781955ea78e61df6573bcc2ddd151bffb05394bb463833a58b42e"
+    },
+    "poi_extended_vn_con_lai_sau_luutru.parquet": {
+      "n_dong": 380519,
+      "n_uid_unique": 380519,
+      "sha256_file": "952866f99f030dbfcbae7ea3685734ae4573688ef083bbc001781c51959d1da2",
+      "sha256_uid_set": "88c2e877782e79fe46446d78882f242b15a0267ff553e900607a19dc84dbc679"
+    },
+    "poi_extended_vn_con_lai_sau_thamquan.parquet": {
+      "n_dong": 349235,
+      "n_uid_unique": 349235,
+      "sha256_file": "ffab4760da979cd81ecdd93b2734f8446cd2f9372a99d09e41e03e47900fde81",
+      "sha256_uid_set": "67fdb176f065aff91eb343f17a7c3d4b1a83c1b79913107851343339e2f9593c"
+    },
+    "poi_extended_vn_con_lai_sau_thuongmai.parquet": {
+      "n_dong": 377362,
+      "n_uid_unique": 377362,
+      "sha256_file": "8ed82e33562aa54a36e544adf1af30f252084502061b3f7a986cdb50a1de5558",
+      "sha256_uid_set": "12cb6c95eb94a858c96ab82db4f28ad3c3ac4cb9f907d87f03f106116e5b6b7c"
+    },
+    "poi_extended_vn_con_lai_sau_truonghoc.parquet": {
+      "n_dong": 329185,
+      "n_uid_unique": 329185,
+      "sha256_file": "3c2ab9e780942e10249881b53d8e80b20acbe2cc698dcc154e2b3a49f4f79808",
+      "sha256_uid_set": "c6cdb2ddb49683719ebe64169d8081d59a6dbc857331951601a7ddeaece2b22e"
+    },
+    "poi_giaitri_vn_b1.parquet": {
+      "n_dong": 28351,
+      "n_uid_unique": 28351,
+      "sha256_file": "b5fe08b1bc6a3b4dabbabdb5281719c359440d764b0fdc03416dce8221d1b649",
+      "sha256_uid_set": "0210c0e8ecbb8ddee642d4ef8c000faa6ce89839a32e3d85b50d234843efc059"
+    },
+    "poi_giaitri_vn_b3.parquet": {
+      "n_dong": 9727,
+      "n_uid_unique": 9727,
+      "sha256_file": "7b1c30a58e3d8a51fe82936e0cbaef249756363c3c9de5dc353a9418f036a8fc",
+      "sha256_uid_set": "a40137a60fd85612e94adfdac547e68ad2bd71301ac9dd71e85db1000bfe7a65"
+    },
+    "poi_giaitri_vn_b3_bi_xoa.parquet": {
+      "n_dong": 18624,
+      "n_uid_unique": 18624,
+      "sha256_file": "c4174491765f7f24222b95bad9e7b12a2f4d6a12965cf0aee2dd04cf13c92631",
+      "sha256_uid_set": "67e5182defc09e1702540426fba5e72c0eed6fee332e2f13befae7f656f7d380"
+    },
+    "poi_giaitri_vn_final.parquet": {
+      "n_dong": 9727,
+      "n_uid_unique": 9727,
+      "sha256_file": "8ba188c07fc62e1a2a175e4e730ba7346e987e64a3371ff6f2f643f5bf68ebaf",
+      "sha256_uid_set": "a40137a60fd85612e94adfdac547e68ad2bd71301ac9dd71e85db1000bfe7a65"
+    },
+    "poi_hanhchinh_vn_b1.parquet": {
+      "n_dong": 8629,
+      "n_uid_unique": 8629,
+      "sha256_file": "6b75a91a15da4da2952da7d9a484daf34a2bc73aca76925c8a070622fbb9717d",
+      "sha256_uid_set": "f6e7bc3c33325163ac1fe0c7caaf5e09e6e613a8a20bbc38e4541c80aad154a2"
+    },
+    "poi_hanhchinh_vn_b3.parquet": {
+      "n_dong": 7460,
+      "n_uid_unique": 7460,
+      "sha256_file": "deb03d8b9f539a899237f10f985bd4050ca5e701f82b305ab861fb0f711e147f",
+      "sha256_uid_set": "4c28c707c93bc2848aca6cc3fd2ac559e52daf3795ff7b30af215588a078377a"
+    },
+    "poi_hanhchinh_vn_b3_bi_xoa.parquet": {
+      "n_dong": 1169,
+      "n_uid_unique": 1169,
+      "sha256_file": "cf1476c57f41e07f0fca3ece4a4a4a9349b93dd86fef6c357c16cdbc8a65d891",
+      "sha256_uid_set": "18442dda78361f61151c0c749804434d70e4e73947e26ead68298b82e50dc6ff"
+    },
+    "poi_hanhchinh_vn_final.parquet": {
+      "n_dong": 7460,
+      "n_uid_unique": 7460,
+      "sha256_file": "cc849a6bdffbf5cedfc5010f2d6d7b34a9cbe6614d5f2b4ac834fda5334fef9b",
+      "sha256_uid_set": "4c28c707c93bc2848aca6cc3fd2ac559e52daf3795ff7b30af215588a078377a"
+    },
+    "poi_luutru_vn_b1.parquet": {
+      "n_dong": 13086,
+      "n_uid_unique": 13086,
+      "sha256_file": "3d73ab46362720e83e6ab5176870fcee19856b11614257e02bab51eee68695c1",
+      "sha256_uid_set": "c3b221b25728a13228dd68d704f06f06322dc411f624788893ee8394afba81e7"
+    },
+    "poi_luutru_vn_b3.parquet": {
+      "n_dong": 12092,
+      "n_uid_unique": 12092,
+      "sha256_file": "461b412c834644535dfaf0a78726a84ce01a73f7d9e00e225234869f11ed57f1",
+      "sha256_uid_set": "d89378e5a3e7e97423d1ec00cc28590a8cc03359e6015d1f65376458e53be347"
+    },
+    "poi_luutru_vn_b3_bi_xoa.parquet": {
+      "n_dong": 994,
+      "n_uid_unique": 994,
+      "sha256_file": "3b19165291417321e5bd2599787d31c6444f1d27a77b2b049f00ef1b09a53278",
+      "sha256_uid_set": "6d514afbebeebd54060d5a640c77b94e0e16e91dcd056a59be0665f2326afa9b"
+    },
+    "poi_luutru_vn_final.parquet": {
+      "n_dong": 12092,
+      "n_uid_unique": 12092,
+      "sha256_file": "e4cecb31a8d741835ac3782ca0aff953f6c8ad418b87f09cb1fc4c814e278ae9",
+      "sha256_uid_set": "d89378e5a3e7e97423d1ec00cc28590a8cc03359e6015d1f65376458e53be347"
+    },
+    "poi_morph_review_vn.parquet": {
+      "n_dong": 118,
+      "n_uid_unique": 118,
+      "sha256_file": "86de6c6ab34eb5f27b13a0fd90acb721967f085625053becac697f18d3f3bbb4",
+      "sha256_uid_set": "ecbd537340d5d6becca7353735d740cd8e28880d6ad3962f65730212596ba98e"
+    },
+    "poi_thamquan_vn_b1.parquet": {
+      "n_dong": 23399,
+      "n_uid_unique": 23399,
+      "sha256_file": "12146cd51e5e1dfd248c96855b56553b92d6b94e6f532ada8f75d593e55166af",
+      "sha256_uid_set": "88e762aabd4e484ff5a6cbe083e2f6712729d56f816f77f03839ba357d1b776f"
+    },
+    "poi_thamquan_vn_b3.parquet": {
+      "n_dong": 18400,
+      "n_uid_unique": 18400,
+      "sha256_file": "0f942cac041207ab7be976be8cbf08b5ffe627dfdcfb309aa60642faa33067e0",
+      "sha256_uid_set": "4779df00475d4cf320e8395b7548f60e3f50fb4dd9a6de233ec2e1f5fe225b33"
+    },
+    "poi_thamquan_vn_b3_bi_xoa.parquet": {
+      "n_dong": 4999,
+      "n_uid_unique": 4999,
+      "sha256_file": "a81906579570f2956661a55c681c25684a31cfb619a041cf461a2038d7ade9cb",
+      "sha256_uid_set": "817714da51b46f09519a52b7a3461e5bd2947a527f8f7dfdbbb38aa1da3dc2f2"
+    },
+    "poi_thamquan_vn_final.parquet": {
+      "n_dong": 18400,
+      "n_uid_unique": 18400,
+      "sha256_file": "83254dfd881d852e43e4f0eb0d1105aa9faf605e475297f0a0496cef48194cf1",
+      "sha256_uid_set": "4779df00475d4cf320e8395b7548f60e3f50fb4dd9a6de233ec2e1f5fe225b33"
+    },
+    "poi_thuongmai_vn_b1.parquet": {
+      "n_dong": 30349,
+      "n_uid_unique": 30349,
+      "sha256_file": "468d34fc6a280160498275db67394c6b4e84c68656b6237fec61af6e3cb29efb",
+      "sha256_uid_set": "684fc2e7e18c2cf563b8215662dc964b029d543fea801b89016830d57667bb40"
+    },
+    "poi_thuongmai_vn_b3.parquet": {
+      "n_dong": 3157,
+      "n_uid_unique": 3157,
+      "sha256_file": "4c92145332cf8d2e49faf0aca69eace76b966403cd390f6f7db635315f96e3ee",
+      "sha256_uid_set": "9391b4a0c9b0bae92f9c6ecc76d6e8500d727d7c085fdf3766acb42614efd90a"
+    },
+    "poi_thuongmai_vn_b3_bi_xoa.parquet": {
+      "n_dong": 27192,
+      "n_uid_unique": 27192,
+      "sha256_file": "012e27acae10c07e184e9026ce292b69323d6df30c92831b1ab64fc5edb51528",
+      "sha256_uid_set": "a9f51b2df9821f9f83e9c60a5690d817568fd8ecd7f02e2068e4cabd0b6056dd"
+    },
+    "poi_thuongmai_vn_final.parquet": {
+      "n_dong": 3157,
+      "n_uid_unique": 3157,
+      "sha256_file": "70af5d8b7ff5f928aaf434d18db26d15738c6da81ffd0372207fb68fe657a6b9",
+      "sha256_uid_set": "9391b4a0c9b0bae92f9c6ecc76d6e8500d727d7c085fdf3766acb42614efd90a"
+    },
+    "poi_truonghoc_vn_b1.parquet": {
+      "n_dong": 21693,
+      "n_uid_unique": 21693,
+      "sha256_file": "73980bdc6d3e6fd4a11b336f0744f9ade7d74464471107f8bb9c8d3f5f4dd3ae",
+      "sha256_uid_set": "01c632b8edbd4948b37387a8415bc4862ea03981f513f40b118a570f03c8bf46"
+    },
+    "poi_truonghoc_vn_b3.parquet": {
+      "n_dong": 20050,
+      "n_uid_unique": 20050,
+      "sha256_file": "afa1e9240ade6f316e3eb63c6e0c9e86f17704cf70c06bba3c39ac9a77388711",
+      "sha256_uid_set": "9d7d1bcab7ca3eadeff56a28d797982da8fdabc4ba33a06158d8016826a3f0c4"
+    },
+    "poi_truonghoc_vn_b3_bi_xoa.parquet": {
+      "n_dong": 1643,
+      "n_uid_unique": 1643,
+      "sha256_file": "09d1ac1c87626158a0b0db3372713776898f7544fd3e7185faa00d825639cd3c",
+      "sha256_uid_set": "f7b3fe58b1225dd04ad38fb9321fd960843ee3b225f56c4e9ea299e9bc1e5ca8"
+    },
+    "poi_truonghoc_vn_final.parquet": {
+      "n_dong": 20050,
+      "n_uid_unique": 20050,
+      "sha256_file": "ed37be574cb43abc4368aab4faa7c3a49850dde447e1183d266f09475f6fc5a3",
+      "sha256_uid_set": "9d7d1bcab7ca3eadeff56a28d797982da8fdabc4ba33a06158d8016826a3f0c4"
+    },
+    "poi_vanphong_vn_b1.parquet": {
+      "n_dong": 8048,
+      "n_uid_unique": 8048,
+      "sha256_file": "d3aece978a568d4a682942d71ea4d3b7f8522f67bf2ca6af23f83a76891c747a",
+      "sha256_uid_set": "5492e205231a04f6850fca8af3d3a6e672c8bcb5366fedc91b36727b8292b768"
+    },
+    "poi_vanphong_vn_b3.parquet": {
+      "n_dong": 4707,
+      "n_uid_unique": 4707,
+      "sha256_file": "b25d684ece48901b0c69da08740e1c9a49aff82f374163ae84c348775831d343",
+      "sha256_uid_set": "63db53df17c32cd59d5804b0ddc496f9dd13451e727ea1bec47ee3853e55d9da"
+    },
+    "poi_vanphong_vn_b3_bi_xoa.parquet": {
+      "n_dong": 3341,
+      "n_uid_unique": 3341,
+      "sha256_file": "56c29e62b97b181528b332a761742a1c117f467fe090a876f44e83d954053df3",
+      "sha256_uid_set": "4cecb15809d1de2e46ca42aae41faeac732553da96bfb651471fd0d003475713"
+    },
+    "poi_vanphong_vn_final.parquet": {
+      "n_dong": 4707,
+      "n_uid_unique": 4707,
+      "sha256_file": "63504263885094852488b27aa1f8411cd233e3c35f1c80adb5b5848f1124b790",
+      "sha256_uid_set": "63db53df17c32cd59d5804b0ddc496f9dd13451e727ea1bec47ee3853e55d9da"
+    }
+  },
+  "drop_reason_theo_lop": {
+    "chungcu": {
+      "HA_TANG_DUONG": 630,
+      "AMENITY_KHAC": 522,
+      "LUU_TRU": 287,
+      "BUILDING_KHAC": 273,
+      "SHOP_OFFICE": 216,
+      "DU_AN_DANG_XAY": 135,
+      "PLACE_DIA_LY": 134,
+      "LANDUSE_KHAC": 133,
+      "LEISURE": 96,
+      "CONG_TRINH_KY_THUAT": 71,
+      "DI_TICH": 52,
+      "TEN_LOAI_KHAC": 10,
+      "BRAND": 2
+    },
+    "luutru": {
+      "TAG_SAI_HE_THONG": 262,
+      "HA_TANG_DUONG": 190,
+      "AN_UONG_GIAI_TRI": 180,
+      "LUU_TRU_DAI_HAN": 156,
+      "KHU_DU_LICH": 102,
+      "DI_TICH_THAM_QUAN": 40,
+      "BAN_LE_VAN_PHONG": 33,
+      "TEN_LOAI_KHAC": 13,
+      "LEISURE_KHAC": 9,
+      "BUILDING_KHAC": 5,
+      "KHU_O_KHONG_LUU_TRU": 3,
+      "MOC_THAM_CHIEU": 1
+    },
+    "thuongmai": {
+      "BAN_LE_NHO": 20512,
+      "DICH_VU_KHONG_BAN_LE": 4291,
+      "AMENITY_LOP_KHAC": 861,
+      "HA_TANG_DUONG": 851,
+      "NHA_PHO_BUILDING_RETAIL": 380,
+      "O_DAT_VO_DANH": 208,
+      "AMENITY_LOP_DA_BOC": 55,
+      "DINH_DANG_NHO": 24,
+      "TEN_LOAI_KHAC": 10
+    },
+    "giaitri": {
+      "MAT_PHU_KHONG_PHAI_CO_SO": 8937,
+      "QUA_NHO_VO_DANH": 4573,
+      "THANH_PHAN_KHUON_VIEN": 4459,
+      "HA_TANG_DUONG": 377,
+      "TAG_LOP_KHAC": 136,
+      "TEN_LOAI_KHAC": 74,
+      "CHI_TEN_TAG_LOP_KHAC": 68
+    },
+    "thamquan": {
+      "TAG_LOP_KHAC": 2578,
+      "HA_TANG_DUONG": 1654,
+      "BIEN_CHI_DAN": 678,
+      "TEN_LOAI_KHAC": 51,
+      "PLACE_DIA_LY": 25,
+      "TU_DUONG_MO_GIA_DINH": 11,
+      "MOC_THAM_CHIEU": 2
+    },
+    "truonghoc": {
+      "HA_TANG_DUONG": 1522,
+      "TAG_LOP_KHAC": 97,
+      "CO_QUAN_QUAN_LY_GD": 11,
+      "TEN_RIENG_KHONG_PHAI_TRUONG": 7,
+      "TEN_LOAI_KHAC": 5,
+      "MOC_THAM_CHIEU": 1
+    },
+    "benhvien": {
+      "NGOAI_PHAM_VI_NHA_THUOC_THU_Y": 2911,
+      "HA_TANG_DUONG": 555,
+      "TAG_LOP_KHAC": 74,
+      "DOANH_NGHIEP_NGANH_Y": 18,
+      "CO_QUAN_QUAN_LY_YT": 4
+    },
+    "hanhchinh": {
+      "HA_TANG_DUONG": 1058,
+      "TAG_LOP_KHAC": 62,
+      "DOANH_NGHIEP_NHA_NUOC": 25,
+      "PLACE_DIA_LY": 15,
+      "RANH_GIOI_KHONG_PHAI_TRU_SO": 5,
+      "TEN_LOAI_KHAC": 4
+    },
+    "vanphong": {
+      "O_DAT_VO_DANH": 1332,
+      "HA_TANG_DUONG": 746,
+      "CONG_NGHIEP_NGOAI_MVP": 710,
+      "TAG_LOP_KHAC": 539,
+      "TEN_LOAI_KHAC": 14
+    }
+  },
+  "phan_phoi_nhan": {
+    "chungcu": {
+      "label": {
+        "KHU_DO_THI": 10980,
+        "CHUNG_CU": 6835
+      },
+      "kdt_class": {
+        "nan": 6835,
+        "DAT_O": 6496,
+        "KHONG_KET_LUAN": 3949,
+        "KDT_XAC_NHAN": 384,
+        "NGHI_RANH_HANH_CHINH": 151
+      },
+      "evidence": {
+        "explicit_name": 11217,
+        "hard_tag": 6568,
+        "token_only": 28,
+        "context": 2
+      },
+      "_n_dong": 17815,
+      "_n_co_so": 15493
+    },
+    "luutru": {
+      "hang_ten": {
+        "(tên không nói hạng)": 5822,
+        "khách sạn": 3164,
+        "homestay / hostel": 1555,
+        "nhà nghỉ / nhà khách": 755,
+        "resort / nghỉ dưỡng": 575,
+        "villa / biệt thự": 212,
+        "căn hộ DV / condotel": 9
+      },
+      "quy_mo": {
+        "KHONG_DO_DUOC": 9018,
+        "LON_SUY_TU_HINH_THAI": 2373,
+        "NHO_TU_KHAI": 362,
+        "LON_TU_KHAI": 339
+      },
+      "verdict": {
+        "nan": 11854,
+        "CAN_HO_CHUA_KET_LUAN": 224,
+        "VUNG_KHONG_PHAI_CO_SO": 14
+      },
+      "_n_dong": 12092,
+      "_n_co_so": 11341
+    },
+    "thuongmai": {
+      "hang_tm": {
+        "CHO": 1848,
+        "SHOWROOM": 372,
+        "TTTM": 343,
+        "SIEU_THI": 316,
+        "BAN_LE_LON_CHUA_RO_LOAI": 203,
+        "CH_CHUYEN_NGANH": 75
+      },
+      "quy_mo_tm": {
+        "LON_TU_DO": 1764,
+        "KHONG_DO_DUOC": 914,
+        "NHO_TU_DO": 315,
+        "LON_THUA_KE_BRAND": 133,
+        "NHO_THUA_KE_BRAND": 31
+      },
+      "quy_mo_nguon": {
+        "dien_tich": 2079,
+        "khong_co": 914,
+        "thua_ke_brand": 164
+      },
+      "_n_dong": 3157,
+      "_n_co_so": 2808
+    },
+    "giaitri": {
+      "hang_gt": {
+        "CONG_VIEN": 4331,
+        "CO_SO_THE_THAO": 3486,
+        "TIEN_ICH_KHU_DAN_CU": 614,
+        "SAN_VAN_DONG": 455,
+        "KHAC": 417,
+        "KHU_VUI_CHOI": 218,
+        "QUANG_TRUONG": 125,
+        "THIEN_NHIEN": 81
+      },
+      "vai_tro": {
+        "CHINH_THE": 8586,
+        "THANH_PHAN": 1141
+      },
+      "quy_mo_gt": {
+        "VUA_2000_20000M2": 3649,
+        "NHO_DUOI_2000M2": 3580,
+        "KHONG_DO_DUOC": 1507,
+        "LON_TREN_2HA": 991
+      },
+      "_n_dong": 9727,
+      "_n_co_so": 8582
+    },
+    "thamquan": {
+      "hang_tq": {
+        "CO_SO_THO_TU": 9451,
+        "DIEM_THAM_QUAN_KHAC": 2701,
+        "DI_TICH": 2114,
+        "TAC_PHAM_CONG_CONG": 1309,
+        "THIET_CHE_VAN_HOA": 1016,
+        "KHAC": 458,
+        "BAO_TANG": 428,
+        "RAP_PHIM_NHA_HAT": 295,
+        "TUONG_NIEM": 263,
+        "NGHIA_TRANG": 227,
+        "CANH_QUAN_TU_NHIEN": 138
+      },
+      "suc_hut": {
+        "DIA_PHUONG": 13978,
+        "DIA_PHUONG_CO_KHAI": 2901,
+        "VUNG": 1187,
+        "QUOC_GIA_QUOC_TE": 334
+      },
+      "loai_tho_tu": {
+        "nan": 12783,
+        "chùa / tự viện": 2101,
+        "nhà thờ / giáo xứ": 1253,
+        "đình": 1176,
+        "đền / miếu": 751,
+        "thánh thất / thánh tịnh": 165,
+        "tịnh xá / tịnh thất / niệm phật đường": 135,
+        "lăng / mộ / nhà thờ họ": 36
+      },
+      "_n_dong": 18400,
+      "_n_co_so": 14649
+    },
+    "truonghoc": {
+      "hang_th": {
+        "PHO_THONG": 11627,
+        "MAM_NON": 2761,
+        "DAI_HOC_HOC_VIEN": 2056,
+        "TRUONG_CHUA_RO_CAP": 1790,
+        "NGHE_CAO_DANG": 1156,
+        "TRUNG_TAM_DAO_TAO": 511,
+        "VIEN_NGHIEN_CUU": 114,
+        "KHONG_XAC_DINH": 35
+      },
+      "cap_hieu_luc": {
+        "TIEU_HOC": 4934,
+        "THCS": 3828,
+        "MAM_NON": 2762,
+        "THPT": 2503,
+        "KHAC": 2342,
+        "DAI_HOC": 2083,
+        "NGHE_TRUNG_CAP": 1234,
+        "LIEN_CAP": 364
+      },
+      "cap_nguon": {
+        "ten": 8026,
+        "ke_thua_khuon_vien": 5798,
+        "khong_ro": 2342,
+        "tag_day": 2141,
+        "tag_co_cau_truc": 1743
+      },
+      "_n_dong": 20050,
+      "_n_co_so": 11231
+    },
+    "benhvien": {
+      "loai_yt": {
+        "KHONG_XAC_DINH": 2172,
+        "BENH_VIEN": 1248,
+        "PK_CHUYEN_KHOA": 585,
+        "TRUNG_TAM_Y_TE": 540,
+        "TRAM_Y_TE": 525,
+        "PK_DA_KHOA": 284,
+        "CS_XA_HOI": 66
+      },
+      "tuyen_yt": {
+        "KHONG_KHAI": 4347,
+        "PHUONG_XA": 474,
+        "QUAN_HUYEN": 217,
+        "TINH_THANH": 197,
+        "TU_NHAN": 110,
+        "TRUNG_UONG": 75
+      },
+      "quy_mo_yt": {
+        "NHO": 2432,
+        "KHONG_DO_DUOC": 1159,
+        "LON": 1125,
+        "VUA": 704
+      },
+      "_n_dong": 5420,
+      "_n_co_so": 3103
+    },
+    "hanhchinh": {
+      "cap_hc": {
+        "KHONG_KHAI": 4070,
+        "PHUONG_XA": 1687,
+        "QUAN_HUYEN": 833,
+        "TINH_THANH": 626,
+        "TRUNG_UONG": 244
+      },
+      "nganh_hc": {
+        "CHINH_QUYEN_CHUNG": 3508,
+        "CONG_AN": 1203,
+        "QUAN_DOI": 722,
+        "BUU_CHINH": 628,
+        "DANG_DOAN_THE": 454,
+        "TAI_CHINH": 433,
+        "TU_PHAP": 405,
+        "NGOAI_GIAO": 107
+      },
+      "_n_dong": 7460,
+      "_n_co_so": 6887
+    },
+    "vanphong": {
+      "hang_vp": {
+        "DIEM_DOANH_NGHIEP": 2625,
+        "TO_CHUC_XA_HOI": 1069,
+        "TOA_VAN_PHONG": 695,
+        "O_DAT_DICH_VU": 318
+      },
+      "_n_dong": 4707,
+      "_n_co_so": 4562
+    }
+  },
+  "tong_doi_chieu": {
+    "tong_9_lop_final": 98828,
+    "con_lai_cuoi": 311598,
+    "cong_lai": 410426,
+    "bo_goc": 410426,
+    "khop": true
+  },
+  "do_theo_lop": {
+    "chungcu": {
+      "recall": {
+        "cung": {
+          "tag vòng đời = nhà ở": 0,
+          "tên: nhà ở công vụ/dự án": 0,
+          "tên: khu biệt thự": 0,
+          "tên: chung cư mini": 0
+        },
+        "mem": {
+          "tên: apartment sai chính tả": 6,
+          "hình thái: toà ≥8 tầng, building=yes": 111
+        },
+        "no_da_dieu_tra": {}
+      },
+      "xung_dot": {
+        "n_pham": 10,
+        "tran": 36,
+        "n_vao": 20374
+      }
+    },
+    "luutru": {
+      "recall": {
+        "cung": {
+          "tag vòng đời lưu trú": 0,
+          "brand/operator là chuỗi khách sạn": 0,
+          "tự khai hạng sao (stars)": 0
+        },
+        "mem": {
+          "addr:housename là KS (đơn vị THUÊ bên trong)": 5,
+          "có rooms=* (trường học khai số phòng học)": 8,
+          "tên có lodge/camping/house": 557,
+          "nhà trọ / phòng trọ — lưu trú DÀI HẠN": 32,
+          "HÌNH THÁI: ≥5 tầng, vô danh, không tag chức năng": 144
+        },
+        "no_da_dieu_tra": {}
+      }
+    },
+    "thuongmai": {
+      "recall": {
+        "cung": {
+          "nhất quán thương hiệu": 0,
+          "tên 'cửa hàng/đại lý' + có brand": 0,
+          "`shop` ở dạng tag vòng đời mà nhánh E bỏ lọt": 0
+        },
+        "mem": {
+          "tên có 'chợ' nhưng đã bị loại": 0,
+          "tên có 'shop/store'": 113,
+          "`amenity=fuel`": 4907,
+          "`amenity=bank`": 2461,
+          "có `opening_hours` + `payment:*` mà không tag phân loại": 4
+        },
+        "no_da_dieu_tra": {}
+      },
+      "xung_dot": {
+        "n_pham": 3,
+        "tran": 18,
+        "n_vao": 30349
+      },
+      "bac_lon": [
+        "car",
+        "mall",
+        "trade",
+        "wholesale"
+      ]
+    },
+    "giaitri": {
+      "recall": {
+        "cung": {
+          "có `pitch:*` / `golf:*`": 0,
+          "`building=grandstand|stadium` (khán đài)": 0,
+          "tên có 'thể thao/thi đấu' mà bị loại": 0
+        },
+        "mem": {
+          "`amenity=cinema|theatre` → lớp tham quan": 274,
+          "`tourism=museum|…` → lớp tham quan": 4654,
+          "`amenity=nightclub` → lớp ăn uống, ngoài MVP": 110,
+          "tên có 'sân'": 850,
+          "`natural=beach` → lớp tham quan": 8
+        },
+        "no_da_dieu_tra": {
+          "way:968202817": "LỖ RECALL THẬT — lexicon thiếu token `nha the thao`. Hoãn vá vì sẽ phá parity 7tinh (+1 dòng 'Nhà thể thao Khu phố 22', TP.HCM). Cần mở lại chuẩn vàng."
+        }
+      },
+      "xung_dot": {
+        "n_pham": 8,
+        "tran": 49,
+        "n_vao": 28351
+      }
+    },
+    "thamquan": {
+      "recall": {
+        "cung": {
+          "có `denomination` / `heritage:*` / `ruins:*`": 0,
+          "`operator` là Giáo hội / BQL di tích (và có tên)": 0,
+          "tên có 'tưởng niệm / liệt sĩ'": 0
+        },
+        "mem": {
+          "đơn âm ở CUỐI tên, không tag (đã loại có chủ ý)": 428,
+          "tên có 'đài'": 1723,
+          "tên có 'thành'": 3551,
+          "`natural=water|wood` — cảnh quan, chưa phải điểm đến": 887,
+          "`amenity=library` công cộng": 0
+        },
+        "no_da_dieu_tra": {}
+      },
+      "xung_dot": {
+        "n_pham": 10,
+        "tran": 62,
+        "n_vao": 23399
+      },
+      "chuong_dinh": 1907
+    },
+    "truonghoc": {
+      "recall": {
+        "cung": {
+          "có `school:*` / `capacity:students`": 0,
+          "tên có 'giáo dục / đào tạo' + polygon (trừ cơ quan)": 0
+        },
+        "mem": {
+          "tên có 'phòng/sở giáo dục' → lớp hành chính": 60,
+          "tên có 'trường' (đa số là TÊN RIÊNG)": 833,
+          "`amenity=library` — thiết chế văn hoá, lớp trước": 0,
+          "`operator:type=university` (bãi xe DO trường vận hành)": 13,
+          "tên có 'lớp / trung tâm' (dạy thêm tại nhà)": 1514
+        },
+        "no_da_dieu_tra": {}
+      },
+      "xung_dot": {
+        "n_pham": 5,
+        "tran": 48,
+        "n_vao": 21693
+      }
+    },
+    "benhvien": {
+      "recall": {
+        "cung": {
+          "`building` nghĩa y tế nhưng NGOÀI danh mục tuyển": 0,
+          "khoá `medical_system` / `health_facility:*`": 0,
+          "có khoá `health_*` / `medical_*`": 0,
+          "tên có 'y tế / khám chữa bệnh' + polygon": 0
+        },
+        "mem": {
+          "`operator` là Sở/Bộ Y tế hoặc Bệnh viện": 9,
+          "`emergency` ở giá trị PHI y tế": 211,
+          "từ vựng lâm sàng còn sót ngoài lớp": 12,
+          "tên có 'viện'": 660,
+          "tên có 'dược'": 81,
+          "tên có 'sở/phòng y tế' → lớp hành chính": 19
+        },
+        "no_da_dieu_tra": {}
+      },
+      "xung_dot": {
+        "n_pham": 5,
+        "tran": 57,
+        "n_vao": 8982
+      },
+      "thieu_bang_chung": 69
+    },
+    "hanhchinh": {
+      "recall": {
+        "cung": {
+          "'chi cục …' (ngoài chi cục thuế)": 0,
+          "'cơ quan nhà nước / hành chính'": 0,
+          "'nhà khách tỉnh / hội trường UBND'": 0,
+          "'đoàn đại biểu / hội đồng bầu cử'": 0,
+          "`official_name` + cụm cơ quan": 0
+        },
+        "mem": {
+          "`boundary=administrative` — RANH GIỚI, không phải trụ sở": 1037,
+          "tên bắt đầu 'Số ' (bỏ dấu thành 'so', trùng 'Sở')": 118,
+          "`operator` là cơ quan nhà nước (chủ sở hữu ≠ loại)": 18,
+          "tên bắt đầu 'ban ' mà KHÔNG có danh từ lĩnh vực": 432,
+          "tên có 'cơ quan'": 12
+        },
+        "no_da_dieu_tra": {}
+      },
+      "xung_dot": {
+        "n_pham": 13,
+        "tran": 50,
+        "n_vao": 8629
+      }
+    },
+    "vanphong": {
+      "recall": {
+        "cung": {
+          "polygon ≥ 8 tầng mà THIẾU tag `building`": 0,
+          "`building:use=office|commercial` trên công trình vô chức năng": 0,
+          "`operator`/`brand` là công ty, trên công trình vô chức năng": 0,
+          "`addr:housename` nói 'toà nhà/cao ốc/tower'": 0
+        },
+        "mem": {
+          "`building:use`/`addr:housename` toà nhà, nhưng vật thể CÓ tag chức năng": 16,
+          "`building=yes` ≥ 2.000 m², vô danh — TỐI, không rule nào chạm": 207,
+          "tên có 'trung tâm'": 563,
+          "`landuse=industrial` — khu công nghiệp, ngoài phạm vi MVP": 2165
+        },
+        "no_da_dieu_tra": {}
+      },
+      "xung_dot": {
+        "n_pham": 9,
+        "tran": 47,
+        "n_vao": 8048
+      },
+      "no_tu_lop_nha_o": 38
+    }
+  }
+}

@@ -1,0 +1,531 @@
+{
+  "scope": "7tinh",
+  "git_sha": "e6c7348a1c7a9419e2a6058bf48fdbe1dac753bc",
+  "theo_lop": {
+    "chungcu": {
+      "dat_tay": {
+        "AREA_MIN": 300,
+        "AREA_MAX": 20000,
+        "MORPH_LEVELS_MIN": 8,
+        "KDT_NB_COMPLEX": 2,
+        "KDT_SERVICE_MIN": 3,
+        "RING_SERVICE_MAX": 2
+      },
+      "hoc_tu_du_lieu": {
+        "HA_MIN": 5,
+        "HA_MAX": 300,
+        "NB_MIN": 10
+      },
+      "do_duoc": {
+        "n_morph_ban_giao": 104,
+        "n_tuyen_boi_context": 1,
+        "kdt_class": {
+          "DAT_O": 2537,
+          "KHONG_KET_LUAN": 860,
+          "KDT_XAC_NHAN": 229,
+          "NGHI_RANH_HANH_CHINH": 32
+        },
+        "verdict": {
+          "LÀ KHU — sai lớp": 158,
+          "một toà, vẽ rộng": 27,
+          "trống ruột — chưa kết luận": 23
+        },
+        "status": {
+          "MÙ OSM": 2343,
+          "CÓ RUỘT": 771,
+          "RỖNG THẬT": 544
+        }
+      }
+    },
+    "luutru": {
+      "dat_tay": {
+        "SAO_LON": 3,
+        "TANG_LON": 7,
+        "HA_VUNG": 50,
+        "N_TAGS_THOAI_HOA": 3
+      },
+      "hoc_tu_du_lieu": {
+        "PHONG_LON": 40,
+        "NGUONG_DI_THUONG_lan_trung_vi": 2,
+        "ty_le_apartment_theo_tinh_pct": {
+          "Tỉnh Đồng Nai": 0.6982,
+          "Thành phố Đà Nẵng": 0.3402,
+          "Thành phố Hải Phòng": 0.2665,
+          "Thành phố Hồ Chí Minh": 0.257,
+          "Thành phố Hà Nội": 0.0741,
+          "Thành phố Cần Thơ": 0.0443,
+          "Tỉnh Quảng Ninh": 0.04
+        },
+        "trung_vi_pct": 0.257,
+        "nguong_di_thuong_pct": 0.5141,
+        "tinh_bi_coi_la_di_thuong": [
+          "Tỉnh Đồng Nai"
+        ]
+      }
+    },
+    "thuongmai": {
+      "dat_tay": {
+        "DT_LON": 1000,
+        "DO_PHU_TOI_THIEU": 0.15,
+        "BAC_N_TOI_THIEU": 20,
+        "TOI_THIEU_DO": 3,
+        "NGUONG_GAN_m": 100.0
+      },
+      "hoc_tu_du_lieu": {
+        "BAC_LON": [
+          "car",
+          "mall",
+          "supermarket",
+          "trade",
+          "wholesale"
+        ],
+        "bac_shop_do_duoc": {
+          "mall": {
+            "n": 155,
+            "dt_trung_vi": 5201.2,
+            "ty_le_polygon": 0.7677
+          },
+          "department_store": {
+            "n": 651,
+            "dt_trung_vi": 2236.1,
+            "ty_le_polygon": 0.0246
+          },
+          "car": {
+            "n": 212,
+            "dt_trung_vi": 1901.1,
+            "ty_le_polygon": 0.4057
+          },
+          "supermarket": {
+            "n": 816,
+            "dt_trung_vi": 1838.8,
+            "ty_le_polygon": 0.1556
+          },
+          "hardware": {
+            "n": 62,
+            "dt_trung_vi": 1110.6,
+            "ty_le_polygon": 0.0806
+          },
+          "car_repair": {
+            "n": 197,
+            "dt_trung_vi": 628.3,
+            "ty_le_polygon": 0.1421
+          },
+          "houseware": {
+            "n": 29,
+            "dt_trung_vi": 486.1,
+            "ty_le_polygon": 0.3448
+          },
+          "electronics": {
+            "n": 398,
+            "dt_trung_vi": 450.5,
+            "ty_le_polygon": 0.1859
+          },
+          "books": {
+            "n": 315,
+            "dt_trung_vi": 377.7,
+            "ty_le_polygon": 0.1206
+          },
+          "motorcycle": {
+            "n": 389,
+            "dt_trung_vi": 341.0,
+            "ty_le_polygon": 0.1105
+          },
+          "tyres": {
+            "n": 66,
+            "dt_trung_vi": 315.8,
+            "ty_le_polygon": 0.0303
+          },
+          "baby_goods": {
+            "n": 46,
+            "dt_trung_vi": 290.3,
+            "ty_le_polygon": 0.087
+          },
+          "gift": {
+            "n": 188,
+            "dt_trung_vi": 242.2,
+            "ty_le_polygon": 0.0798
+          },
+          "furniture": {
+            "n": 191,
+            "dt_trung_vi": 236.0,
+            "ty_le_polygon": 0.2461
+          },
+          "convenience": {
+            "n": 5407,
+            "dt_trung_vi": 202.0,
+            "ty_le_polygon": 0.027
+          },
+          "coffee": {
+            "n": 106,
+            "dt_trung_vi": 195.1,
+            "ty_le_polygon": 0.0849
+          },
+          "gas": {
+            "n": 22,
+            "dt_trung_vi": 183.2,
+            "ty_le_polygon": 0.1364
+          },
+          "hifi": {
+            "n": 20,
+            "dt_trung_vi": 155.5,
+            "ty_le_polygon": 0.05
+          },
+          "car_parts": {
+            "n": 46,
+            "dt_trung_vi": 146.5,
+            "ty_le_polygon": 0.2609
+          },
+          "massage": {
+            "n": 287,
+            "dt_trung_vi": 144.7,
+            "ty_le_polygon": 0.0418
+          },
+          "sports": {
+            "n": 110,
+            "dt_trung_vi": 129.1,
+            "ty_le_polygon": 0.3455
+          },
+          "general": {
+            "n": 25,
+            "dt_trung_vi": 115.8,
+            "ty_le_polygon": 0.52
+          },
+          "bed": {
+            "n": 37,
+            "dt_trung_vi": 114.6,
+            "ty_le_polygon": 0.5405
+          },
+          "tea": {
+            "n": 36,
+            "dt_trung_vi": 113.7,
+            "ty_le_polygon": 0.2222
+          },
+          "bicycle": {
+            "n": 85,
+            "dt_trung_vi": 108.7,
+            "ty_le_polygon": 0.0706
+          },
+          "bakery": {
+            "n": 385,
+            "dt_trung_vi": 106.3,
+            "ty_le_polygon": 0.0805
+          },
+          "seafood": {
+            "n": 66,
+            "dt_trung_vi": 105.2,
+            "ty_le_polygon": 0.1061
+          },
+          "mobile_phone": {
+            "n": 395,
+            "dt_trung_vi": 104.5,
+            "ty_le_polygon": 0.1595
+          },
+          "computer": {
+            "n": 112,
+            "dt_trung_vi": 104.2,
+            "ty_le_polygon": 0.1429
+          },
+          "interior_decoration": {
+            "n": 38,
+            "dt_trung_vi": 100.5,
+            "ty_le_polygon": 0.3158
+          },
+          "yes": {
+            "n": 341,
+            "dt_trung_vi": 100.5,
+            "ty_le_polygon": 0.0645
+          },
+          "greengrocer": {
+            "n": 80,
+            "dt_trung_vi": 97.7,
+            "ty_le_polygon": 0.1125
+          },
+          "toys": {
+            "n": 56,
+            "dt_trung_vi": 96.9,
+            "ty_le_polygon": 0.25
+          },
+          "clothes": {
+            "n": 1363,
+            "dt_trung_vi": 96.2,
+            "ty_le_polygon": 0.245
+          },
+          "chemist": {
+            "n": 36,
+            "dt_trung_vi": 94.6,
+            "ty_le_polygon": 0.1944
+          },
+          "alcohol": {
+            "n": 36,
+            "dt_trung_vi": 93.2,
+            "ty_le_polygon": 0.1667
+          },
+          "optician": {
+            "n": 139,
+            "dt_trung_vi": 92.6,
+            "ty_le_polygon": 0.223
+          },
+          "pet": {
+            "n": 44,
+            "dt_trung_vi": 85.7,
+            "ty_le_polygon": 0.1364
+          },
+          "photo": {
+            "n": 63,
+            "dt_trung_vi": 83.8,
+            "ty_le_polygon": 0.0952
+          },
+          "jewelry": {
+            "n": 392,
+            "dt_trung_vi": 83.7,
+            "ty_le_polygon": 0.1454
+          },
+          "cosmetics": {
+            "n": 124,
+            "dt_trung_vi": 82.1,
+            "ty_le_polygon": 0.25
+          },
+          "kiosk": {
+            "n": 92,
+            "dt_trung_vi": 80.4,
+            "ty_le_polygon": 0.837
+          },
+          "beverages": {
+            "n": 162,
+            "dt_trung_vi": 80.2,
+            "ty_le_polygon": 0.0679
+          },
+          "dairy": {
+            "n": 26,
+            "dt_trung_vi": 79.2,
+            "ty_le_polygon": 0.1154
+          },
+          "shoes": {
+            "n": 226,
+            "dt_trung_vi": 79.0,
+            "ty_le_polygon": 0.2788
+          },
+          "motorcycle_repair": {
+            "n": 218,
+            "dt_trung_vi": 78.8,
+            "ty_le_polygon": 0.1009
+          },
+          "beauty": {
+            "n": 375,
+            "dt_trung_vi": 75.9,
+            "ty_le_polygon": 0.2613
+          },
+          "laundry": {
+            "n": 174,
+            "dt_trung_vi": 75.8,
+            "ty_le_polygon": 0.0575
+          },
+          "wine": {
+            "n": 22,
+            "dt_trung_vi": 74.7,
+            "ty_le_polygon": 0.1818
+          },
+          "stationery": {
+            "n": 65,
+            "dt_trung_vi": 71.2,
+            "ty_le_polygon": 0.0769
+          },
+          "tattoo": {
+            "n": 37,
+            "dt_trung_vi": 70.5,
+            "ty_le_polygon": 0.0811
+          },
+          "travel_agency": {
+            "n": 249,
+            "dt_trung_vi": 67.3,
+            "ty_le_polygon": 0.0241
+          },
+          "appliance": {
+            "n": 30,
+            "dt_trung_vi": 66.7,
+            "ty_le_polygon": 0.1
+          },
+          "copyshop": {
+            "n": 112,
+            "dt_trung_vi": 62.0,
+            "ty_le_polygon": 0.0714
+          },
+          "art": {
+            "n": 37,
+            "dt_trung_vi": 61.4,
+            "ty_le_polygon": 0.027
+          },
+          "hairdresser": {
+            "n": 472,
+            "dt_trung_vi": 60.1,
+            "ty_le_polygon": 0.1441
+          },
+          "fashion_accessories": {
+            "n": 21,
+            "dt_trung_vi": 60.0,
+            "ty_le_polygon": 0.0476
+          },
+          "outdoor": {
+            "n": 48,
+            "dt_trung_vi": 59.0,
+            "ty_le_polygon": 0.0208
+          },
+          "butcher": {
+            "n": 33,
+            "dt_trung_vi": 58.9,
+            "ty_le_polygon": 0.1515
+          },
+          "bag": {
+            "n": 29,
+            "dt_trung_vi": 58.9,
+            "ty_le_polygon": 0.3103
+          },
+          "ticket": {
+            "n": 144,
+            "dt_trung_vi": 55.9,
+            "ty_le_polygon": 0.1389
+          },
+          "tailor": {
+            "n": 54,
+            "dt_trung_vi": 54.6,
+            "ty_le_polygon": 0.2593
+          },
+          "variety_store": {
+            "n": 174,
+            "dt_trung_vi": 48.3,
+            "ty_le_polygon": 0.2126
+          },
+          "farm": {
+            "n": 26,
+            "dt_trung_vi": 40.2,
+            "ty_le_polygon": 0.4231
+          },
+          "pastry": {
+            "n": 44,
+            "dt_trung_vi": 40.1,
+            "ty_le_polygon": 0.25
+          },
+          "watches": {
+            "n": 34,
+            "dt_trung_vi": 29.8,
+            "ty_le_polygon": 0.3235
+          },
+          "florist": {
+            "n": 105,
+            "dt_trung_vi": 27.0,
+            "ty_le_polygon": 0.1048
+          },
+          "doityourself": {
+            "n": 22,
+            "dt_trung_vi": 24.4,
+            "ty_le_polygon": 0.2273
+          }
+        },
+        "brand_hoc_dinh_dang": {
+          "n_brand": 35,
+          "n_LON": 10,
+          "n_NHO": 25
+        },
+        "n_brand_cua_lop_dau_do": 45,
+        "n_tram_thuoc_ngoai": 7787
+      }
+    },
+    "giaitri": {
+      "dat_tay": {
+        "DT_DIEM_DEN": 2000,
+        "DT_SAN_DON_MON": 2000,
+        "DT_LON": 20000,
+        "DT_VUA": 2000
+      },
+      "hoc_tu_du_lieu": {
+        "NGUONG_DT": 1000
+      },
+      "do_duoc": {
+        "n_khuon_vien_chu": 13143,
+        "ty_le_nam_trong_khuon_vien": 0.3758
+      }
+    },
+    "thamquan": {
+      "dat_tay": {
+        "N_LANG_DA_NGU": 4,
+        "N_LANG_VUNG": 2
+      },
+      "hoc_tu_du_lieu": {},
+      "do_duoc": {
+        "chuong_re2_n_dinh": 1338,
+        "chuong_re2_nguong": 200,
+        "ty_le_ten_khong_dau": 0.1027,
+        "suc_hut": {
+          "DIA_PHUONG": 6751,
+          "DIA_PHUONG_CO_KHAI": 819,
+          "VUNG": 703,
+          "QUOC_GIA_QUOC_TE": 286
+        }
+      }
+    },
+    "truonghoc": {
+      "dat_tay": {},
+      "hoc_tu_du_lieu": {},
+      "do_duoc": {
+        "cap_nguon": {
+          "ten": 4847,
+          "ke_thua_khuon_vien": 3256,
+          "tag_day": 1541,
+          "tag_co_cau_truc": 1157,
+          "khong_ro": 1156
+        },
+        "n_doi_chung_ca_hai_nguon": 2867,
+        "n_cap_xung_dot": 104
+      }
+    },
+    "benhvien": {
+      "dat_tay": {
+        "DT_LON": 10000,
+        "DT_VUA": 2000,
+        "BAN_KINH_M": 1000
+      },
+      "hoc_tu_du_lieu": {
+        "n_ten_tinh_danh_muc": 64
+      },
+      "do_duoc": {
+        "n_loai_xung_dot": 4,
+        "tuyen_yt": {
+          "KHONG_KHAI": 2202,
+          "PHUONG_XA": 272,
+          "QUAN_HUYEN": 97,
+          "TU_NHAN": 86,
+          "TINH_THANH": 60,
+          "TRUNG_UONG": 48
+        }
+      }
+    },
+    "hanhchinh": {
+      "dat_tay": {},
+      "hoc_tu_du_lieu": {},
+      "do_duoc": {
+        "cap_hc": {
+          "KHONG_KHAI": 2203,
+          "PHUONG_XA": 1043,
+          "QUAN_HUYEN": 429,
+          "TINH_THANH": 231,
+          "TRUNG_UONG": 214
+        }
+      }
+    },
+    "vanphong": {
+      "dat_tay": {
+        "TANG_CAO": 8
+      },
+      "hoc_tu_du_lieu": {},
+      "do_duoc": {
+        "n_no_tu_lop_nha_o": 38,
+        "hang_vp": {
+          "DIEM_DOANH_NGHIEP": 1837,
+          "TOA_VAN_PHONG": 588,
+          "O_DAT_DICH_VU": 220,
+          "TO_CHUC_XA_HOI": 45
+        }
+      }
+    }
+  }
+}

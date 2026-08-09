@@ -1,0 +1,404 @@
+{
+  "git_sha": "e6c7348a1c7a9419e2a6058bf48fdbe1dac753bc",
+  "git_dirty_khi_chay": true,
+  "scope": "7tinh",
+  "bo_goc": {
+    "file": "data/qa/critique/poi_extended_7tinh.parquet",
+    "n_dong": 193509
+  },
+  "thu_tu_chuoi": [
+    "chungcu",
+    "luutru",
+    "thuongmai",
+    "giaitri",
+    "thamquan",
+    "truonghoc",
+    "benhvien",
+    "hanhchinh",
+    "vanphong"
+  ],
+  "artefacts": {
+    "poi_benhvien_7tinh_b1.parquet": {
+      "n_dong": 4728,
+      "n_uid_unique": 4728,
+      "sha256_file": "e559bc1f1c1634789a5af4de9c6247ac66f1e0fb695ab117d00828931b592353",
+      "sha256_uid_set": "492851de79f9f4accc5073c00c337ee9a25d8257617f495a2c5506d1bf59d071"
+    },
+    "poi_benhvien_7tinh_b3.parquet": {
+      "n_dong": 2765,
+      "n_uid_unique": 2765,
+      "sha256_file": "186cc816bf525ae259fa8deddffb1d13633c8fe66a3775d7fd3d714f68e19bec",
+      "sha256_uid_set": "dca46ad8495363412c22cd4b050da47cd9a941030fbc0bd2a743b2d1138cf3dc"
+    },
+    "poi_benhvien_7tinh_b3_bi_xoa.parquet": {
+      "n_dong": 1963,
+      "n_uid_unique": 1963,
+      "sha256_file": "0fb46931d86ec9b3a8169f88d8694758eaf8238984b42fed91d48203fe680f8b",
+      "sha256_uid_set": "847d47c2be01c47e57c66c0ecc52236e8a3edbeb98ae51754061263d2483a513"
+    },
+    "poi_benhvien_7tinh_final.parquet": {
+      "n_dong": 2765,
+      "n_uid_unique": 2765,
+      "sha256_file": "605b8e2b04c5535741ede1bd3fec004230a627d3f0ac05073a6fe3687cc9f3f5",
+      "sha256_uid_set": "dca46ad8495363412c22cd4b050da47cd9a941030fbc0bd2a743b2d1138cf3dc"
+    },
+    "poi_benhvien_7tinh_thieu_bang_chung.parquet": {
+      "n_dong": 67,
+      "n_uid_unique": 67,
+      "sha256_file": "cedab2c34ff10c3b6d09ddc4037a6bb25cebf7745c4f93f2c91a8bd5c52ecdba",
+      "sha256_uid_set": "58df4906dc6ed960093d3719bfecc38449189c48e50b2ef66c671588586fe3b2"
+    },
+    "poi_chungcu_7tinh.parquet": {
+      "n_dong": 11397,
+      "n_uid_unique": 11397,
+      "sha256_file": "a0445339296350484c1bdd0528e9d098281670e1c5b737c4bea9e11901c3fbe0",
+      "sha256_uid_set": "feeddc27064cf54613130bf89dcc04cee322bcaa153b17c86b584f61ad615ddc"
+    },
+    "poi_chungcu_7tinh_b3.parquet": {
+      "n_dong": 9612,
+      "n_uid_unique": 9612,
+      "sha256_file": "4ff3dc5e8817b70a3ca03e956dc69424eab123b880feb238c0472bf375ae5ebe",
+      "sha256_uid_set": "2074c1b0476340663ad0cc394cad4871ab37fbe498ac16e6876875f42d09e5a7"
+    },
+    "poi_chungcu_7tinh_b3_bi_xoa.parquet": {
+      "n_dong": 1785,
+      "n_uid_unique": 1785,
+      "sha256_file": "73d10674ed21338e3de77f7fe1cedbc381f05fecd7cdc2d38655c629280af0b3",
+      "sha256_uid_set": "e518c259a32a749972b18f398f29206a090b23c739a13f306f7fc323b32a0078"
+    },
+    "poi_chungcu_7tinh_final.parquet": {
+      "n_dong": 9613,
+      "n_uid_unique": 9613,
+      "sha256_file": "ed5b74981e1115bd55cdaaee3d45c88a896cc01a77cb0ff596390fbd222af86e",
+      "sha256_uid_set": "f7ef6bbc00e0bf913d19ec2354297585909095425c9bd0d27c08c12cfc01e26f"
+    },
+    "poi_extended_7tinh_con_lai.parquet": {
+      "n_dong": 183896,
+      "n_uid_unique": 183896,
+      "sha256_file": "6f3fb2abdb63e8475c88ab5b31e89d306d54aa16c1e3521ead178a6c83346985",
+      "sha256_uid_set": "7c0b46a7bdb8892ae37c73af742ad92d5a258d480019e95d9452b69ee117c42b"
+    },
+    "poi_extended_7tinh_con_lai_cuoi.parquet": {
+      "n_dong": 141133,
+      "n_uid_unique": 141133,
+      "sha256_file": "2d166bc6d5e593defd8dbd4422caaf7ce5d450ff28791f9ca10f1057f8f135d5",
+      "sha256_uid_set": "5f88a6f3c7f26072d2d83e6998077ac7b983a3f0dec253c35d50a3b46022b955"
+    },
+    "poi_extended_7tinh_con_lai_sau_benhvien.parquet": {
+      "n_dong": 147943,
+      "n_uid_unique": 147943,
+      "sha256_file": "be10e3fc51476b740be51412840f8dac75545b53a4ce684b549dcff133f84c98",
+      "sha256_uid_set": "f0e769b79e90f0d1a2d8b5a12c4ab1a8df816b899b9052b0b04f7460df65ebe9"
+    },
+    "poi_extended_7tinh_con_lai_sau_giaitri.parquet": {
+      "n_dong": 171224,
+      "n_uid_unique": 171224,
+      "sha256_file": "e4255e67be5dd5929d911f7c95d3334630c0bafe1818bacc587c6df5a1ff19f0",
+      "sha256_uid_set": "4ddd72745e2948f6e0b617701b8c916483a1fcd4006d3759368b55b3eaff45b0"
+    },
+    "poi_extended_7tinh_con_lai_sau_hanhchinh.parquet": {
+      "n_dong": 143823,
+      "n_uid_unique": 143823,
+      "sha256_file": "54136a5181380ec13babd1a53757614631c3cb9f144e2a5381b7ce5e2a386353",
+      "sha256_uid_set": "60f3fca31a03aac4db138ec9c24666b77ab90b82a76322a6f195bffff1f50fde"
+    },
+    "poi_extended_7tinh_con_lai_sau_luutru.parquet": {
+      "n_dong": 178680,
+      "n_uid_unique": 178680,
+      "sha256_file": "6b9532d1c7e7c113e0c9bd54e211359ccf4c4e7cbc8520a2a13a21110e66ddf6",
+      "sha256_uid_set": "3b675043aa4e1a81c241ea3d6431fdddeced29ca943cf8878c1304068912dedd"
+    },
+    "poi_extended_7tinh_con_lai_sau_thamquan.parquet": {
+      "n_dong": 162665,
+      "n_uid_unique": 162665,
+      "sha256_file": "a156c5675c1b6e9ce7df48a49ad16ba2debcbe978167c6e05080ace201e0ccbc",
+      "sha256_uid_set": "7667018731a9e627c242c9d3b59bcb69135fc99bf19a52dc1be48f0e04f476a5"
+    },
+    "poi_extended_7tinh_con_lai_sau_thuongmai.parquet": {
+      "n_dong": 176615,
+      "n_uid_unique": 176615,
+      "sha256_file": "d8fcd4ca2cfd3763a82ffa47b0140048e022212c72d7bccea7492c6ed50980ed",
+      "sha256_uid_set": "b592683ab54c19f77ed56bf89def879ebc215d34d432504c94114a04a312aabe"
+    },
+    "poi_extended_7tinh_con_lai_sau_truonghoc.parquet": {
+      "n_dong": 150708,
+      "n_uid_unique": 150708,
+      "sha256_file": "13eb9bb01c087169e6036f4c57b1014040df431e55f3b1464fad04326f974eb8",
+      "sha256_uid_set": "4999b68bd34b09ac327092de4f3a9c03f9540315ae3125f2ee61f08bf86d8a52"
+    },
+    "poi_giaitri_7tinh_b1.parquet": {
+      "n_dong": 17305,
+      "n_uid_unique": 17305,
+      "sha256_file": "6c8bd0b2e21902460cd206b360f049cc34949c9ac79fbaecae23f2a0f980c734",
+      "sha256_uid_set": "54e9a74cf4d88d3d493cf07746650db961605a85fc10263248517fdf6e27796a"
+    },
+    "poi_giaitri_7tinh_b3.parquet": {
+      "n_dong": 5391,
+      "n_uid_unique": 5391,
+      "sha256_file": "f9dd29ad5edee1ac63fd308e5c4d535d1444cd1c022c63a7860fedd6683f5a34",
+      "sha256_uid_set": "767a14fc8cd1749bf2f5d63b251e35d4b450dce487f80c8f36bd34d20c40fdc7"
+    },
+    "poi_giaitri_7tinh_b3_bi_xoa.parquet": {
+      "n_dong": 11914,
+      "n_uid_unique": 11914,
+      "sha256_file": "1e971a5df8dee79794cd0aa571758492ec8c977fc0db818f75ace81c942cfff6",
+      "sha256_uid_set": "cd0c373e076f3b8547ab2d6a6ea79294a9bc0afdd3dea09e3423a3172aa1836b"
+    },
+    "poi_giaitri_7tinh_final.parquet": {
+      "n_dong": 5391,
+      "n_uid_unique": 5391,
+      "sha256_file": "dd3256b63defd1e905d6af7c8ec94c05aa38d1b2257f27d21f343c2b8b9db379",
+      "sha256_uid_set": "767a14fc8cd1749bf2f5d63b251e35d4b450dce487f80c8f36bd34d20c40fdc7"
+    },
+    "poi_hanhchinh_7tinh_b1.parquet": {
+      "n_dong": 5161,
+      "n_uid_unique": 5161,
+      "sha256_file": "332b308707927ce1f66dd0fec8ff2edbfe66c26d15b2eccaed32659a24a9b12b",
+      "sha256_uid_set": "4bc2742e0f37950e5ecb1b97470bfff3bc626088a63565699778c409a163446a"
+    },
+    "poi_hanhchinh_7tinh_b3.parquet": {
+      "n_dong": 4120,
+      "n_uid_unique": 4120,
+      "sha256_file": "40dc6d4a93425ce3bad6834bdc0e24c6298232ce59da5e4b0d0542f52c94fe67",
+      "sha256_uid_set": "3513d555d18836860a67ed459b6e657793b3c5106e8cf77ab2d1f6fa7ebc04d9"
+    },
+    "poi_hanhchinh_7tinh_b3_bi_xoa.parquet": {
+      "n_dong": 1041,
+      "n_uid_unique": 1041,
+      "sha256_file": "c732509dfe5ba618d58afce9f034a87f7bf72c33e08dbb430cce1f552b138475",
+      "sha256_uid_set": "dd9ae55dd0a6cc09bebea025f37ebb298387e830879b135ef7a36cbb3c597b69"
+    },
+    "poi_hanhchinh_7tinh_final.parquet": {
+      "n_dong": 4120,
+      "n_uid_unique": 4120,
+      "sha256_file": "e9a39137e7bc3043e34b3184dccd758a598c2602368918d3a0208b95d74383b7",
+      "sha256_uid_set": "3513d555d18836860a67ed459b6e657793b3c5106e8cf77ab2d1f6fa7ebc04d9"
+    },
+    "poi_luutru_7tinh_b1.parquet": {
+      "n_dong": 5698,
+      "n_uid_unique": 5698,
+      "sha256_file": "684b6c0b855960aaf9c039175d10b6d44a1413e5d60ecd06a3a48f51929c1dae",
+      "sha256_uid_set": "20ac446aba98977a6e6328850a86ce1713179448373c23f34841b33c3cb1203b"
+    },
+    "poi_luutru_7tinh_b3.parquet": {
+      "n_dong": 5216,
+      "n_uid_unique": 5216,
+      "sha256_file": "2e221ba8124fd4c3328553f1437ca7b9720dabbfcd923e4fc7394e19a7ad9abd",
+      "sha256_uid_set": "fa237e14d3774fd61c6695c67a8a28243e96666cb30124f9fc5b3bae2fe32337"
+    },
+    "poi_luutru_7tinh_b3_bi_xoa.parquet": {
+      "n_dong": 482,
+      "n_uid_unique": 482,
+      "sha256_file": "28e6806c291e6bc93d74b7e67d997184fa5968e0e6d82890d47eb859a51ebe24",
+      "sha256_uid_set": "87c5ec76025a029379df209532f440b00b5fba586b8a37462fe6b7fe6077136f"
+    },
+    "poi_luutru_7tinh_final.parquet": {
+      "n_dong": 5216,
+      "n_uid_unique": 5216,
+      "sha256_file": "6e7f8d5b666ec0d15abecdbebf58be084ae5d2a12b92eb5ab65919d24c2d94e9",
+      "sha256_uid_set": "fa237e14d3774fd61c6695c67a8a28243e96666cb30124f9fc5b3bae2fe32337"
+    },
+    "poi_morph_review_7tinh.parquet": {
+      "n_dong": 104,
+      "n_uid_unique": 104,
+      "sha256_file": "05e5c6e03021e901cbc23449b47ad021fcbcc4884d80e4d7c81cf4bf99acd3c8",
+      "sha256_uid_set": "a00f26e3677ca9158b81a5069c3e7dd676fae814ffe403b77481c2a42af4d1dd"
+    },
+    "poi_thamquan_7tinh_b1.parquet": {
+      "n_dong": 11394,
+      "n_uid_unique": 11394,
+      "sha256_file": "026b5b464d3cd6c4bbdfda929a77dc25b689c2fcfc35d73713863b50846b00b1",
+      "sha256_uid_set": "e85da4bd572e327d44f8a0aaa203a645c2124863a9d6969714ecd06e13ee186d"
+    },
+    "poi_thamquan_7tinh_b3.parquet": {
+      "n_dong": 8559,
+      "n_uid_unique": 8559,
+      "sha256_file": "810c6c42c7385dd5096b433f266fbb131a7caea145416ab635d93cf59d2892c5",
+      "sha256_uid_set": "9f2376098b0a8d29f313f866665e7323336add4d5dfc701fe221b61bbdae5322"
+    },
+    "poi_thamquan_7tinh_b3_bi_xoa.parquet": {
+      "n_dong": 2835,
+      "n_uid_unique": 2835,
+      "sha256_file": "4613385fab844726ace77399c714e142925c43b0d498d96af90850cd60cd0f10",
+      "sha256_uid_set": "67975f0ee5a3a74bef32462372338a01f95c807d158577750876466e8b517c56"
+    },
+    "poi_thamquan_7tinh_final.parquet": {
+      "n_dong": 8559,
+      "n_uid_unique": 8559,
+      "sha256_file": "6de3ae1342b206260cde625dfe9dce2dc2dc1a1b1cb0c1764b4d102459322c56",
+      "sha256_uid_set": "9f2376098b0a8d29f313f866665e7323336add4d5dfc701fe221b61bbdae5322"
+    },
+    "poi_thuongmai_7tinh_b1.parquet": {
+      "n_dong": 20287,
+      "n_uid_unique": 20287,
+      "sha256_file": "f4dd408fc22764a7ac21a63d9b46de526e17a6f8a48cd483fa7a9629e48c24b3",
+      "sha256_uid_set": "be385a8e406153e08b6ff450989d2d7fff2538bdad07f86ae0cbb2029ac38556"
+    },
+    "poi_thuongmai_7tinh_b3.parquet": {
+      "n_dong": 2065,
+      "n_uid_unique": 2065,
+      "sha256_file": "f5718039bc16a79ee9d379fef74110139c3db653292cb8876b5dd3835d160758",
+      "sha256_uid_set": "e6ea9df5776a65db703d23d95e7bf260732c27a5348eb0f5b22b65875b6f15d9"
+    },
+    "poi_thuongmai_7tinh_b3_bi_xoa.parquet": {
+      "n_dong": 18222,
+      "n_uid_unique": 18222,
+      "sha256_file": "89fbf35152106cb625724f4d4a7c0a7c3d5fae2146e7110a045869882a1f05cb",
+      "sha256_uid_set": "e640932e0844cf8eccc3c2f786fc4be8c08af603925ba3644b037efe526e9c38"
+    },
+    "poi_thuongmai_7tinh_final.parquet": {
+      "n_dong": 2065,
+      "n_uid_unique": 2065,
+      "sha256_file": "13bea5e66c7fe5375ea52a1bec3947ba2681ae37d248395bdcbf9487eed9b729",
+      "sha256_uid_set": "e6ea9df5776a65db703d23d95e7bf260732c27a5348eb0f5b22b65875b6f15d9"
+    },
+    "poi_truonghoc_7tinh_b1.parquet": {
+      "n_dong": 13486,
+      "n_uid_unique": 13486,
+      "sha256_file": "fcd0db3ffe6519dfcd98d707e9b4da7209be12cf289c873185561ad7e736d5c4",
+      "sha256_uid_set": "9a2e67ed8c5173ed4c7d5956dc66f94e5da7ee74fd96ebc36d5ff64277af8e7c"
+    },
+    "poi_truonghoc_7tinh_b3.parquet": {
+      "n_dong": 11957,
+      "n_uid_unique": 11957,
+      "sha256_file": "b9e2d3711b824abeb58f58c21b7d2bf6c24d355694599a76b06e3e1f1fa185bb",
+      "sha256_uid_set": "3044f1d51e269e5e0888c24f7706a4a60ef3f29402ad49d3728f5afea32936ac"
+    },
+    "poi_truonghoc_7tinh_b3_bi_xoa.parquet": {
+      "n_dong": 1529,
+      "n_uid_unique": 1529,
+      "sha256_file": "81db8f6b1435536875e46012cacbf9fb115fc3dd722f7eb17355cbff7f6118dc",
+      "sha256_uid_set": "b15589963f667cabcdb8665afee8423bda6fb020cc78e14b89b1e09d02dbdbf0"
+    },
+    "poi_truonghoc_7tinh_final.parquet": {
+      "n_dong": 11957,
+      "n_uid_unique": 11957,
+      "sha256_file": "11b6c9d0e795fe9f188a74117b58d6e7f4b633dfeb12006d3c1ce075276bbfbc",
+      "sha256_uid_set": "3044f1d51e269e5e0888c24f7706a4a60ef3f29402ad49d3728f5afea32936ac"
+    },
+    "poi_vanphong_7tinh_b1.parquet": {
+      "n_dong": 5108,
+      "n_uid_unique": 5108,
+      "sha256_file": "3643bad568eedd61d8650acb2889275c7ffec083ca9830ee069f6cfead903764",
+      "sha256_uid_set": "298c4f6b3d1946eaf74223eae72a817602eeaf28757283256fb1111cfab6e95e"
+    },
+    "poi_vanphong_7tinh_b3.parquet": {
+      "n_dong": 2690,
+      "n_uid_unique": 2690,
+      "sha256_file": "0f6dc19436e6a7028d2b413214f6828b121acd816bbb58e9252d49e341264b4c",
+      "sha256_uid_set": "0ef4091e2c357cc926b47fa7fa2f71b838f0dff7d18511086636c43e64e7f46a"
+    },
+    "poi_vanphong_7tinh_b3_bi_xoa.parquet": {
+      "n_dong": 2418,
+      "n_uid_unique": 2418,
+      "sha256_file": "1c8d5f9a325d5a68200c8a8106129aa6ec870bbee7566d8b7ef35241bb0f8c3a",
+      "sha256_uid_set": "9437ee187e6c6cfeb5e9f5dbb066077cef3550f05d4560683d6d3c361a01ab99"
+    },
+    "poi_vanphong_7tinh_final.parquet": {
+      "n_dong": 2690,
+      "n_uid_unique": 2690,
+      "sha256_file": "b4ba003c5884eab916b16bf8136309a0c6fc868965b3665354d9300c5e473bfd",
+      "sha256_uid_set": "0ef4091e2c357cc926b47fa7fa2f71b838f0dff7d18511086636c43e64e7f46a"
+    }
+  },
+  "drop_reason_theo_lop": {
+    "chungcu": {
+      "HA_TANG_DUONG": 605,
+      "AMENITY_KHAC": 291,
+      "BUILDING_KHAC": 251,
+      "SHOP_OFFICE": 162,
+      "LUU_TRU": 153,
+      "LANDUSE_KHAC": 96,
+      "DU_AN_DANG_XAY": 83,
+      "LEISURE": 63,
+      "PLACE_DIA_LY": 39,
+      "CONG_TRINH_KY_THUAT": 26,
+      "DI_TICH": 10,
+      "TEN_LOAI_KHAC": 5,
+      "BRAND": 1
+    },
+    "luutru": {
+      "HA_TANG_DUONG": 119,
+      "AN_UONG_GIAI_TRI": 103,
+      "LUU_TRU_DAI_HAN": 84,
+      "TAG_SAI_HE_THONG": 76,
+      "KHU_DU_LICH": 41,
+      "BAN_LE_VAN_PHONG": 26,
+      "DI_TICH_THAM_QUAN": 13,
+      "TEN_LOAI_KHAC": 12,
+      "LEISURE_KHAC": 5,
+      "BUILDING_KHAC": 3
+    },
+    "thuongmai": {
+      "BAN_LE_NHO": 13543,
+      "DICH_VU_KHONG_BAN_LE": 2451,
+      "HA_TANG_DUONG": 764,
+      "AMENITY_LOP_KHAC": 707,
+      "NHA_PHO_BUILDING_RETAIL": 232,
+      "SIEU_THI_KHONG_BANG_CHUNG": 217,
+      "DINH_DANG_NHO": 138,
+      "O_DAT_VO_DANH": 138,
+      "AMENITY_LOP_DA_BOC": 26,
+      "TEN_LOAI_KHAC": 6
+    },
+    "giaitri": {
+      "MAT_PHU_KHONG_PHAI_CO_SO": 6221,
+      "THANH_PHAN_KHUON_VIEN": 2948,
+      "QUA_NHO_VO_DANH": 2250,
+      "HA_TANG_DUONG": 342,
+      "TAG_LOP_KHAC": 87,
+      "CHI_TEN_TAG_LOP_KHAC": 36,
+      "TEN_LOAI_KHAC": 30
+    },
+    "thamquan": {
+      "HA_TANG_DUONG": 1445,
+      "TAG_LOP_KHAC": 1144,
+      "BIEN_CHI_DAN": 197,
+      "TEN_LOAI_KHAC": 27,
+      "PLACE_DIA_LY": 18,
+      "TU_DUONG_MO_GIA_DINH": 3,
+      "MOC_THAM_CHIEU": 1
+    },
+    "truonghoc": {
+      "HA_TANG_DUONG": 1454,
+      "TAG_LOP_KHAC": 63,
+      "CO_QUAN_QUAN_LY_GD": 4,
+      "TEN_RIENG_KHONG_PHAI_TRUONG": 4,
+      "TEN_LOAI_KHAC": 4
+    },
+    "benhvien": {
+      "NGOAI_PHAM_VI_NHA_THUOC_THU_Y": 1393,
+      "HA_TANG_DUONG": 505,
+      "TAG_LOP_KHAC": 50,
+      "DOANH_NGHIEP_NGANH_Y": 13,
+      "CO_QUAN_QUAN_LY_YT": 2
+    },
+    "hanhchinh": {
+      "HA_TANG_DUONG": 984,
+      "TAG_LOP_KHAC": 30,
+      "DOANH_NGHIEP_NHA_NUOC": 24,
+      "TEN_LOAI_KHAC": 3
+    },
+    "vanphong": {
+      "O_DAT_VO_DANH": 886,
+      "HA_TANG_DUONG": 699,
+      "CONG_NGHIEP_NGOAI_MVP": 475,
+      "TAG_LOP_KHAC": 347,
+      "TEN_LOAI_KHAC": 11
+    }
+  },
+  "tong_doi_chieu": {
+    "tong_9_lop_final": 52376,
+    "con_lai_cuoi": 141133,
+    "cong_lai": 193509,
+    "bo_goc": 193509,
+    "khop": true
+  },
+  "kiem_tat_dinh": {
+    "so_lan_chay": 2,
+    "so_artefact_kiem": 47,
+    "so_artefact_lech_uid": 0,
+    "so_artefact_lech_file_sha256": 0,
+    "ket_luan": "TẤT ĐỊNH — khớp 100% cả set(uid) lẫn sha256 toàn file giữa 2 lần chạy độc lập"
+  }
+}
