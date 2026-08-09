@@ -24,12 +24,13 @@
     ],
     "bytes": {
       "grid_h3_r6.parquet": 464197,
+      "grid_h3_r7.parquet": 2138189,
       "stations.parquet": 269437,
       "poi.parquet": 777397,
       "provinces.json": 58090
     },
     "ngan_sach_tai_lan_dau_MB": 0.52,
-    "ngan_sach_ke_ca_lop_nap_luoi_MB": 1.57,
+    "ngan_sach_ke_ca_lop_nap_luoi_MB": 3.71,
     "totals": {
       "population": 113732608,
       "n_stations": 6380,
@@ -43,6 +44,11 @@
   "checks": [
     {
       "name": "schema_r6_khop_khai_bao",
+      "status": "PASS",
+      "detail": "30 cột, suy ra từ GRID"
+    },
+    {
+      "name": "schema_r7_khop_khai_bao",
       "status": "PASS",
       "detail": "30 cột, suy ra từ GRID"
     },
@@ -79,7 +85,7 @@
     {
       "name": "tai_lan_dau_duoi_1MB",
       "status": "PASS",
-      "detail": "0.52 MB (lưới gộp + bảng tỉnh); thêm 1.05 MB nạp lười cho trạm + POI"
+      "detail": "0.52 MB (lưới gộp + bảng tỉnh); thêm 3.19 MB nạp lười cho trạm + POI"
     }
   ]
 }

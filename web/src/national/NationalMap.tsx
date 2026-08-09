@@ -15,9 +15,11 @@ import maplibregl from "maplibre-gl";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import { H3HexagonLayer } from "@deck.gl/geo-layers";
 import { GeoJsonLayer, IconLayer, ScatterplotLayer } from "@deck.gl/layers";
-import type { Layer } from "@deck.gl/core";
+import { AmbientLight, DirectionalLight, LightingEffect, type Layer } from "@deck.gl/core";
 
 import { loadStyle } from "../map/positron";
+import { elevationFor, maxElevFor } from "./elevation";
+import type { NationalMode } from "./hash";
 import { HATCH_RGB, classOf, rampFor, type RGB, type Scale } from "../viz/palette";
 import { buildPoiIconAtlas, iconId, type IconEntry } from "../viz/poi-icons";
 import type { NationalField } from "./fields";
@@ -31,6 +33,58 @@ import type {
 
 type RGBA = [number, number, number, number];
 const rgba = (c: RGB, a: number): RGBA => [c[0], c[1], c[2], a];
+
+/**
+ * Ánh sáng của chế độ 3D — MỘT nguồn hướng dốc + nền sáng mạnh, đổ bóng NHẸ.
+ *
+ * ── Bóng là tín hiệu chiều sâu, không phải một kênh dữ liệu ────────────────────────────
+ *
+ * Không có bóng thì khối đứng trên hư không: mắt không có mốc nào để biết chân khối ở đâu,
+ * và cả thảm ô đọc thành một mảng màu gợn. Đó là khoảng cách thị giác lớn nhất giữa bản đồ
+ * này và một bản đồ 3D "trông thật".
+ *
+ * Nhưng bóng có một cái giá thật, và ba con số dưới đây là cách trả giá đó cho rẻ:
+ *
+ *  1. **`direction` DỐC** (thành phần đứng lớn gấp ~2 lần hai thành phần ngang). Mặt trời
+ *     thấp cho bóng dài và đẹp, nhưng bóng dài **che ô bên cạnh** — tức một ô bị tối đi vì
+ *     hàng xóm của nó cao, chứ không vì giá trị của chính nó. Đó là bịa thêm một kênh.
+ *     Nắng gần đỉnh đầu giữ được cảm giác khối mà bóng chỉ đọng quanh chân khối.
+ *  2. **`shadowColor` alpha 0,14** — đủ để thấy chân khối, không đủ để đổi bậc màu đọc
+ *     được. Legend in bảy ô màu; nếu bóng làm một ô bậc 5 nhìn như bậc 4 thì legend sai.
+ *  3. **Tổng độ sáng mặt trên phải ≈ 1,0**, tức KHÔNG được làm sáng gì cả. deck.gl nhân màu
+ *     gốc với `material.ambient × ambient.intensity + material.diffuse × directional.intensity
+ *     × cos(góc)`; với material hiện tại (0,7 / 0,55) thì 1,26 và 0,25 cho ~0,88 + 0,12 ≈ 1,0.
+ *
+ *     Bản đầu đặt ambient 3,0 và ảnh render cho thấy hậu quả ngay: **cả bản đồ vọt qua bão
+ *     hoà**, nâu sẫm bậc 7 hoá cam sáng, và bảy ô màu của legend không còn khớp một ô nào
+ *     trên bản đồ. Ánh sáng ở đây không được phép là một bộ chỉnh màu — nó chỉ được làm mặt
+ *     bên tối đi so với mặt trên.
+ *
+ * ── Đã đo, không ước lượng ────────────────────────────────────────────────────────────
+ *
+ * So từng pixel với bản KHÔNG đèn, trên 14.406 pixel chắc chắn mang màu một bậc:
+ * dịch màu **trung vị 16, p90 32** (thang L1 ba kênh), trong khi hai bậc kề nhau cách nhau
+ * **44**. Màu phổ biến nhất của mặt trên lệch 8–9 khỏi bậc gần nhất — bằng đúng cỡ lệch mà
+ * alpha 225 của chính lớp ô đã gây ra từ trước khi có đèn. Tức **mặt trên vẫn đọc đúng bậc**;
+ * phần lệch quá nửa khoảng bậc (28% pixel) nằm ở MẶT BÊN và trong bóng, mà mặt bên thì mắt
+ * đọc ra là *hình khối*, không đọc ra là *giá trị*.
+ *
+ * Với ambient 3,0 thì con số tương ứng là trung vị **185** và **0 pixel** nào còn giữ được
+ * màu bậc — đó là cách phát hiện ra bản đầu hỏng.
+ *
+ * Hằng số ở module chứ không dựng lại mỗi lần render: `LightingEffect` mang theo shadow map,
+ * dựng lại nó mỗi frame là dựng lại texture đó.
+ */
+const LIGHTING = new LightingEffect({
+  ambient: new AmbientLight({ color: [255, 255, 255], intensity: 1.26 }),
+  sun: new DirectionalLight({
+    color: [255, 255, 255],
+    intensity: 0.25,
+    direction: [-0.45, 0.6, -1.15],
+    _shadow: true,
+  }),
+});
+LIGHTING.shadowColor = [0, 0, 0, 0.14];
 
 /** Mực của ranh giới tỉnh — nét mảnh, không phải một lớp mang dữ liệu. */
 const BORDER_RGB: RGB = [120, 118, 112];
@@ -48,6 +102,10 @@ export interface NationalMapProps {
   poi: NationalPoi[] | null;
   showStations: boolean;
   showPoi: Set<string>;
+  /** `3d` ⇒ đùn ô gộp + nghiêng camera. Chỉ hợp lệ với trường đơn vị Ô — xem `can3D`. */
+  mode: NationalMode;
+  /** bậc H3 của thảm ô đang vẽ — trần chiều cao co theo bậc, xem `maxElevFor`. */
+  res: number;
   hovered: string | null;
   onHoverProvince: (code: string | null) => void;
   onPickProvince: (code: string) => void;
@@ -118,7 +176,10 @@ export function NationalMap(props: NationalMapProps) {
       const ov = new MapboxOverlay({ interleaved: true, layers: [] });
       overlay.current = ov;
       m.addControl(ov);
-      m.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
+      // La bàn BẬT ở màn hình này (khác bậc tỉnh): khi có khối, **xoay được** là tín hiệu chiều
+      // sâu mạnh nhất mà không tốn một pixel nào để nói dối — hai góc nhìn của cùng một cụm
+      // khối cho biết cái nào cao hơn cái nào, thứ mà một góc cố định không nói được.
+      m.addControl(new maplibregl.NavigationControl({ showCompass: true }), "bottom-right");
       setReady(true);
     });
 
@@ -153,6 +214,8 @@ export function NationalMap(props: NationalMapProps) {
     poi,
     showStations,
     showPoi,
+    mode,
+    res,
     hovered,
     onHoverProvince,
     onPickProvince,
@@ -165,6 +228,10 @@ export function NationalMap(props: NationalMapProps) {
     const out: Layer[] = [];
 
     const paintProvince = field.unit === "province";
+    // Quyết định 1: KHÔNG bao giờ đùn 34 đa giác tỉnh. `NationalApp` đã chặn ở nút bấm và
+    // ở hash, nhưng lớp vẽ cũng phải tự chặn — hai chỗ đọc cùng một luật thì chỗ nào cũng
+    // phải đúng một mình.
+    const is3d = mode === "3d" && !paintProvince;
     // Màu ĐÃ áp cực tính — cùng một hàm mà legend gọi, nên bản đồ không thể lệch với chú
     // giải của chính nó.
     //
@@ -222,17 +289,32 @@ export function NationalMap(props: NationalMapProps) {
           id: "vn-cells",
           data: cells,
           getHexagon: (d: NationalCell) => d.h3,
-          // `extruded: false` và `highPrecision: false`: ở bậc r6 phép nội suy nhanh không
-          // lệch thấy được, còn 9,8 nghìn ô dựng chính xác từng đỉnh là chi phí thật.
-          extruded: false,
+          // `highPrecision: false` giữ nguyên ở CẢ HAI chế độ: ở bậc r6 phép nội suy nhanh
+          // không lệch thấy được, còn 9,8 nghìn ô dựng chính xác từng đỉnh là chi phí thật.
+          extruded: is3d,
+          getElevation: (d: NationalCell) =>
+            elevationFor(d[field.column] as number, scale, maxElevFor(res)),
+          // Vật liệu MỜ: tắt hẳn đốm bóng loáng (`specularColor` đen, `shininess` 1). Một
+          // vệt sáng chạy trên nóc khối là thứ mắt đọc thành *dữ liệu* — nó nhấn đúng những
+          // ô nằm về phía nguồn sáng, mà hướng nguồn sáng thì không có trong legend. Vẫn
+          // giữ `diffuse` để mặt bên tối hơn mặt trên: đó mới là thứ làm khối đọc ra khối.
+          material: { ambient: 0.7, diffuse: 0.55, shininess: 1, specularColor: [0, 0, 0] },
           filled: true,
           stroked: false,
           pickable: true,
           getFillColor: (d: NationalCell) => {
             const c = colorOf(d[field.column]);
+            // Ô không đo được: VÂN xám và **cao 0** (xem `elevationFor`). Hai kênh nói cùng
+            // một câu, và ở 3D câu đó phải là "không có gì để dựng lên", không phải "dựng
+            // lên bằng 0" — nên nó nằm phẳng dưới chân mọi ô có đo.
             return c ? ([c[0], c[1], c[2], 225] as RGBA) : rgba(HATCH_RGB, 70);
           },
-          updateTriggers: { getFillColor: [field.id, scale] },
+          updateTriggers: {
+            getFillColor: [field.id, scale],
+            // `mode` phải có mặt: `extruded` đổi nhưng `getElevation` thì deck.gl không tự
+            // biết là đã đổi, và một layer đùn với chiều cao cũ là một bản đồ nói dối.
+            getElevation: [field.id, scale, mode, res],
+          },
         }),
       );
       // Ranh giới tỉnh vẫn vẽ, dưới dạng NÉT: thảm ô r6 không nói được mình đang ở tỉnh nào,
@@ -311,6 +393,9 @@ export function NationalMap(props: NationalMapProps) {
 
     ov.setProps({
       layers: out,
+      // Ánh sáng chỉ bật ở 3D. Ở 2D không có mặt bên nào để chiếu, và một `LightingEffect`
+      // treo sẵn vẫn tốn một lượt dựng shadow map mỗi frame.
+      effects: is3d ? [LIGHTING] : [],
       getTooltip: ({ object, layer }: { object?: unknown; layer?: { id: string } | null }) =>
         tooltip(object, layer?.id, field, rows),
     });
@@ -324,6 +409,8 @@ export function NationalMap(props: NationalMapProps) {
     poi,
     showStations,
     showPoi,
+    mode,
+    res,
     hovered,
     zoom,
     atlas,
@@ -332,8 +419,30 @@ export function NationalMap(props: NationalMapProps) {
     onPickProvince,
   ]);
 
-  // Nhảy tới khung nhìn từ ngoài (nút "về cả nước") — cùng luật với `MapView`: chỉ nhảy
-  // khi lệch đáng kể, nếu không `moveend` và effect này sẽ đá nhau.
+  // Bật 3D là NGHIÊNG CAMERA, tắt là dựng thẳng — quyết định 6.
+  //
+  // `map.easeTo` của MapLibre chứ không phải một pitch tự tính trong deck: ở chế độ
+  // interleaved thì MapLibre giữ camera, và deck đọc lại từ nó. Tự đặt pitch ở phía deck là
+  // dựng một nguồn sự thật thứ hai cho cùng một góc nhìn, rồi hai bên lệch nhau đúng một
+  // frame mỗi lần kéo chuột.
+  //
+  // Chỉ chạy khi `is3d` đổi, KHÔNG khoá pitch: sau cú nghiêng đầu tiên người dùng kéo tự do.
+  const wantTilt = mode === "3d" && field.unit === "cell";
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !ready) return;
+    m.easeTo({ pitch: wantTilt ? 50 : 0, duration: 500 });
+  }, [wantTilt, ready]);
+
+  // Nhảy tới khung nhìn từ ngoài (khớp bbox lúc manifest về) — cùng luật với `MapView`:
+  // chỉ nhảy khi lệch đáng kể, nếu không `moveend` và effect này sẽ đá nhau.
+  //
+  // `pitch` phải nằm TRONG `jumpTo`, và đó là một lỗi đã đo được chứ không phải phòng xa:
+  // manifest về gần như cùng lúc với `ready`, nên cú nhảy này xảy ra **ngay giữa** cú
+  // `easeTo` 500 ms ở trên và huỷ nó. Kết quả: `m=3d` mở ra với khối đã đùn nhưng camera
+  // vẫn dựng thẳng — nhìn từ trên xuống thì một khối cao 4,5 km trông y hệt một ô phẳng,
+  // và không có lỗi nào để thấy. Đo bằng ảnh render: diff 2D↔3D chỉ 6% pixel (đúng phần
+  // thảm ô), trong khi pitch 50° phải đổi gần như toàn khung.
   const { lng, lat } = props.view;
   useEffect(() => {
     const m = map.current;
@@ -345,8 +454,8 @@ export function NationalMap(props: NationalMapProps) {
       Math.abs(m.getZoom() - zoom) < 0.01
     )
       return;
-    m.jumpTo({ center: [lng, lat], zoom });
-  }, [lng, lat, zoom, ready]);
+    m.jumpTo({ center: [lng, lat], zoom, pitch: wantTilt ? 50 : 0 });
+  }, [lng, lat, zoom, ready, wantTilt]);
 
   return <div ref={container} className="h-full w-full" />;
 }

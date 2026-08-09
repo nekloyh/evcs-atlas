@@ -26,12 +26,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { parseNationalHash, serializeNationalHash } from "./hash";
+import { parseNationalHash, serializeNationalHash, type NationalMode } from "./hash";
+import { can3D } from "./elevation";
+import { RES_BASE, resolutionForZoom } from "./lod";
 
 import { POI_GROUPS, POI_GROUP_BY_KEY, type PoiShape } from "../data/poi";
-import { switchProvince } from "../data/province";
+import { switchDataset } from "../data/province";
+import { DatasetPicker } from "../ui/DatasetPicker";
 import { zoomForBbox } from "../map/positron";
-import { RAMP_HEX, buildScale, formatBreak, rampFor, type Scale } from "../viz/palette";
+import { RAMP_HEX, buildScale, classCount, formatBreak, rampFor, type Scale } from "../viz/palette";
 import {
   loadCells,
   loadNationalManifest,
@@ -39,6 +42,7 @@ import {
   loadProvinceRows,
   loadProvinceShapes,
   loadStations,
+  type GridMeta,
   type NationalCell,
   type NationalManifest,
   type NationalPoi,
@@ -60,6 +64,27 @@ import { NationalMap } from "./NationalMap";
 /** Mọi cột của lưới r6 mà danh mục trường có nhắc tới — nạp một lần, đổi trường không nạp lại. */
 const CELL_COLUMNS = [...new Set(CELL_FIELDS.map((f) => f.column))];
 
+/** Hằng ở module: một `[]` mới mỗi lần render sẽ làm mọi `useMemo` phía dưới tính lại. */
+const EMPTY_CELLS: NationalCell[] = [];
+
+/**
+ * Khối `grids` của một bậc, có đường lui cho manifest CŨ (chưa có khối đó).
+ *
+ * Bản build dựng trước `n12` VERSION 4 không khai `grids`; khi ấy vẫn phải mở được, và bậc
+ * duy nhất là r6 ở đúng tên file cũ. Thiếu dữ liệu là "chưa có bậc mịn", không phải lỗi.
+ */
+function gridOf(m: NationalManifest, res: number): GridMeta {
+  return (
+    m.grids?.[String(res)] ?? {
+      file: `grid_h3_r${res}.parquet`,
+      key: `h3_r${res}`,
+      n_cells: m.n_cells,
+      cell_km2_median: m.cell_km2_median,
+      bytes: 0,
+    }
+  );
+}
+
 const shapeOf = (group: string): PoiShape => POI_GROUP_BY_KEY.get(group)?.shape ?? "square";
 
 // ── hash ──────────────────────────────────────────────────────────────────────
@@ -78,11 +103,11 @@ function readHash() {
   );
 }
 
-function writeHash(field: string, layers: Set<string>) {
+function writeHash(field: string, layers: Set<string>, mode: NationalMode) {
   history.replaceState(
     null,
     "",
-    serializeNationalHash(window.location.hash, { field, layers }),
+    serializeNationalHash(window.location.hash, { field, layers, mode }),
   );
 }
 
@@ -90,10 +115,20 @@ export default function NationalApp() {
   const initial = readHash();
   const [fieldId, setFieldId] = useState(initial.field);
   const [layers, setLayers] = useState<Set<string>>(initial.layers);
+  // Quyết định 7: link mang `m=3d` NHƯNG trường trong link là trường TỈNH ⇒ về 2d. Quyết
+  // định 1 thắng, và nó phải thắng NGAY Ở LẦN VẼ ĐẦU — nếu không, trang mở ra ở một trạng
+  // thái mà nút 3D đang mờ còn bản đồ thì đang nghiêng, tức giao diện tự mâu thuẫn.
+  const [mode, setMode] = useState<NationalMode>(
+    initial.mode === "3d" && can3D(FIELD_BY_ID.get(initial.field)?.unit ?? "cell") ? "3d" : "2d",
+  );
   const [manifest, setManifest] = useState<NationalManifest | null>(null);
   const [provinces, setProvinces] = useState<ProvinceFeature[]>([]);
   const [rows, setRows] = useState<Record<string, ProvinceRow>>({});
-  const [cells, setCells] = useState<NationalCell[]>([]);
+  // Ô theo BẬC, không phải một mảng: đổi bậc rồi đổi lại không được tải lại 2,14 MB, và
+  // quan trọng hơn — giữ cả hai cho phép so hai bậc mà không có một nhịp màn hình trống.
+  const [cellsBy, setCellsBy] = useState<Record<number, NationalCell[]>>({});
+  const [res, setRes] = useState<number>(RES_BASE);
+  const [loadingRes, setLoadingRes] = useState<number | null>(null);
   const [stations, setStations] = useState<NationalStation[] | null>(null);
   const [poi, setPoi] = useState<NationalPoi[] | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
@@ -101,9 +136,16 @@ export default function NationalApp() {
   const [error, setError] = useState<string | null>(null);
 
   const field = FIELD_BY_ID.get(fieldId) ?? FIELD_BY_ID.get(DEFAULT_NATIONAL_FIELD)!;
+  // Chọn một trường TỈNH khi đang ở 3D thì bản đồ tự về phẳng, và **state cũng về `2d`** —
+  // không chỉ lớp vẽ. Giữ `mode === "3d"` ngầm trong khi nút đang mờ là để hash ghi một
+  // trạng thái không dựng lại được: mở lại link ấy sẽ ra 2D, tức link nói dối (§9).
+  const can3d = can3D(field.unit);
+  useEffect(() => {
+    if (!can3d) setMode("2d");
+  }, [can3d]);
   const fail = (e: unknown) => setError(e instanceof Error ? e.message : String(e));
 
-  useEffect(() => writeHash(fieldId, layers), [fieldId, layers]);
+  useEffect(() => writeHash(fieldId, layers, mode), [fieldId, layers, mode]);
 
   useEffect(() => {
     void loadNationalManifest().then((m) => {
@@ -115,7 +157,10 @@ export default function NationalApp() {
     }, fail);
     void loadProvinceShapes().then(setProvinces, fail);
     void loadProvinceRows().then(setRows, fail);
-    void loadCells(CELL_COLUMNS).then(setCells, fail);
+    // Bậc thô nạp ngay (nó nằm trong 0,52 MB tải lần đầu); bậc mịn đợi người ta phóng vào.
+    void loadNationalManifest()
+      .then((m) => loadCells(CELL_COLUMNS, gridOf(m, RES_BASE)))
+      .then((c) => setCellsBy((p) => ({ ...p, [RES_BASE]: c })), fail);
   }, []);
 
   // Trạm và POI nạp LƯỜI — cùng luật §5a với màn hình tỉnh: một lớp không ai bật thì không
@@ -134,6 +179,35 @@ export default function NationalApp() {
     if (poiGroupsOn.size === 0 || poi) return;
     void loadPoi(shapeOf).then(setPoi, fail);
   }, [poiGroupsOn, poi]);
+
+  // ── LOD: bậc lưới theo mức phóng ────────────────────────────────────────────
+  //
+  // Bậc là hàm của zoom + bậc đang dùng (có TRỄ — xem `lod.ts`), và nó KHÔNG vào hash: nó
+  // suy được từ khung nhìn, nên ghi nó ra là dựng một trạng thái thứ hai cho cùng một sự
+  // thật, rồi hai cái lệch nhau khi người ta sửa tay URL.
+  const available = useMemo(
+    () => new Set(Object.keys(manifest?.grids ?? {}).map(Number)),
+    [manifest],
+  );
+  useEffect(() => {
+    setRes((cur) => resolutionForZoom(view.zoom, cur, available));
+  }, [view.zoom, available]);
+
+  const cells = cellsBy[res] ?? cellsBy[RES_BASE] ?? EMPTY_CELLS;
+  // Bậc ĐANG VẼ, không phải bậc đang muốn: trong lúc r7 còn đang tải thì bản đồ vẫn là r6,
+  // và chú giải phải nói về cái đang thấy. In "5,8 km²/ô" trên một thảm ô 40,1 km² là dạng
+  // nói dối tệ nhất ở đây — nó đổi ĐƠN VỊ ĐỌC của mọi con số trên màn hình.
+  const shownRes = cellsBy[res] ? res : RES_BASE;
+  const grid = manifest ? gridOf(manifest, shownRes) : null;
+  useEffect(() => {
+    if (!manifest || cellsBy[res] || loadingRes === res) return;
+    const grid = manifest.grids?.[String(res)];
+    if (!grid) return;
+    setLoadingRes(res);
+    void loadCells(CELL_COLUMNS, grid)
+      .then((c) => setCellsBy((p) => ({ ...p, [res]: c })), fail)
+      .finally(() => setLoadingRes(null));
+  }, [manifest, res, cellsBy, loadingRes]);
 
   // Bậc màu tính trên chính tập đang xem — xem quyết định 2 ở docstring.
   const scale: Scale | null = useMemo(() => {
@@ -163,30 +237,38 @@ export default function NationalApp() {
       <nav className="flex h-11 shrink-0 items-center gap-6 border-b border-hairline px-4 text-[13px]">
         <span className="font-semibold tracking-[0.14em]">EVCS TOÀN QUỐC</span>
         <span className="text-[11px] text-ink-muted">
-          {manifest ? `${manifest.n_provinces} tỉnh · ${manifest.n_cells.toLocaleString("vi-VN")} ô gộp` : "đang nạp…"}
+          {manifest && grid
+            ? `${manifest.n_provinces} tỉnh · ${grid.n_cells.toLocaleString("vi-VN")} ô gộp r${shownRes}`
+            : "đang nạp…"}
+          {loadingRes !== null && (
+            <span className="ml-2 text-ink-muted">· đang nạp lưới mịn r{loadingRes}…</span>
+          )}
         </span>
-        <label className="ml-auto flex items-center gap-1.5 text-[11px] text-ink-2">
-          <span className="uppercase tracking-wide text-ink-muted">MỞ MỘT TỈNH</span>
-          <select
-            value=""
-            onChange={(e) => e.target.value && switchProvince(e.target.value)}
-            className="bg-transparent text-ink outline-none"
-          >
-            <option value="">— chọn —</option>
-            {provinces
-              .map((f) => f.properties)
-              .sort((a, b) => a.province_name.localeCompare(b.province_name, "vi"))
-              .map((p) => (
-                <option key={p.province_code} value={p.province_code} disabled={!p.in_store}>
-                  {p.province_name}
-                  {p.in_store ? "" : " — chưa dựng"}
-                </option>
-              ))}
-          </select>
-        </label>
+        {/* Cùng một bộ chọn với hai màn hình kia. Bản cũ ở đây là một `<select>` riêng
+            nhãn "MỞ MỘT TỈNH", và nó thiếu đúng hai đường: về Hà Nội và sang POI. */}
+        <div className="ml-auto">
+          <DatasetPicker />
+        </div>
+        <div className="flex items-center gap-2 tracking-[0.1em]">
+          <ViewButton label="2D" on={mode === "2d"} ready go={() => setMode("2d")} />
+          <span className="text-ink-muted/50">|</span>
+          <ViewButton
+            label="3D"
+            on={mode === "3d"}
+            ready={can3d}
+            // Câu này là NỘI DUNG, không phải trang trí: một nút mờ không tự nói vì sao nó
+            // mờ thì đọc thành "hỏng". Xem quyết định 1 ở `elevation.ts`.
+            note={
+              can3d
+                ? "đùn ô gộp r6 theo BẬC của trường đang tô, pitch 50°"
+                : "34 khối tỉnh là biểu đồ cột méo theo phối cảnh, không phải bản đồ — chọn một trường của Ô GỘP để bật 3D"
+            }
+            go={() => setMode("3d")}
+          />
+        </div>
       </nav>
 
-      <Legend field={field} scale={scale} manifest={manifest} />
+      <Legend field={field} scale={scale} grid={grid} mode={can3d ? mode : "2d"} />
 
       <div className="flex min-h-0 flex-1">
         <main className="relative min-w-0 flex-1">
@@ -202,9 +284,11 @@ export default function NationalApp() {
             poi={poi}
             showStations={wantStations}
             showPoi={poiGroupsOn}
+            mode={can3d ? mode : "2d"}
+            res={shownRes}
             hovered={hovered}
             onHoverProvince={setHovered}
-            onPickProvince={(code) => switchProvince(code)}
+            onPickProvince={(code) => switchDataset(code)}
           />
           {error && (
             <div className="absolute inset-x-0 top-0 border-b border-hairline bg-panel px-4 py-2 text-[13px]">
@@ -236,7 +320,9 @@ export default function NationalApp() {
               <FieldRow key={f.id} f={f} on={f.id === fieldId} pick={setFieldId} />
             ))}
           </Group>
-          <Group title={`Ô GỘP H3 r6 · ~${(manifest?.cell_km2_median ?? 36).toLocaleString("vi-VN", { maximumFractionDigits: 1 })} km²/ô`}>
+          <Group
+            title={`Ô GỘP H3 r${shownRes} · ~${(grid?.cell_km2_median ?? 36).toLocaleString("vi-VN", { maximumFractionDigits: 1 })} km²/ô`}
+          >
             {CELL_FIELDS.map((f) => (
               <FieldRow key={f.id} f={f} on={f.id === fieldId} pick={setFieldId} />
             ))}
@@ -297,6 +383,42 @@ export default function NationalApp() {
   );
 }
 
+/**
+ * Nút 2D|3D — cùng từ vựng thị giác với `NavButton` của bậc tỉnh, và cố ý CHÉP chứ không
+ * import: `NavButton` sống trong `App.tsx`, và import nó là kéo cả app bậc tỉnh (store,
+ * fields, story) vào bundle của màn hình toàn quốc để lấy 12 dòng JSX.
+ *
+ * `ready === false` ⇒ mờ và KHÔNG bấm được. Không phải chỉ mờ: một nút trông mờ mà vẫn ăn
+ * cú bấm là dạng nói dối tệ hơn cả không có nút (§3a).
+ */
+function ViewButton({
+  label,
+  on,
+  ready,
+  note,
+  go,
+}: {
+  label: string;
+  on: boolean;
+  ready: boolean;
+  note?: string;
+  go: () => void;
+}) {
+  return (
+    <button
+      aria-disabled={!ready}
+      aria-current={on || undefined}
+      title={note}
+      onClick={ready ? go : undefined}
+      className={`${ready ? "cursor-pointer" : "cursor-default"} ${
+        ready ? (on ? "text-ink" : "text-ink-2 hover:text-ink") : "text-ink-muted/50"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
 function Row({ k, v }: { k: string; v: string }) {
   return (
     <>
@@ -343,11 +465,14 @@ function FieldRow({
 function Legend({
   field,
   scale,
-  manifest,
+  grid,
+  mode,
 }: {
   field: NationalField;
   scale: Scale | null;
-  manifest: NationalManifest | null;
+  /** bậc lưới ĐANG VẼ — đơn vị đọc của mọi con số ở dải này đến từ đây, không từ TS */
+  grid: GridMeta | null;
+  mode: NationalMode;
 }) {
   const { colors, inks } = scale ? rampFor(scale, field.polarity) : { colors: [], inks: [] };
   // Nhãn là CẬN DƯỚI của từng bậc, in nguyên văn — cùng hàm và cùng luật với `labelsFor`
@@ -399,13 +524,22 @@ function Legend({
           đọc theo{" "}
           {field.unit === "province"
             ? "TỈNH"
-            : `Ô GỘP ~${(manifest?.cell_km2_median ?? 36).toLocaleString("vi-VN", { maximumFractionDigits: 1 })} km²`}
+            : `Ô GỘP ~${(grid?.cell_km2_median ?? 36).toLocaleString("vi-VN", { maximumFractionDigits: 1 })} km²`}
         </span>
         {/* Bậc màu là phân vị TRÊN CHÍNH tập này. Nói ra, vì cùng sắc cam ở màn hình một
             tỉnh mang một nghĩa khác — xem quyết định 2 ở docstring. */}
         <span className="border border-hairline px-1 text-[10px] text-ink-muted">
-          bậc theo phân vị của 34 tỉnh / 9,8 nghìn ô — không so được với bậc của một tỉnh
+          bậc theo phân vị của {field.unit === "province" ? "34 tỉnh" : `${grid ? Math.round(grid.n_cells / 1000) : "?"} nghìn ô r${grid?.key.slice(-1) ?? "6"}`} — không so được với bậc của một tỉnh, cũng không so được giữa hai bậc lưới
         </span>
+        {/* Chỉ hiện Ở 3D, và đó là điều đúng: ở 2D không có kênh chiều cao nào để mà mô tả,
+            một câu mô tả kênh không tồn tại là nhiễu. Con số bậc đến từ `classCount` (tính
+            trên chính dữ liệu đang xem), không gõ tay — ràng buộc 4. */}
+        {mode === "3d" && scale && (
+          <span className="border border-hairline px-1 text-[10px] text-ink-muted">
+            chiều cao = cùng trường đang tô, {classCount(scale)} bậc (mã hoá trùng) · ô không
+            đo được giữ phẳng
+          </span>
+        )}
       </div>
     </div>
   );

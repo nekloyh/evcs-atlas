@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 
 import { UNKNOWN, apply, factsFrom } from "./data/bootstrap";
 import { loadManifest } from "./data/manifest";
-import { PROVINCE, isNationalMode } from "./data/province";
+import { PROVINCE, isNationalMode, isProxyMode } from "./data/province";
 import "./index.css";
 
 /**
@@ -30,6 +30,20 @@ async function boot() {
   // gộp r6 và tỉnh, và danh mục trường là một danh mục khác (`national/fields.ts`). Chạy
   // qua khối dưới rồi mới rẽ là để một manifest của tỉnh đặt trạng thái cho một màn hình
   // không đọc trạng thái đó.
+  // Chế độ PROXY POI rẽ TRƯỚC cả toàn quốc, và cùng một lý do: nó không đọc `manifest.json`
+  // của tỉnh, không có `available_columns`, không có trường nào để mà khoá trạng thái. Nó
+  // cũng là chỗ DUY NHẤT trong app hiển thị dữ liệu chưa qua pipeline, nên nó phải không
+  // chạm được vào bất kỳ trạng thái nào của hai bộ kia.
+  if (isProxyMode) {
+    document.title = "POI · tỉnh vô danh (test)";
+    const { default: ProxyApp } = await import("./proxy/ProxyApp");
+    createRoot(document.getElementById("root")!).render(
+      <StrictMode>
+        <ProxyApp />
+      </StrictMode>,
+    );
+    return;
+  }
   if (isNationalMode) {
     document.title = "EVCS · Toàn quốc";
     const { default: NationalApp } = await import("./national/NationalApp");

@@ -14,6 +14,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import { parseHash, serializeHash } from "../src/state/hash.ts";
+import {
+  parseNationalHash,
+  serializeNationalHash,
+} from "../src/national/hash.ts";
 import type { HashState } from "../src/state/types.ts";
 
 const VIEW = { lng: 105.84, lat: 21, zoom: 9.3, pitch: 0, bearing: 0 };
@@ -334,4 +338,60 @@ test("vòng ghi ↔ đọc `p` hội tụ", () => {
 test("khoá `p` KHÔNG được ghi khi có `s` — cùng luật §9a với f/v/l", () => {
   const s = serializeHash({ ...BASE, scene: "von-cuc", paintOn: false });
   assert.doesNotMatch(s, /[?&]p=/);
+});
+
+
+// ── Khoá `m` ở bậc TOÀN QUỐC — chế độ 3D (§9) ───────────────────────────────────
+//
+// Cùng khoá, cùng từ vựng với bậc tỉnh, và đó là cả điểm: một người đã học `m=3d` ở
+// `#tinh=01` phải gõ đúng chữ ấy ở `#tinh=vn`. Hash của hai bậc là hai module khác nhau,
+// nên "cùng từ vựng" là thứ phải assert chứ không phải thứ để tin.
+
+const KNOWN_F = new Set(["c:population", "p:n_stations"]);
+const KNOWN_L = new Set(["stations", "poi_mall"]);
+const parseN = (h: string) => parseNationalHash(h, "c:population", KNOWN_F, KNOWN_L);
+
+test("`m=3d` đọc được; vắng khoá là 2d", () => {
+  assert.equal(parseN("#tinh=vn&m=3d").mode, "3d");
+  assert.equal(parseN("#tinh=vn").mode, "2d");
+});
+
+test("giá trị `m` lạ về 2d, KHÔNG nổ — cùng luật với mọi khoá hỏng khác", () => {
+  for (const xau of ["4d", "", "3D", "true", "2d ", "3d,3d"]) {
+    assert.equal(parseN(`#tinh=vn&m=${encodeURIComponent(xau)}`).mode, "2d", xau);
+  }
+});
+
+test("serialize chỉ ghi `m` khi 3d — mặc định 2d không ghi rác vào link", () => {
+  const base = { field: "c:population", layers: new Set<string>() };
+  assert.doesNotMatch(serializeNationalHash("", { ...base, mode: "2d" }), /[?&#]m=/);
+  assert.match(serializeNationalHash("", { ...base, mode: "3d" }), /m=3d/);
+});
+
+test("bật rồi tắt 3D thì khoá `m` biến mất hẳn, không thành `m=2d`", () => {
+  const base = { field: "c:population", layers: new Set<string>() };
+  const on = serializeNationalHash("", { ...base, mode: "3d" });
+  const off = serializeNationalHash(on, { ...base, mode: "2d" });
+  assert.doesNotMatch(off, /[?&#]m=/);
+});
+
+test("vòng ghi ↔ đọc `m` hội tụ", () => {
+  const st = { field: "c:population", layers: new Set(["stations"]), mode: "3d" as const };
+  const back = parseN(serializeNationalHash("", st));
+  assert.equal(back.mode, "3d");
+  assert.equal(back.field, st.field);
+  assert.deepEqual([...back.layers], ["stations"]);
+});
+
+test("đổi mode KHÔNG làm mất khoá khác của hash", () => {
+  const prev = "#tinh=vn&f=c:population&l=stations&giu=nguyen";
+  const s = serializeNationalHash(prev, {
+    field: "c:population",
+    layers: new Set(["stations"]),
+    mode: "3d",
+  });
+  assert.match(s, /giu=nguyen/);
+  assert.match(s, /tinh=vn/);
+  assert.match(s, /l=stations/);
+  assert.match(s, /m=3d/);
 });

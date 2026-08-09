@@ -19,9 +19,13 @@
 
 import { NATIONAL, PROVINCE_KEY } from "../data/province";
 
+/** Chế độ xem — cùng từ vựng với bậc tỉnh (`state/types.ts`), cùng khoá hash `m`. */
+export type NationalMode = "2d" | "3d";
+
 export interface NationalHash {
   field: string;
   layers: Set<string>;
+  mode: NationalMode;
 }
 
 /**
@@ -44,6 +48,9 @@ export function parseNationalHash(
     // Id lớp lạ bị BỎ, không giữ lại: một lớp không tồn tại trong hash sẽ hiện như một nút
     // bật mà không có gì bật lên — tệ hơn là không có nút.
     layers: new Set(knownLayers ? raw.filter((x) => knownLayers.has(x)) : raw),
+    // `m=4d`, `m=`, `m=3D` ⇒ 2D. Cùng luật §9 với mọi khoá khác: một ký tự gõ sai rơi về
+    // mặc định, không thành màn hình lỗi. Chỉ đúng chuỗi `3d` mới bật.
+    mode: p.get("m") === "3d" ? "3d" : "2d",
   };
 }
 
@@ -59,5 +66,9 @@ export function serializeNationalHash(prev: string, s: NationalHash): string {
   p.set("f", s.field);
   if (s.layers.size) p.set("l", [...s.layers].sort().join(","));
   else p.delete("l");
+  // 2D là mặc định ⇒ KHÔNG ghi `m=2d`. Một khoá nói lại điều mặc định đã nói chỉ làm link
+  // dài ra và làm người đọc tưởng nó mang thông tin; cùng luật với `l` rỗng ngay trên.
+  if (s.mode === "3d") p.set("m", "3d");
+  else p.delete("m");
   return `#${p.toString()}`;
 }

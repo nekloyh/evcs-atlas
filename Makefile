@@ -1,4 +1,4 @@
-.PHONY: setup clean help web vn vn-plan vn-web vn-quocgia golden golden-ghi schema schema-kiem kiem clean-cache
+.PHONY: check-chain setup clean help web vn vn-plan vn-web vn-quocgia poi-proxy golden golden-ghi schema schema-kiem kiem clean-cache
 
 help:
 	@echo "make setup    — cài môi trường (uv sync)"
@@ -12,6 +12,11 @@ help:
 	@echo "make vn-plan            — in kế hoạch, không chạy (cặp nào sẽ chạy, cặp nào bỏ qua)"
 	@echo "make vn-web             — chỉ xuất lại store cho web (34 bộ theo tỉnh)"
 	@echo "make vn-quocgia         — chỉ dựng lại lớp gộp TOÀN QUỐC + 4 file GeoJSON POI"
+	@echo ""
+	@echo "  ── proxy POI (chế độ test, #tinh=poi) ──"
+	@echo "make poi-proxy SRC=data/qa/eda/poi_chungcu_7tinh.parquet   — đưa một bảng POI lên bản đồ"
+	@echo "  (cửa thứ hai, KHÔNG cần lệnh: kéo-thả .geojson/.parquet thẳng vào #tinh=poi —"
+	@echo "   đọc trong trình duyệt, không ghi đĩa, mất khi tải lại trang)"
 	@echo ""
 	@echo "  ── cổng chặn (xem docs/adr/) ──"
 	@echo "make kiem      — schema + test Python + test web + golden. Chạy trước mọi commit."
@@ -60,6 +65,16 @@ vn-web:
 vn-quocgia:
 	uv run python -m vn n12_national
 
+# --- proxy POI: nhìn thẳng một bảng POI đang soi ở notebook ------------------
+# KHÔNG phải một bước pipeline (xem docstring `vn/proxy_poi.py`). Một parquet bất kỳ có
+# lat/lng → một lớp trên bản đồ ở `#tinh=poi`. Manifest cộng dồn: chạy nhiều lần với nhiều
+# file thì bộ chọn ở web liệt kê đủ, bấm qua lại được giữa b2 và b3.
+#   make poi-proxy SRC=data/qa/eda/poi_chungcu_7tinh.parquet
+#   make poi-proxy SRC="data/qa/eda/poi_chungcu_7tinh_b3.parquet data/qa/eda/poi_chungcu_7tinh_b3_bi_xoa.parquet"
+poi-proxy:
+	@test -n "$(SRC)" || (echo "cần SRC=<file.parquet> [file2.parquet …]"; exit 1)
+	uv run python -m vn.proxy_poi $(SRC)
+
 # --- lưới an toàn: vân tay mọi bảng sản phẩm ---------------------------------
 # `make golden` DỪNG nếu một con số nào đổi. Đây là cổng chặn của mọi đợt refactor:
 # đổi cấu trúc mã thì được, đổi kết quả thì phải là một quyết định có người ký.
@@ -82,3 +97,6 @@ kiem: schema-kiem
 	uv run pytest
 	cd web && pnpm test
 	$(MAKE) golden
+
+check-chain:  ## kiem nhat quan chuoi EDA POI: vao - final = ra (theo tap uid)
+	uv run python scripts/check_chain.py

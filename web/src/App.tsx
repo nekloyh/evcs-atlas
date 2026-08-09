@@ -34,7 +34,7 @@ import {
   layerUsable,
   type RuntimeCoverage,
 } from "./fields";
-import { ProvincePicker } from "./ui/ProvincePicker";
+import { DatasetPicker } from "./ui/DatasetPicker";
 import { keep } from "./state/brush";
 import { useStore } from "./state/store";
 import { syncHash } from "./state/hash";
@@ -157,7 +157,7 @@ function Nav({ manifest }: { manifest: Manifest | null }) {
       <span className="font-semibold tracking-[0.14em]">
         EVCS {(manifest?.province?.province_name ?? "Hà Nội").toUpperCase()}
       </span>
-      <ProvincePicker />
+      <DatasetPicker />
       <div className="flex items-center gap-4 tracking-[0.1em]">
         {appModes.map((m) => (
           <NavButton key={m.label} item={m} active={m.label === activeLabel} />

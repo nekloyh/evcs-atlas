@@ -14,6 +14,16 @@
 import { query, registerParquet } from "../data/duckdb";
 import type { PoiShape } from "../data/poi";
 
+/** Một bậc lưới đã xuất — `n12_national._grid_agg`. */
+export interface GridMeta {
+  file: string;
+  /** tên cột khoá trong parquet: `h3_r6` / `h3_r7` */
+  key: string;
+  n_cells: number;
+  cell_km2_median: number;
+  bytes: number;
+}
+
 export interface NationalManifest {
   vintage: Record<string, unknown>;
   resolution: number;
@@ -26,6 +36,17 @@ export interface NationalManifest {
   n_provinces: number;
   cell_km2_median: number;
   available_columns: string[];
+  /**
+   * Các bậc lưới đã xuất, khoá là bậc H3 dạng chuỗi (`"6"`, `"7"`) — hợp đồng của LOD.
+   *
+   * **OPTIONAL**, và đó là một sự thật về dữ liệu: một bản build dựng trước `n12` VERSION 4
+   * không có khối này, và màn hình phải chạy y như trước (chỉ r6). Khai nó bắt buộc là để
+   * TS im lặng cho qua `m.grids["7"]` rồi nổ `undefined` ở trình duyệt.
+   *
+   * `cell_km2_median` ở đây là thứ chú giải in ra — KHÔNG gõ tay diện tích ô vào TS
+   * (ràng buộc 4): đổi bậc là đổi đơn vị đọc, và câu chữ phải đi theo.
+   */
+  grids?: Record<string, GridMeta>;
   poi_groups: Record<string, { file: string; n: number; n_polygon: number; bytes: number }>;
   bytes_first_load: number;
   totals: Record<string, number>;
@@ -114,16 +135,23 @@ function str(v: unknown): string | null {
   return v === null || v === undefined ? null : String(v);
 }
 
-export async function loadCells(columns: string[]): Promise<NationalCell[]> {
-  const f = await registerParquet("vn/grid_h3_r6.parquet");
-  const cols = ["h3_r6", "province_code", "lat", "lng", ...columns]
+/**
+ * Nạp một bậc lưới. `grid` đến từ `manifest.grids` — tên file và tên cột khoá KHÔNG được
+ * dựng bằng chuỗi ở đây, vì thế thì TS và Python cùng phải nhớ một quy ước đặt tên.
+ *
+ * Trả về `NationalCell` với khoá đã đổi tên thành `h3` ở cả hai bậc: tầng vẽ không cần
+ * biết nó đang vẽ r6 hay r7, `H3HexagonLayer` nhận một mã H3 và tự suy ra bậc từ chính mã.
+ */
+export async function loadCells(columns: string[], grid: GridMeta): Promise<NationalCell[]> {
+  const f = await registerParquet(`vn/${grid.file}`);
+  const cols = [grid.key, "province_code", "lat", "lng", ...columns]
     .map((c) => `"${c}"`)
     .join(", ");
   const t = await query(`SELECT ${cols} FROM "${f}"`);
   return t.toArray().map((r) => {
     const o = r.toJSON() as Record<string, unknown>;
     const cell: NationalCell = {
-      h3: String(o.h3_r6),
+      h3: String(o[grid.key]),
       province_code: String(o.province_code),
       lat: num(o.lat) ?? 0,
       lng: num(o.lng) ?? 0,

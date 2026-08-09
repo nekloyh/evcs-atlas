@@ -2,6 +2,7 @@
 
 Sinh:
   web/public/data/vn/grid_h3_r6.parquet   ~9,8 nghìn ô gộp — mặt dân số / POI / cung
+  web/public/data/vn/grid_h3_r7.parquet   bậc MỊN, nạp lười khi phóng vào (LOD của 3D)
   web/public/data/vn/stations.parquet     6.380 trạm, toàn quốc, một file
   web/public/data/vn/poi.parquet          25.220 POI, toàn quốc, một file
   web/public/data/vn/provinces.json       34 dòng thuộc tính đầy đủ (KHÔNG có hình học)
@@ -62,7 +63,8 @@ import pyarrow.parquet as pq
 from shapely import wkb
 from shapely.geometry import mapping
 
-from evcs.schema import GRID, NATIONAL_R6
+from evcs.schema import GRID
+from evcs.schema.national import national_table  # noqa: I001 — bậc là tham số, xem `national_table`
 
 from . import admin, paths, qa
 
@@ -72,11 +74,16 @@ from . import admin, paths, qa
 from .n11_web_export import WEB_DATA, _fc, _round_coords
 from .runner import Step
 
-VERSION = "3"  # 3: khung nhìn theo 99,5% dân · 2: thêm 4 file GeoJSON theo nhóm POI (chung cư · TTTM · công cộng · y tế-giáo dục)
+VERSION = "4"  # 4: thêm lưới r7 cho LOD của chế độ 3D · 3: khung nhìn theo 99,5% dân · 2: thêm 4 file GeoJSON theo nhóm POI (chung cư · TTTM · công cộng · y tế-giáo dục)
 
 WEB_VN = WEB_DATA / "vn"
 
 R_NATIONAL = 6
+
+# Bậc thứ HAI, chỉ để phóng vào — xem `_grid_agg`. Không thay r6: ở khung nhìn cả nước một
+# ô r7 rộng ~1 px, tức mịn hơn cả pixel, và cái "mịn" đó chỉ làm bản đồ nhoè chứ không thêm
+# thông tin nào đọc được.
+R_ZOOM = 7
 
 # Hai danh sách dưới đây SUY RA từ `evcs.schema.GRID`, không gõ tay.
 #
@@ -114,7 +121,9 @@ POI_COLS = ["group", "tag", "name", "levels", "lat", "lng", "osm_type", "osm_id"
 POI_GEOM_COL = "geometry_wkb"
 
 
-def _grid_r6() -> tuple[pd.DataFrame, dict]:
+def _grid_agg(res: int) -> tuple[pd.DataFrame, dict]:
+    """Gộp 34 phân mảnh r8 lên MỘT bậc H3. Bậc là tham số — xem `national_table`."""
+    key = f"h3_r{res}"
     cols = ["h3_r8", "province_code", "area_km2", "area_frac", *SUM_COLS, *FRAC_COLS]
     frames = []
     for code in admin.province_codes():
@@ -126,34 +135,34 @@ def _grid_r6() -> tuple[pd.DataFrame, dict]:
 
     # Diện tích HIỆU DỤNG: `area_km2` là ô đầy đủ, phần trong tỉnh mới là thứ cộng được.
     d["area_eff"] = d.area_km2 * d.area_frac
-    d["h3_r6"] = [h3.cell_to_parent(c, R_NATIONAL) for c in d.h3_r8]
+    d[key] = [h3.cell_to_parent(c, res) for c in d.h3_r8]
 
     agg = {c: "sum" for c in [*SUM_COLS, "area_eff"]}
-    g = d.groupby("h3_r6", sort=True).agg(agg)
-    g["n_cells_r8"] = d.groupby("h3_r6", sort=True).h3_r8.nunique()
+    g = d.groupby(key, sort=True).agg(agg)
+    g["n_cells_r8"] = d.groupby(key, sort=True).h3_r8.nunique()
 
     for c in FRAC_COLS:
         # Trọng số là diện tích hiệu dụng, không phải số ô: một ô biên góp 3% diện tích thì
         # nó góp 3% vào trung bình. Chia cho tổng trọng số của CHÍNH nhóm, nên ô r6 nằm nửa
         # ngoài biển vẫn ra tỉ lệ đúng cho phần đất của nó.
         w = d.area_eff
-        num = (d[c].fillna(0) * w).groupby(d.h3_r6, sort=True).sum()
-        den = w.where(d[c].notna(), 0).groupby(d.h3_r6, sort=True).sum()
+        num = (d[c].fillna(0) * w).groupby(d[key], sort=True).sum()
+        den = w.where(d[c].notna(), 0).groupby(d[key], sort=True).sum()
         g[c] = np.divide(num, den, out=np.full(len(num), np.nan), where=den > 0)
 
     # Tỉnh CHỦ của ô gộp = tỉnh chiếm nhiều diện tích nhất trong ô. Dùng cho nhãn và cho
     # cú bấm "vào tỉnh này"; nó KHÔNG phải một phép phân bổ dữ liệu — mọi số ở trên đã cộng
     # đủ cả phần của các tỉnh khác trong cùng ô.
     owner = (
-        d.groupby(["h3_r6", "province_code"], sort=False)
+        d.groupby([key, "province_code"], sort=False)
         .area_eff.sum()
         .reset_index()
         .sort_values("area_eff", ascending=False)
-        .drop_duplicates("h3_r6")
-        .set_index("h3_r6")
+        .drop_duplicates(key)
+        .set_index(key)
     )
     g["province_code"] = owner.province_code
-    g["n_provinces"] = d.groupby("h3_r6", sort=True).province_code.nunique()
+    g["n_provinces"] = d.groupby(key, sort=True).province_code.nunique()
 
     g = g.reset_index()
     g["area_km2"] = g.pop("area_eff")
@@ -162,16 +171,16 @@ def _grid_r6() -> tuple[pd.DataFrame, dict]:
     )
     # Toạ độ tâm ô: tầng vẽ cần chúng cho tooltip và cho lớp mark, và tính trong trình duyệt
     # nghĩa là nạp thư viện h3 vào bundle chỉ để lặp lại một phép tính tất định.
-    ll = [h3.cell_to_latlng(c) for c in g.h3_r6]
+    ll = [h3.cell_to_latlng(c) for c in g[key]]
     g["lat"] = [p[0] for p in ll]
     g["lng"] = [p[1] for p in ll]
 
-    front = ["h3_r6", "province_code", "n_provinces", "n_cells_r8", "lat", "lng", "area_km2"]
+    front = [key, "province_code", "n_provinces", "n_cells_r8", "lat", "lng", "area_km2"]
     g = g[front + [c for c in g.columns if c not in front]]
-    return _shrink(g), {"r8_rows_read": n_rows, "r8_cells_unique": n_unique}
+    return _shrink(g, key), {"r8_rows_read": n_rows, "r8_cells_unique": n_unique}
 
 
-def _shrink(g: pd.DataFrame) -> pd.DataFrame:
+def _shrink(g: pd.DataFrame, key: str) -> pd.DataFrame:
     """Hạ độ chính xác xuống đúng mức bảng này CÓ, rồi mới ghi.
 
     Bảng thô là float64 ở mọi cột số và nặng 1,04 MB — nhưng không cột nào mang tới 15 chữ
@@ -184,7 +193,7 @@ def _shrink(g: pd.DataFrame) -> pd.DataFrame:
     phép này bù nhau: chữ số lặp lại thì zstd mới có cái để nén.
     """
     for c in g.columns:
-        if c in ("h3_r6", "province_code"):
+        if c in (key, "province_code"):
             continue
         if pd.api.types.is_integer_dtype(g[c]):
             g[c] = g[c].astype("int32")
@@ -325,23 +334,31 @@ def run() -> None:
     WEB_VN.mkdir(parents=True, exist_ok=True)
     r = qa.Report("n12_national", target=str(WEB_VN.relative_to(paths.ROOT)), resolution=R_NATIONAL)
 
-    g, gmeta = _grid_r6()
-    gp = WEB_VN / "grid_h3_r6.parquet"
-    pq.write_table(pa.Table.from_pandas(g, preserve_index=False), gp, compression="zstd")
+    # HAI bậc, cùng một hàm gộp. r6 là bậc mặc định (nhìn cả nước); r7 chỉ tải khi phóng
+    # vào — xem `R_ZOOM`. Chúng KHÔNG được trộn trong một lần đọc: mỗi bậc có bậc màu phân
+    # vị riêng vì một ô r7 đo một đại lượng khác (dân của 5,2 km², không phải của 36 km²).
+    grids: dict[int, tuple] = {}
+    for res in (R_NATIONAL, R_ZOOM):
+        gg, meta = _grid_agg(res)
+        path = WEB_VN / f"grid_h3_r{res}.parquet"
+        pq.write_table(pa.Table.from_pandas(gg, preserve_index=False), path, compression="zstd")
 
-    # Cổng chặn thứ ba. Bảng r6 KHÔNG được khai lại ở schema — nó SUY RA từ `GRID`:
-    # danh tính của ô gộp + mọi cột `national=True` + một tỉ số tính lại. Nên phép kiểm này
-    # trả lời một câu mạnh hơn "có đủ cột không": nó nói lớp cả nước chở ĐÚNG những cột đã
-    # được đánh dấu là cả-nước, không thừa một cột nào, và đúng thứ tự lẫn độ chính xác.
-    _s = pq.read_schema(gp)
-    lech = NATIONAL_R6.validate(
-        list(_s.names), {n: str(t) for n, t in zip(_s.names, _s.types)}
-    )
-    r.check(
-        "schema_r6_khop_khai_bao",
-        not lech,
-        "; ".join(lech) if lech else f"{len(NATIONAL_R6.columns)} cột, suy ra từ GRID",
-    )
+        # Cổng chặn thứ ba. Bảng gộp KHÔNG được khai lại ở schema — nó SUY RA từ `GRID`:
+        # danh tính của ô gộp + mọi cột `national=True` + một tỉ số tính lại. Nên phép kiểm
+        # này trả lời một câu mạnh hơn "có đủ cột không": nó nói lớp cả nước chở ĐÚNG những
+        # cột đã đánh dấu là cả-nước, không thừa một cột nào, đúng thứ tự lẫn độ chính xác.
+        # Chạy cho CẢ HAI bậc: một bậc lệch khỏi bậc kia là chế độ LOD đổi cột giữa chừng.
+        decl = national_table(res)
+        _s = pq.read_schema(path)
+        lech = decl.validate(list(_s.names), {n: str(t) for n, t in zip(_s.names, _s.types)})
+        r.check(
+            f"schema_r{res}_khop_khai_bao",
+            not lech,
+            "; ".join(lech) if lech else f"{len(decl.columns)} cột, suy ra từ GRID",
+        )
+        grids[res] = (gg, meta, path)
+
+    g, gmeta, gp = grids[R_NATIONAL]
 
     st = _stations()
     sp = WEB_VN / "stations.parquet"
@@ -368,11 +385,24 @@ def run() -> None:
         float(pv.lat_max.max()),
     ]
     view_bbox = _view_bbox(g)
-    files = {p.name: p.stat().st_size for p in (gp, sp, pp, pj)}
+    files = {p.name: p.stat().st_size for p in (gp, grids[R_ZOOM][2], sp, pp, pj)}
     # Hai ngân sách khác nhau, và gộp chúng lại là nói sai về cái đắt. **Tải lần đầu** là
     # thứ trả trước khi thấy gì: lưới gộp + bảng tỉnh. Trạm và POI nạp LƯỜI đúng như ở màn
     # hình tỉnh (§5a) — chúng chỉ tới khi một lớp được bật.
     first_load = files["grid_h3_r6.parquet"] + files["provinces.json"]
+    # Khối GRIDS — hợp đồng của chế độ LOD. Bên đọc không phải đoán tên file, không phải
+    # đoán số ô, và **không được gõ tay diện tích ô vào TS** (ràng buộc 4): chú giải phải
+    # đổi câu "đọc theo Ô GỘP ~40,1 km²" theo đúng bậc đang xem.
+    grids_meta = {
+        str(res): {
+            "file": path.name,
+            "key": f"h3_r{res}",
+            "n_cells": len(gg),
+            "cell_km2_median": round(float(gg.area_km2.median()), 3),
+            "bytes": path.stat().st_size,
+        }
+        for res, (gg, _m, path) in grids.items()
+    }
     manifest = {
         "vintage": admin.VINTAGE,
         "resolution": R_NATIONAL,
@@ -391,7 +421,11 @@ def run() -> None:
         "files": files,
         "bytes_total": sum(files.values()),
         "bytes_first_load": first_load,
-        "lazy_files": ["stations.parquet", "poi.parquet"],
+        "lazy_files": ["stations.parquet", "poi.parquet", f"grid_h3_r{R_ZOOM}.parquet"],
+        "grids": grids_meta,
+        # Bậc mịn chỉ nạp khi phóng đủ sâu. Ngưỡng sống ở TS (`national/lod.ts`) vì nó là
+        # một quyết định về CÁCH XEM, không phải về dữ liệu; ở đây chỉ khai bậc nào có.
+        "resolution_zoom": R_ZOOM,
         # Ô r6 rộng ~6,4 km. In ra chứ không để tầng vẽ đoán: chú giải phải nói ĐƠN VỊ ĐỌC,
         # và đơn vị đọc ở đây không phải ô r8 mà mọi màn hình khác của app đang dùng.
         "cell_km2_median": round(float(g.area_km2.median()), 3),
@@ -472,6 +506,7 @@ def run() -> None:
 def outputs() -> list:
     return [
         WEB_VN / "grid_h3_r6.parquet",
+        WEB_VN / f"grid_h3_r{R_ZOOM}.parquet",
         WEB_VN / "stations.parquet",
         WEB_VN / "poi.parquet",
         WEB_VN / "provinces.json",
