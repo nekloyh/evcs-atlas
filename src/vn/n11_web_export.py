@@ -38,12 +38,13 @@ from shapely import wkb
 from shapely.geometry import mapping
 
 from evcs.schema import COMMUNE, GRID
+from evcs.core.osm import ACCESS_BLOCKED
 
 from . import admin, paths, qa
 from .n10_quality import MIN_OCC_MEASURED_SHARE
 from .runner import Step
 
-VERSION = "7"  # 6: thêm khối `totals` cho KPI row của chế độ DỮ LIỆU (web DESIGN §3f-1)
+VERSION = "8"  # 8: web road surface chỉ còn public-driveable; thêm count access-blocked
 
 WEB_DATA = paths.ROOT / "web/public/data"
 WEB_PROV = WEB_DATA / "p"
@@ -154,7 +155,13 @@ def _roads_parquet(code: str, dst) -> dict:
     t = pq.read_table(paths.PROV / code / "roads.parquet")
     df = t.to_pandas()
     n_all = len(df)
-    ship = df[df.in_province & ~df.road_class.isin(SHIP_EXCLUDE_ROAD_CLASS)].copy()
+    # Surface web chỉ là mạng xe công cộng đi được. `roads.parquet` sản phẩm vẫn giữ đủ
+    # đường để audit; không ship access=private/no/... rồi vẽ xám như thể đó là khoảng
+    # cách chưa đo được. Null sau filter chỉ còn nghĩa nhãn distance thật sự vắng.
+    in_scope = df.in_province
+    excluded_class = df.road_class.isin(SHIP_EXCLUDE_ROAD_CLASS)
+    excluded_access = df.access.fillna("").str.lower().isin(ACCESS_BLOCKED)
+    ship = df[in_scope & ~excluded_class & ~excluded_access].copy()
 
     # Nhãn khoảng cách theo ĐOẠN, do `n07` tính. Nối bằng ``osm_id`` chứ không theo vị trí:
     # bảng nhãn chỉ có những đoạn NẰM TRONG đồ thị (đã lọc `access`), nên nó là tập con.
@@ -178,8 +185,9 @@ def _roads_parquet(code: str, dst) -> dict:
         "ways_shipped": int(len(ship)),
         "ways_dropped_buffer_copy": int((~df.in_province).sum()),
         "ways_dropped_service": int(
-            (df.in_province & df.road_class.isin(SHIP_EXCLUDE_ROAD_CLASS)).sum()
+            (in_scope & excluded_class).sum()
         ),
+        "ways_dropped_access_blocked": int((in_scope & ~excluded_class & excluded_access).sum()),
         "bridge_ways_shipped": int(df[df.in_province].bridge.sum()),
         # Cùng tên khoá với bộ Hà Nội — `story/bodies.tsx` đọc đúng hai khoá này, và thiếu
         # chúng là chỗ `formatNumber(undefined)` từng ném TypeError.
