@@ -15,7 +15,13 @@ import {
   FIELDS,
   FIELD_BY_ID,
   DEFAULT_FIELD,
+  LENSES,
+  LENS_DECLARATIONS,
   badgesFor,
+  defaultFieldOfLens,
+  lensOfField,
+  mapFieldsOfLens,
+  mapFieldsOfUnit,
   fieldsOfUnit,
   unitNoun,
   type FieldMeta,
@@ -78,15 +84,79 @@ test("cả hai đơn vị đều có ít nhất một trường — công tắc 
   assert.ok(fieldsOfUnit("commune").length > 0);
 });
 
+test("đường và trạm là đơn vị đọc thật trong rail, không chỉ mở được từ story", () => {
+  assert.deepEqual(mapFieldsOfUnit("road").map((f) => f.id), ["road:dist_station_m"]);
+  assert.deepEqual(mapFieldsOfUnit("station").map((f) => f.id), ["station:ports", "station:occ"]);
+});
+
+test("độ dài đường trong H3 là biến mô hình, không phải field bản đồ", () => {
+  assert.equal(FIELD_BY_ID.get("road_len_m")!.map, false);
+  assert.ok(!mapFieldsOfUnit("cell").some((f) => f.id === "road_len_m"));
+});
+
+test("composite chưa có sensitivity contract chỉ để inspect, không thành map mặc định", () => {
+  for (const id of ["poi_anchor_index", "demand_supply_gap"]) {
+    assert.equal(FIELD_BY_ID.get(id)!.map, false, id);
+    assert.ok(!mapFieldsOfUnit("cell").some((f) => f.id === id), id);
+  }
+});
+
+test("mọi field map-hoá có đúng một lens; lens suy ra từ field, không là state thứ hai", () => {
+  for (const f of FIELDS.filter((x) => x.map !== false)) {
+    assert.ok(LENSES.some((l) => l.id === f.lens), f.id);
+    assert.equal(lensOfField(f.id), f.lens, f.id);
+  }
+});
+
+test("registry khai lens tường minh và phủ đúng một lần mọi field", () => {
+  const ids = Object.values(LENS_DECLARATIONS).flat();
+  assert.equal(new Set(ids).size, ids.length, "một field không được trả lời hai câu hỏi");
+  assert.deepEqual(
+    new Set(ids),
+    new Set(FIELDS.map((f) => f.readAs === "cell" ? `cell:${f.id}` : f.id)),
+  );
+});
+
+test("lens Tiếp cận chứa line distance, còn lens Sử dụng chứa point occupancy", () => {
+  assert.ok(mapFieldsOfLens("access").some((f) => f.id === "road:dist_station_m"));
+  assert.ok(mapFieldsOfLens("utilization").some((f) => f.id === "station:occ"));
+  assert.ok(mapFieldsOfLens("supply").some((f) => f.id === "station:ports"));
+});
+
+test("mỗi lens có default khai báo, không phụ thuộc thứ tự field", () => {
+  assert.equal(defaultFieldOfLens("supply")?.id, "station:ports");
+  assert.equal(defaultFieldOfLens("access")?.id, "road:dist_station_m");
+  assert.equal(defaultFieldOfLens("policy")?.id, "commune:ports_per_10k_pop");
+});
+
+test("POI là bối cảnh, không được xếp làm bằng chứng cầu", () => {
+  for (const id of ["n_poi_1km", "n_poi_total", "n_mall", "n_market", "n_fuel"]) {
+    assert.equal(lensOfField(id), "context", id);
+  }
+});
+
+test("aggregate sử dụng và raw count xã chỉ để inspect", () => {
+  for (const id of [
+    "util_cell",
+    "n_stations_measured",
+    "util_pctl_cell",
+    "commune:n_stations",
+    "commune:n_ports",
+    "commune:power_kw_site",
+    "commune:util_mean_port_weighted",
+  ]) {
+    assert.equal(FIELD_BY_ID.get(id)!.map, false, id);
+  }
+  assert.deepEqual(mapFieldsOfLens("utilization").map((f) => f.id), ["station:occ"]);
+});
+
 test("màn hình đầu tiên là đơn vị XÃ, không phải thảm hex (§13b-1)", () => {
   assert.equal(FIELD_BY_ID.get(DEFAULT_FIELD)!.readAs, "commune");
 });
 
 // ── §13c-1: trường phái sinh ───────────────────────────────────────────────────
 
-test("nhóm SO SÁNH có đủ 8 trường của §13c", () => {
-  // `station:occ` vào nhóm này ở M4 (§13c-1): nó vẽ ĐỘ LỆCH khỏi kỳ vọng ("trạm này đầy
-  // tới đâu so với những gì lắp đặt"), không vẽ một MỨC — đúng tiêu chí gom nhóm của §13c.
+test("nhóm SO SÁNH có các trường phái sinh so sánh theo §13c", () => {
   const ids = FIELDS.filter((f) => f.group === "sosanh").map((f) => f.id);
   assert.deepEqual(new Set(ids), new Set([
     "detour_ratio",
@@ -95,6 +165,7 @@ test("nhóm SO SÁNH có đủ 8 trường của §13c", () => {
     "screen_margin_m",
     "pop_beyond_2km",
     "util_pctl_cell",
+    "demand_supply_gap",
     `${COMMUNE_PREFIX}ports_per_10k_pop`,
     "station:occ",
   ]));
@@ -154,6 +225,7 @@ test("§7a: trường mà null CÓ NGHĨA không mang badge, dù phủ chỉ 33%
     id: "gia_dinh",
     column: "gia_dinh",
     readAs: "cell",
+    lens: "context",
     group: "dat",
     label: "Trường giả định",
     desc: "Null ở đây nghĩa là “biết là không”, không phải “không biết”.",

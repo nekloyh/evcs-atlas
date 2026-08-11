@@ -20,17 +20,19 @@
  *
  * ── Hai nhánh, một luật ──────────────────────────────────────────────────────────────
  *
- * Manifest hỏng **không** được thành trang lỗi. Bộ Hà Nội gốc không có `available_columns`
- * và vẫn phải chạy y như trước, nên "không nạp được manifest" thoái lui về **không lọc gì**.
+ * Manifest hỏng **không** được thành trang lỗi. Bộ Hà Nội mặc định vẫn phải chạy y như
+ * trước, nên "không nạp được manifest" thoái lui về **không lọc gì**.
  * "Chưa biết bộ dữ liệu thiếu gì" khác hẳn "biết là thiếu" — đây là cùng một luật với ràng
  * buộc 1 của giao diện, chỉ khác là áp cho tầng khởi tạo.
  */
 
-import type { Manifest } from "./manifest";
+import { hasManifestFile, type Manifest } from "./manifest";
 import { setUnavailableOverlays, unavailableOverlayPairs } from "./overlays";
 import { setAvailableColumns, setUnusableLayers, type AvailableByUnit } from "../fields";
-import { setInitialViewFromBbox } from "../map/positron";
+import { setInitialViewFromBbox } from "../state/view-config";
 import { setStoryEnabled } from "../story/scenes";
+
+const ROUTES_MANIFEST_FILE = ["routes_showcase", "geojson"].join(".");
 
 /** Những gì một bộ dữ liệu nói về chính nó. Tách khỏi `Manifest` để test không cần dựng cả. */
 export interface DatasetFacts {
@@ -69,11 +71,11 @@ export const UNKNOWN: DatasetFacts = {
  * khi lớp cặp tuyến + `dist_station_m` được dựng cho store toàn quốc.
  */
 export function storyDataReady(m: Manifest): boolean {
-  // Bộ Hà Nội gốc không khai `available_road_columns` ⇒ vắng khoá = KHÔNG BIẾT = không
+  // Bộ Hà Nội cũ không khai `available_road_columns` ⇒ vắng khoá = KHÔNG BIẾT = không
   // chặn. Hành vi cũ giữ nguyên tuyệt đối.
   const road = m.available_road_columns;
   if (road && !road.includes("dist_station_m")) return false;
-  if (m.files && !("routes_showcase.geojson" in m.files)) return false;
+  if (m.files && !hasManifestFile(m.files, ROUTES_MANIFEST_FILE)) return false;
   return true;
 }
 

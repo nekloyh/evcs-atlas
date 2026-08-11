@@ -96,6 +96,11 @@ test("tên trường không có thật bị bỏ", () => {
   assert.equal(parseHash("#f=commune:n_mall").field, undefined);
 });
 
+test("biến inspect-only không phải deep link bản đồ hợp lệ", () => {
+  assert.equal(parseHash("#f=road_len_m").field, undefined);
+  assert.equal(parseHash("#f=demand_supply_gap").field, undefined);
+});
+
 // ── §9: hash hỏng thì bỏ TỪNG KHOÁ, không reset cả app ─────────────────────────
 
 test("khoá hỏng không kéo theo khoá lành", () => {

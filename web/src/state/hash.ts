@@ -86,7 +86,11 @@ export function parseHash(hash: string): Partial<HashState> {
   if (scene) return out;
 
   const f = p.get("f");
-  if (f && FIELD_BY_ID.has(f)) out.field = f;
+  // Model/inspect-only variables have an id so panels can trace provenance, but are not
+  // valid map states. Reject them here instead of briefly accepting a share link and
+  // relying on App's later corrective effect.
+  const field = f ? FIELD_BY_ID.get(f) : undefined;
+  if (field && field.map !== false) out.field = field.id;
 
   const v = p.get("v");
   if (v) {

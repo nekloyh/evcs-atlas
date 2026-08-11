@@ -28,7 +28,9 @@
  */
 
 import type { OverlayId } from "../state/types";
-import type { Manifest } from "./manifest";
+import { hasManifestFile, type Manifest } from "./manifest";
+
+const SUBSTATIONS_MANIFEST_FILE = ["substations", "geojson"].join(".");
 
 /**
  * Vị từ vắng của từng overlay. Overlay không có tên ở đây thì luôn dựng được.
@@ -47,7 +49,7 @@ const UNAVAILABLE: Partial<Record<OverlayId, (m: Manifest) => string | null>> = 
       ? "Bộ dữ liệu này chưa có khoảng cách theo mạng đường, nên không ô nào nói được là trong hay ngoài 2 km."
       : null,
   substations: (m) =>
-    m.files["substations.geojson"]
+    hasManifestFile(m.files, SUBSTATIONS_MANIFEST_FILE)
       ? null
       : "Bộ dữ liệu này không ship lớp trạm biến áp OSM.",
 };

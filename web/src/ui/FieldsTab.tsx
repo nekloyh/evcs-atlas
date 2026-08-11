@@ -1,19 +1,23 @@
 import { useEffect, useRef } from "react";
 
 import {
-  FIELDS,
-  GROUPS,
+  FIELD_BY_ID,
+  LENSES,
   badgesFor,
-  fieldsOfUnit,
+  defaultFieldOfLens,
+  lensOfField,
+  mapFieldsOfLens,
+  STATION_OCC_FIELD,
   type FieldMeta,
   type RuntimeCoverage,
 } from "../fields";
 import type { Manifest } from "../data/manifest";
-import type { ReadingUnit } from "../state/types";
 import type { CommuneCollection } from "../data/queries";
 import { serializeSelection } from "../data/h3";
 import { useStore } from "../state/store";
 import { Badge } from "./Badge";
+import { DemandModes } from "./DemandModes";
+import { ThemeReadout } from "./ThemeReadout";
 
 /**
  * Gợi ý dưới mỗi nút — **số đến từ dữ liệu, không gõ tay** (§12, §7c).
@@ -23,17 +27,7 @@ import { Badge } from "./Badge";
  * bản đồ. Khối NGUỒN thì đúng vì nó đọc `manifest.n_cells` — đó chính là bằng chứng cho
  * quy tắc: chỗ nào đọc manifest thì tự đúng, chỗ nào gõ tay thì sai âm thầm.
  */
-const UNITS: { id: ReadingUnit; label: string }[] = [
-  { id: "cell", label: "Ô H3" },
-  { id: "commune", label: "XÃ" },
-];
-
-function unitHint(u: ReadingUnit, manifest: Manifest | null, communes: CommuneCollection | null): string {
-  if (u === "cell") {
-    return manifest ? `${manifest.n_cells.toLocaleString("vi-VN")} ô ~0,74 km²` : "ô H3 ~0,74 km²";
-  }
-  return communes ? `${communes.features.length} xã/phường` : "xã/phường";
-}
+const READ_AS_LABEL = { cell: "Ô H3", commune: "XÃ", road: "ĐƯỜNG", station: "TRẠM" } as const;
 
 /**
  * Tab TRƯỜNG — DESIGN.md §3c và §6b.
@@ -65,13 +59,15 @@ export function FieldsTab({
   runtime: Map<string, RuntimeCoverage>;
   communes: CommuneCollection | null;
 }) {
-  // Đơn vị đang xem đến TỪ trường đang chọn, không phải một state riêng. Hai nguồn sự thật
-  // cho cùng một thứ thì sớm muộn cũng lệch nhau — và ở đây "trường đang chọn" là cái duy
-  // nhất được serialize ra hash, nên nó phải là cái quyết định.
-  const unit: ReadingUnit = FIELDS.find((f) => f.id === field)?.readAs ?? "cell";
-  const pool = fieldsOfUnit(unit);
+  // Lens và geometry đều suy ra từ field đang chọn. Không giữ một state lens riêng: URL
+  // `f` đã là nguồn sự thật duy nhất về câu hỏi lẫn cách biểu đạt nó.
+  const lens = lensOfField(field);
+  const pool = mapFieldsOfLens(lens);
+  const lenses = LENSES.filter((l) => mapFieldsOfLens(l.id).length > 0);
   const paintOn = useStore((s) => s.paintOn);
+  const scene = useStore((s) => s.scene);
   const setPaintOn = useStore((s) => s.setPaintOn);
+  const openCompare = useStore((s) => s.openCompare);
 
   const q = search.trim().toLowerCase();
   const hits = q
@@ -80,9 +76,10 @@ export function FieldsTab({
 
   // Tìm theo TÊN XÃ — §13d-B "gọi được tên". Ô tìm kiếm cũ chỉ lọc tên TRƯỜNG, nên gõ
   // "Ba Đình" ra rỗng và không có đường nào khác để tìm một xã cụ thể trên bản đồ.
-  // Chỉ chạy ở đơn vị XÃ: ở đơn vị Ô, "xã" không phải thứ chọn được.
+  // Chỉ chạy trong lens Chính sách: đây là nơi một xã là đơn vị ra quyết định, không phải
+  // một label tiện để tìm trên mọi analytical map.
   const communeHits =
-    q && unit === "commune" && communes
+    q && lens === "policy" && communes
       ? communes.features
           .filter((f) => String(f.properties["commune_name"] ?? "").toLowerCase().includes(q))
           .slice(0, 8)
@@ -90,40 +87,36 @@ export function FieldsTab({
 
   return (
     <div className="text-[12px]">
-      {/* STICKY — F7. Công tắc này đổi NGHĨA của cả bản đồ; để nó cuộn khỏi màn hình
-          khi danh sách trường dài là giấu mất điều khiển quan trọng nhất của tab.
-
-          Nút thứ ba TẮT ở cuối — thêm sau M3.5, cho mentor xem overlay POI/trạm trên nền
-          sạch không bị mặt tô che gestalt (§4d-4: overlay bao giờ cũng phải nhường mặt tô,
-          nhưng mặt tô CŨNG có thể nhường overlay khi người xem chủ động chọn vậy). Nó KHÔNG
-          đổi `field` — trường đang xem vẫn nguyên, chỉ phần TÔ của nó tắt (§6b, §11 M3.5). */}
-      <div className="sticky top-0 z-10 flex border-b border-hairline bg-panel">
-        {UNITS.map((u) => {
-          const on = u.id === unit && paintOn;
+      <div className="sticky top-0 z-10 border-b border-hairline bg-panel">
+        <div className="grid grid-cols-2 border-b border-hairline">
+        {lenses.map((l) => {
+          const on = l.id === lens && paintOn;
           return (
             <button
-              key={u.id}
-              // Đổi đơn vị = chọn trường ĐẦU TIÊN của đơn vị đó, VÀ bật lại mặt tô nếu
-              // đang tắt — bấm "Ô H3"/"XÃ" là một lựa chọn muốn NHÌN THẤY nó tô.
+              key={l.id}
               onClick={() => {
-                setField(fieldsOfUnit(u.id)[0]!.id);
-                setPaintOn(true);
+                const next = defaultFieldOfLens(l.id);
+                if (next) {
+                  setField(next.id);
+                  setPaintOn(true);
+                }
               }}
-              className={`flex-1 cursor-pointer border-r border-hairline px-2 py-1.5 text-left ${
+              className={`cursor-pointer border-r border-hairline px-2 py-1.5 text-left ${
                 on ? "bg-basemap" : "hover:bg-basemap/50"
               }`}
             >
-              <span className={`block text-[11px] tracking-[0.1em] ${on ? "font-semibold text-ink" : "text-ink-2"}`}>
-                {u.label}
+              <span className={`block text-[10px] tracking-[0.1em] ${on ? "font-semibold text-ink" : "text-ink-2"}`}>
+                {l.label}
               </span>
-              <span className="block text-[10px] text-ink-muted">{unitHint(u.id, manifest, communes)}</span>
+              <span className="block text-[10px] text-ink-muted">{l.hint}</span>
             </button>
           );
         })}
+        </div>
         <button
           onClick={() => setPaintOn(false)}
           title="Tắt mặt tô — chỉ còn nền và overlay (POI, trạm, ranh giới)"
-          className={`flex-1 cursor-pointer px-2 py-1.5 text-left ${
+          className={`w-full cursor-pointer px-2 py-1.5 text-left ${
             !paintOn ? "bg-basemap" : "hover:bg-basemap/50"
           }`}
         >
@@ -148,6 +141,38 @@ export function FieldsTab({
           </div>
         )}
       </div>
+
+      <ThemeReadout field={FIELD_BY_ID.get(field)!} />
+
+      <div className="border-b border-hairline p-2">
+        {field === "population" ? (
+          <button
+            onClick={() => openCompare("demand-access")}
+            className="w-full cursor-pointer border border-hairline px-2 py-1.5 text-left text-[11px] text-ink-2 hover:bg-basemap hover:text-ink"
+          >
+            SO SÁNH DÂN SỐ × KHOẢNG CÁCH
+            <span className="block pt-0.5 text-[10px] text-ink-muted">ô H3 có đủ hai biến; không tự lọc bản đồ</span>
+          </button>
+        ) : field === STATION_OCC_FIELD ? (
+          <button
+            onClick={() => openCompare("utilization-pattern")}
+            className="w-full cursor-pointer border border-hairline px-2 py-1.5 text-left text-[11px] text-ink-2 hover:bg-basemap hover:text-ink"
+          >
+            XEM NHỊP SỬ DỤNG 168 GIỜ
+            <span className="block pt-0.5 text-[10px] text-ink-muted">tổng hợp toàn dataset; chỉ đổi giờ đang xem</span>
+          </button>
+        ) : FIELD_BY_ID.get(field)?.kind === "numeric" ? (
+          <button
+            onClick={() => openCompare("distribution")}
+            className="w-full cursor-pointer border border-hairline px-2 py-1.5 text-left text-[11px] text-ink-2 hover:bg-basemap hover:text-ink"
+          >
+            XEM PHÂN BỐ MEASURE
+            <span className="block pt-0.5 text-[10px] text-ink-muted">toàn dataset; kéo để lọc tập mark</span>
+          </button>
+        ) : null}
+      </div>
+
+      {field === "population" && scene === null && <DemandModes />}
 
       {communeHits.length > 0 && (
         <section>
@@ -180,36 +205,29 @@ export function FieldsTab({
         </section>
       )}
 
-      {GROUPS.map((g) => {
-        const rows = hits.filter((f) => f.group === g.id);
-        if (rows.length === 0) return null;
-        return (
-          <section key={g.id}>
-            <h3 className="flex items-baseline gap-2 border-b border-hairline bg-basemap px-2 py-1 text-[11px] tracking-[0.1em] text-ink-2">
-              {g.label}
-              <span className="tracking-normal text-ink-muted">{g.hint}</span>
-              <span className="ml-auto tabular-nums text-ink-muted">{rows.length}</span>
-            </h3>
-            {rows.map((f) => (
-              <FieldRow
-                key={f.id}
-                f={f}
-                selected={f.id === field}
-                onSelect={() => setField(f.id)}
-                manifest={manifest}
-                runtime={runtime}
-              />
-            ))}
-          </section>
-        );
-      })}
+      {hits.length > 0 && (
+        <section>
+          <h3 className="flex items-baseline gap-2 border-b border-hairline bg-basemap px-2 py-1 text-[11px] tracking-[0.1em] text-ink-2">
+            MEASURE
+            <span className="tracking-normal text-ink-muted">các cách trả lời câu hỏi đang chọn</span>
+            <span className="ml-auto tabular-nums text-ink-muted">{hits.length}</span>
+          </h3>
+          {hits.map((f) => (
+            <FieldRow
+              key={f.id}
+              f={f}
+              selected={f.id === field}
+              onSelect={() => setField(f.id)}
+              manifest={manifest}
+              runtime={runtime}
+            />
+          ))}
+        </section>
+      )}
 
       {hits.length === 0 && communeHits.length === 0 && (
         <p className="p-3 text-[12px] text-ink-muted">
-          Không trường nào của đơn vị {unit === "commune" ? "XÃ" : "Ô H3"} khớp “{search}”.
-          {unit === "cell"
-            ? " 8 cột định danh/xuất xứ (h3_r8, lat, lng, cell_state, commune_*, pop_source) cố tình không có ở đây — chúng chỉ xuất hiện trong panel Ô."
-            : " Bảng xã chỉ có 8 trường bản đồ hoá được; thử đơn vị Ô H3."}
+          Không field map-hoá nào của lens {LENSES.find((l) => l.id === lens)?.label ?? "này"} khớp “{search}”.
         </p>
       )}
     </div>
@@ -261,6 +279,7 @@ function FieldRow({
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className={selected ? "font-semibold" : ""}>{f.label}</span>
+            <span className="text-[10px] tracking-[0.08em] text-ink-muted">{READ_AS_LABEL[f.readAs]}</span>
             {badges.map((b) => (
               <Badge key={b.kind + b.text} badge={b} />
             ))}

@@ -11,7 +11,7 @@
  * thế nhận `CellValue` chứ không nhận `GridCell`.
  */
 
-import { INITIAL_VIEW } from "../map/positron";
+import { INITIAL_VIEW } from "../state/view-config";
 import type { OverlayId, View } from "../state/types";
 import type { CellValue } from "../viz/palette";
 

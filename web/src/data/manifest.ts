@@ -60,10 +60,25 @@ export interface ProvinceBlock {
   center: [number, number];
 }
 
+export type ManifestFile = { bytes: number; rows: number | null };
+export type ManifestFiles = Record<string, ManifestFile> | string[];
+
+/** Manifest cũ của bộ Hà Nội phát danh sách tên file; manifest tỉnh mới phát bảng metadata. */
+export function hasManifestFile(files: ManifestFiles | undefined, name: string): boolean {
+  if (!files) return false;
+  return Array.isArray(files) ? files.includes(name) : name in files;
+}
+
+export function manifestFile(files: ManifestFiles | undefined, name: string): ManifestFile | null {
+  if (!files || Array.isArray(files)) return null;
+  return files[name] ?? null;
+}
+
 export interface Manifest {
   exported_utc: string;
   n_cells: number;
-  files: Record<string, { bytes: number; rows: number | null }>;
+  // Runtime also accepts the legacy string[] emitted by the Hà Nội bundle.
+  files: Record<string, ManifestFile>;
   coverage: Record<string, Coverage>;
   categories: Record<string, CategoryCounts>;
   /**
@@ -165,6 +180,8 @@ export interface Manifest {
     ways_total_raw: number;
     ways_shipped: number;
     ways_dropped_service: number;
+    /** Đường OSM tồn tại nhưng public vehicle không được vào; không thuộc surface Access. */
+    ways_dropped_access_blocked?: number;
     ways_unreachable_null_dist: number;
     points_before_simplify: number;
     points_after_simplify: number;

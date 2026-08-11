@@ -38,6 +38,8 @@ export interface GridCell {
    * sinh (§13c-1) và trọng số của mặt độ cầu (§1b). Nạp một lần thay vì hai lần.
    */
   pop: number;
+  /** Số cổng lắp đặt trong ô — trục cung của P1 bivariate, `0` là giá trị thật. */
+  ports: number;
   lat: number;
   lng: number;
   /**
@@ -167,6 +169,7 @@ export async function fetchField(meta: FieldMeta): Promise<GridCell[]> {
   await registerFor([meta]);
   const table = await query(
     `SELECT g."h3_r8" AS h3, ${selectExpr(meta)} AS value, ${gcol("population")} AS pop,
+            ${gcol("n_ports")} AS ports,
             g."lat" AS lat, g."lng" AS lng,
             ${gcol("dist_station_network_m")} AS dist,
             ${gridColumnAvailable("dist_station_network_m") ? 'g."dist_station_network_m" > 2000' : "NULL"} AS beyond2km,
@@ -177,6 +180,7 @@ export async function fetchField(meta: FieldMeta): Promise<GridCell[]> {
   const h3s = table.getChild("h3")!;
   const vals = table.getChild("value")!;
   const pops = table.getChild("pop")!;
+  const ports = table.getChild("ports")!;
   const lats = table.getChild("lat")!;
   const lngs = table.getChild("lng")!;
   const far = table.getChild("beyond2km")!;
@@ -189,6 +193,7 @@ export async function fetchField(meta: FieldMeta): Promise<GridCell[]> {
       h3: String(h3s.get(i)),
       value: toCellValue(vals.get(i)),
       pop: Number(pops.get(i)) || 0,
+      ports: Number(ports.get(i)) || 0,
       lat: Number(lats.get(i)),
       lng: Number(lngs.get(i)),
       // KHÔNG `?? 0`: 51 ô không tới được. Ghi 0 vào đó là nói "sát trạm" ở đúng chỗ tệ
@@ -383,6 +388,9 @@ export const ROUTES_GEOJSON = dataPath("routes_showcase.geojson");
 
 /** Một đoạn đường. `dist` có thể null — 396/160.823 đoạn không tới được. */
 export interface RoadSeg {
+  /** OSM way id — selection/deep-link identity, không phải graph edge. */
+  id: string;
+  roadClass: string;
   /** toạ độ phẳng `[lng, lat, lng, lat, …]` — giải mã sẵn lúc export, KHÔNG phải WKB (§5b). */
   path: number[];
   dist: number | null;
@@ -410,9 +418,11 @@ export function fetchRoads(): Promise<RoadSeg[]> {
     // thấy màn hình trắng chứ không thấy "trường này chưa tính".
     const d = columnAvailable("road", "dist_station_m") ? `"dist_station_m"` : "NULL";
     const t = await query(
-      `SELECT "coords" AS c, ${d} AS d, "bridge" AS b FROM read_parquet('${ROADS}')`,
+      `SELECT "osm_id" AS id, "road_class" AS rc, "coords" AS c, ${d} AS d, "bridge" AS b FROM read_parquet('${ROADS}')`,
     );
     const cs = t.getChild("c")!;
+    const ids = t.getChild("id")!;
+    const rcs = t.getChild("rc")!;
     const ds = t.getChild("d")!;
     const bs = t.getChild("b")!;
     const out: RoadSeg[] = new Array(t.numRows);
@@ -420,6 +430,8 @@ export function fetchRoads(): Promise<RoadSeg[]> {
       const raw = cs.get(i) as { toArray(): ArrayLike<number> } | null;
       const d = ds.get(i);
       out[i] = {
+        id: String(ids.get(i)),
+        roadClass: String(rcs.get(i) ?? "UNKNOWN"),
         path: raw ? Array.from(raw.toArray()) : [],
         // KHÔNG `?? 0`: 396 đoạn không tới được phải về tới lớp vẽ dưới dạng null để chúng
         // được vẽ bằng mực xám của vân null, không phải bậc "gần trạm" (ràng buộc 1).
@@ -731,13 +743,15 @@ export interface StationPoint {
   inScope: boolean;
   /** `op_status` thô — `OPERATIONAL` · `MAINTENANCE` · `OUT_OF_SERVICE` · `UNKNOWN`. */
   opStatus: string;
+  /** Số cổng ASSET; chỉ P1 Hybrid dùng bán kính như một encoding có legend riêng. */
+  nPorts: number | null;
 }
 
 let stationCache: Promise<StationPoint[]> | null = null;
 
 /**
- * 939 trạm sạc **công cộng**. Không lấy `n_ports`: bán kính chấm là hằng số (§4d-1) —
- * mã hoá giá trị bằng kích thước là dựng một kênh dữ liệu thứ hai, đúng cái ràng buộc 2 cấm.
+ * 939 trạm sạc **công cộng**. Mặc định, bán kính chấm là hằng số (§4d-1). `n_ports` chỉ
+ * được mang theo cho P1 Hybrid, nơi kích thước là encoding được khai rõ ở legend (§15).
  *
  * `op_status` thì CÓ lấy (M4.1): nó không đi vào kích thước hay hue, nó đi vào **nét**
  * (§4d-3a) — một kênh còn trống, và một kênh nhị phân, đúng cỡ của thứ nó chở.
@@ -746,7 +760,7 @@ export function fetchStations(): Promise<StationPoint[]> {
   stationCache ??= (async () => {
     await registerParquet(STATIONS);
     const t = await query(
-      `SELECT station_id, lat, lng, scope, op_status FROM read_parquet('${STATIONS}')
+      `SELECT station_id, lat, lng, scope, op_status, n_ports FROM read_parquet('${STATIONS}')
        WHERE lat IS NOT NULL AND lng IS NOT NULL`,
     );
     const ids = t.getChild("station_id")!;
@@ -754,6 +768,7 @@ export function fetchStations(): Promise<StationPoint[]> {
     const lngs = t.getChild("lng")!;
     const scopes = t.getChild("scope")!;
     const ops = t.getChild("op_status")!;
+    const ports = t.getChild("n_ports")!;
     const out: StationPoint[] = new Array(t.numRows);
     for (let i = 0; i < t.numRows; i++) {
       out[i] = {
@@ -762,6 +777,7 @@ export function fetchStations(): Promise<StationPoint[]> {
         lng: Number(lngs.get(i)),
         inScope: isInScope(String(scopes.get(i))),
         opStatus: String(ops.get(i) ?? "UNKNOWN"),
+        nPorts: ports.get(i) === null || ports.get(i) === undefined ? null : Number(ports.get(i)),
       };
     }
     return out;

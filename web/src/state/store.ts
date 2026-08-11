@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 import { DEFAULT_FIELD, FIELD_BY_ID } from "../fields";
-import { INITIAL_VIEW } from "../map/positron";
+import { INITIAL_VIEW } from "./view-config";
 import { beatOf, parseScene, sceneState, type SceneId } from "../story/scenes";
 import {
   NO_BRUSH,
@@ -12,12 +12,14 @@ import {
   type BrushState,
 } from "./brush";
 import { readHash } from "./hash";
-import type { HashState, Mode, OverlayId, RailTab, View } from "./types";
+import type { BasemapStyle, CompareView, DemandRepresentation, HashState, Mode, OverlayId, RailTab, View } from "./types";
 
-export type { Mode, OverlayId, RailTab, ReadingUnit, View } from "./types";
+export type { BasemapStyle, Mode, OverlayId, RailTab, ReadingUnit, View } from "./types";
 
 export interface AppState {
   field: string;
+  /** P1 Demand prototype; session-only until its representations pass review (§15c). */
+  demandRepresentation: DemandRepresentation;
   mode: Mode;
   view: View;
   /** overlay đang bật — §4d. Khoá KHÁC với `field`: overlay không bao giờ là trường. */
@@ -79,11 +81,17 @@ export interface AppState {
    * mang sẵn một ô ⇒ mở thẳng panel Ô".
    */
   dockOpen: boolean;
+  /** Compare đang trả lời câu nào. Thuần UI, không vào hash. */
+  compareView: CompareView;
+  workspaceOpen: boolean;
+  basemapStyle: BasemapStyle;
 
   setField: (f: string) => void;
+  setDemandRepresentation: (representation: DemandRepresentation) => void;
   setView: (v: View) => void;
   /** Đổi 2D ↔ 3D — M3.5 (P5). Kèm nghiêng camera, vì đó là điều người bấm muốn. */
   setMode: (m: Mode) => void;
+  setBasemapStyle: (style: BasemapStyle) => void;
   /** Bật/tắt mặt tô — nút thứ ba cạnh Ô H3 | XÃ. Không đụng `field`. */
   setPaintOn: (on: boolean) => void;
   setTab: (t: RailTab) => void;
@@ -112,6 +120,8 @@ export interface AppState {
   /** Đặt/xoá một brush. `undefined` = xoá ô đó. */
   setBrush: (b: BrushState) => void;
   setDockOpen: (on: boolean) => void;
+  openCompare: (view: CompareView) => void;
+  setWorkspaceOpen: (on: boolean) => void;
   /** nạp ngược từ hash (`hashchange`) — §9. Khoá vắng mặt thì giữ nguyên giá trị hiện tại. */
   applyHash: (s: Partial<HashState>) => void;
 }
@@ -168,6 +178,7 @@ export const useStore = create<AppState>((set, get) => ({
   dataMode: boot.dataMode ?? false,
   beat: null,
   field: boot.field ?? DEFAULT_FIELD,
+  demandRepresentation: "hex",
   mode: boot.mode ?? "2d",
   // Link `#m=3d` không kèm `v` phải mở ra ĐÃ nghiêng — pitch 50 là một nửa nghĩa của
   // "3D" (§2b); mở phẳng rồi bắt người nhận tự nghiêng là link nói dối một nửa.
@@ -191,6 +202,9 @@ export const useStore = create<AppState>((set, get) => ({
   brush: bootBrush,
   // Hash mang brush ⇒ dock mở sẵn, để ô xám nhạt có chỗ giải thích nó.
   dockOpen: brushCount(bootBrush) > 0,
+  compareView: "distribution",
+  workspaceOpen: false,
+  basemapStyle: "positron",
 
   // Hash mang `s` ⇒ cảnh GHI ĐÈ ngay từ lúc boot (L1). Đặt SAU các mặc định, không trộn
   // vào từng dòng: §9a nói khi có `s` thì `f`/`v`/`l` không được đọc, nên `boot` không
@@ -205,11 +219,20 @@ export const useStore = create<AppState>((set, get) => ({
   // đem khoảng giá trị của trường cũ đi so với trường mới, im lặng và ra kết quả trông hợp
   // lý. Hai brush kia không đụng gì: scatter nói về hai cột cố định, cửa sổ nói về thời
   // gian; cả hai độc lập với trường đang tô.
-  setField: (f) => set((s) => ({ field: f, brush: reconcileBrush(s.brush, f) })),
+  setField: (f) =>
+    set((s) => ({
+      field: f,
+      brush: reconcileBrush(s.brush, f),
+      // P1 chỉ có nghĩa với `population` của Ô H3. Không để một representation cũ âm
+      // thầm đổi cách vẽ một metric khác khi người dùng chọn trường mới.
+      demandRepresentation: f === "population" ? (s.mode === "3d" ? "extrusion" : "hex") : "hex",
+    })),
+  setDemandRepresentation: (demandRepresentation) => set({ demandRepresentation }),
   setView: (v) => set({ view: v }),
   // `mode` quyết định LỚP (fill-extrusion + khối POI); pitch chỉ là camera đi kèm cho
   // tiện — sau đó người dùng nghiêng tự do và pitch ghi vào `v` như mọi khi (§9).
   setMode: (m) => set((s) => ({ mode: m, view: { ...s.view, pitch: m === "3d" ? 50 : 0 } })),
+  setBasemapStyle: (basemapStyle) => set({ basemapStyle }),
   setPaintOn: (on) => set({ paintOn: on }),
   setTab: (t) => set(t === "cell" ? { tab: t } : { tab: t, backTab: t }),
   toggleLayer: (id) =>
@@ -220,7 +243,7 @@ export const useStore = create<AppState>((set, get) => ({
       return { layers: next };
     }),
   selectCell: (h3) =>
-    set(h3 === null ? { cell: null, tab: get().backTab } : { cell: h3, tab: "cell" }),
+    set(h3 === null ? { cell: null, tab: get().backTab } : { cell: h3, tab: "cell", workspaceOpen: false }),
 
   // Luật L1 và L2 của §14a, cả hai trong một hàm — vì chúng là hai chiều của cùng một
   // quyết định. Vào cảnh: cảnh ghi đè state dùng chung. Ra khỏi cảnh (`null`): CHỈ bỏ
@@ -247,6 +270,8 @@ export const useStore = create<AppState>((set, get) => ({
   // brush vừa loại ra, tức bản đồ hiện một giờ mà dock nói là không xem.
   setBrush: (b) => set((s) => ({ brush: b, t: clampToWindow(b.win, s.t) })),
   setDockOpen: (on) => set({ dockOpen: on }),
+  openCompare: (compareView) => set({ dockOpen: true, compareView }),
+  setWorkspaceOpen: (workspaceOpen) => set({ workspaceOpen }),
 
   applyHash: (h) =>
     set((s) => {

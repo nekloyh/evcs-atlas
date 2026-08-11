@@ -25,6 +25,16 @@ const HOURS_PER_SEC = 4;
 
 const MARK = RAMP_HEX[4];
 
+/** Snapshot presets complement playback; each is a real `(dow, hour)` in the 168h source. */
+const PRESETS = [
+  { label: "đêm", t: 1 },
+  { label: "sáng", t: 8 },
+  { label: "trưa", t: 12 },
+  { label: "tối", t: 18 },
+  { label: "T2", t: 8 },
+  { label: "T7", t: 5 * 24 + 8 },
+] as const;
+
 export function Scrubber({ field }: { field: string }) {
   const t = useStore((s) => s.t);
   const setT = useStore((s) => s.setT);
@@ -90,6 +100,24 @@ export function Scrubber({ field }: { field: string }) {
               </button>
             </span>
           )}
+        </div>
+
+        <div className="flex items-center gap-1 pb-1 text-[10px] text-ink-muted">
+          <span>snapshot:</span>
+          {PRESETS.map((p) => (
+            <button
+              key={p.label}
+              onClick={() => {
+                setPlaying(false);
+                setT(p.t);
+              }}
+              className="cursor-pointer border border-hairline px-1 hover:bg-basemap"
+              title={`đặt ${p.label} — snapshot tĩnh, không phải trung bình`}
+            >
+              {p.label}
+            </button>
+          ))}
+          <span className="pl-1">heatmap/hồ sơ 24h trong dock là comparison tĩnh.</span>
         </div>
 
         <Track t={t} onT={setT} dimOutsideWindow={(tt) => !inWindow(win, tt)} />

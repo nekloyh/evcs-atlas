@@ -13,7 +13,24 @@ import type { BrushState } from "./brush";
 export type Mode = "2d" | "3d";
 export const MODES: readonly string[] = ["2d", "3d"];
 
+export type BasemapStyle = "voyager" | "positron" | "dark";
+export const BASEMAP_STYLES: readonly BasemapStyle[] = ["voyager", "positron", "dark"];
+
+/** Sáu representation thử nghiệm của P1 Demand (§15 DESIGN.md). Session UI, chưa vào hash. */
+export const DEMAND_REPRESENTATIONS = [
+  "hex",
+  "density",
+  "extrusion",
+  "intensity",
+  "bivariate",
+  "hybrid",
+] as const;
+export type DemandRepresentation = (typeof DEMAND_REPRESENTATIONS)[number];
+
 export type RailTab = "field" | "layer" | "cell";
+
+/** Một compare view trả lời một câu hỏi; không có dock đa-biểu-đồ mặc định. */
+export type CompareView = "distribution" | "demand-access" | "utilization-pattern";
 
 /**
  * Đơn vị đọc của một trường — DESIGN.md §6b.

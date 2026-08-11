@@ -1,6 +1,7 @@
 import {
   constantShort,
   polarityNote,
+  STATION_OCC_FIELD,
   unitNoun,
   unitSentence,
   type FieldMeta,
@@ -11,14 +12,15 @@ import { SURFACE_CELL_M } from "../data/queries";
 import { useStore } from "../state/store";
 import { activeCellFilter } from "../story/scenes";
 import { HEX_MIN_ZOOM, hexPixelWidth, planFor } from "../viz/render-plan";
+import { themeFor } from "../viz/theme";
 import {
   HATCH_HEX,
-  RAMP_HEX,
-  RAMP_INK,
   formatBreak,
+  getThemePalette,
   rampFor,
   type Scale,
 } from "../viz/palette";
+import { DEMAND_SUPPLY_RGB } from "../viz/demand";
 
 /**
  * Dải legend ngang — DESIGN.md §3b: swatch dán sát nhau không gap, giá trị in ĐÈ LÊN
@@ -32,13 +34,17 @@ export function Legend({
   manifest,
   runtime,
   surfaceBreaks,
+  variant = "inline",
 }: {
   field: FieldMeta;
   scale: Scale | null;
   manifest: Manifest | null;
   runtime: Map<string, RuntimeCoverage>;
   surfaceBreaks: number[];
+  /** Inline is the legacy full-width strip; floating preserves all semantics in a wrapped stack. */
+  variant?: "inline" | "floating";
 }) {
+  const floating = variant === "floating";
   const zoom = useStore((s) => s.view.zoom);
   const setView = useStore((s) => s.setView);
   const view = useStore((s) => s.view);
@@ -46,6 +52,7 @@ export function Legend({
   const setPaintOn = useStore((s) => s.setPaintOn);
   const scene = useStore((s) => s.scene);
   const beatId = useStore((s) => s.beat);
+  const demandRepresentation = useStore((s) => s.demandRepresentation);
   // Legend mô tả CHÍNH mặt tô đang vẽ, nên nó phải đi qua đúng một cửa với `MapView` —
   // xem `planFor`. Trước đây hai bên tự gọi `renderPlan` và bỏ sót `filtered`, cho ra một
   // dải chú giải "không vẽ vì zoom" trên một bản đồ đang vẽ ô H3.
@@ -62,7 +69,7 @@ export function Legend({
   // quá để đọc là một sự thật về ZOOM, còn đây là một sự thật về Ý MUỐN của người xem.
   if (!paintOn) {
     return (
-      <div className="flex h-10 shrink-0 items-center gap-3 border-b border-hairline px-3 text-[11px]">
+      <div className={floating ? "flex gap-2 text-[11px] text-ink-2" : "flex h-10 shrink-0 items-center gap-3 border-b border-hairline px-3 text-[11px]"}>
         <span className="text-ink-2">Mặt tô đang TẮT — chỉ còn nền và overlay.</span>
         <button
           onClick={() => setPaintOn(true)}
@@ -75,10 +82,50 @@ export function Legend({
     );
   }
 
+  const theme = themeFor(field, demandRepresentation);
+  const themePalette = getThemePalette(theme);
+
+  const demandP1 = scene === null && field.id === "population" && field.readAs === "cell";
+  if (demandP1 && (demandRepresentation === "density" || demandRepresentation === "hybrid")) {
+    return (
+      <div className={floating ? "flex flex-col gap-2 text-[11px]" : "flex h-10 shrink-0 items-stretch border-b border-hairline text-[11px]"}>
+        <div className="flex flex-wrap">
+          {surfaceBreaks.map((b, i) => {
+            const k = Math.round((i / Math.max(surfaceBreaks.length - 1, 1)) * (themePalette.hex.length - 1));
+            return <div key={b} className="flex min-w-20 items-center justify-center px-2 tabular-nums" style={{ background: themePalette.hex[k], color: themePalette.ink[k] }}>{formatBreak(b)}</div>;
+          })}
+        </div>
+        <div className="flex items-center px-3 text-ink-2">density định lượng · người/ô gộp {(SURFACE_CELL_M / 1000).toLocaleString("vi-VN")} km</div>
+        {demandRepresentation === "hybrid" && <div className="flex items-center px-3 text-cold-2">chấm: √ số cổng, 3–15 px · vòng xám: chưa biết cổng</div>}
+        <div className={floating ? "text-ink-muted" : "ml-auto flex items-center px-3 text-ink-muted"}>gộp {SURFACE_CELL_M} m · ngưỡng thật</div>
+      </div>
+    );
+  }
+
+  if (demandP1 && demandRepresentation === "intensity") {
+    return <div className={floating ? "text-[11px] text-ink-2" : "flex h-10 shrink-0 items-center border-b border-hairline px-3 text-[11px] text-ink-2"}>intensity hotspot · màu phụ thuộc bán kính 42 px và zoom · chỉ để khám phá pattern, <strong className="ml-1">không so sánh định lượng</strong></div>;
+  }
+
+  if (demandP1 && demandRepresentation === "bivariate") {
+    return (
+      <div className={floating ? "flex flex-wrap items-center gap-2 text-[11px] text-ink-2" : "flex h-10 shrink-0 items-center gap-3 border-b border-hairline px-3 text-[11px] text-ink-2"}>
+        <span>cầu (hàng) × số cổng (cột), tối đa 3 nhóm/trục</span>
+        <span className="grid h-7 w-7 grid-cols-3 grid-rows-3 border border-hairline">
+          {DEMAND_SUPPLY_RGB.flatMap((row, r) => row.map((c, col) => <i key={`${r}-${col}`} style={{ background: `rgb(${c.join(",")})` }} />))}
+        </span>
+        <span className="text-ink-muted">so sánh exploratory · không phải opportunity score</span>
+      </div>
+    );
+  }
+
+  if (demandP1 && demandRepresentation === "extrusion") {
+    return <div className={floating ? "text-[11px] text-ink-2" : "flex h-10 shrink-0 items-center border-b border-hairline px-3 text-[11px] text-ink-2"}>focused 3D · màu và độ cao cùng mã hoá dân số · độ cao dùng √(dân số), cắt ở 2.500 m để đọc được</div>;
+  }
+
   // Không vẽ được thì NÓI RA, không để dải legend đứng đó mô tả một bản đồ không tồn tại.
   if (plan.paint === "none") {
     return (
-      <div className="flex h-10 shrink-0 items-center gap-3 border-b border-hairline px-3 text-[11px]">
+      <div className={floating ? "flex flex-wrap gap-2 text-[11px]" : "flex h-10 shrink-0 items-center gap-3 border-b border-hairline px-3 text-[11px]"}>
         <span className="text-ink-2">
           Ô H3 rộng ~{Math.round(hexPixelWidth(zoom))} px ở mức phóng này — quá nhỏ để đọc,
           nên không vẽ. Đó là texture, không phải bản đồ.
@@ -98,15 +145,15 @@ export function Legend({
   // in ngưỡng của choropleth ở đây sẽ là in số của một bản đồ khác.
   if (plan.paint === "surface") {
     return (
-      <div className="flex h-10 shrink-0 items-stretch border-b border-hairline text-[11px]">
-        <div className="flex">
+      <div className={floating ? "flex flex-col gap-2 text-[11px]" : "flex h-10 shrink-0 items-stretch border-b border-hairline text-[11px]"}>
+        <div className="flex flex-wrap">
           {surfaceBreaks.map((b, i) => {
-            const k = Math.round((i / Math.max(surfaceBreaks.length - 1, 1)) * (RAMP_HEX.length - 1));
+            const k = Math.round((i / Math.max(surfaceBreaks.length - 1, 1)) * (themePalette.hex.length - 1));
             return (
               <div
                 key={b}
                 className="flex min-w-20 items-center justify-center px-2 tabular-nums"
-                style={{ background: RAMP_HEX[k], color: RAMP_INK[k] }}
+                style={{ background: themePalette.hex[k], color: themePalette.ink[k] }}
               >
                 {formatBreak(b)}
               </div>
@@ -118,7 +165,7 @@ export function Legend({
         </div>
         {/* Cạnh ô gộp là GIẢ ĐỊNH KHAI BÁO, không phải số đo — §1b ràng buộc 1. Giấu nó đi
             thì mặt độ trông như một số đo khách quan, mà nó không phải. */}
-        <div className="ml-auto flex items-center px-3 text-ink-muted">
+        <div className={floating ? "text-ink-muted" : "ml-auto flex items-center px-3 text-ink-muted"}>
           gộp {SURFACE_CELL_M} m · giả định khai báo, không phải số đo
         </div>
       </div>
@@ -126,7 +173,7 @@ export function Legend({
   }
 
   // Màu ĐÃ áp cực tính (M2.1-B) — cùng một hàm mà bản đồ gọi, nên legend không thể lệch.
-  const { colors, inks } = scale ? rampFor(scale, field.polarity) : { colors: [], inks: [] };
+  const { colors, inks } = scale ? rampFor(scale, field.polarity, theme) : { colors: [], inks: [] };
   const labels = scale ? labelsFor(scale) : [];
   const noun = unitNoun(field.readAs);
   const cov = coverageOf(field, manifest, runtime);
@@ -136,8 +183,8 @@ export function Legend({
   const nUnknown = Math.max((scale?.nNull ?? 0) - nNotApplicable, 0);
 
   return (
-    <div className="flex h-10 shrink-0 items-stretch border-b border-hairline text-[11px]">
-      <div className="flex">
+    <div className={floating ? "flex max-w-full flex-col gap-2 text-[11px]" : "flex h-10 shrink-0 items-stretch border-b border-hairline text-[11px]"}>
+      <div className={floating ? "flex flex-wrap" : "flex"}>
         {labels.map((label, i) => (
           <div
             key={label + i}
@@ -190,7 +237,7 @@ export function Legend({
               {/* Đơn vị TRẠM nói rõ "ở giờ này": số này là số của GIỜ ĐANG XEM, không phải
                   của cả tuần — nó đổi khi scrubber chạy, và câu chữ phải nói ra điều đó,
                   nếu không nó đọc thành một con số cố định về chất lượng dữ liệu. */}
-              {field.nullLabel ?? (field.readAs === "station" ? "chưa đủ quan sát ở giờ này" : "không đo được")}{" "}
+              {field.nullLabel ?? (field.id === STATION_OCC_FIELD ? "chưa đủ quan sát ở giờ này" : "không đo được")}{" "}
               ({nUnknown.toLocaleString("vi-VN")} {noun})
             </div>
           </>
@@ -212,7 +259,7 @@ export function Legend({
           </>
         )}
       </div>
-      <div className="flex items-center gap-2 px-3 text-ink-2">
+      <div className={floating ? "flex flex-wrap items-center gap-2 text-ink-2" : "flex items-center gap-2 px-3 text-ink-2"}>
         {/* Ô nhỏ hơn mức đọc được từng bậc màu — §13a-1 vẫn đúng, chỉ hình phạt là đổi
             (M5.1): trước đây không vẽ gì, giờ vẫn vẽ nhưng NÓI RA rằng đang đọc thô. Bấm
             được, vì cách sửa duy nhất là phóng gần. */}
@@ -235,13 +282,13 @@ export function Legend({
         )}
       </div>
       {cov && (
-        <div className="ml-auto flex items-center px-3 tabular-nums text-ink-muted">
+        <div className={floating ? "flex items-center tabular-nums text-ink-muted" : "ml-auto flex items-center px-3 tabular-nums text-ink-muted"}>
           {cov.n_present.toLocaleString("vi-VN")}/{cov.n_total.toLocaleString("vi-VN")} {noun}
           {/* Đơn vị TRẠM: con số này là của CẢ TUẦN (trạm có ít nhất một giờ đọc được),
               còn swatch chấm rỗng bên trái là của GIỜ ĐANG XEM. Hai câu hỏi khác nhau nên
               cả hai phải tự nói ra mình đang trả lời câu nào — nếu không, hai số cạnh nhau
               trên cùng một dải sẽ đọc thành một số mâu thuẫn. */}
-          {field.readAs === "station" && " có nhịp đọc được"}
+          {field.id === STATION_OCC_FIELD && " có nhịp đọc được"}
           {/* Phủ theo DÂN chỉ có nghĩa khi ô trống nghĩa là "không biết". Với trường mà
               null có nghĩa (§7a), thêm "% dân" vào đây là dựng lại đúng cái báo động giả
               mà badge ⚠ đã bị cấm. */}

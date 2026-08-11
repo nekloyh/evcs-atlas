@@ -1,20 +1,12 @@
 /**
- * Dock trái 360px, ẩn được — DESIGN.md §3d và §3d-1.
- *
- * Ba biểu đồ xếp dọc, cả ba brush được, giao nhau bằng AND và lọc lên bản đồ. Việc riêng
- * của file này là **nói ra** ba thứ mà một dock im lặng sẽ giấu mất:
- *
- *   1. brush nào **không áp dụng được** cho hình học đang tô, và vì sao (§3d-1);
- *   2. còn lại bao nhiêu mark sau phép AND — một bộ lọc không đếm được thì người xem không
- *      biết mình đang nhìn một phần hay toàn bộ (§13b-2 ràng buộc 2);
- *   3. ngưỡng `observed_h` của heatmap (§4d-3b).
+ * Compare dock chỉ dựng linked view người dùng đã yêu cầu. Nó không phải dashboard ba
+ * biểu đồ: distribution, demand × access và utilization pattern là ba câu hỏi khác nhau.
  */
 
 import type { FieldMeta } from "../fields";
 import { STATION_OCC_FIELD } from "../fields";
 import type { BrushState, Range, ScatterBrush, WindowBrush } from "../state/brush";
-import { SCATTER_X, SCATTER_Y, brushCount } from "../state/brush";
-import { DOW_LABELS } from "../state/types";
+import { DOW_LABELS, type CompareView } from "../state/types";
 import { useStore } from "../state/store";
 import type { CityHour } from "../viz/occ";
 import { heatmapUnitSentence, hourProfile, hourProfileSentence } from "../viz/occ";
@@ -71,7 +63,7 @@ function Section({
   );
 }
 
-export function Dock({ field, data }: { field: FieldMeta; data: DockData }) {
+export function Dock({ field, data, view }: { field: FieldMeta; data: DockData; view: CompareView }) {
   const brush = useStore((s) => s.brush);
   const setBrush = useStore((s) => s.setBrush);
   const setField = useStore((s) => s.setField);
@@ -91,26 +83,13 @@ export function Dock({ field, data }: { field: FieldMeta; data: DockData }) {
   const onScatter = (s: ScatterBrush | null) => patch({ scatter: s ?? undefined });
   const onWindow = (w: WindowBrush | null) => patch({ win: w ?? undefined });
 
-  const isCell = field.readAs === "cell";
   const isOcc = field.id === STATION_OCC_FIELD;
-
   return (
-    <aside className="flex w-90 shrink-0 flex-col overflow-y-auto border-r border-hairline bg-panel">
-      <header className="flex shrink-0 items-baseline gap-2 border-b border-hairline px-2 py-1.5 text-[11px] tracking-[0.1em]">
-        <span className="font-semibold">DOCK PHÂN TÍCH</span>
-        {brushCount(brush) > 0 && (
-          <button
-            onClick={() => setBrush({})}
-            className="ml-auto cursor-pointer border border-hairline px-1 tracking-normal text-[10px] text-ink-2 hover:bg-basemap"
-          >
-            bỏ cả {brushCount(brush)} brush
-          </button>
-        )}
-      </header>
+    <div className="min-w-0">
 
       {/* Kết quả của phép AND, ngay dưới tiêu đề: đây là con số duy nhất nói được "bộ lọc
           đang làm gì", và §13b-2 đòi một tập đã thu hẹp phải ĐẾM ĐƯỢC. */}
-      {data.kept && (
+      {view === "distribution" && data.kept && (
         <p className="shrink-0 border-b border-hairline px-2 py-1 text-[11px] text-ink-2">
           <span className="tabular-nums">
             {data.kept.n.toLocaleString("vi-VN")}/{data.kept.total.toLocaleString("vi-VN")}
@@ -121,7 +100,7 @@ export function Dock({ field, data }: { field: FieldMeta; data: DockData }) {
         </p>
       )}
 
-      <Section
+      {view === "distribution" && <Section
         title="HISTOGRAM"
         onClear={brush.hist ? () => onRange(null) : undefined}
         note={
@@ -145,30 +124,26 @@ export function Dock({ field, data }: { field: FieldMeta; data: DockData }) {
             Trường này không phải thang số, nên nó không có “khoảng giá trị” để kéo.
           </p>
         )}
-      </Section>
+      </Section>}
 
-      <Section
+      {view === "demand-access" && <Section
         title="SCATTER"
         onClear={brush.scatter ? () => onScatter(null) : undefined}
         note={
-          !isCell
-            ? `Brush này KHÔNG hoạt động ở đơn vị đọc hiện tại: ${SCATTER_X} và ${SCATTER_Y} là hai cột của bảng Ô, không có trên hình học đang tô. Nó không loại mark nào — chọn một trường của Ô H3 để dùng.`
-            : brush.scatter
+          brush.scatter
               ? `đang chọn dân ${formatBreak(brush.scatter.xr.lo)}–${formatBreak(brush.scatter.xr.hi)} · ${formatBreak(brush.scatter.yr.lo)}–${formatBreak(brush.scatter.yr.hi)} m tới trạm`
               : "kéo một hộp để chọn theo CẢ HAI trục. Góc phải-trên là “đông người mà xa trạm” — chính là tập ô mà bài toán đặt trạm nói về."
         }
       >
-        <div className={isCell ? "" : "pointer-events-none opacity-40"}>
-          <Scatter
-            points={data.points}
-            brush={brush.scatter}
-            onBrush={onScatter}
-            nMissing={data.nScatterMissing}
-          />
-        </div>
-      </Section>
+        <Scatter
+          points={data.points}
+          brush={brush.scatter}
+          onBrush={onScatter}
+          nMissing={data.nScatterMissing}
+        />
+      </Section>}
 
-      <Section
+      {view === "utilization-pattern" && <Section
         title="NHỊP 168 GIỜ"
         onClear={brush.win ? () => onWindow(null) : undefined}
         note={
@@ -212,25 +187,7 @@ export function Dock({ field, data }: { field: FieldMeta; data: DockData }) {
         ) : (
           <p className="py-3 text-[11px] text-ink-muted">Đang nạp hồ sơ 168 giờ…</p>
         )}
-      </Section>
-    </aside>
-  );
-}
-
-/** Tab dọc dán mép trái bản đồ — §3d. Nằm ngoài dock để nó còn bấm được khi dock đã đóng. */
-export function DockTab() {
-  const open = useStore((s) => s.dockOpen);
-  const setOpen = useStore((s) => s.setDockOpen);
-  const n = brushCount(useStore((s) => s.brush));
-  return (
-    <button
-      onClick={() => setOpen(!open)}
-      title={open ? "ẩn dock phân tích" : "hiện dock phân tích"}
-      className="absolute left-0 top-3 z-10 cursor-pointer border-y border-r border-hairline bg-panel px-1 py-3 text-[10px] tracking-[0.1em] text-ink-2 hover:text-ink"
-      style={{ writingMode: "vertical-rl" }}
-    >
-      {open ? "‹ DOCK" : "DOCK ›"}
-      {n > 0 && <span className="pt-1 tabular-nums text-cold-2"> {n}</span>}
-    </button>
+      </Section>}
+    </div>
   );
 }

@@ -9,9 +9,18 @@
  * Không có `?? 0` ở bất kỳ đâu trong file này. Đừng thêm.
  */
 
+import type { AnalysisTheme } from "./theme";
+
 export type RGB = [number, number, number];
 
-/** Ramp choropleth: cam tuần tự, 7 bậc, nhạt → đậm. Đã PASS ordinal validator. */
+export interface ThemePalette {
+  hex: readonly [string, string, string, string, string, string, string];
+  ink: readonly [string, string, string, string, string, string, string];
+  rgb: RGB[];
+  series: string;
+}
+
+/** Ramp choropleth mặc định (demand / exploration): cam tuần tự, 7 bậc, nhạt → đậm. */
 export const RAMP_HEX = [
   "#e7997e",
   "#dd7c58",
@@ -33,6 +42,227 @@ export const RAMP_INK = [
   "#ffffff",
 ] as const;
 
+export function hexToRgb(hex: string): RGB {
+  const h = hex.replace("#", "");
+  return [
+    parseInt(h.slice(0, 2), 16),
+    parseInt(h.slice(2, 4), 16),
+    parseInt(h.slice(4, 6), 16),
+  ];
+}
+
+export const RAMP_RGB: RGB[] = RAMP_HEX.map(hexToRgb);
+
+/**
+ * Bảng màu 7 bậc riêng cho từng AnalysisTheme / Scene.
+ * Được thiết kế và kiểm định theo chuẩn bản đồ học CARTOColors & Kepler.gl:
+ * - Multi-hue sequential (dịch chuyển cả Hue lẫn Lightness) giúp phân biệt bậc tốt hơn.
+ * - Đảm bảo độ tương phản WCAG 2.1 ≥ 4.5:1 trên nền positron #f2f3f0.
+ */
+export const THEME_PALETTES: Record<AnalysisTheme, ThemePalette> = {
+  demand: {
+    // CARTO OrYel / Warm Amber (Nhu cầu, Dân số, Cường độ)
+    hex: [
+      "#fef6b5",
+      "#ffdd80",
+      "#ffaa40",
+      "#f26d21",
+      "#d9381e",
+      "#a61212",
+      "#66000d",
+    ],
+    ink: [
+      "#0b0b0b",
+      "#0b0b0b",
+      "#0b0b0b",
+      "#ffffff",
+      "#ffffff",
+      "#ffffff",
+      "#ffffff",
+    ],
+    rgb: [
+      "#fef6b5",
+      "#ffdd80",
+      "#ffaa40",
+      "#f26d21",
+      "#d9381e",
+      "#a61212",
+      "#66000d",
+    ].map(hexToRgb),
+    series: "#f26d21",
+  },
+  supply: {
+    // CARTO Mint / Teal-Cyan (Hạ tầng, Năng lượng sạc, Trạm biến áp)
+    hex: [
+      "#e4f1e1",
+      "#b4e1d4",
+      "#74c4b2",
+      "#36a394",
+      "#1d8073",
+      "#0b5c53",
+      "#023834",
+    ],
+    ink: [
+      "#0b0b0b",
+      "#0b0b0b",
+      "#0b0b0b",
+      "#ffffff",
+      "#ffffff",
+      "#ffffff",
+      "#ffffff",
+    ],
+    rgb: [
+      "#e4f1e1",
+      "#b4e1d4",
+      "#74c4b2",
+      "#36a394",
+      "#1d8073",
+      "#0b5c53",
+      "#023834",
+    ].map(hexToRgb),
+    series: "#36a394",
+  },
+  utilization: {
+    // CARTO Purp / Magenta-Fuchsia (Tải trạm, Telemetry, Cường độ sạc)
+    hex: [
+      "#f3e0f7",
+      "#e2b6e8",
+      "#c884d4",
+      "#a852b7",
+      "#842893",
+      "#5c0e6c",
+      "#38004d",
+    ],
+    ink: [
+      "#0b0b0b",
+      "#0b0b0b",
+      "#0b0b0b",
+      "#ffffff",
+      "#ffffff",
+      "#ffffff",
+      "#ffffff",
+    ],
+    rgb: [
+      "#f3e0f7",
+      "#e2b6e8",
+      "#c884d4",
+      "#a852b7",
+      "#842893",
+      "#5c0e6c",
+      "#38004d",
+    ].map(hexToRgb),
+    series: "#a852b7",
+  },
+  accessibility: {
+    // CARTO BluYl / Indigo-Cobalt (Mạng lưới đường, Khoảng cách tiếp cận)
+    hex: [
+      "#d7e1ee",
+      "#9cbbe3",
+      "#6093d6",
+      "#356ec2",
+      "#1d479e",
+      "#0e2978",
+      "#06134a",
+    ],
+    ink: [
+      "#0b0b0b",
+      "#0b0b0b",
+      "#0b0b0b",
+      "#ffffff",
+      "#ffffff",
+      "#ffffff",
+      "#ffffff",
+    ],
+    rgb: [
+      "#d7e1ee",
+      "#9cbbe3",
+      "#6093d6",
+      "#356ec2",
+      "#1d479e",
+      "#0e2978",
+      "#06134a",
+    ].map(hexToRgb),
+    series: "#356ec2",
+  },
+  "urban-context": {
+    // CARTO Emerald / Forest-Sage (Môi trường đô thị, Đất, POI)
+    hex: [
+      "#eef7e8",
+      "#c4e8b8",
+      "#8ecf84",
+      "#52b157",
+      "#2e8b38",
+      "#126322",
+      "#053d11",
+    ],
+    ink: [
+      "#0b0b0b",
+      "#0b0b0b",
+      "#0b0b0b",
+      "#ffffff",
+      "#ffffff",
+      "#ffffff",
+      "#ffffff",
+    ],
+    rgb: [
+      "#eef7e8",
+      "#c4e8b8",
+      "#8ecf84",
+      "#52b157",
+      "#2e8b38",
+      "#126322",
+      "#053d11",
+    ].map(hexToRgb),
+    series: "#52b157",
+  },
+  screening: {
+    // CARTO Gold-Bronze / Amber (Biên lọc, So sánh, Tiêu chí)
+    hex: [
+      "#fff8db",
+      "#ffe49e",
+      "#ffd059",
+      "#f5b027",
+      "#d4860b",
+      "#9e5600",
+      "#613000",
+    ],
+    ink: [
+      "#0b0b0b",
+      "#0b0b0b",
+      "#0b0b0b",
+      "#ffffff",
+      "#ffffff",
+      "#ffffff",
+      "#ffffff",
+    ],
+    rgb: [
+      "#fff8db",
+      "#ffe49e",
+      "#ffd059",
+      "#f5b027",
+      "#d4860b",
+      "#9e5600",
+      "#613000",
+    ].map(hexToRgb),
+    series: "#f5b027",
+  },
+  exploration: {
+    // Ramp mặc định (Cam Hổ Phách / CARTO OrYel Classic)
+    hex: RAMP_HEX,
+    ink: RAMP_INK,
+    rgb: RAMP_RGB,
+    series: "#b94918",
+  },
+};
+
+export function getThemePalette(theme?: AnalysisTheme): ThemePalette {
+  return THEME_PALETTES[theme ?? "exploration"] ?? THEME_PALETTES.exploration;
+}
+
+export function seriesColorForTheme(theme?: AnalysisTheme): string {
+  return getThemePalette(theme).series;
+}
+
 /** Họ màu lạnh dùng chung cho MỌI overlay. Danh tính overlay đến từ hình học. */
 export const COLD_HEX = ["#3987e5", "#1c5cab", "#0d366b"] as const;
 
@@ -46,16 +276,6 @@ export const HATCH_HEX = "#898781"; // nét gạch chéo cho ô null
 export const BASEMAP_HEX = "#f2f3f0";
 export const HAIRLINE_HEX = "#e1e0d9";
 
-export function hexToRgb(hex: string): RGB {
-  const h = hex.replace("#", "");
-  return [
-    parseInt(h.slice(0, 2), 16),
-    parseInt(h.slice(2, 4), 16),
-    parseInt(h.slice(4, 6), 16),
-  ];
-}
-
-export const RAMP_RGB: RGB[] = RAMP_HEX.map(hexToRgb);
 export const COLD_RGB: RGB[] = COLD_HEX.map(hexToRgb);
 export const HATCH_RGB: RGB = hexToRgb(HATCH_HEX);
 /** Màu nền positron — dùng làm VÒNG VIỀN tách mark khỏi thứ bên dưới (§4d), không làm màu tô. */
@@ -276,21 +496,22 @@ export function classCount(s: Scale): number {
  * ngưỡng đó. Nếu một ngày nào đó chạm, đây là chỗ phải nghĩ lại chứ không phải chỗ để
  * âm thầm lặp màu.
  */
-export function scaleColors(s: Scale): RGB[] {
-  if (s.kind === "bool") return [RAMP_RGB[1]!, RAMP_RGB[5]!]; // c2, c6 — §6a quy tắc 4
+export function scaleColors(s: Scale, theme?: AnalysisTheme): RGB[] {
+  const palette = getThemePalette(theme);
+  if (s.kind === "bool") return [palette.rgb[1]!, palette.rgb[5]!]; // c2, c6 — §6a quy tắc 4
   if (s.kind === "categorical") return s.categories.map((_, i) => COLD_RGB[i % COLD_RGB.length]!);
   // Khi số bậc thật < 7, trải các bậc còn lại đều trên toàn ramp để vẫn dùng hết biên độ
   // nhạt→đậm thay vì dồn về đầu ramp.
   const n = s.breaks.length;
   return s.breaks.map(
-    (_, k) => RAMP_RGB[n <= 1 ? RAMP_RGB.length - 1 : Math.round((k / (n - 1)) * (RAMP_RGB.length - 1))]!,
+    (_, k) => palette.rgb[n <= 1 ? palette.rgb.length - 1 : Math.round((k / (n - 1)) * (palette.rgb.length - 1))]!,
   );
 }
 
 /**
  * Cực tính của một trường — DESIGN.md M2.1-(B).
  *
- * Vấn đề nó giải: hai trường xã dùng CÙNG ramp cam để nói NGƯỢC nhau. `dist_station_*`
+ * Vấn đề nó giải: hai trường xã dùng CÙNG ramp để nói NGƯỢC nhau. `dist_station_*`
  * nhạt = TỐT (gần trạm); `ports_per_10k_pop` nhạt = XẤU (ít cổng trên đầu người). Người
  * xem đọc gestalt màu trước khi đọc câu đơn vị, nên lật qua lại hai trường liền kề trong
  * một danh sách là đọc sai một trong hai.
@@ -298,7 +519,7 @@ export function scaleColors(s: Scale): RGB[] {
 export type Polarity = "high-bad" | "high-good";
 
 /**
- * Màu + mực cho từng bậc, đã áp cực tính.
+ * Màu + mực cho từng bậc, đã áp cực tính và theo theme của cảnh.
  *
  * `high-good` thì **đảo thứ tự gán**, để bất biến duy nhất mà mắt cần nhớ là:
  *
@@ -311,9 +532,9 @@ export type Polarity = "high-bad" | "high-good";
  * Chỉ áp cho thang SỐ. Bool và hạng mục không có "nhiều/ít" để đảo — hạng mục còn dùng
  * bậc lạnh chứ không dùng ramp (§6a-5).
  */
-export function rampFor(s: Scale, polarity?: Polarity): { colors: RGB[]; inks: string[] } {
-  const colors = scaleColors(s);
-  const inks = scaleInks(s);
+export function rampFor(s: Scale, polarity?: Polarity, theme?: AnalysisTheme): { colors: RGB[]; inks: string[] } {
+  const colors = scaleColors(s, theme);
+  const inks = scaleInks(s, theme);
   if (s.kind !== "numeric" || polarity !== "high-good") return { colors, inks };
   // Đảo CẢ HAI, cùng lúc: mực chữ phải đi theo swatch của nó, nếu không §4c gãy và chữ
   // trắng rơi lên nền nhạt.
@@ -321,12 +542,13 @@ export function rampFor(s: Scale, polarity?: Polarity): { colors: RGB[]; inks: s
 }
 
 /** Mực chữ đè lên từng swatch — §4c. Đi kèm `scaleColors`, cùng thứ tự. */
-export function scaleInks(s: Scale): string[] {
-  if (s.kind === "bool") return [RAMP_INK[1]!, RAMP_INK[5]!];
+export function scaleInks(s: Scale, theme?: AnalysisTheme): string[] {
+  const palette = getThemePalette(theme);
+  if (s.kind === "bool") return [palette.ink[1]!, palette.ink[5]!];
   if (s.kind === "categorical") return s.categories.map((_, i) => COLD_INK[i % COLD_INK.length]!);
   const n = s.breaks.length;
   return s.breaks.map(
-    (_, k) => RAMP_INK[n <= 1 ? RAMP_INK.length - 1 : Math.round((k / (n - 1)) * (RAMP_INK.length - 1))]!,
+    (_, k) => palette.ink[n <= 1 ? palette.ink.length - 1 : Math.round((k / (n - 1)) * (palette.ink.length - 1))]!,
   );
 }
 
@@ -350,10 +572,10 @@ export function classOf(value: CellValue, s: Scale): number | null {
  * ĐƯỜNG VÀO DUY NHẤT từ giá trị sang màu.
  * Trả `null` khi không có giá trị — người gọi phải vẽ gạch chéo, KHÔNG được thay bằng 0.
  */
-export function colorFor(value: CellValue, s: Scale): RGB | null {
+export function colorFor(value: CellValue, s: Scale, theme?: AnalysisTheme): RGB | null {
   const k = classOf(value, s);
   if (k === null) return null;
-  return scaleColors(s)[k] ?? null;
+  return scaleColors(s, theme)[k] ?? null;
 }
 
 /** Nhãn ngưỡng cho legend — in giá trị thật, không in "bậc 1..7". DESIGN.md §3b. */

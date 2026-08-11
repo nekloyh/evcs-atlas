@@ -30,6 +30,8 @@ export const POI_REF_RE = /^[nwr]\d+$/;
 
 /** Tiền tố của trạm trong khoá `c` — M4.1 (§8a, §9). Cùng tiền tố với trường `station:`. */
 export const STATION_SEL_PREFIX = "station:";
+export const ROAD_SEL_PREFIX = "road:";
+export const ROAD_ID_RE = /^\d+$/;
 
 /**
  * Định danh trạm trong hash là **`station_id`**, không phải `station_code` — quyết định
@@ -50,7 +52,8 @@ export type Selection =
   | { kind: "cell"; id: string }
   | { kind: "commune"; code: string }
   | { kind: "poi"; ref: string }
-  | { kind: "station"; id: string };
+  | { kind: "station"; id: string }
+  | { kind: "road"; id: string };
 
 /**
  * Đọc khoá `c`. Trả `null` khi sai hình dạng — và sai hình dạng thì **bỏ đúng khoá đó**,
@@ -73,6 +76,10 @@ export function parseSelection(raw: string | null): Selection | null {
     const id = raw.slice(STATION_SEL_PREFIX.length);
     return STATION_ID_RE.test(id) ? { kind: "station", id } : null;
   }
+  if (raw.startsWith(ROAD_SEL_PREFIX)) {
+    const id = raw.slice(ROAD_SEL_PREFIX.length);
+    return ROAD_ID_RE.test(id) ? { kind: "road", id } : null;
+  }
   return H3_RE.test(raw) ? { kind: "cell", id: raw } : null;
 }
 
@@ -81,6 +88,7 @@ export function serializeSelection(s: Selection): string {
   if (s.kind === "commune") return COMMUNE_SEL_PREFIX + s.code;
   if (s.kind === "poi") return POI_SEL_PREFIX + s.ref;
   if (s.kind === "station") return STATION_SEL_PREFIX + s.id;
+  if (s.kind === "road") return ROAD_SEL_PREFIX + s.id;
   return s.id;
 }
 
@@ -106,4 +114,9 @@ export function poiRefOf(raw: string | null): string | null {
 export function stationIdOf(raw: string | null): string | null {
   const s = parseSelection(raw);
   return s?.kind === "station" ? s.id : null;
+}
+
+export function roadIdOf(raw: string | null): string | null {
+  const s = parseSelection(raw);
+  return s?.kind === "road" ? s.id : null;
 }

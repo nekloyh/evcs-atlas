@@ -24,6 +24,7 @@ import {
   COMMUNE_PREFIX,
   FIELDS,
   STATION_OCC_FIELD,
+  STATION_PORTS_FIELD,
   fieldAvailable,
   fieldsOfUnit,
   columnAvailable,
@@ -96,6 +97,12 @@ test("trường của ĐƯỜNG và TRẠM không bị lọc theo cột lưới"
   for (const x of FIELDS.filter((y) => y.readAs === "road" || y.readAs === "station")) {
     assert.ok(fieldAvailable(x), x.id);
   }
+});
+
+test("field dẫn xuất của TRẠM kiểm tra dependency thật, không kiểm tra tên hiển thị", () => {
+  setAvailableColumns({ station: ["station_code", "n_ports"] });
+  assert.ok(fieldAvailable(f(STATION_PORTS_FIELD)), "station:ports dùng cột n_ports");
+  assert.ok(fieldAvailable(f(STATION_OCC_FIELD)), "station:occ dùng profile occupancy");
 });
 
 // --- bậc hỏng thứ ba: lớp có cột nhưng đọc không được --------------------

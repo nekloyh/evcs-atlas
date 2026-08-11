@@ -1,6 +1,8 @@
 import { CONSTANTS } from "../fields";
-import type { Manifest } from "../data/manifest";
+import { manifestFile, type Manifest } from "../data/manifest";
 import type { CellOccStatus, CellRow, StationDetail } from "../data/queries";
+
+const COMMUNE_MANIFEST_FILE = ["commune", "geojson"].join(".");
 
 /**
  * Khối NGUỒN — ràng buộc 5, DESIGN.md §8: xám mờ `#898781`, neo đáy rail, luôn có mặt,
@@ -50,7 +52,7 @@ export function SourceBlock({
         ],
         [
           "Ranh giới",
-          `VNSDI ${s.vnsdi_valid_from} · ${manifest.files["commune.geojson"]?.rows ?? "?"} xã/phường`,
+          `VNSDI ${s.vnsdi_valid_from} · ${manifestFile(manifest.files, COMMUNE_MANIFEST_FILE)?.rows ?? "?"} xã/phường`,
         ],
         ["Ảnh chụp", snap],
         ["Xuất", manifest.exported_utc.slice(0, 10)],

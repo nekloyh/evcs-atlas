@@ -23,28 +23,33 @@ import {
 } from "./data/queries";
 import { poiGroupsOn, type PoiCollection } from "./data/poi";
 import type { SubstationCollection } from "./data/substations";
-import { poiRefOf, stationIdOf } from "./data/h3";
+import { poiRefOf, roadIdOf, stationIdOf } from "./data/h3";
 import { fetchOccupancy, type StationOccupancy } from "./data/occupancy";
 import { loadManifest, type Manifest } from "./data/manifest";
 import {
   DEFAULT_FIELD,
   FIELD_BY_ID,
   STATION_OCC_FIELD,
+  STATION_PORTS_FIELD,
   fieldAvailable,
+  fieldMapAvailable,
   layerUsable,
   type RuntimeCoverage,
 } from "./fields";
-import { DatasetPicker } from "./ui/DatasetPicker";
 import { keep } from "./state/brush";
 import { useStore } from "./state/store";
 import { syncHash } from "./state/hash";
-import { SCENES } from "./story/scenes";
+import { INITIAL_VIEW } from "./state/view-config";
+import { SCENES, storyEnabled } from "./story/scenes";
 import { StoryColumn } from "./story/StoryColumn";
 import { DataMode } from "./ui/DataMode";
-import { Dock, DockTab, type DockData } from "./ui/Dock";
-import { Legend } from "./ui/Legend";
-import { Rail } from "./ui/Rail";
+import { type DockData } from "./ui/Dock";
 import { Scrubber } from "./ui/Scrubber";
+import { NavRail } from "./components/atlas/NavRail";
+import { FloatingLegend } from "./components/atlas/FloatingLegend";
+import { FloatingWorkspace } from "./components/atlas/FloatingWorkspace";
+import { AtlasInspector } from "./components/atlas/AtlasInspector";
+import { CompareDock } from "./components/atlas/CompareDock";
 import { allOccValues, cityProfile, occCountAt, occCoverage, stationOccAt } from "./viz/occ";
 import { buildScale, computeClassingByWeight, type Scale } from "./viz/palette";
 
@@ -61,128 +66,28 @@ import { buildScale, computeClassingByWeight, type Scale } from "./viz/palette";
  * `CÂU CHUYỆN` mất `disabled`, mất mực mờ, mất nhãn `M3`, và có `onClick` thật — để lại
  * một trong bốn thứ đó là nói dối theo chiều ngược lại.
  */
-interface NavItem {
-  label: string;
-  /** đã dựng chưa — `false` thì mục hiện mờ hẳn và không bấm được */
-  ready: boolean;
-  /** mốc sẽ dựng, hiện NGAY TRÊN nav; rỗng = chưa xếp lịch */
-  milestone?: string;
-  /** câu đầy đủ, hiện khi rê chuột */
-  note?: string;
-  /** bấm thì làm gì. Vắng = chưa dựng, và `ready: false` phải đi kèm. */
-  go?: () => void;
-}
+const NO_COVERAGE: Map<string, RuntimeCoverage> = new Map();
 
-// M3.5: 3D thành thật — hết `ready: false`, hết nhãn M5, có `go` (§3a: dựng xong thì
-// phải BỎ dấu hiệu "chưa dựng" đi, để lại một cái là nói dối theo chiều ngược lại).
-
-/**
- * Một mục nav.
- *
- * Dùng `aria-disabled` chứ KHÔNG dùng thuộc tính `disabled`: phần tử `disabled` không
- * nhận sự kiện chuột ở nhiều trình duyệt, nên `title` của nó không bao giờ hiện — lời
- * giải thích sẽ vô hình đúng lúc cần nhất. Và mốc còn được in THẲNG lên nav, để thông tin
- * không phụ thuộc việc rê chuột.
- */
-function NavButton({ item, active }: { item: NavItem; active: boolean }) {
-  return (
-    <button
-      aria-disabled={!item.ready}
-      aria-current={active || undefined}
-      title={item.note}
-      onClick={item.go}
-      className={`${item.go ? "cursor-pointer" : "cursor-default"} ${
-        item.ready ? (active ? "text-ink" : "text-ink-2 hover:text-ink") : "text-ink-muted/50"
-      }`}
-    >
-      {item.label}
-      {item.milestone && (
-        <span className="pl-1 align-super text-[9px] tracking-normal">{item.milestone}</span>
-      )}
-    </button>
-  );
-}
-
-function Nav({ manifest }: { manifest: Manifest | null }) {
+export default function App() {
+  const field = useStore((s) => s.field);
   const scene = useStore((s) => s.scene);
   const enterScene = useStore((s) => s.enterScene);
   const dataMode = useStore((s) => s.dataMode);
   const setDataMode = useStore((s) => s.setDataMode);
   const mode = useStore((s) => s.mode);
   const setMode = useStore((s) => s.setMode);
-
-  const viewModes: NavItem[] = [
-    { label: "2D", ready: true, go: () => setMode("2d") },
-    {
-      label: "3D",
-      ready: true,
-      note: "khối POI + nhà cửa basemap, pitch 50 — phóng tới z12 để thấy nhà",
-      go: () => setMode("3d"),
-    },
-  ];
-
-  // Cảnh CÂU CHUYỆN được VIẾT cho Hà Nội: nó gọi tên hai xã cụ thể (`scenes.ts`), bay tới
-  // toạ độ cụ thể, và dựa vào `detour_ratio` — một cột của lớp TÍNH TOÁN mà store toàn quốc
-  // chưa có. Ở tỉnh khác nó phải hiện như CHƯA DỰNG (§3a), không phải bay tới một xã không
-  // tồn tại rồi im lặng không vẽ gì.
-  const storyOn = manifest?.story_enabled !== false;
-
-  const appModes: NavItem[] = [
-    {
-      label: "CÂU CHUYỆN",
-      ready: storyOn,
-      note: storyOn
-        ? undefined
-        : "cảnh được viết cho Hà Nội và cần lớp TÍNH TOÁN (detour_ratio) — chưa dựng cho tỉnh này",
-      // Vào lại thì về cảnh ĐANG xem nếu có, không phải luôn về cảnh đầu — nhưng ở chế độ
-      // BẢN ĐỒ thì `scene` là null, nên nút này luôn mở cảnh đầu. Đúng ý: câu chuyện đọc
-      // từ đầu, và mọi cảnh vẫn tới thẳng được bằng link (§9a).
-      go: storyOn ? () => enterScene(SCENES[0]!.id) : undefined,
-    },
-    { label: "BẢN ĐỒ", ready: true, go: () => { enterScene(null); setDataMode(false); } },
-    // M4.2 — trang dữ liệu thành thật: hết `ready: false`, hết nhãn M4.2, có `go`. Mặt kia
-    // của luật §3a, đúng như CÂU CHUYỆN đã trải ở M3 và 3D ở M3.5: để lại một trong bốn dấu
-    // hiệu "chưa dựng" là nói dối theo chiều ngược lại.
-    {
-      label: "DỮ LIỆU",
-      ready: true,
-      note: "KPI + chuẩn phích + hồ sơ ngày theo dạng nhịp + bảng phủ + bảng dữ liệu (§3f)",
-      go: () => setDataMode(true),
-    },
-  ];
-  const activeLabel = dataMode ? "DỮ LIỆU" : scene ? "CÂU CHUYỆN" : "BẢN ĐỒ";
-
-  return (
-    <nav className="flex h-11 shrink-0 items-center gap-6 border-b border-hairline px-4 text-[13px]">
-      <span className="font-semibold tracking-[0.14em]">
-        EVCS {(manifest?.province?.province_name ?? "Hà Nội").toUpperCase()}
-      </span>
-      <DatasetPicker />
-      <div className="flex items-center gap-4 tracking-[0.1em]">
-        {appModes.map((m) => (
-          <NavButton key={m.label} item={m} active={m.label === activeLabel} />
-        ))}
-      </div>
-      <div className="ml-auto flex items-center gap-2 tracking-[0.1em]">
-        <NavButton item={viewModes[0]!} active={mode === "2d"} />
-        <span className="text-ink-muted/50">|</span>
-        <NavButton item={viewModes[1]!} active={mode === "3d"} />
-      </div>
-    </nav>
-  );
-}
-
-const NO_COVERAGE: Map<string, RuntimeCoverage> = new Map();
-
-export default function App() {
-  const field = useStore((s) => s.field);
-  const scene = useStore((s) => s.scene);
-  const dataMode = useStore((s) => s.dataMode);
+  const basemapStyle = useStore((s) => s.basemapStyle);
+  const setBasemapStyle = useStore((s) => s.setBasemapStyle);
+  const setView = useStore((s) => s.setView);
+  const workspaceOpen = useStore((s) => s.workspaceOpen);
+  const setWorkspaceOpen = useStore((s) => s.setWorkspaceOpen);
+  const cellSel = useStore((s) => s.cell);
   const [cells, setCells] = useState<GridCell[]>([]);
   const [communes, setCommunes] = useState<CommuneCollection | null>(null);
   const [boundary, setBoundary] = useState<CommuneCollection | null>(null);
   const [stations, setStations] = useState<StationPoint[]>([]);
   const [roads, setRoads] = useState<RoadSeg[]>([]);
+  const [roadsLoading, setRoadsLoading] = useState(false);
   const [routes, setRoutes] = useState<ShowcaseRoute[]>([]);
   const [poi, setPoi] = useState<PoiCollection | null>(null);
   const [substations, setSubstations] = useState<SubstationCollection | null>(null);
@@ -246,7 +151,7 @@ export default function App() {
   // khác sẽ là một `SELECT` cột không tồn tại. Rơi về mặc định (trường của XÃ, luôn dựng
   // được vì nó đọc từ `commune.geojson`) thay vì nổ.
   const picked = FIELD_BY_ID.get(field);
-  const meta = picked && fieldAvailable(picked) ? picked : FIELD_BY_ID.get(DEFAULT_FIELD)!;
+  const meta = picked && fieldMapAvailable(picked) ? picked : FIELD_BY_ID.get(DEFAULT_FIELD)!;
 
   // Sửa luôn STATE, không chỉ sửa lượt vẽ này: nếu chỉ thay ở đây thì hash vẫn ghi
   // `f=population` trong khi bản đồ tô một trường khác — URL nói một đằng, màn hình nói
@@ -254,7 +159,7 @@ export default function App() {
   // mà ràng buộc 2 áp cho `field`.
   const setField = useStore((s) => s.setField);
   useEffect(() => {
-    if (picked && !fieldAvailable(picked)) setField(DEFAULT_FIELD);
+    if (picked && !fieldMapAvailable(picked)) setField(DEFAULT_FIELD);
   }, [picked, setField]);
 
   // Phủ của trường xã đo trên chính 126 feature vừa nạp — mẫu số là 126, không phải 4.427.
@@ -309,31 +214,37 @@ export default function App() {
   // cả mark CẦU lẫn cặp tuyến minh hoạ chỉ sống trong đúng nhịp mà trường đường đang tô
   // (§14b), nên không có trường hợp nào cần đường mà `readAs` không phải `road`.
   useEffect(() => {
-    if (meta.readAs !== "road") return;
+    if (meta.readAs !== "road" && roadIdOf(cellSel) === null) return;
+    if (roads.length || roadsLoading) return;
     let cancelled = false;
+    setRoadsLoading(true);
     void (async () => {
       try {
         const [segs, showcase] = await Promise.all([fetchRoads(), fetchShowcaseRoutes()]);
         if (cancelled) return;
         setRoads(segs);
         setRoutes(showcase);
-        setScale(buildScale(meta.kind, segs.map((r) => r.dist)));
-        // Phủ đo trên chính mảng vừa nạp — mẫu số là 160.823 đoạn, không phải 4.400 ô.
-        setRoadCov(new Map([[meta.id, roadCoverage(segs)]]));
+        // Cold road deep-link cần feature để inspector đọc, nhưng không được thay scale/
+        // legend của measure đang xem bằng scale khoảng cách đường.
+        if (meta.readAs === "road") {
+          setScale(buildScale(meta.kind, segs.map((r) => r.dist)));
+          setRoadCov(new Map([[meta.id, roadCoverage(segs)]]));
+        }
       } catch (e) {
         if (!cancelled) fail(e);
+      } finally {
+        if (!cancelled) setRoadsLoading(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [meta]);
+  }, [meta, cellSel, roads.length, roadsLoading]);
 
   // POI nạp LƯỜI như roads (§5a): 3,39 MB, phần lớn phiên xem không bật nhóm POI nào.
   // Hai đường cần nó: một overlay `poi_*` bật, hoặc hash mở sẵn `c=poi:` (panel POI phải
   // dựng được cả khi chưa bật lớp nào — link là lời hứa, §9).
   const layersSet = useStore((s) => s.layers);
-  const cellSel = useStore((s) => s.cell);
   const needPoi = poiGroupsOn(layersSet).length > 0 || poiRefOf(cellSel) !== null;
   useEffect(() => {
     if (!needPoi || poi) return;
@@ -369,14 +280,25 @@ export default function App() {
   // dock đang mở (heatmap 168h là một trong ba biểu đồ của nó). 116.785 dòng là chi phí
   // thật, và phần lớn phiên xem chỉ mở bản đồ rồi thôi.
   const dockOpen = useStore((s) => s.dockOpen);
+  const compareView = useStore((s) => s.compareView);
+  const setDockOpen = useStore((s) => s.setDockOpen);
   // Đường thứ ba từ M4.1: một TRẠM đang được chọn. Panel TRẠM có mini-heatmap 168h (§8a-3),
   // nên nó cần đúng bộ hồ sơ này — kể cả khi dock đóng và trường đang tô là trường của ô.
   // Đường thứ tư từ M4.2: chế độ DỮ LIỆU dựng small multiples từ chính hồ sơ đó (§3f-5).
   const needOcc =
-    meta.readAs === "station" ||
+    meta.id === STATION_OCC_FIELD ||
     (dockOpen && !scene) ||
     (stationIdOf(cellSel) !== null && !scene) ||
     dataMode;
+
+  // Compare là câu trả lời gắn với measure đã gọi nó. Đổi measure thì đóng compare không
+  // còn cùng nghĩa, thay vì giữ scatter/heatmap cũ cạnh một bản đồ khác rồi ngầm nói chúng
+  // vẫn được liên kết.
+  useEffect(() => {
+    if (!dockOpen) return;
+    if (compareView === "demand-access" && meta.id !== "population") setDockOpen(false);
+    if (compareView === "utilization-pattern" && meta.id !== STATION_OCC_FIELD) setDockOpen(false);
+  }, [dockOpen, compareView, meta, setDockOpen]);
   useEffect(() => {
     if (!needOcc || occupancy) return;
     void fetchOccupancy().then(setOccupancy, fail);
@@ -401,13 +323,19 @@ export default function App() {
   // Trường trạm: NGƯỠNG lấy từ cả tuần (ở trên), còn hai SỐ ĐẾM là của giờ đang xem —
   // legend đếm cái đang vẽ. Hai thứ khác nhau và chúng phải đến từ hai chỗ khác nhau.
   useEffect(() => {
-    if (meta.readAs !== "station" || !occupancy || !occClassing) return;
+    if (meta.id !== STATION_OCC_FIELD || !occupancy || !occClassing) return;
     const c = occCountAt(occupancy.profiles, t);
     setScale({ ...occClassing, n: c.present, nNull: c.missing });
   }, [meta, occupancy, occClassing, t]);
 
+  // Asset supply không phụ thuộc telemetry. Cùng geometry trạm nhưng khác measure, nên
+  // scale đọc trực tiếp `stations` và null là “chưa khai cổng”, không là “chưa quan sát”.
+  useEffect(() => {
+    if (meta.id !== STATION_PORTS_FIELD) return;
+    setScale(buildScale(meta.kind, stations.map((s) => s.nPorts)));
+  }, [meta, stations]);
+
   const dockData: DockData = useMemo(() => {
-    // Histogram vẽ CHÍNH thứ bản đồ đang tô — nên nguồn của nó đổi theo đơn vị đọc.
     let histValues: number[] = [];
     let total = 0;
     let kept = 0;
@@ -434,16 +362,20 @@ export default function App() {
         if (r.dist !== null) histValues.push(r.dist);
         if (keep(brush, { value: r.dist })) kept++;
       }
-    } else if (meta.readAs === "station" && occupancy) {
+    } else if (meta.id === STATION_OCC_FIELD && occupancy) {
       for (let s = 0; s < occupancy.profiles.n; s++) {
         total++;
         const v = stationOccAt(occupancy.profiles, s, t);
         if (v !== null) histValues.push(v);
         if (keep(brush, { value: v })) kept++;
       }
+    } else if (meta.id === STATION_PORTS_FIELD) {
+      for (const s of stations) {
+        total++;
+        if (s.nPorts !== null) histValues.push(s.nPorts);
+        if (keep(brush, { value: s.nPorts })) kept++;
+      }
     }
-    // Trường hạng mục/bool không có "khoảng giá trị" để kéo — dock nói ra thay vì vẽ một
-    // histogram của mã hạng mục, thứ đọc thành một thứ tự không có thật (§6a-5).
     if (meta.kind !== "numeric") histValues = [];
 
     const points = cells
@@ -453,94 +385,134 @@ export default function App() {
     return {
       histValues,
       points,
-      // Ô bị bỏ khỏi mặt phẳng vì thiếu MỘT trục (51 ô không tới được bằng đường bộ). Đếm ở
-      // đây, hiện ở readout của scatter — đặt chúng ở 0 là bịa, im lặng về chúng là để hình
-      // trông như nói về toàn bộ lưới.
       nScatterMissing: cells.length - points.length,
       city,
       occScale: occClassing,
       kept: total > 0 ? { n: kept, total } : null,
     };
-  }, [meta, cells, communes, roads, occupancy, t, brush, city, occClassing]);
+  }, [meta, cells, communes, roads, stations, occupancy, t, brush, city, occClassing]);
+
+  const activeNavMode = dataMode ? "data" : scene ? "story" : "map";
+  const isStoryEnabled = manifest?.story_enabled !== false && storyEnabled();
+  const scrubberVisible = !scene && !dataMode && layerUsable("occupancy");
+
+  const handleSelectNavMode = (mode: "map" | "story" | "data") => {
+    if (mode === "data") {
+      setDataMode(true);
+    } else if (mode === "story") {
+      if (isStoryEnabled) enterScene(SCENES[0]!.id);
+    } else {
+      enterScene(null);
+      setDataMode(false);
+    }
+  };
+
+  // Surface Coordinator Rule: When an object/cell selection is active, close Compare Dock so Inspector has exclusive right panel space
+  useEffect(() => {
+    if (cellSel && dockOpen) {
+      setDockOpen(false);
+    }
+  }, [cellSel, dockOpen, setDockOpen]);
+
+  const handleResetView = () => {
+    setView({
+      lng: INITIAL_VIEW.center[0],
+      lat: INITIAL_VIEW.center[1],
+      zoom: INITIAL_VIEW.zoom,
+      pitch: mode === "3d" ? 50 : 0,
+      bearing: INITIAL_VIEW.bearing,
+    });
+  };
 
   return (
-    <div className="flex h-full flex-col bg-panel text-ink">
-      <Nav manifest={manifest} />
+    <div className="flex h-full bg-panel text-ink overflow-hidden">
+      <NavRail
+        manifest={manifest}
+        activeMode={activeNavMode}
+        storyEnabled={isStoryEnabled}
+        onSelectMode={handleSelectNavMode}
+        basemapStyle={basemapStyle}
+        onSelectBasemap={setBasemapStyle}
+        viewMode={mode}
+        onToggle2D3D={() => setMode(mode === "2d" ? "3d" : "2d")}
+        onResetView={handleResetView}
+        workspaceOpen={workspaceOpen}
+        onToggleWorkspace={() => setWorkspaceOpen(!workspaceOpen)}
+      />
 
-      {/* Dải legend là chú giải của MẶT TÔ — chế độ DỮ LIỆU không có bản đồ (§3f), nên để
-          nó ở đó là một dải chú giải cho một thứ không có trên màn hình. */}
-      {!dataMode && (
-        <Legend
-          field={meta}
-          scale={scale}
-          manifest={manifest}
-          runtime={runtimeCov}
-          surfaceBreaks={surfaceBreaks}
-        />
-      )}
-
-      {/* Chế độ DỮ LIỆU THAY cả ba dải giữa (dock · bản đồ · rail), không chen vào giữa
-          chúng — §3f: "không có bản đồ". Trạng thái bản đồ vẫn nguyên trong store và trong
-          hash, nên bấm về BẢN ĐỒ trả người xem về đúng chỗ họ rời đi (luật bàn giao L2). */}
-      {dataMode && <DataMode manifest={manifest} occupancy={occupancy} />}
-
-      {/*
-        THÁO hẳn ba dải chứ không `hidden` chúng, và đó là một quyết định có bẫy đi kèm:
-        một `<canvas>` MapLibre khởi tạo trong lúc bị ẩn sẽ đo được kích thước 0×0 và giữ
-        nguyên như thế cho tới khi có sự kiện resize — nên link `#d=1` mở nguội rồi bấm sang
-        BẢN ĐỒ sẽ ra một bản đồ trống mà không lỗi nào. Tháo ra thì khung nhìn được dựng lại
-        từ `store.view` (MapView đọc nó lúc khởi tạo), tức đúng chỗ người xem rời đi.
-      */}
-      {!dataMode && (
-      <div className="flex min-h-0 flex-1">
-        {/* Dock và scrubber là đồ đạc của chế độ BẢN ĐỒ — §3d-1. Trong một cảnh chúng
-            không dựng: cảnh chốt trường + khung nhìn + tập ô của nó (L3), nên một bộ lọc
-            bấm được bên cạnh là nguồn sự thật thứ hai cho "cảnh này cho xem những ô nào". */}
-        {!scene && dockOpen && <Dock field={meta} data={dockData} />}
-        <main className="relative min-w-0 flex-1">
-          <MapView
-            field={meta}
-            cells={cells}
-            communes={communes}
-            boundary={boundary}
-            stations={stations}
-            scale={scale}
-            surfaceBreaks={surfaceBreaks}
-            roads={roads}
-            routes={routes}
-            poi={poi}
-            occupancy={occupancy}
-            substations={substations}
-          />
-          {!scene && <DockTab />}
-          {error && (
-            <div className="absolute inset-x-0 top-0 border-b border-hairline bg-panel px-4 py-2 text-[13px]">
-              Không nạp được dữ liệu: {error}
-              <span className="text-ink-muted"> — đã chạy `make web-data` chưa?</span>
-            </div>
-          )}
-        </main>
-        {/* Cột cảnh THAY rail, không đứng cạnh — §14c. Trong một cảnh không có bộ chọn
-            trường vì cảnh chọn trường; để rail ở đó là hai thứ tranh nhau cùng một state. */}
-        {scene ? (
-          <StoryColumn communes={communes} manifest={manifest} />
-        ) : (
-          <Rail
-            manifest={manifest}
-            runtime={runtimeCov}
-            communes={communes}
-            poi={poi}
-            occupancy={occupancy}
-            occScale={occClassing}
-          />
+      <div className="flex min-w-0 flex-1 flex-col relative overflow-hidden">
+        {error && (
+          <div className="shrink-0 border-b border-hairline bg-panel px-4 py-2 text-[13px]">
+            Không nạp được dữ liệu: {error}
+            <span className="text-ink-muted"> — đã chạy `make web-data` chưa?</span>
+          </div>
         )}
-      </div>
-      )}
 
-      {/* Scrubber đọc hồ sơ 168 giờ. Lớp đó không đọc được thì thanh trượt vẫn kéo được
-          và bản đồ vẫn đổi — nhưng đổi giữa các giờ trống, tức một chuyển động không mang
-          thông tin nào. Tắt hẳn, cùng luật §3a với nav "chưa dựng". */}
-      {!scene && !dataMode && layerUsable("occupancy") && <Scrubber field={field} />}
+        {dataMode && <DataMode manifest={manifest} occupancy={occupancy} />}
+
+        {!dataMode && (
+          <div className="flex min-h-0 flex-1 relative">
+            <main className="relative min-w-0 flex-1">
+              <MapView
+                field={meta}
+                cells={cells}
+                communes={communes}
+                boundary={boundary}
+                stations={stations}
+                scale={scale}
+                surfaceBreaks={surfaceBreaks}
+                roads={roads}
+                routes={routes}
+                poi={poi}
+                occupancy={occupancy}
+                substations={substations}
+              />
+
+              {/* Floating Legend Top-Left */}
+              <FloatingLegend
+                field={meta}
+                scale={scale}
+                manifest={manifest}
+                runtime={runtimeCov}
+                surfaceBreaks={surfaceBreaks}
+              />
+
+              {/* Inspector Sheet from Right */}
+              {!scene && (
+                <AtlasInspector
+                  manifest={manifest}
+                  communes={communes}
+                  poi={poi}
+                  occupancy={occupancy}
+                  occScale={occClassing}
+                  roads={roads}
+                  roadsLoading={roadsLoading}
+                />
+              )}
+
+              {/* Floating Workspace Bottom-Right */}
+              {!scene && (
+                <FloatingWorkspace
+                  manifest={manifest}
+                  runtime={runtimeCov}
+                  communes={communes}
+                  scrubberVisible={scrubberVisible}
+                />
+              )}
+            </main>
+
+            {/* Compare Dock on Right */}
+            {!scene && <CompareDock field={meta} dockData={dockData} />}
+
+            {/* Story Column in Story Mode */}
+            {scene ? (
+              <StoryColumn communes={communes} manifest={manifest} />
+            ) : null}
+          </div>
+        )}
+
+        {scrubberVisible && <Scrubber field={field} />}
+      </div>
     </div>
   );
 }

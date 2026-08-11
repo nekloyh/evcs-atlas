@@ -4,7 +4,7 @@
 /* Token màu — DESIGN.md §4. Mọi giá trị đã qua scripts/validate_palette.js của skill
    dataviz trên surface #f2f3f0 (nền thật của positron). Đừng sửa bằng mắt. */
 @theme {
-  /* ramp choropleth — cam tuần tự 7 bậc */
+  /* ramp choropleth — cam tuần tự 7 bậc (Analytical colors PRESERVED) */
   --color-c1: #e7997e;
   --color-c2: #dd7c58;
   --color-c3: #d35c2d;
@@ -22,12 +22,31 @@
   --color-panel: #f9f9f7;
   --color-basemap: #f2f3f0;
   --color-hairline: #e1e0d9;
+  --color-border-subtle: rgba(15, 23, 42, 0.12);
   --color-ink: #0b0b0b;
   --color-ink-2: #52514e;
   --color-ink-muted: #898781;
   --color-warn: #fab219;
 
+  --color-surface: #ffffff;
+  --color-surface-hover: #f1f5f9;
+  --color-surface-active: #e2e8f0;
+  --color-ring: #0284c7;
+
+  /* Floating shadows */
+  --shadow-float: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  --shadow-sheet: -4px 0 24px -4px rgba(15, 23, 42, 0.08);
+
   --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 html,

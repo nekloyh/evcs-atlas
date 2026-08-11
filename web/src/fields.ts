@@ -21,6 +21,16 @@ import type { Polarity } from "./viz/palette";
 
 export type FieldKind = "numeric" | "bool" | "categorical";
 export type GroupId = "cau" | "dat" | "duong" | "cung" | "tiepcan" | "sosanh";
+export type LensId = "demand" | "supply" | "access" | "utilization" | "policy" | "context";
+
+export const LENSES: { id: LensId; label: string; hint: string; defaultField: string }[] = [
+  { id: "demand", label: "CẦU", hint: "ai cần sạc", defaultField: "population" },
+  { id: "supply", label: "CUNG", hint: "đã có gì", defaultField: "station:ports" },
+  { id: "access", label: "TIẾP CẬN", hint: "đi xa ở đâu", defaultField: "road:dist_station_m" },
+  { id: "utilization", label: "SỬ DỤNG", hint: "bận lúc nào", defaultField: "station:occ" },
+  { id: "policy", label: "CHÍNH SÁCH", hint: "phân bổ / rule", defaultField: "commune:ports_per_10k_pop" },
+  { id: "context", label: "BỐI CẢNH", hint: "đọc để giải thích", defaultField: "built_frac" },
+];
 
 export const GROUPS: { id: GroupId; label: string; hint: string }[] = [
   { id: "cau", label: "CẦU", hint: "ai cần sạc" },
@@ -45,6 +55,7 @@ export const STATION_PREFIX = "station:";
 
 /** Trường nhịp trạm — id đầy đủ. Scrubber và dock đều cần trỏ tới nó bằng một hằng. */
 export const STATION_OCC_FIELD = `${STATION_PREFIX}occ`;
+export const STATION_PORTS_FIELD = `${STATION_PREFIX}ports`;
 
 export interface FieldMeta {
   /**
@@ -80,6 +91,13 @@ export interface FieldMeta {
    * phải khai từng trường một chứ không suy ra từ `kind: "numeric"`.
    */
   surface?: boolean;
+  /**
+   * `false` = có giá trị để inspect hoặc làm input mô hình, nhưng không có visual contract
+   * đủ mạnh để trở thành analytical field trên bản đồ. Mặc định là `true`.
+   */
+  map?: boolean;
+  /** Lens là CÂU HỎI; `readAs` là geometry mang câu trả lời. */
+  lens: LensId;
   group: GroupId;
   label: string;
   /** mô tả một câu — ô tìm kiếm lọc trên cả trường này, không chỉ trên tên cột */
@@ -130,7 +148,7 @@ export interface FieldMeta {
 const FRAC = "tỉ lệ diện tích ô, 0–1";
 
 /** Khai báo một trường trước khi gắn đơn vị đọc — `unit`/`column` do bảng dưới suy ra. */
-type Spec = Omit<FieldMeta, "readAs" | "column">;
+type Spec = Omit<FieldMeta, "readAs" | "column" | "lens"> & { lens?: LensId };
 
 // ── Trường của Ô (bảng grid_h3_r8.parquet) ─────────────────────────────────────
 
@@ -190,6 +208,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Số POI trong bán kính 1 km quanh tâm ô — PHƠI NHIỄM, khác với “có gì trong ô”.",
     unit: "POI trong bán kính 1 km",
     kind: "numeric",
+    lens: "context",
     // Khác `n_poi_total` ở KHÁI NIỆM, không phải ở thang đo. `n_poi_total` là KIỂM KÊ
     // (ô này chứa gì); trường này là PHƠI NHIỄM (quanh điểm này có gì). Đo được là phơi
     // nhiễm mới dự báo nhu cầu: trên 632 trạm có `util` tin cậy, thêm nó vào mô hình đưa
@@ -214,6 +233,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Cộng 8 loại POI: chung cư, bãi đỗ, đỗ lòng đường, cây xăng, siêu thị, chợ, trung tâm thương mại, bách hoá.",
     unit: "điểm",
     kind: "numeric",
+    lens: "context",
   },
   {
     id: "n_mall",
@@ -222,6 +242,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Số trung tâm thương mại OSM trong ô.",
     unit: "điểm",
     kind: "numeric",
+    lens: "context",
   },
   {
     id: "n_dept_store",
@@ -230,6 +251,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Số cửa hàng bách hoá OSM trong ô.",
     unit: "điểm",
     kind: "numeric",
+    lens: "context",
   },
   {
     id: "n_supermarket",
@@ -238,6 +260,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Số siêu thị OSM trong ô.",
     unit: "điểm",
     kind: "numeric",
+    lens: "context",
   },
   {
     id: "n_market",
@@ -246,6 +269,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Số chợ OSM trong ô.",
     unit: "điểm",
     kind: "numeric",
+    lens: "context",
   },
   {
     id: "n_parking_off",
@@ -254,6 +278,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Số bãi đỗ xe tách khỏi lòng đường.",
     unit: "điểm",
     kind: "numeric",
+    lens: "context",
   },
   {
     id: "n_parking_street",
@@ -262,6 +287,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Số chỗ đỗ xe dọc lòng đường.",
     unit: "điểm",
     kind: "numeric",
+    lens: "context",
   },
   {
     id: "n_fuel",
@@ -270,6 +296,19 @@ const CELL_SPECS: Spec[] = [
     desc: "Số cây xăng OSM trong ô.",
     unit: "điểm",
     kind: "numeric",
+    lens: "context",
+  },
+  {
+    id: "poi_anchor_index",
+    group: "cau",
+    label: "Chỉ số nêm điểm đến",
+    desc: "Tổng hợp có trọng số các POI thu hút xe dừng (Chung cư, Siêu thị, TTM, Cây xăng, Bãi đỗ).",
+    unit: "điểm chỉ số",
+    kind: "numeric",
+    // Proxy composite từ OSM: chưa có coverage/sensitivity contract để làm analytical map.
+    map: false,
+    expr:
+      'COALESCE(g."n_apartment", 0) * 3.0 + COALESCE(g."n_mall", 0) * 4.0 + COALESCE(g."n_supermarket", 0) * 2.0 + COALESCE(g."n_fuel", 0) * 3.0 + COALESCE(g."n_parking_off", 0) * 2.0',
   },
 
   // ── 2. ĐẤT — đặt được không (12) ──────────────────────────────────────────
@@ -344,6 +383,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Diện tích hình học của ô H3 độ phân giải 8.",
     unit: "km²",
     kind: "numeric",
+    map: false,
   },
   {
     id: "area_frac",
@@ -355,6 +395,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Phần diện tích ô nằm trong ranh giới cấp tỉnh — ô ven biên chỉ thuộc một phần.",
     unit: "tỉ lệ, 0–1",
     kind: "numeric",
+    map: false,
   },
 
   // ── 3. ĐƯỜNG — xe tới được không (9) ──────────────────────────────────────
@@ -365,6 +406,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Tổng chiều dài đường ô tô đi được trong ô. Không tính lối bộ, đường mòn, làn xe đạp.",
     unit: "mét",
     kind: "numeric",
+    map: false,
   },
   {
     // Cùng khái niệm với `road_len_in_hanoi_m`, khác TÊN CỘT — và hai dòng cùng tồn tại là
@@ -378,6 +420,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Phần chiều dài đường nằm TRONG ranh giới tỉnh. Bằng tổng chiều dài ở ô nằm trọn trong tỉnh; nhỏ hơn ở ô biên.",
     unit: "mét",
     kind: "numeric",
+    map: false,
   },
   {
     id: "road_len_arterial_m",
@@ -386,6 +429,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Cộng 4 cấp cao nhất: cao tốc, quốc lộ, đường chính, đường thứ cấp.",
     unit: "mét",
     kind: "numeric",
+    map: false,
   },
   {
     id: "road_len_motorway_m",
@@ -394,6 +438,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Chiều dài đường cấp cao tốc trong ô.",
     unit: "mét",
     kind: "numeric",
+    map: false,
   },
   {
     id: "road_len_trunk_m",
@@ -402,6 +447,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Chiều dài đường cấp quốc lộ trong ô.",
     unit: "mét",
     kind: "numeric",
+    map: false,
   },
   {
     id: "road_len_primary_m",
@@ -410,6 +456,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Chiều dài đường cấp chính trong ô.",
     unit: "mét",
     kind: "numeric",
+    map: false,
   },
   {
     id: "road_len_secondary_m",
@@ -418,6 +465,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Chiều dài đường cấp thứ cấp trong ô.",
     unit: "mét",
     kind: "numeric",
+    map: false,
   },
   {
     id: "road_len_tertiary_m",
@@ -426,6 +474,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Chiều dài đường cấp ba trong ô.",
     unit: "mét",
     kind: "numeric",
+    map: false,
   },
   {
     id: "road_len_local_m",
@@ -434,6 +483,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Chiều dài đường khu dân cư, ngõ phố trong ô.",
     unit: "mét",
     kind: "numeric",
+    map: false,
   },
   {
     id: "road_len_service_m",
@@ -442,6 +492,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Chiều dài đường dẫn nội khu — lối vào bãi xe, sân, kho — trong ô.",
     unit: "mét",
     kind: "numeric",
+    map: false,
   },
 
   // ── 4. CUNG — đã có gì (5) ────────────────────────────────────────────────
@@ -557,6 +608,8 @@ const CELL_SPECS: Spec[] = [
     desc: "Trung bình có trọng số số cổng, trên các trạm đủ điều kiện công bố trong ô. Ô không có trạm đo được để TRỐNG, không phải 0.",
     unit: "tỉ lệ cổng-giờ bận, 0–1",
     kind: "numeric",
+    // Aggregate chỉ để inspect: lens Sử dụng đọc trạng thái ở chính điểm trạm theo giờ.
+    map: false,
     coverageNote: (m) => {
       const c = m.coverage["util_cell"];
       const ok = m.source_metrics?.occ_status_ok;
@@ -581,6 +634,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Số trạm trong ô đóng góp vào mức sử dụng của ô.",
     unit: "trạm",
     kind: "numeric",
+    map: false,
   },
   {
     id: "network_reachable",
@@ -653,6 +707,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Các trạm trong ô đứng ở phân vị nào so với những trạm CÙNG LOẠI dòng điện trong Hà Nội. 0,5 là đúng mức trung vị của nhóm; cao hơn nghĩa là bận bất thường.",
     unit: "phân vị trong nhóm cùng loại, 0,5 = trung vị",
     kind: "numeric",
+    map: false,
     deps: [dataPath("stations.parquet"), dataPath("station_occupancy.parquet")],
     // Trung bình có trọng số SỐ CỔNG, cùng khuôn với `util_cell` ở B10 — một trạm 30 cổng
     // nói nhiều hơn một trạm 2 cổng về mức bận của cả ô.
@@ -668,6 +723,23 @@ const CELL_SPECS: Spec[] = [
       ' WHERE s.h3_r8 = g."h3_r8" AND o.util_pctl IS NOT NULL)',
     coverageNote:
       "Thưa hơn cả mức sử dụng: phân vị chỉ tính cho trạm hạng GOOD, nên ô có trạm nhưng chưa đủ quan sát vẫn để trống. Trống ở đây là “chưa xếp hạng được”, không phải “bận bằng 0”.",
+  },
+  {
+    id: "demand_supply_gap",
+    group: "sosanh",
+    label: "Chênh lệch Cung - Cầu",
+    desc: "Chỉ số thiếu hụt trạm sạc: Dân số và POI cao nhưng thưa súng sạc. Giá trị càng cao càng thể hiện vùng lõm phục vụ.",
+    unit: "chỉ số chênh lệch, > 0 = thiếu hụt",
+    kind: "numeric",
+    polarity: "high-bad",
+    // Chỉ số có trọng số policy-like; linked/bivariate view là fallback trước khi ship score.
+    map: false,
+    expr:
+      'CASE WHEN g."population" IS NULL THEN NULL ' +
+      'ELSE (g."population" / 1000.0 + COALESCE(g."n_apartment", 0) * 10.0 + COALESCE(g."n_mall", 0) * 5.0) ' +
+      '- (COALESCE(g."n_ports", 0) * 50.0 + COALESCE(g."power_kw_site", 0) * 0.5) END',
+    coverageNote:
+      "Chỉ số chênh lệch dương thể hiện khu vực dân cư và điểm thương mại tập trung cao nhưng hạ tầng sạc công cộng còn thưa thớt.",
   },
 ];
 
@@ -704,6 +776,8 @@ const COMMUNE_SPECS: Spec[] = [
     desc: "Số trạm sạc công cộng nằm trong ranh giới xã. Điểm sạc cá nhân 1 súng AC không được tính.",
     unit: "trạm",
     kind: "numeric",
+    // Tổng theo xã bị chi phối bởi quy mô đơn vị; xem point trạm hoặc cổng/10k dân.
+    map: false,
   },
   {
     id: "n_ports",
@@ -712,6 +786,7 @@ const COMMUNE_SPECS: Spec[] = [
     desc: "Tổng số súng lắp đặt của các trạm trong xã — tầng tài sản, không phải số súng đang báo cáo.",
     unit: "súng",
     kind: "numeric",
+    map: false,
   },
   {
     id: "power_kw_site",
@@ -720,6 +795,7 @@ const COMMUNE_SPECS: Spec[] = [
     desc: "Tổng công suất tủ sạc trong xã.",
     unit: "kW",
     kind: "numeric",
+    map: false,
   },
   {
     id: "dist_station_m_pop_weighted",
@@ -737,6 +813,7 @@ const COMMUNE_SPECS: Spec[] = [
     desc: "Trung bình mức sử dụng các trạm trong xã, trọng số số cổng. Xã không có trạm đo được để TRỐNG, không phải 0.",
     unit: "tỉ lệ cổng-giờ bận, 0–1",
     kind: "numeric",
+    map: false,
     coverageNote:
       "Xã trống là xã không có trạm công cộng nào báo cáo đủ chuẩn — không phải xã có trạm rảnh.",
   },
@@ -794,6 +871,16 @@ const ROAD_SPECS: Spec[] = [
 
 const STATION_SPECS: Spec[] = [
   {
+    id: "ports",
+    group: "cung",
+    lens: "supply",
+    label: "Số cổng đã lắp tại trạm",
+    desc: "Số cổng sạc công cộng đã lắp tại từng trạm. Màu mã hoá quy mô tài sản; bán kính chấm cố định để không thêm encoding thứ hai.",
+    unit: "cổng đã lắp tại trạm",
+    kind: "numeric",
+    nullMeans: "Nguồn không khai số cổng của trạm này; không được đọc thành trạm 0 cổng.",
+  },
+  {
     id: "occ",
     group: "sosanh",
     label: "Nhịp trạm tại giờ đang xem",
@@ -821,12 +908,60 @@ const PREFIX: Record<ReadingUnit, string> = {
   station: STATION_PREFIX,
 };
 
+/**
+ * Lens là nghĩa của measure, nên khai TƯỜNG MINH ở registry này thay vì suy từ `group`,
+ * `readAs` hay vị trí trong mảng. Prefix làm các trường trùng tên ở ô/xã không thể vô tình
+ * dùng chung quyết định. Danh sách được kiểm đủ ở `declaredLens` lúc module khởi tạo.
+ */
+export const LENS_DECLARATIONS: Record<LensId, readonly string[]> = {
+  demand: [
+    "cell:population", "cell:pop_density_ppkm2", "cell:n_apartment", "cell:apartment_levels_sum",
+    "cell:poi_anchor_index", "cell:demand_supply_gap", "commune:population", "commune:pop_density_ppkm2",
+  ],
+  supply: [
+    "cell:n_stations", "cell:n_stations_operational", "cell:n_ports", "cell:power_kw_site",
+    "commune:n_stations", "commune:n_ports", "commune:power_kw_site", "station:ports",
+  ],
+  access: [
+    "cell:road_len_m", "cell:road_len_in_province_m", "cell:road_len_arterial_m", "cell:road_len_motorway_m",
+    "cell:road_len_trunk_m", "cell:road_len_primary_m", "cell:road_len_secondary_m", "cell:road_len_tertiary_m",
+    "cell:road_len_local_m", "cell:road_len_service_m", "cell:dist_station_network_m", "cell:dist_station_euclid_m",
+    "cell:detour_ratio", "cell:dist_station_asym_m", "cell:road_access_offset_m", "cell:network_reachable",
+    "cell:evidence_grade_distance", "cell:pop_beyond_2km", "commune:dist_station_m_pop_weighted", "road:dist_station_m",
+  ],
+  utilization: ["cell:util_cell", "cell:n_stations_measured", "cell:util_pctl_cell", "commune:util_mean_port_weighted", "station:occ"],
+  policy: ["cell:screen_decision", "cell:screen_margin_m", "commune:ports_per_10k_pop"],
+  context: [
+    "cell:n_poi_1km", "cell:n_poi_total", "cell:n_mall", "cell:n_dept_store", "cell:n_supermarket", "cell:n_market",
+    "cell:n_parking_off", "cell:n_parking_street", "cell:n_fuel", "cell:built_frac", "cell:water_frac", "cell:crop_frac",
+    "cell:tree_frac", "cell:grass_frac", "cell:shrub_frac", "cell:bare_frac", "cell:wetland_frac", "cell:area_km2", "cell:area_frac",
+  ],
+};
+
+const DECLARED_LENS = new Map<string, LensId>(
+  Object.entries(LENS_DECLARATIONS).flatMap(([lens, ids]) => ids.map((id) => [id, lens as LensId] as const)),
+);
+
+function declaredLens(id: string, readAs: ReadingUnit): LensId {
+  const key = `${readAs}:${id}`;
+  const lens = DECLARED_LENS.get(key);
+  if (!lens) throw new Error(`Field registry lacks an explicit lens declaration: ${key}`);
+  return lens;
+}
+
 const withUnit = (specs: Spec[], readAs: ReadingUnit): FieldMeta[] =>
   specs.map((s) => ({
     ...s,
     readAs,
     column: s.id,
     id: PREFIX[readAs] + s.id,
+    // `lens` viết cạnh vài Spec cũ chỉ là chú thích lịch sử. Registry ở trên mới là nguồn
+    // sự thật; chặn lệch tại đây thay vì để một edit sau này âm thầm đổi câu hỏi của map.
+    lens: (() => {
+      const lens = declaredLens(s.id, readAs);
+      if (s.lens && s.lens !== lens) throw new Error(`Conflicting lens declarations for ${readAs}:${s.id}`);
+      return lens;
+    })(),
   }));
 
 export const FIELDS: FieldMeta[] = [
@@ -932,15 +1067,48 @@ export function fieldAvailable(f: FieldMeta): boolean {
   if (inUnusableLayer(f.id)) return false;
   const co = AVAILABLE[f.readAs];
   if (!co) return true;
+  // Một số field là đại lượng tính ở client nên `column` là tên hiển thị, không phải cột
+  // raw trong parquet. `station:ports` đọc `n_ports`; `station:occ` đọc profile occupancy
+  // và được chặn riêng bởi `inUnusableLayer`. Nếu kiểm tra mù `co.has(f.column)`, hai nút
+  // này luôn bị tắt dù bộ Hà Nội có đủ dữ liệu.
+  if (f.id === STATION_PORTS_FIELD) return co.has("n_ports");
+  if (f.id === STATION_OCC_FIELD) return true;
   // Trường phái sinh (`expr`) có thể chạm nhiều cột; nó chỉ dựng được khi CÓ ĐỦ. Không có
   // cách nào biết chắc từ đây, nên luật là: cột trần phải có mặt, biểu thức thì bỏ qua nếu
   // cột cùng tên không có. Thà giấu một trường dựng được còn hơn hiện một trường sẽ nổ.
   return co.has(f.column);
 }
 
+/** Field đủ dữ liệu VÀ có visual contract để làm analytical map. */
+export function fieldMapAvailable(f: FieldMeta): boolean {
+  return f.map !== false && fieldAvailable(f);
+}
+
 /** Trường của một đơn vị đọc, giữ nguyên thứ tự khai báo, ĐÃ lọc theo cột có mặt. */
 export function fieldsOfUnit(unit: ReadingUnit): FieldMeta[] {
   return FIELDS.filter((f) => f.readAs === unit && fieldAvailable(f));
+}
+
+/** Danh sách field được phép chọn trong rail bản đồ của một đơn vị đọc. */
+export function mapFieldsOfUnit(unit: ReadingUnit): FieldMeta[] {
+  return FIELDS.filter((f) => f.readAs === unit && fieldMapAvailable(f));
+}
+
+/** Field map-hoá của một lens, bất kể nó dùng H3, xã, line hay point. */
+export function mapFieldsOfLens(lens: LensId): FieldMeta[] {
+  return FIELDS.filter((f) => f.lens === lens && fieldMapAvailable(f));
+}
+
+/** Default lens khai báo; fallback chỉ dùng khi dataset thiếu default. */
+export function defaultFieldOfLens(lens: LensId): FieldMeta | undefined {
+  const id = LENSES.find((l) => l.id === lens)?.defaultField;
+  const preferred = id ? FIELD_BY_ID.get(id) : undefined;
+  return preferred && fieldMapAvailable(preferred) ? preferred : mapFieldsOfLens(lens)[0];
+}
+
+/** Lens là hệ quả của field; không có state/hash lens thứ hai để lệch khỏi `f`. */
+export function lensOfField(id: string): LensId {
+  return FIELD_BY_ID.get(id)?.lens ?? "demand";
 }
 
 /**

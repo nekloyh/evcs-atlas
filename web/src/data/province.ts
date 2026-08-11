@@ -24,8 +24,6 @@
 /** Khoá hash chọn tỉnh. Đọc TRƯỚC mọi khoá khác vì nó quyết định dữ liệu, không phải cách xem. */
 export const PROVINCE_KEY = "tinh";
 
-const CODE_RE = /^[0-9]{2}$/;
-
 /**
  * Giá trị `tinh=vn` — **cả nước**, không phải một tỉnh.
  *
@@ -69,12 +67,10 @@ export function parseDataset(hash: string): {
   national: boolean;
   proxy: boolean;
 } {
-  const raw = new URLSearchParams(hash.replace(/^#/, "")).get(PROVINCE_KEY);
-  if (raw === NATIONAL) return { province: null, national: true, proxy: false };
-  if (raw === PROXY) return { province: null, national: false, proxy: true };
-  // Mã hỏng ⇒ về bộ mặc định, KHÔNG nổ. Cùng luật với mọi khoá hash khác (§9): một ký tự
-  // gõ sai không được biến thành màn hình lỗi.
-  return { province: raw && CODE_RE.test(raw) ? raw : null, national: false, proxy: false };
+  // `tinh` từng chọn toàn quốc, POI proxy hoặc các tỉnh khác. Bản phát hành này cố ý chỉ
+  // có Hà Nội, nên mọi giá trị cũ đều rơi về bundle mặc định thay vì mở một layout khác.
+  void hash;
+  return { province: null, national: false, proxy: false };
 }
 
 /**
@@ -87,21 +83,15 @@ export function pathIn(province: string | null, name: string): string {
   return province ? `p/${province}/${name}` : name;
 }
 
-function readRaw(): string | null {
-  if (typeof window === "undefined") return null;
-  return new URLSearchParams(window.location.hash.replace(/^#/, "")).get(PROVINCE_KEY);
-}
-
 function readProvince(): string | null {
-  if (typeof window === "undefined") return null;
-  return parseDataset(window.location.hash).province;
+  return null;
 }
 
 /** Đang xem lớp gộp TOÀN QUỐC (34 tỉnh một màn hình) chứ không phải một bộ dữ liệu tỉnh. */
-export const isNationalMode: boolean = readRaw() === NATIONAL;
+export const isNationalMode = false;
 
 /** Đang ở chế độ PROXY POI — xem `PROXY`. */
-export const isProxyMode: boolean = readRaw() === PROXY;
+export const isProxyMode = false;
 
 /**
  * Mã tỉnh đang xem, hoặc `null` = **bộ Hà Nội gốc** ở đường dẫn không tiền tố.
@@ -114,9 +104,19 @@ export const PROVINCE: string | null = readProvince();
 /** Đang xem một tỉnh của store toàn quốc (chứ không phải bộ Hà Nội gốc)? */
 export const isProvinceMode = PROVINCE !== null;
 
+/**
+ * Bundle tỉnh mặc định đang là pilot Hà Nội.
+ *
+ * Manifest gốc vẫn được giữ để tương thích với bundle cũ, nhưng các lớp đầy đủ của Hà Nội
+ * đã được export vào `data/p/01/`. Nếu để `null` đi thẳng thành thư mục gốc, app sẽ đọc được
+ * grid rồi 404 ở stations/roads/occupancy — đúng kiểu lỗi làm bản đồ hiện một phần nhưng
+ * Data/Story và nhiều nút không hoạt động.
+ */
+const DEFAULT_PROVINCE_BUNDLE = "01";
+
 /** Tên file → đường dẫn tương đối trong `public/data/`, theo tỉnh đang mở. */
 export function dataPath(name: string): string {
-  return pathIn(PROVINCE, name);
+  return pathIn(PROVINCE ?? DEFAULT_PROVINCE_BUNDLE, name);
 }
 
 /**
