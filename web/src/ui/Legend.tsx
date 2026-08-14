@@ -20,7 +20,7 @@ import {
   type Scale,
 } from "../viz/palette";
 import { formatIn, formatSeries, scaleUnit, withDigits, type ScaledUnit } from "../units";
-import { DEMAND_SUPPLY_RGB } from "../viz/demand";
+import { DEMAND_SUPPLY_RGB, type BivariateAxes } from "../viz/demand";
 
 /**
  * Thang đơn vị của ramp đang hiện — chọn MỘT lần theo giá trị lớn nhất của thang.
@@ -54,6 +54,7 @@ export function Legend({
   manifest,
   runtime,
   surfaceBreaks,
+  bivariate = null,
   selectedValue = null,
   variant = "inline",
 }: {
@@ -62,6 +63,8 @@ export function Legend({
   manifest: Manifest | null;
   runtime: Map<string, RuntimeCoverage>;
   surfaceBreaks: number[];
+  /** Hai trục của ma trận bivariate, dựng từ chính tập ô đang vẽ (§15b). */
+  bivariate?: BivariateAxes | null;
   /** Giá trị của đối tượng đang chọn theo measure này — mốc trên thước đo. */
   selectedValue?: number | null;
   /** Inline is the legacy full-width strip; floating preserves all semantics in a wrapped stack. */
@@ -140,13 +143,11 @@ export function Legend({
 
   if (demandP1 && demandRepresentation === "bivariate") {
     return (
-      <div className={floating ? "flex flex-wrap items-center gap-2 text-body text-ink-2" : "flex h-10 shrink-0 items-center gap-3 border-b border-hairline px-3 text-body text-ink-2"}>
-        <span>cầu (hàng) × số cổng (cột), tối đa 3 nhóm/trục</span>
-        <span className="grid h-7 w-7 grid-cols-3 grid-rows-3 border border-hairline">
-          {DEMAND_SUPPLY_RGB.flatMap((row, r) => row.map((c, col) => <i key={`${r}-${col}`} style={{ background: `rgb(${c.join(",")})` }} />))}
-        </span>
-        <span className="text-ink-muted">so sánh exploratory · không phải opportunity score</span>
-      </div>
+      <BivariateKey
+        axes={bivariate}
+        field={field}
+        floating={floating}
+      />
     );
   }
 
@@ -647,6 +648,84 @@ function coverageOf(
     };
   }
   return runtime.get(field.id);
+}
+
+/**
+ * Chú giải MA TRẬN của bivariate — chỉ vẽ ô màu mà bản đồ thật sự dùng tới.
+ *
+ * Bản cũ vẽ một lưới 3×3 **cứng**, không biết gì về dữ liệu, kèm câu "tối đa 3 nhóm/trục".
+ * Với `n_ports` (90% ô bằng 0) thì phân vị 1/3 và 2/3 đều bằng 0, nhóm giữa của trục cung
+ * **không một ô nào rơi vào được**, và chú giải vẫn hứa đủ chín ô — ba trong đó không thể
+ * xuất hiện trên bản đồ. Luật chia nhóm đã sửa ở `tertileBreaks`; ở đây là phần chú giải
+ * không được phép hứa quá: nhóm nào không có ô thì không có swatch (§6a-3, cùng tinh thần
+ * "không độn bậc giả").
+ *
+ * Và nó in **ngưỡng thật** thay cho câu "tối đa 3 nhóm/trục" — §3b: chú giải in giá trị,
+ * không in tên nhóm.
+ */
+function BivariateKey({
+  axes,
+  field,
+  floating,
+}: {
+  axes: BivariateAxes | null;
+  field: FieldMeta;
+  floating: boolean;
+}) {
+  const wrap = floating
+    ? "flex flex-wrap items-center gap-x-3 gap-y-1 text-body text-ink-2"
+    : "flex h-10 shrink-0 items-center gap-3 border-b border-hairline px-3 text-body text-ink-2";
+  if (!axes) {
+    return (
+      <div className={wrap} aria-busy="true">
+        <span className="text-ink-muted">đang dựng ma trận cầu × cung…</span>
+      </div>
+    );
+  }
+  const rows = [0, 1, 2].filter((r) => axes.pop.reachable[r]);
+  const cols = [0, 1, 2].filter((c) => axes.ports.reachable[c]);
+  // Cùng luật với thước đo của ramp: thang chốt MỘT lần theo ngưỡng lớn, rồi `withDigits`
+  // khoá số chữ số. Thiếu bước này thì `formatIn` rơi về `formatBreak` cho số ≥ 1.000 và
+  // in "1,5 ng" cạnh nhãn "người" — hai đơn vị trong một câu.
+  const popUnit = withDigits(scaleUnit(field.unit, axes.pop.breaks[1]), axes.pop.breaks);
+  const portUnit = scaleUnit({ kind: "port" }, axes.ports.breaks[1]);
+  const n = (v: number, u: ScaledUnit) => formatIn(v, u);
+  // Trục cung có HAI cách chia, và câu chữ phải nói đúng cách đang dùng: nhánh {0} thì
+  // nhóm đầu là "chưa có trạm nào" — một khái niệm khác hẳn "ít cổng".
+  const portCaption =
+    axes.ports.breaks[0] === 0
+      ? `cung chưa có · ≤${n(axes.ports.breaks[1], portUnit)} · trên ${n(axes.ports.breaks[1], portUnit)} ${portUnit.label}`
+      : `cung cắt ở ${n(axes.ports.breaks[0], portUnit)} · ${n(axes.ports.breaks[1], portUnit)} ${portUnit.label}`;
+
+  return (
+    <div className={wrap}>
+      <span>
+        cầu (hàng) × số cổng (cột) — {rows.length}×{cols.length} nhóm
+      </span>
+      <span
+        className="grid border border-hairline"
+        style={{
+          height: `${rows.length * 9}px`,
+          width: `${cols.length * 9}px`,
+          gridTemplateRows: `repeat(${rows.length}, 1fr)`,
+          gridTemplateColumns: `repeat(${cols.length}, 1fr)`,
+        }}
+      >
+        {rows.flatMap((r) =>
+          cols.map((c) => (
+            <i key={`${r}-${c}`} style={{ background: `rgb(${DEMAND_SUPPLY_RGB[r]![c]!.join(",")})` }} />
+          )),
+        )}
+      </span>
+      {/* Ngưỡng THẬT, không phải "nhóm 1..3" — §3b. */}
+      <span className="tabular-nums text-ink-muted">
+        cầu cắt ở {n(axes.pop.breaks[0], popUnit)} · {n(axes.pop.breaks[1], popUnit)}{" "}
+        {popUnit.label}
+      </span>
+      <span className="tabular-nums text-ink-muted">{portCaption}</span>
+      <span className="text-ink-muted">so sánh exploratory · không phải opportunity score</span>
+    </div>
+  );
 }
 
 /**

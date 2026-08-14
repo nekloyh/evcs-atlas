@@ -191,6 +191,24 @@ ramp. Ramp cam là theme `exploration` (mặc định).
 `polarity` khai từng trường: `high-good` **đảo** thứ tự gán màu để **đậm luôn là chỗ cần can
 thiệp** ở mọi bản đồ. Không suy hộ — "nhiều đường trong ô" không tốt cũng không xấu.
 
+#### 4a-1. Cổng đo của ramp — đo trên MÀU VẼ RA, không trên hex trần
+
+Ô hex tô ở **alpha 217/255**, nên thứ mắt đọc là hợp thành trên nền `#f2f3f0`. Bốn cổng, tất
+cả chạy ở `test/ramp_gate.test.ts`:
+
+1. **ΔE ≥ 8 với NỀN.** Bậc thấp nhất phải tách khỏi nền, nếu không "giá trị thấp" đọc y như
+   "không có ô" — đúng thứ §4b bỏ hẳn một cơ chế để tránh.
+2. **ΔE ≥ 8 với MỰC BỊ-LOẠI** (`#898781` @ 0,25). Thiếu nó thì ô **được giữ** và ô **bị
+   loại** cùng màu, và §3d-1 gãy.
+3. **ΔL kề ≥ 0,06**, L đơn điệu giảm.
+4. **Mực đè swatch ≥ 4,5:1** (§4c), và `rgb` phải khớp `hex`, `series` phải là bậc 4.
+
+> Sáu ramp CARTO chưa từng qua cổng nào — chỉ ramp cam gốc đã đo. Bậc 1 của
+> `urban-context` cho **ΔE 1,5** với nền, `supply` **2,4**; bốn ramp có bậc nhạt đụng mực
+> bị-loại (`accessibility` **4,0**). Sửa bằng cách **giữ nguyên đường cong sắc, chỉ dời dải
+> L** rồi lấy mẫu lại 7 bậc trên chính đường cong ấy — không sắc mới nào được đẻ ra.
+> `exploration` bị KẸP để không bị làm sáng lên: nó vốn đã đạt. Số đo ở DECISIONS §24.
+
 ### 4b. Ô null — gạch chéo xám
 
 Ô không có giá trị vẽ **vân 45°** xám trung tính, **không bao giờ** tô bậc màu nhạt. Hàm màu
@@ -634,3 +652,17 @@ thang màu.
 **15c.** Representation nào mã hoá bằng **kích thước** thì kích thước đó phải được **khai rõ
 ở chú giải** (`hybrid`: chấm = √ số cổng). Không có legend kích thước thật thì không được
 dùng kích thước để mã hoá — §4d.
+
+### 15b. Ma trận bivariate
+
+Ngưỡng của **cả hai trục** dựng một lần bằng `bivariateAxes(cells)`; bản đồ và chú giải đọc
+đúng bộ ấy. Chú giải chỉ vẽ ô màu cho nhóm **thật sự có ô**, và in **ngưỡng thật** chứ không
+in "3 nhóm/trục".
+
+> Phân vị ba không dùng được cho trục thưa: `n_ports` có 90,0% ô bằng 0 nên phân vị 1/3 và
+> 2/3 **đều bằng 0**, nhóm giữa **không ô nào rơi vào được**, và chú giải vẫn hứa đủ 9 ô
+> màu — 3 trong đó không thể xuất hiện. Nay trục nào có ≥5% số 0 thì {0} là nhóm riêng
+> (§6a-2) và phần dương chia đôi ở trung vị của chính nó. 9/9 ô màu tới được.
+>
+> Việc này **không** chữa chuyện bivariate cần cả hai trục có cấu trúc không gian, mà cung
+> thì không (Moran I = 0,19). Đó là việc của bước sau.

@@ -68,7 +68,7 @@ import {
 import { keep, type BrushState } from "../state/brush";
 import type { StationOccupancy } from "../data/occupancy";
 import { stationOccAt } from "../viz/occ";
-import { DEMAND_SUPPLY_RGB, tertileBreaks, tertileClass } from "../viz/demand";
+import { DEMAND_SUPPLY_RGB, bivariateAxes, tertileClass } from "../viz/demand";
 import { themeFor, type AnalysisTheme } from "../viz/theme";
 
 interface Props {
@@ -1254,8 +1254,10 @@ function demandIntensityLayer(cells: GridCell[]): Layer {
 
 /** P1 bivariate comparison: Hàng = population tertile, cột = installed-port tertile. */
 function demandSupplyLayer(cells: GridCell[]): Layer {
-  const popBreaks = tertileBreaks(cells.map((d) => d.pop));
-  const portBreaks = tertileBreaks(cells.map((d) => d.ports));
+  // MỘT cửa cho cả bản đồ lẫn chú giải — xem `bivariateAxes`.
+  const { pop, ports } = bivariateAxes(cells);
+  const popBreaks = pop.breaks;
+  const portBreaks = ports.breaks;
   return new H3HexagonLayer<GridCell>({
     id: "demand-supply-bivariate",
     data: cells,

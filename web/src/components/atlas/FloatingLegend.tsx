@@ -5,6 +5,7 @@ import { scaleUnit } from "../../units";
 import type { Manifest } from "../../data/manifest";
 import { useStore } from "../../state/store";
 import type { Scale } from "../../viz/palette";
+import type { BivariateAxes } from "../../viz/demand";
 import { Legend } from "../../ui/Legend";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
@@ -16,6 +17,7 @@ export interface FloatingLegendProps {
   manifest: Manifest | null;
   runtime: Map<string, RuntimeCoverage>;
   surfaceBreaks: number[];
+  bivariate: BivariateAxes | null;
   /** Giá trị của đối tượng đang chọn theo measure đang tô — mốc trên thước đo. */
   selectedValue: number | null;
 }
@@ -26,6 +28,7 @@ export function FloatingLegend({
   manifest,
   runtime,
   surfaceBreaks,
+  bivariate,
   selectedValue,
 }: FloatingLegendProps) {
   const [collapsed, setCollapsed] = React.useState(false);
@@ -101,6 +104,7 @@ export function FloatingLegend({
               manifest={manifest}
               runtime={runtime}
               surfaceBreaks={surfaceBreaks}
+              bivariate={bivariate}
               selectedValue={selectedValue}
               variant="floating"
             />

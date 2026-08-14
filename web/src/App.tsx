@@ -50,6 +50,7 @@ import { AtlasInspector } from "./components/atlas/AtlasInspector";
 import { CompareDock } from "./components/atlas/CompareDock";
 import { allOccValues, cityProfile, occCountAt, occCoverage, stationOccAt } from "./viz/occ";
 import { buildScale, computeClassingByWeight, type Scale } from "./viz/palette";
+import { bivariateAxes } from "./viz/demand";
 
 /**
  * Nav — DESIGN.md §3a.
@@ -94,6 +95,9 @@ export default function App() {
   const [derivedCov, setDerivedCov] = useState(NO_COVERAGE);
   const [roadCov, setRoadCov] = useState(NO_COVERAGE);
   const [surfaceBreaks, setSurfaceBreaks] = useState<number[]>([]);
+  // Hai trục bivariate dựng cùng chỗ, cùng lúc với `scale`: bản đồ và chú giải phải đọc
+  // đúng một bộ ngưỡng, nếu không chú giải sẽ hứa những ô màu bản đồ không bao giờ vẽ.
+  const bivariate = useMemo(() => (cells.length ? bivariateAxes(cells) : null), [cells]);
   const [error, setError] = useState<string | null>(null);
 
   const fail = (e: unknown) => setError(e instanceof Error ? e.message : String(e));
@@ -516,6 +520,7 @@ export default function App() {
                 manifest={manifest}
                 runtime={runtimeCov}
                 surfaceBreaks={surfaceBreaks}
+                bivariate={bivariate}
                 selectedValue={selectedValue}
               />
 
