@@ -215,17 +215,17 @@ export default function ProxyApp() {
 
   return (
     <div className="flex h-full flex-col bg-panel text-ink">
-      <nav className="flex h-11 shrink-0 items-center gap-4 border-b border-hairline px-4 text-[13px]">
+      <nav className="flex h-11 shrink-0 items-center gap-4 border-b border-hairline px-4 text-heading">
         <span className="font-semibold tracking-[0.14em]">POI · TỈNH VÔ DANH</span>
         {/* Nhãn CẢNH BÁO, không phải trang trí: mọi thứ trên màn hình này là dữ liệu chưa
             kiểm chứng, và người xem phải biết điều đó trước khi đọc một mark nào. */}
-        <span className="border border-hairline px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-ink-muted">
+        <span className="border border-hairline px-1.5 py-0.5 text-note uppercase tracking-wide text-ink-muted">
           chế độ test · không có phép tính nào
         </span>
         <div className="ml-auto flex items-center gap-4">
           <DatasetPicker />
         </div>
-        <label className="flex items-center gap-1.5 text-[11px] text-ink-2">
+        <label className="flex items-center gap-1.5 text-body text-ink-2">
           <span className="uppercase tracking-wide text-ink-muted">TẬP</span>
           <select
             value={set?.key ?? ""}
@@ -273,12 +273,12 @@ export default function ProxyApp() {
             showPoints={showPoints}
           />
           {error && (
-            <div className="absolute inset-x-0 top-0 z-10 border-b border-hairline bg-panel px-4 py-2 text-[13px]">
+            <div className="absolute inset-x-0 top-0 z-10 border-b border-hairline bg-panel px-4 py-2 text-heading">
               {error}
             </div>
           )}
           {(loading || dangNap) && (
-            <div className="absolute left-3 top-3 z-10 border border-hairline bg-panel/95 px-2 py-1 text-[11px] text-ink-muted">
+            <div className="absolute left-3 top-3 z-10 border border-hairline bg-panel/95 px-2 py-1 text-body text-ink-muted">
               đang {dangNap ? `đọc ${dangNap}` : `nạp ${set?.file}`}…
             </div>
           )}
@@ -288,15 +288,15 @@ export default function ProxyApp() {
           {!set && !dangNap && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-panel/70">
               <div className="max-w-md border border-dashed border-hairline px-8 py-7 text-center">
-                <div className="text-[15px] font-semibold">Chưa có tập POI nào</div>
-                <p className="mt-2 text-[12px] leading-relaxed text-ink-muted">
+                <div className="text-heading font-semibold">Chưa có tập POI nào</div>
+                <p className="mt-2 text-title leading-relaxed text-ink-muted">
                   Kéo một file <b className="text-ink-2">.geojson</b> hoặc{" "}
                   <b className="text-ink-2">.parquet</b> thả vào cửa sổ này — hoặc bấm{" "}
                   <b className="text-ink-2">＋ NẠP FILE</b> ở thanh trên. File được đọc ngay trong
                   trình duyệt: không gửi đi đâu, không ghi xuống đĩa, và mất khi tải lại trang.
                 </p>
                 {manErr && (
-                  <p className="mt-3 border-t border-hairline pt-2 text-[11px] text-ink-muted">
+                  <p className="mt-3 border-t border-hairline pt-2 text-body text-ink-muted">
                     {manErr}
                   </p>
                 )}
@@ -306,8 +306,8 @@ export default function ProxyApp() {
           {/* Bảng đọc của POI đang rê chuột — đặt TRÊN bản đồ, cùng lý do với màn hình toàn
               quốc: nó đổi theo con trỏ, và mắt không nên rời khỏi chỗ đang chỉ. */}
           {hovered && (
-            <div className="pointer-events-none absolute bottom-3 left-3 z-10 max-w-sm border border-hairline bg-panel/95 px-3 py-2 text-[11px]">
-              <div className="text-[12px] font-semibold">
+            <div className="pointer-events-none absolute bottom-3 left-3 z-10 max-w-sm border border-hairline bg-panel/95 px-3 py-2 text-body">
+              <div className="text-title font-semibold">
                 {String(hovered.properties["name"] ?? "— không có tên —")}
               </div>
               <div className="text-ink-muted">
@@ -319,7 +319,7 @@ export default function ProxyApp() {
           )}
         </main>
 
-        <aside className="flex w-80 shrink-0 flex-col overflow-y-auto overflow-x-hidden border-l border-hairline text-[11px]">
+        <aside className="flex w-80 shrink-0 flex-col overflow-y-auto overflow-x-hidden border-l border-hairline text-body">
           <Group title="LỚP">
             {/* MỘT lớp, tên "POI". Không tách theo `lop` — xem docstring của file. */}
             <div className="flex items-start gap-2 px-3 py-1.5">
@@ -502,7 +502,7 @@ function Row({ k, v }: { k: string; v: string }) {
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="border-b border-hairline">
-      <h2 className="px-3 py-1.5 text-[10px] uppercase tracking-[0.12em] text-ink-muted">
+      <h2 className="px-3 py-1.5 text-note uppercase tracking-[0.12em] text-ink-muted">
         {title}
       </h2>
       {children}

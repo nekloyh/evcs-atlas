@@ -23,11 +23,11 @@ export function Figure({
       {/* Số lớn dùng figure TỈ LỆ, không `tabular-nums`: `tabular-nums` cho mọi chữ số bề
           rộng của số 0, nên ở cỡ lớn nó đọc thành lỏng lẻo. `tabular-nums` để dành cho cột
           số phải thẳng hàng — §4e. */}
-      <div className="text-[30px] font-semibold leading-none">
+      <div className="text-readout font-semibold leading-none">
         {value}
-        {unit && <span className="pl-1.5 text-[12px] font-normal text-ink-muted">{unit}</span>}
+        {unit && <span className="pl-1.5 text-title font-normal text-ink-muted">{unit}</span>}
       </div>
-      <div className="pt-1.5 text-[11px] leading-snug text-ink-2">{caption}</div>
+      <div className="pt-1.5 text-body leading-snug text-ink-2">{caption}</div>
     </div>
   );
 }
@@ -35,7 +35,7 @@ export function Figure({
 /** Dòng số phụ — dùng cho những con số đỡ cho con số dẫn, không tự đứng một mình. */
 export function Stat({ label, value }: { label: ReactNode; value: string }) {
   return (
-    <div className="flex items-baseline gap-2 border-b border-hairline px-4 py-1.5 text-[11px]">
+    <div className="flex items-baseline gap-2 border-b border-hairline px-4 py-1.5 text-body">
       <span className="min-w-0 flex-1 text-ink-2">{label}</span>
       <span className="tabular-nums text-ink">{value}</span>
     </div>
@@ -44,7 +44,7 @@ export function Stat({ label, value }: { label: ReactNode; value: string }) {
 
 /** Đoạn văn của cảnh. */
 export function Para({ children }: { children: ReactNode }) {
-  return <p className="px-4 py-2.5 text-[12px] leading-relaxed text-ink-2">{children}</p>;
+  return <p className="px-4 py-2.5 text-title leading-relaxed text-ink-2">{children}</p>;
 }
 
 /**
@@ -55,7 +55,7 @@ export function Para({ children }: { children: ReactNode }) {
  */
 export function Pending({ label }: { label: string }) {
   return (
-    <div className="border-b border-hairline px-4 py-3 text-[11px] text-ink-muted">
+    <div className="border-b border-hairline px-4 py-3 text-body text-ink-muted">
       đang đo {label}…
     </div>
   );
@@ -64,7 +64,7 @@ export function Pending({ label }: { label: string }) {
 /** Khối "vì sao điều này quyết định", đóng mỗi cảnh. */
 export function SoWhat({ children }: { children: ReactNode }) {
   return (
-    <div className="mx-4 my-3 border-l-2 border-cold-3 pl-3 text-[12px] leading-relaxed text-ink">
+    <div className="mx-4 my-3 border-l-2 border-cold-3 pl-3 text-title leading-relaxed text-ink">
       {children}
     </div>
   );

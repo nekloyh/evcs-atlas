@@ -86,7 +86,7 @@ export function FieldsTab({
       : [];
 
   return (
-    <div className="text-[12px]">
+    <div className="text-title">
       <div className="sticky top-0 z-10 border-b border-hairline bg-panel">
         <div className="grid grid-cols-2 border-b border-hairline">
         {lenses.map((l) => {
@@ -105,10 +105,10 @@ export function FieldsTab({
                 on ? "bg-basemap" : "hover:bg-basemap/50"
               }`}
             >
-              <span className={`block text-[10px] tracking-[0.1em] ${on ? "font-semibold text-ink" : "text-ink-2"}`}>
+              <span className={`block text-note tracking-[0.1em] ${on ? "font-semibold text-ink" : "text-ink-2"}`}>
                 {l.label}
               </span>
-              <span className="block text-[10px] text-ink-muted">{l.hint}</span>
+              <span className="block text-note text-ink-muted">{l.hint}</span>
             </button>
           );
         })}
@@ -120,10 +120,10 @@ export function FieldsTab({
             !paintOn ? "bg-basemap" : "hover:bg-basemap/50"
           }`}
         >
-          <span className={`block text-[11px] tracking-[0.1em] ${!paintOn ? "font-semibold text-ink" : "text-ink-2"}`}>
+          <span className={`block text-body tracking-[0.1em] ${!paintOn ? "font-semibold text-ink" : "text-ink-2"}`}>
             TẮT
           </span>
-          <span className="block text-[10px] text-ink-muted">chỉ nền + overlay</span>
+          <span className="block text-note text-ink-muted">chỉ nền + overlay</span>
         </button>
       </div>
 
@@ -132,10 +132,10 @@ export function FieldsTab({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="tìm trong tên · nhãn · mô tả"
-          className="w-full border border-hairline bg-white px-2 py-1 text-[12px] outline-none placeholder:text-ink-muted focus:border-ink-muted"
+          className="w-full border border-hairline bg-white px-2 py-1 text-title outline-none placeholder:text-ink-muted focus:border-ink-muted"
         />
         {q && (
-          <div className="pt-1 text-[11px] text-ink-muted">
+          <div className="pt-1 text-body text-ink-muted">
             {hits.length}/{pool.length} trường
             {communeHits.length > 0 && ` · ${communeHits.length} xã`}
           </div>
@@ -148,26 +148,26 @@ export function FieldsTab({
         {field === "population" ? (
           <button
             onClick={() => openCompare("demand-access")}
-            className="w-full cursor-pointer border border-hairline px-2 py-1.5 text-left text-[11px] text-ink-2 hover:bg-basemap hover:text-ink"
+            className="w-full cursor-pointer border border-hairline px-2 py-1.5 text-left text-body text-ink-2 hover:bg-basemap hover:text-ink"
           >
             SO SÁNH DÂN SỐ × KHOẢNG CÁCH
-            <span className="block pt-0.5 text-[10px] text-ink-muted">ô H3 có đủ hai biến; không tự lọc bản đồ</span>
+            <span className="block pt-0.5 text-note text-ink-muted">ô H3 có đủ hai biến; không tự lọc bản đồ</span>
           </button>
         ) : field === STATION_OCC_FIELD ? (
           <button
             onClick={() => openCompare("utilization-pattern")}
-            className="w-full cursor-pointer border border-hairline px-2 py-1.5 text-left text-[11px] text-ink-2 hover:bg-basemap hover:text-ink"
+            className="w-full cursor-pointer border border-hairline px-2 py-1.5 text-left text-body text-ink-2 hover:bg-basemap hover:text-ink"
           >
             XEM NHỊP SỬ DỤNG 168 GIỜ
-            <span className="block pt-0.5 text-[10px] text-ink-muted">tổng hợp toàn dataset; chỉ đổi giờ đang xem</span>
+            <span className="block pt-0.5 text-note text-ink-muted">tổng hợp toàn dataset; chỉ đổi giờ đang xem</span>
           </button>
         ) : FIELD_BY_ID.get(field)?.kind === "numeric" ? (
           <button
             onClick={() => openCompare("distribution")}
-            className="w-full cursor-pointer border border-hairline px-2 py-1.5 text-left text-[11px] text-ink-2 hover:bg-basemap hover:text-ink"
+            className="w-full cursor-pointer border border-hairline px-2 py-1.5 text-left text-body text-ink-2 hover:bg-basemap hover:text-ink"
           >
             XEM PHÂN BỐ MEASURE
-            <span className="block pt-0.5 text-[10px] text-ink-muted">toàn dataset; kéo để lọc tập mark</span>
+            <span className="block pt-0.5 text-note text-ink-muted">toàn dataset; kéo để lọc tập mark</span>
           </button>
         ) : null}
       </div>
@@ -176,7 +176,7 @@ export function FieldsTab({
 
       {communeHits.length > 0 && (
         <section>
-          <h3 className="flex items-baseline gap-2 border-b border-hairline bg-basemap px-2 py-1 text-[11px] tracking-[0.1em] text-ink-2">
+          <h3 className="flex items-baseline gap-2 border-b border-hairline bg-basemap px-2 py-1 text-body tracking-[0.1em] text-ink-2">
             XÃ/PHƯỜNG
             <span className="tracking-normal text-ink-muted">bấm để mở panel</span>
             <span className="ml-auto tabular-nums text-ink-muted">{communeHits.length}</span>
@@ -197,7 +197,7 @@ export function FieldsTab({
               className="flex w-full cursor-pointer items-baseline gap-2 border-b border-hairline px-2 py-1.5 text-left hover:bg-basemap"
             >
               <span className="min-w-0 flex-1 truncate">{String(f.properties["commune_name"])}</span>
-              <span className="font-mono text-[10px] text-ink-muted">
+              <span className="font-mono text-note text-ink-muted">
                 {String(f.properties["commune_code"])}
               </span>
             </button>
@@ -207,7 +207,7 @@ export function FieldsTab({
 
       {hits.length > 0 && (
         <section>
-          <h3 className="flex items-baseline gap-2 border-b border-hairline bg-basemap px-2 py-1 text-[11px] tracking-[0.1em] text-ink-2">
+          <h3 className="flex items-baseline gap-2 border-b border-hairline bg-basemap px-2 py-1 text-body tracking-[0.1em] text-ink-2">
             MEASURE
             <span className="tracking-normal text-ink-muted">các cách trả lời câu hỏi đang chọn</span>
             <span className="ml-auto tabular-nums text-ink-muted">{hits.length}</span>
@@ -226,7 +226,7 @@ export function FieldsTab({
       )}
 
       {hits.length === 0 && communeHits.length === 0 && (
-        <p className="p-3 text-[12px] text-ink-muted">
+        <p className="p-3 text-title text-ink-muted">
           Không field map-hoá nào của lens {LENSES.find((l) => l.id === lens)?.label ?? "này"} khớp “{search}”.
         </p>
       )}
@@ -279,19 +279,19 @@ function FieldRow({
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className={selected ? "font-semibold" : ""}>{f.label}</span>
-            <span className="text-[10px] tracking-[0.08em] text-ink-muted">{READ_AS_LABEL[f.readAs]}</span>
+            <span className="text-note tracking-[0.08em] text-ink-muted">{READ_AS_LABEL[f.readAs]}</span>
             {badges.map((b) => (
               <Badge key={b.kind + b.text} badge={b} />
             ))}
           </span>
           {/* Tên CỘT thật, không phải id có tiền tố: `commune:population` là định danh của
               app, còn thứ truy được về dữ liệu là `population` trong commune.parquet. */}
-          <span className="block text-[10px] text-ink-muted">{f.column}</span>
+          <span className="block text-note text-ink-muted">{f.column}</span>
         </span>
       </label>
 
       {selected && (
-        <div className="space-y-1.5 px-2 pb-2 pl-7 text-[11px] leading-snug text-ink-2">
+        <div className="space-y-1.5 px-2 pb-2 pl-7 text-body leading-snug text-ink-2">
           <p>{f.desc}</p>
           {badges.map((b) => (
             <p key={b.kind} className="text-ink-muted">

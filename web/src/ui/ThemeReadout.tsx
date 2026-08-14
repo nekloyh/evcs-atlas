@@ -18,7 +18,7 @@ export function ThemeReadout({ field }: { field: FieldMeta }) {
   const theme = themeFor(field, demand);
   const themeColor = seriesColorForTheme(theme);
   return (
-    <div className="flex items-center border-b border-hairline bg-basemap px-2 py-1 text-[10px] text-ink-2">
+    <div className="flex items-center border-b border-hairline bg-basemap px-2 py-1 text-note text-ink-2">
       <span
         className="mr-1.5 inline-block h-2 w-2 rounded-full shadow-sm"
         style={{ backgroundColor: themeColor }}

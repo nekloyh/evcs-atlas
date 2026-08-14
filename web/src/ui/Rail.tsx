@@ -35,7 +35,7 @@ export function Rail({
 
   return (
     <aside className={`${visibility} ${drawer} absolute bottom-3 right-3 z-20 max-h-[min(42rem,calc(100%-1.5rem))] w-80 flex-col border border-hairline bg-panel`} aria-label="Không gian điều tra">
-      <div className="flex shrink-0 border-b border-hairline text-[11px] tracking-[0.1em]">
+      <div className="flex shrink-0 border-b border-hairline text-body tracking-[0.1em]">
         <button onClick={() => setWorkspaceOpen(false)} className="hidden border-r border-hairline px-2 text-ink-2 max-xl:block">đóng</button>
         <button
           onClick={() => setPage("question")}

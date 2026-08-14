@@ -234,9 +234,9 @@ export default function NationalApp() {
 
   return (
     <div className="flex h-full flex-col bg-panel text-ink">
-      <nav className="flex h-11 shrink-0 items-center gap-6 border-b border-hairline px-4 text-[13px]">
+      <nav className="flex h-11 shrink-0 items-center gap-6 border-b border-hairline px-4 text-heading">
         <span className="font-semibold tracking-[0.14em]">EVCS TOÀN QUỐC</span>
-        <span className="text-[11px] text-ink-muted">
+        <span className="text-body text-ink-muted">
           {manifest && grid
             ? `${manifest.n_provinces} tỉnh · ${grid.n_cells.toLocaleString("vi-VN")} ô gộp r${shownRes}`
             : "đang nạp…"}
@@ -291,15 +291,15 @@ export default function NationalApp() {
             onPickProvince={(code) => switchDataset(code)}
           />
           {error && (
-            <div className="absolute inset-x-0 top-0 border-b border-hairline bg-panel px-4 py-2 text-[13px]">
+            <div className="absolute inset-x-0 top-0 border-b border-hairline bg-panel px-4 py-2 text-heading">
               Không nạp được dữ liệu: {error}
             </div>
           )}
           {/* Bảng đọc của tỉnh đang rê chuột. Đặt TRÊN bản đồ chứ không trong rail: nó đổi
               theo con trỏ, và mắt không rời khỏi chỗ đang chỉ để đọc một ô ở mép màn hình. */}
           {hoveredRow && (
-            <div className="pointer-events-none absolute bottom-3 left-3 max-w-xs border border-hairline bg-panel/95 px-3 py-2 text-[11px]">
-              <div className="text-[12px] font-semibold">{hoveredRow.province_name}</div>
+            <div className="pointer-events-none absolute bottom-3 left-3 max-w-xs border border-hairline bg-panel/95 px-3 py-2 text-body">
+              <div className="text-title font-semibold">{hoveredRow.province_name}</div>
               <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-3 tabular-nums">
                 {PROVINCE_FIELDS.slice(0, 6).map((f) => (
                   <Row key={f.id} k={f.label} v={`${formatValue(f, hoveredRow[f.column] as number)} ${f.unit_label}`} />
@@ -314,7 +314,7 @@ export default function NationalApp() {
           )}
         </main>
 
-        <aside className="w-72 shrink-0 overflow-y-auto border-l border-hairline text-[11px]">
+        <aside className="w-72 shrink-0 overflow-y-auto border-l border-hairline text-body">
           <Group title="CẦU · TỈNH">
             {PROVINCE_FIELDS.map((f) => (
               <FieldRow key={f.id} f={f} on={f.id === fieldId} pick={setFieldId} />
@@ -431,7 +431,7 @@ function Row({ k, v }: { k: string; v: string }) {
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="border-b border-hairline">
-      <h2 className="px-3 py-1.5 text-[10px] uppercase tracking-[0.12em] text-ink-muted">
+      <h2 className="px-3 py-1.5 text-note uppercase tracking-[0.12em] text-ink-muted">
         {title}
       </h2>
       {children}
@@ -482,7 +482,7 @@ function Legend({
   const noun = field.unit === "province" ? "tỉnh" : "ô gộp";
 
   return (
-    <div className="flex h-10 shrink-0 items-stretch border-b border-hairline text-[11px]">
+    <div className="flex h-10 shrink-0 items-stretch border-b border-hairline text-body">
       <div className="flex">
         {labels.map((label, i) => (
           <div
@@ -528,14 +528,14 @@ function Legend({
         </span>
         {/* Bậc màu là phân vị TRÊN CHÍNH tập này. Nói ra, vì cùng sắc cam ở màn hình một
             tỉnh mang một nghĩa khác — xem quyết định 2 ở docstring. */}
-        <span className="border border-hairline px-1 text-[10px] text-ink-muted">
+        <span className="border border-hairline px-1 text-note text-ink-muted">
           bậc theo phân vị của {field.unit === "province" ? "34 tỉnh" : `${grid ? Math.round(grid.n_cells / 1000) : "?"} nghìn ô r${grid?.key.slice(-1) ?? "6"}`} — không so được với bậc của một tỉnh, cũng không so được giữa hai bậc lưới
         </span>
         {/* Chỉ hiện Ở 3D, và đó là điều đúng: ở 2D không có kênh chiều cao nào để mà mô tả,
             một câu mô tả kênh không tồn tại là nhiễu. Con số bậc đến từ `classCount` (tính
             trên chính dữ liệu đang xem), không gõ tay — ràng buộc 4. */}
         {mode === "3d" && scale && (
-          <span className="border border-hairline px-1 text-[10px] text-ink-muted">
+          <span className="border border-hairline px-1 text-note text-ink-muted">
             chiều cao = cùng trường đang tô, {classCount(scale)} bậc (mã hoá trùng) · ô không
             đo được giữ phẳng
           </span>

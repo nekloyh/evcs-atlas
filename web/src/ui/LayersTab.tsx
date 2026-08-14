@@ -19,7 +19,7 @@ interface OverlayMeta {
   id: OverlayId;
   label: string;
   /** hình học — cũng chính là thứ phân biệt overlay này với overlay khác */
-  shape: "point" | "line" | "area" | PoiShape | "star" | "dashed-ring";
+  shape: "point" | "line" | "area" | PoiShape | "dashed-ring";
   desc: string;
   /** câu cần số từ manifest; không có số thì không hiện, không đoán (§12) */
   note?: (m: Manifest) => string | null;
@@ -112,32 +112,6 @@ const OVERLAYS: OverlayMeta[] = [
     desc: `${g.desc} Ở chế độ 3D, POI có polygon thành khối cao ${POI_BLOCK_HEIGHT_M} m — hằng số khai báo để khối nổi lên, KHÔNG phải chiều cao thật.`,
     note: poiNote(g.group),
   })),
-  // M5 — lớp overlay cuối của lộ trình. Một chấm SAO nói đúng một điều và không nói gì
-  // thêm: không màu theo công suất, không bán kính phục vụ, không cấp điện áp (§12).
-  {
-    id: "substations",
-    label: "Trạm biến áp OSM",
-    shape: "star",
-    desc: "Mỗi ngôi sao là một đối tượng power=substation trong OSM. Nó nói ĐÚNG MỘT điều: ở đây có một trạm biến áp. Bản đồ này KHÔNG có công suất lưới (kVA), KHÔNG có bán kính phục vụ và KHÔNG có khoảng cách tới trạm biến áp — khả năng đấu nối lưới nằm ngoài phạm vi bài toán, nên các con số đó không tồn tại trong bộ dữ liệu.",
-    note: (m) => {
-      const s = m.source_metrics?.osm_substations;
-      if (!s) return null;
-      return (
-        `${s.n_mapped_as_area.toLocaleString("vi-VN")}/${s.n.toLocaleString("vi-VN")} cái được ` +
-        `OSM vẽ bằng ĐA GIÁC; ta ship TÂM của chúng vì đây là lớp điểm. ` +
-        `${s.n_named.toLocaleString("vi-VN")} cái có tên trong OSM.`
-      );
-    },
-    warn: (m) => {
-      const s = m.source_metrics?.osm_substations;
-      if (!s) return null;
-      return (
-        `${s.n.toLocaleString("vi-VN")} trạm biến áp là CHẶN DƯỚI, không phải số đo. ` +
-        `OSM phủ hạ tầng điện rất thưa, nên chỗ KHÔNG có sao không có nghĩa là không có ` +
-        `trạm biến áp — chỉ có nghĩa là OSM chưa vẽ. Đừng đọc lớp này như một bản đồ lưới điện.`
-      );
-    },
-  },
 ];
 
 /** Đường bao SVG của 4 hình POI trong hộp 10×10, tâm (5,5) — khớp §4d-4. */
@@ -148,16 +122,6 @@ const POI_SHAPE_PATH: Record<PoiShape, string> = {
   cross: "M3.4 1 H6.6 V3.4 H9 V6.6 H6.6 V9 H3.4 V6.6 H1 V3.4 H3.4 Z",
 };
 
-/** Sao 5 cánh — mark trạm biến áp (§4d-4). Cùng hình học với `viz/substation-icon.ts`. */
-const STAR_PATH = (() => {
-  const pts: string[] = [];
-  for (let i = 0; i < 10; i++) {
-    const r = i % 2 === 0 ? 4.4 : 4.4 * 0.42;
-    const a = -Math.PI / 2 + (i * Math.PI) / 5;
-    pts.push(`${(5 + r * Math.cos(a)).toFixed(2)} ${(5 + r * Math.sin(a)).toFixed(2)}`);
-  }
-  return `M${pts.join(" L")} Z`;
-})();
 
 /** Chú giải = đúng cái mark trên bản đồ, không phải một ô màu đại diện cho nó. */
 function ShapeSwatch({ shape }: { shape: OverlayMeta["shape"] }) {
@@ -177,16 +141,6 @@ function ShapeSwatch({ shape }: { shape: OverlayMeta["shape"] }) {
             strokeWidth="1.4"
             strokeDasharray="3 3"
           />
-        </svg>
-      </span>
-    );
-  }
-  if (shape === "star") {
-    // MỘT biến thể, không có cặp đặc/rỗng — lớp này không mang tư cách thứ hai nào.
-    return (
-      <span className="flex w-7 shrink-0 items-center justify-center">
-        <svg width="12" height="12" viewBox="0 0 10 10">
-          <path d={STAR_PATH} fill={COLD_HEX[2]} />
         </svg>
       </span>
     );
@@ -265,9 +219,9 @@ export function LayersTab({ manifest }: { manifest: Manifest | null }) {
   const setBasemapStyle = useStore((s) => s.setBasemapStyle);
 
   return (
-    <div className="text-[12px]">
+    <div className="text-title">
       <div className="border-b border-hairline p-2 bg-basemap/50">
-        <div className="mb-1.5 font-semibold text-ink-1 uppercase tracking-wider text-[10px]">
+        <div className="mb-1.5 font-semibold text-ink-1 uppercase tracking-wider text-note">
           Bản đồ nền (Basemap Style)
         </div>
         <div className="grid grid-cols-3 gap-1">
@@ -285,7 +239,7 @@ export function LayersTab({ manifest }: { manifest: Manifest | null }) {
                 }`}
               >
                 <span className={`w-3.5 h-3.5 rounded-full border mb-1 ${b.preview}`} />
-                <span className="text-[10px] leading-tight">{b.label}</span>
+                <span className="text-note leading-tight">{b.label}</span>
               </button>
             );
           })}
@@ -318,7 +272,7 @@ export function LayersTab({ manifest }: { manifest: Manifest | null }) {
               <span className={on && !missing ? "font-semibold" : ""}>{o.label}</span>
             </label>
             {missing && (
-              <p className="mx-2 mb-2 ml-7 text-[11px] leading-snug text-ink-muted">
+              <p className="mx-2 mb-2 ml-7 text-body leading-snug text-ink-muted">
                 Không có trong bộ dữ liệu đang mở — {missing}
               </p>
             )}
@@ -326,7 +280,7 @@ export function LayersTab({ manifest }: { manifest: Manifest | null }) {
                 TRƯỚC khi bấm (ràng buộc 4), không phải như một lời thú nhận sau đó.
                 Luôn kèm icon + chữ, không bao giờ chỉ màu — §4e. */}
             {warn && (
-              <p className="mx-2 mb-2 ml-7 flex gap-1.5 border border-warn/60 px-1.5 py-1 text-[11px] leading-snug text-ink-2">
+              <p className="mx-2 mb-2 ml-7 flex gap-1.5 border border-warn/60 px-1.5 py-1 text-body leading-snug text-ink-2">
                 <span aria-hidden className="shrink-0 text-warn">
                   ⚠
                 </span>
@@ -334,7 +288,7 @@ export function LayersTab({ manifest }: { manifest: Manifest | null }) {
               </p>
             )}
             {on && !missing && (
-              <div className="space-y-1.5 px-2 pb-2 pl-7 text-[11px] leading-snug text-ink-2">
+              <div className="space-y-1.5 px-2 pb-2 pl-7 text-body leading-snug text-ink-2">
                 <p>{o.desc}</p>
                 {note && <p className="text-ink-muted">{note}</p>}
               </div>
@@ -343,7 +297,7 @@ export function LayersTab({ manifest }: { manifest: Manifest | null }) {
         );
       })}
 
-      <p className="p-3 text-[11px] leading-snug text-ink-muted">
+      <p className="p-3 text-body leading-snug text-ink-muted">
         Bật bao nhiêu cái cùng lúc cũng được — không cái nào là choropleth thứ hai. Chúng
         phân biệt nhau bằng <strong>hình học</strong> (điểm · đường · vùng) và{" "}
         <strong>chất liệu</strong> (đặc · nét · vân), không bằng màu; cả ba dùng chung một họ

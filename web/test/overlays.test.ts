@@ -17,12 +17,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-import {
-  overlayUnavailableIn,
-  overlayUnavailable,
-  setUnavailableOverlays,
-  unavailableOverlayPairs,
-} from "../src/data/overlays.ts";
+import { overlayUnavailableIn, unavailableOverlayPairs } from "../src/data/overlays.ts";
 import { parseHash } from "../src/state/hash.ts";
 import { parseScene, setStoryEnabled } from "../src/story/scenes.ts";
 import type { Manifest } from "../src/data/manifest.ts";
@@ -34,30 +29,9 @@ const TINH = read("public/data/p/04/manifest.json");
 
 // ── Vị từ vắng ────────────────────────────────────────────────────────────────
 
-test("bộ Hà Nội dựng được cả hai lớp — không cổng nào chặn nhầm bộ gốc", () => {
+test("bộ Hà Nội dựng được lớp khoảng cách — không cổng nào chặn nhầm bộ gốc", () => {
   assert.equal(overlayUnavailableIn("beyond2km", HANOI), null);
-  assert.equal(overlayUnavailableIn("substations", HANOI), null);
   assert.deepEqual(unavailableOverlayPairs(HANOI), []);
-});
-
-test("lớp trạm biến áp NAY có ở mọi tỉnh — cổng phải im khi file có mặt", () => {
-  // Đổi ở B3 (ADR-0003 §1): bước `n13_substation` dựng lớp này cho cả 34 tỉnh, nên ca
-  // "tỉnh vắng lớp" không còn tồn tại trong dữ liệu thật. Test giữ nguyên vai của nó bằng
-  // cách kiểm LUẬT thay vì kiểm trạng thái — cùng khuôn `beyond2km` ngay dưới.
-  assert.ok(TINH.files["substations.geojson"]);
-  assert.equal(overlayUnavailableIn("substations", TINH), null);
-  assert.deepEqual(unavailableOverlayPairs(TINH), []);
-});
-
-test("bỏ file đi thì cổng PHẢI nói — hỏi FILE, không hỏi cột", () => {
-  const { "substations.geojson": _bo, ...con } = TINH.files;
-  const vang = { ...TINH, files: con } as Manifest;
-  const why = overlayUnavailableIn("substations", vang);
-  assert.ok(why && why.includes("trạm biến áp"));
-  assert.deepEqual(
-    unavailableOverlayPairs(vang).map(([id]) => id),
-    ["substations"],
-  );
 });
 
 test("`beyond2km` theo CỘT, và nó đang có ở cả hai bộ — cổng phải im khi cột có mặt", () => {
@@ -82,24 +56,6 @@ test("lớp không có vị từ thì luôn dựng được — cổng là danh 
     assert.equal(overlayUnavailableIn("communes", m), null);
     assert.equal(overlayUnavailableIn("poi_mall", m), null);
   }
-});
-
-// ── Khoá `l` bỏ overlay vắng ──────────────────────────────────────────────────
-
-test("khoá `l` bỏ RIÊNG overlay vắng, giữ các overlay còn lại", () => {
-  // Dựng ca "vắng" từ manifest THẬT bằng cách bỏ đúng một khoá — sau B3 mọi tỉnh đều có
-  // lớp trạm biến áp, nên trạng thái hôm nay không còn tự sinh ra ca này.
-  const { "substations.geojson": _bo, ...con } = TINH.files;
-  setUnavailableOverlays(unavailableOverlayPairs({ ...TINH, files: con } as Manifest));
-  assert.ok(overlayUnavailable("substations"));
-  assert.equal(overlayUnavailable("stations"), null);
-
-  // Cùng luật với ID lạ ở §9: bỏ từng cái một, không bỏ cả khoá.
-  const out = parseHash("#l=stations,substations,khongcothat,communes");
-  assert.deepEqual(out.layers, ["stations", "communes"]);
-
-  setUnavailableOverlays([]);
-  assert.deepEqual(parseHash("#l=stations,substations").layers, ["stations", "substations"]);
 });
 
 // ── Cổng `story_enabled` ──────────────────────────────────────────────────────

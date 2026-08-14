@@ -1,7 +1,20 @@
 @import "tailwindcss";
 @import "maplibre-gl/dist/maplibre-gl.css";
 
-/* Token màu — DESIGN.md §4. Mọi giá trị đã qua scripts/validate_palette.js của skill
+/* Chữ tự chủ, không CDN — cùng lý do favicon là data: URI (xem index.html): mỗi request ra
+   ngoài là một dòng rác tiềm năng trong đúng kênh console mà mọi lượt verify của dự án dùng
+   để chứng minh "0 lỗi". Vite gói woff2 vào bundle.
+
+   BE VIETNAM PRO là chữ được vẽ CHO tiếng Việt: dấu thanh đặt riêng cho mỗi nguyên âm thay
+   vì dán lại dấu của bảng latin, nên `ế` `ữ` `ộ` ở 10–11 px không dính vào dòng trên. Đây là
+   bản đồ của một thành phố Việt Nam, đọc bởi người Việt — nên nó không dùng chữ mặc định của
+   hệ điều hành, thứ ở Linux có thể rơi về bất kỳ face nào đang cài. */
+@import "@fontsource/be-vietnam-pro/400.css";
+@import "@fontsource/be-vietnam-pro/500.css";
+@import "@fontsource/be-vietnam-pro/600.css";
+@import "@fontsource-variable/jetbrains-mono";
+
+/* Token màu — DESIGN.md §5. Mọi giá trị đã qua scripts/validate_palette.js của skill
    dataviz trên surface #f2f3f0 (nền thật của positron). Đừng sửa bằng mắt. */
 @theme {
   /* ramp choropleth — cam tuần tự 7 bậc (Analytical colors PRESERVED) */
@@ -33,11 +46,83 @@
   --color-surface-active: #e2e8f0;
   --color-ring: #0284c7;
 
-  /* Floating shadows */
-  --shadow-float: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
-  --shadow-sheet: -4px 0 24px -4px rgba(15, 23, 42, 0.08);
+  /* ĐANG CHỌN — vô sắc, và đó là điều kiện để nó dùng được.
+     "Đang chọn" là trạng thái UI, không phải một giá trị của trường, nên nó phải đọc được
+     trên CẢ BẢY ramp của `THEME_PALETTES` cùng lúc. Mọi màu có sắc độ đều thua ở đâu đó:
+     navy cũ (#0d366b) biến mất trên bậc c6/c7 nâu sẫm và lẫn với chính họ overlay lạnh.
+     Mực đen + casing trắng thì không — tương phản của nó đến từ ĐỘ SÁNG, thứ mà không ramp
+     nào chiếm được cả hai đầu. */
+  --color-select: #0b0b0b;
+  --color-select-casing: #ffffff;
 
-  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Mặt nổi neo trên bản đồ — một bán kính, một bóng, một độ mờ nền cho MỌI surface.
+
+     Bán kính 3 px là bán kính của một Ô INPUT, không phải của một tấm nổi: ở kích thước
+     panel nó gần như vuông, và một tấm vuông cạnh sắc nằm đè lên bản đồ đọc như một cửa sổ
+     hệ điều hành cũ. 10 px là bán kính mà các panel nổi của CARTO/Kepler dùng — đủ để tấm
+     tách khỏi nền, chưa tới mức thành một viên thuốc.
+
+     Bóng cũng đổi vai: bóng cũ ngắn và đục (20 px, 6%) nên nó vẽ một VIỀN xám quanh tấm.
+     Bóng dài và loãng hơn không vẽ viền — nó chỉ nâng tấm lên khỏi bản đồ. */
+  --radius-surface: 10px;
+  --shadow-float:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 8px 24px -6px rgba(15, 23, 42, 0.10),
+    0 20px 48px -12px rgba(15, 23, 42, 0.08);
+  --shadow-sheet:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    -8px 0 32px -8px rgba(15, 23, 42, 0.12);
+
+  /* ── Thang chữ: SÁU vai trò, không phải mười ba cỡ ───────────────────────────
+     Trước đây giao diện dùng 13 giá trị px rời rạc, chín trong số đó xuất hiện dưới 8 lần
+     — tức là chín lần ai đó chọn bằng mắt. Hệ quả không nằm ở một chỗ nào cụ thể mà ở
+     cảm giác chung: 13 và 15 px cạnh nhau không đọc thành hai cấp bậc, nó đọc thành một
+     cấp bậc vẽ hỏng.
+
+     Tên nói VAI TRÒ chứ không nói cỡ. Nếu token tên là `text-sm` thì lần sau người ta vẫn
+     chọn theo mắt, chỉ là chọn giữa các tên khác; tên vai trò buộc phải trả lời "đây là
+     cái gì trên trang" trước khi trả lời "to bao nhiêu".
+
+     Giãn chữ SIẾT DẦN khi cỡ tăng: ở 10 px các dấu thanh tiếng Việt cần chỗ thở, còn ở
+     24 px cùng lượng giãn ấy làm chữ rời ra. Đây là bù quang học, không phải khẩu vị. */
+  --text-note: 10px;              /* nhãn, chú thích, mốc trên thước đo */
+  --text-note--line-height: 1.4;
+  --text-note--letter-spacing: 0.01em;
+
+  --text-body: 11px;              /* thân panel — cỡ chiếm 138/251 chỗ dùng */
+  --text-body--line-height: 1.45;
+
+  --text-title: 12px;             /* tiêu đề một tấm, dòng cần đọc trước phần thân */
+  --text-title--line-height: 1.4;
+  --text-title--letter-spacing: -0.005em;
+
+  --text-heading: 14px;           /* tên đối tượng đang xét: xã, trạm, đoạn đường */
+  --text-heading--line-height: 1.35;
+  --text-heading--letter-spacing: -0.01em;
+
+  --text-display: 18px;           /* tiêu đề trong story, nơi chữ là nội dung chính */
+  --text-display--line-height: 1.3;
+  --text-display--letter-spacing: -0.015em;
+
+  --text-readout: 24px;           /* MỘT con số đang được đọc — chỉ dùng cho số đo */
+  --text-readout--line-height: 1.15;
+  --text-readout--letter-spacing: -0.02em;
+
+  /* Một token chuyển động, không phải mỗi chỗ một con số. `prefers-reduced-motion` bên
+     dưới vô hiệu hoá tất cả cùng lúc — điều đó chỉ đúng khi mọi transition đều đi qua đây. */
+  --dur: 180ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Cắm token vào MẶC ĐỊNH của Tailwind, thay vì đi dán `duration-*` ở từng chỗ. Sau dòng
+     này, một class `transition` trần đã mang đúng nhịp của hệ — và không ai phải nhớ. */
+  --default-transition-duration: var(--dur);
+  --default-transition-timing-function: var(--ease);
+
+  --font-sans: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Mono chỉ cho ĐỊNH DANH MÁY: mã xã, h3, mã trạm, khoá hash. Không dùng cho số đo — số đo
+     đã có `tabular-nums` của chính Be Vietnam Pro, và đổi face giữa dòng làm một con số
+     trông như một mã. */
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", monospace;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -63,10 +148,59 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Không thẻ nổi, không bo góc, không đổ bóng — DESIGN.md §3.
-   MapLibre tự thêm bo góc + shadow cho control; gỡ ra. */
+/* Nhãn siêu nhỏ (KIỂM TRA, BẰNG CHỨNG, NGUỒN…): viết hoa ở 10 px cần giãn chữ, nếu không
+   các dấu tiếng Việt dồn vào nhau thành một khối xám.
+
+   Giãn 0,08em chứ không phải 0,01em của `--text-note`: chữ HOA không có phần trên/dưới
+   dòng để mắt bám vào, nên nó cần nhiều khoảng cách hơn chữ thường ở cùng cỡ. */
+.eyebrow {
+  font-size: var(--text-note);
+  line-height: var(--text-note--line-height);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+/* Tiêu điểm bàn phím — nhìn thấy được trên MỌI control, không chỉ trên `<Button>`.
+
+   Trước đây chỉ các control dựng bằng `Button` có `focus-visible:ring`; những chỗ dùng
+   `<button>` trần (nút "bật lại" của legend, nút bậc phóng, các nút trong dock) rơi về
+   outline mặc định của trình duyệt — thứ mà `positron` nền sáng nuốt gần hết. Đặt ở đây
+   để nó là MẶC ĐỊNH chứ không phải thứ phải nhớ thêm vào từng nút.
+
+   `:focus-visible` chứ không phải `:focus`: bấm chuột vào một nút không nên để lại vòng
+   sáng, còn Tab tới thì phải. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Thanh cuộn trong panel: mảnh, không chiếm chỗ, chỉ hiện khi có gì để cuộn. */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-hairline) transparent;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-hairline);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Control của MapLibre phải theo cùng ngôn ngữ mặt nổi với panel của app (một bán kính, một
+   hairline), chứ không mang bo góc + bóng mặc định của thư viện. */
 .maplibregl-ctrl-group {
-  border-radius: 0 !important;
-  box-shadow: none !important;
+  border-radius: var(--radius-surface) !important;
+  box-shadow: var(--shadow-float) !important;
   border: 1px solid var(--color-hairline);
+}
+.maplibregl-ctrl-attrib.maplibregl-compact {
+  border-radius: var(--radius-surface) !important;
 }

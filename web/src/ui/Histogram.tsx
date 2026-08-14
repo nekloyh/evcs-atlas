@@ -215,7 +215,7 @@ export function Histogram({
         trông như nói về toàn bộ dữ liệu — nên chúng phải ra chữ (ràng buộc 1 ở tầng chữ).
       */}
       {nMissing > 0 && (
-        <p className="pt-0.5 text-[10px] leading-snug text-ink-muted">
+        <p className="pt-0.5 text-note leading-snug text-ink-muted">
           {nMissing.toLocaleString("vi-VN")} {unitNoun} không có giá trị — chúng không nằm trên
           trục này, và không được vẽ ở 0.
         </p>

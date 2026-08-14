@@ -8,7 +8,7 @@ import type { Layer } from "@deck.gl/core";
 
 import { IconLayer } from "@deck.gl/layers";
 
-import { loadStyle } from "./positron";
+import { labelLayerIds, loadStyle } from "./positron";
 import type {
   CommuneCollection,
   GridCell,
@@ -30,7 +30,7 @@ import { majorBridges } from "../story/bridges";
 import type { DemandRepresentation, Mode, OverlayId } from "../state/types";
 import { HatchExtension } from "../viz/hatch-extension";
 import { planFor } from "../viz/render-plan";
-import { cellIdOf, communeCodeOf, poiRefOf, serializeSelection, stationIdOf } from "../data/h3";
+import { cellIdOf, communeCodeOf, poiRefOf, roadIdOf, serializeSelection, stationIdOf } from "../data/h3";
 import { dacKhuLabels, type DacKhuLabel } from "../data/dackhu";
 import {
   STATUS_ICON_ID,
@@ -50,22 +50,16 @@ import {
 } from "../data/poi";
 import { buildPoiIconAtlas, iconId, type IconEntry } from "../viz/poi-icons";
 import {
-  SUBSTATION_ICON_ID,
-  buildSubstationIconAtlas,
-  type IconEntry as SubIconEntry,
-} from "../viz/substation-icon";
-import {
-  substationIconSize,
-  type SubstationCollection,
-  type SubstationFeature,
-} from "../data/substations";
-import {
   BASEMAP_RGB,
   COLD_RGB,
   HATCH_RGB,
   MUTED_ALPHA,
   MUTED_RGB,
   RAMP_RGB,
+  SELECT_CASING_RGB,
+  SELECT_CASING_W,
+  SELECT_CORE_W,
+  SELECT_RGB,
   classOf,
   rampFor,
   type RGB,
@@ -95,8 +89,6 @@ interface Props {
   poi: PoiCollection | null;
   /** 939 trạm × 168 giờ — đơn vị đọc `station` (M4), nạp lười. `null` = chưa nạp. */
   occupancy: StationOccupancy | null;
-  /** 132 trạm biến áp OSM — overlay ĐIỂM của M5, nạp lười. `null` = chưa nạp. */
-  substations: SubstationCollection | null;
 }
 
 /** Màu của một mark bị brush loại — mờ đi, KHÔNG biến mất (§3d). */
@@ -230,7 +222,7 @@ function setBuildings3dLayer(m: maplibregl.Map, on: boolean): void {
 }
 
 export function MapView(props: Props) {
-  const { field, cells, communes, boundary, stations, scale, surfaceBreaks, roads, routes, poi, occupancy, substations } = props;
+  const { field, cells, communes, boundary, stations, scale, surfaceBreaks, roads, routes, poi, occupancy } = props;
   const container = useRef<HTMLDivElement>(null);
   const overlay = useRef<MapboxOverlay | null>(null);
   const map = useRef<maplibregl.Map | null>(null);
@@ -383,7 +375,12 @@ export function MapView(props: Props) {
   useEffect(() => {
     const m = map.current;
     if (!m) return;
-    const apply = () => setThemeContextLayer(m, theme);
+    // Nhãn nâng lại ngay sau lớp bối cảnh của theme: đổi nền bản đồ (`setStyle`) dựng lại
+    // toàn bộ stack, nên thứ tự lập ở lượt trước không sống sót.
+    const apply = () => {
+      setThemeContextLayer(m, theme);
+      raiseLabels(m);
+    };
     apply();
     m.on("styledata", apply);
     return () => {
@@ -397,7 +394,12 @@ export function MapView(props: Props) {
     ov.setProps({
       layers: buildLayers({ ...props, selected, layersOn, zoom, mode, paintOn, filter, marks, t, brush, demandRepresentation, inStory: scene !== null }),
     });
-  }, [props, field, cells, communes, boundary, stations, scale, surfaceBreaks, roads, routes, poi, occupancy, substations, selected, layersOn, zoom, mode, paintOn, filter, marks, t, brush, demandRepresentation, scene, ready]);
+    // Nhãn định vị phải nằm TRÊN mặt tô, nếu không giữ lại chúng cũng vô nghĩa: `interleaved`
+    // chèn lớp deck vào cuối stack của maplibre, nên một choropleth mờ 100% sẽ nuốt sạch
+    // tên nơi chốn bên dưới. Nâng lại sau MỖI lượt dựng lớp — lớp deck mới luôn được thêm
+    // lên đỉnh, nên một lần nâng lúc khởi tạo sẽ hết tác dụng ở lượt đổi trường kế tiếp.
+    raiseLabels(map.current);
+  }, [props, field, cells, communes, boundary, stations, scale, surfaceBreaks, roads, routes, poi, occupancy, selected, layersOn, zoom, mode, paintOn, filter, marks, t, brush, demandRepresentation, scene, ready]);
 
   // `h-full w-full`, KHÔNG `absolute inset-0`: maplibre-gl.css đặt
   // `.maplibregl-map { position: relative }` và được import SAU tailwind, nên cùng độ ưu
@@ -408,6 +410,34 @@ export function MapView(props: Props) {
     </div>
   );
 }
+
+/**
+ * Đưa mọi nhãn nền lên đỉnh stack, giữ nguyên thứ tự tương đối giữa chúng.
+ *
+ * Im lặng khi style chưa nạp xong hoặc layer không còn: hàm này chạy sau MỖI lượt dựng lớp,
+ * kể cả lượt xảy ra giữa hai lần `setStyle` — ném ở đây sẽ giết cả lượt vẽ vì một việc
+ * thuần trang trí.
+ */
+function raiseLabels(m: maplibregl.Map | null): void {
+  if (!m || !m.isStyleLoaded()) return;
+  for (const id of labelLayerIds(m.getStyle())) {
+    if (m.getLayer(id)) m.moveLayer(id);
+  }
+}
+
+/**
+ * Hai lượt vẽ của ký hiệu ĐANG CHỌN, dưới lên trên: casing sáng rồi lõi mực.
+ *
+ * Một hằng dùng chung cho cả năm hình học (ô, xã, trạm, đường, POI) chứ không phải năm cặp
+ * số chép lại — "đang chọn" là MỘT khái niệm, nên nó phải có đúng một ký hiệu, và cách duy
+ * nhất để điều đó còn đúng sau lần sửa thứ ba là chỉ có một chỗ để sửa.
+ */
+const SELECT_PASSES = [
+  // Casing KHÔNG đục: 190/255 để nó đọc như một quầng sáng quanh nét mực chứ không như một
+  // nét trắng thứ hai cạnh tranh với nó.
+  ["casing", rgba(SELECT_CASING_RGB, 190), SELECT_CASING_W],
+  ["core", rgba(SELECT_RGB, 255), SELECT_CORE_W],
+] as const satisfies readonly (readonly [string, [number, number, number, number], number])[];
 
 interface BuildInput extends Props {
   selected: string | null;
@@ -448,7 +478,6 @@ export function buildLayers({
   routes,
   poi,
   occupancy,
-  substations,
   selected,
   layersOn,
   zoom,
@@ -483,8 +512,6 @@ export function buildLayers({
   if (paintOn) {
     if (demandP1 && demandRepresentation !== "hex") {
       if (demandRepresentation === "density") out.push(surfaceLayer(cells, surfaceBreaks));
-      if (demandRepresentation === "extrusion" && scale)
-        out.push(...hexLayers(cells, scale, field, brush, filter, true, activeTheme));
       if (demandRepresentation === "intensity") out.push(demandIntensityLayer(cells));
       if (demandRepresentation === "bivariate") out.push(demandSupplyLayer(cells));
       if (demandRepresentation === "hybrid") out.push(surfaceLayer(cells, surfaceBreaks), ...capacityStationLayers(stations));
@@ -570,34 +597,34 @@ export function buildLayers({
   }
   // POI 4 nhóm — M3.5, §4d-4. Sau trạm để icon POI không bị chấm trạm đè.
   if (poi) out.push(...poiLayers(poi, layersOn, zoom, mode === "3d", selected));
-  // Trạm biến áp — M5, overlay ĐIỂM cuối cùng. Vẽ SAU cùng trong nhóm overlay vì nó là
-  // lớp thưa nhất (132 mark): nó không che được gì đáng kể, còn 6.633 icon POI thì che
-  // được nó. Thứ tự này không mã hoá tầm quan trọng — nó chỉ theo mật độ.
-  if (substations && layersOn.has("substations")) out.push(substationLayer(substations, zoom));
-
   // Viền ĐỐI TƯỢNG đang chọn. Màu HỌ LẠNH (§4d overlay đậm), KHÔNG phải một bậc của ramp:
   // "đang chọn" là trạng thái UI, không phải một giá trị của trường — tô nó bằng màu ramp
   // là bịa thêm một bậc không có thật. Một khuôn cho cả ô lẫn xã (M2.1-A).
   const selectedCommune = communeCodeOf(selected);
   if (selectedCommune && communes) {
-    out.push(
-      new GeoJsonLayer({
-        id: "commune-selected",
-        data: {
-          type: "FeatureCollection",
-          features: communes.features.filter(
-            (f) => f.properties["commune_code"] === selectedCommune,
-          ),
-        },
-        filled: false,
-        stroked: true,
-        pickable: false,
-        getLineColor: rgba(COLD_RGB[2]!, 255),
-        lineWidthUnits: "pixels",
-        getLineWidth: 2.5,
-        updateTriggers: { getLineColor: selectedCommune },
-      }),
-    );
+    const data = {
+      type: "FeatureCollection" as const,
+      features: communes.features.filter(
+        (f) => f.properties["commune_code"] === selectedCommune,
+      ),
+    };
+    // Casing rồi lõi — HAI lớp, không một lớp. Xem `SELECT_HEX`: đây là cặp duy nhất đọc
+    // được trên cả bậc sáng nhất lẫn bậc sẫm nhất của bảy ramp.
+    for (const [suffix, color, width] of SELECT_PASSES) {
+      out.push(
+        new GeoJsonLayer({
+          id: `commune-selected-${suffix}`,
+          data,
+          filled: false,
+          stroked: true,
+          pickable: false,
+          getLineColor: color,
+          lineWidthUnits: "pixels",
+          getLineWidth: width,
+          updateTriggers: { getLineColor: selectedCommune },
+        }),
+      );
+    }
   }
   // Trạm đang chọn — M4.1. Cùng khuôn, cùng màu, cùng bề rộng nét với ô và xã: "đang chọn"
   // là một khái niệm, nên nó có đúng một ký hiệu bất kể hình học bên dưới là gì.
@@ -606,48 +633,84 @@ export function buildLayers({
     const st = stations.find((s) => s.id === selectedStation);
     if (st) {
       const r = plan.paint === "station" ? stationFieldRadius(zoom) : stationOverlayRadius(zoom);
-      out.push(
-        new ScatterplotLayer<StationPoint>({
-          id: "station-selected",
-          data: [st],
-          getPosition: (d) => [d.lng, d.lat],
-          radiusUnits: "pixels",
-          // Rộng hơn cả vòng nét đứt: hai vòng chồng đúng nhau thì không đọc được cái nào.
-          getRadius: statusRingRadius(r) + 2.5,
-          radiusMinPixels: statusRingRadius(r) + 2.5,
-          radiusMaxPixels: statusRingRadius(r) + 2.5,
-          filled: false,
-          stroked: true,
-          pickable: false,
-          getLineColor: rgba(COLD_RGB[2]!, 255),
-          lineWidthUnits: "pixels",
-          getLineWidth: 2.5,
-          updateTriggers: { getRadius: r, getPosition: selectedStation },
-        }),
-      );
+      // Rộng hơn cả vòng nét đứt: hai vòng chồng đúng nhau thì không đọc được cái nào.
+      const rr = statusRingRadius(r) + 2.5;
+      for (const [suffix, color, width] of SELECT_PASSES) {
+        out.push(
+          new ScatterplotLayer<StationPoint>({
+            id: `station-selected-${suffix}`,
+            data: [st],
+            getPosition: (d) => [d.lng, d.lat],
+            radiusUnits: "pixels",
+            getRadius: rr,
+            radiusMinPixels: rr,
+            radiusMaxPixels: rr,
+            filled: false,
+            stroked: true,
+            pickable: false,
+            getLineColor: color,
+            lineWidthUnits: "pixels",
+            getLineWidth: width,
+            updateTriggers: { getRadius: r, getPosition: selectedStation },
+          }),
+        );
+      }
     }
   }
 
   const selectedCell = cellIdOf(selected);
   if (selectedCell) {
-    out.push(
-      new H3HexagonLayer<{ h3: string }>({
-        id: "grid-selected",
-        data: [{ h3: selectedCell }],
-        getHexagon: (d) => d.h3,
-        // Chế độ `auto` dựng ô bằng một lục giác ĐỀU dùng chung, lấy từ ô ở tâm khung nhìn.
-        // Viền chọn phải trùng đúng ô bên dưới nên ép high precision. Một ô thì không tốn gì.
-        highPrecision: true,
-        extruded: false,
-        filled: false,
-        stroked: true,
-        pickable: false,
-        getLineColor: rgba(COLD_RGB[2]!, 255),
-        lineWidthUnits: "pixels",
-        getLineWidth: 2.5,
-        updateTriggers: { getHexagon: selectedCell },
-      }),
-    );
+    for (const [suffix, color, width] of SELECT_PASSES) {
+      out.push(
+        new H3HexagonLayer<{ h3: string }>({
+          id: `grid-selected-${suffix}`,
+          data: [{ h3: selectedCell }],
+          getHexagon: (d) => d.h3,
+          // Chế độ `auto` dựng ô bằng một lục giác ĐỀU dùng chung, lấy từ ô ở tâm khung nhìn.
+          // Viền chọn phải trùng đúng ô bên dưới nên ép high precision. Một ô thì không tốn gì.
+          highPrecision: true,
+          extruded: false,
+          filled: false,
+          stroked: true,
+          pickable: false,
+          getLineColor: color,
+          lineWidthUnits: "pixels",
+          getLineWidth: width,
+          updateTriggers: { getHexagon: selectedCell },
+        }),
+      );
+    }
+  }
+
+  // Đoạn đường đang chọn — chỗ HỔNG của quy tắc "một ký hiệu cho mọi hình học". `c=road:…`
+  // round-trip qua hash và mở đúng panel (xem `road-selection.test.ts`), nhưng trên bản đồ
+  // nó không được đánh dấu gì cả: người xem theo một deep-link tới một đoạn đường thấy
+  // inspector nói về một đoạn mà họ không tìm được trong 427 nghìn điểm của mạng đường.
+  const selectedRoad = roadIdOf(selected);
+  if (selectedRoad) {
+    const seg = roads.find((r) => r.id === selectedRoad);
+    if (seg) {
+      for (const [suffix, color, width] of SELECT_PASSES) {
+        out.push(
+          new PathLayer<RoadSeg>({
+            id: `road-selected-${suffix}`,
+            data: [seg],
+            getPath: (d) => d.path,
+            // `path` là mảng PHẲNG `[lng, lat, lng, lat, …]` (§5b) — thiếu dòng này thì
+            // deck đọc mỗi số thành một điểm và đoạn đường vẽ ra ở giữa Thái Bình Dương.
+            positionFormat: "XY",
+            widthUnits: "pixels",
+            getWidth: width,
+            widthMinPixels: width,
+            getColor: color,
+            capRounded: true,
+            jointRounded: true,
+            pickable: false,
+            updateTriggers: { getColor: selectedRoad },
+          }),
+        );
+      }
+    }
   }
   return out;
 }
@@ -692,7 +755,11 @@ function hexLayers(
         data: kept,
         getHexagon: (d) => d.h3,
         extruded: is3d,
-        getElevation: is3d ? elevationForCell : undefined,
+        // KHÔNG viết `is3d ? elevationForCell : undefined`: deck.gl coi một khoá có mặt
+        // mang giá trị `undefined` là ĐÃ KHAI, nên nó đè mất mặc định của `ColumnLayer` và
+        // lớp chết ngay lúc dựng ("accessor is not a function") — tức là ở chế độ 2D thì
+        // KHÔNG ô H3 nào được vẽ. Luôn đưa hàm vào; `extruded: false` đã tắt nó rồi.
+        getElevation: elevationForCell,
         elevationScale: is3d ? 1 : 0,
         stroked: false,
         filled: true,
@@ -729,7 +796,7 @@ function hexLayers(
   const common = {
     getHexagon: (d: GridCell) => d.h3,
     extruded: is3d,
-    getElevation: is3d ? elevationForCell : undefined,
+    getElevation: elevationForCell, // xem ghi chú ở `grid-filtered` — `undefined` giết lớp
     elevationScale: is3d ? 1 : 0,
     stroked: false,
     filled: true,
@@ -809,9 +876,15 @@ function communeLayers(
       },
       // Nét ngăn xã với xã là hairline của chính bảng màu chrome (§4e), không phải một bậc
       // ramp: đường biên là cấu trúc, không phải giá trị.
-      getLineColor: rgba(BASEMAP_RGB, 255),
+      //
+      // ĐỤC hẳn (alpha 255, 1 px) là cái sai cũ: 126 đa giác viền trắng đặc biến bản đồ
+      // thành một trang tô màu — nét khoẻ ngang với mảng màu, và mắt đọc LƯỚI trước khi đọc
+      // GIÁ TRỊ. Ranh giới ở đây chỉ cần tách hai mảng cùng bậc ra khỏi nhau, nên nó là thứ
+      // mờ nhất còn làm được việc đó: trắng ~35%, mỏng hơn một pixel.
+      getLineColor: [255, 255, 255, 90],
       lineWidthUnits: "pixels",
-      getLineWidth: 1,
+      getLineWidth: 0.75,
+      lineWidthMinPixels: 0.5,
       getFillColor: (f: unknown) => {
         const v = valueOf(f as { properties: Record<string, unknown> });
         const k = classOf(v, scale);
@@ -1403,66 +1476,6 @@ function stationStatusLayer(stations: StationPoint[], dotRadius: number): Layer 
   });
 }
 
-// ── Overlay: trạm biến áp OSM — M5, §4d-4 ─────────────────────────────────────
-
-let substationAtlas: { atlasUrl: string; mapping: Record<string, SubIconEntry> } | null = null;
-function getSubstationAtlas() {
-  substationAtlas ??= buildSubstationIconAtlas();
-  return substationAtlas;
-}
-
-/**
- * 132 trạm biến áp — MỘT lớp, MỘT mark, MỘT câu.
- *
- * Mọi thứ có thể mã hoá một giá trị đều bị đóng cứng ở đây một cách CÓ CHỦ Ý, vì cái ta
- * không có là công suất lưới điện (§12 gọi đích danh kVA):
- *   · cỡ mark chỉ là hàm của `zoom` — mọi sao co cùng nhau, không sao nào nói gì khác;
- *   · một màu duy nhất, không `getColor` theo dữ liệu nào;
- *   · không `ScatterplotLayer` bán kính theo mét ⇒ không có đường nào để một "vòng bán
- *     kính phục vụ" xuất hiện, kể cả do nhầm.
- * Dữ liệu đã ship cũng không mang cột nào để đọc — hàng rào dựng ở cả hai tầng.
- *
- * `pickable: false` — chưa có panel TRẠM BIẾN ÁP, và một mark bấm được mà bấm không ra gì
- * là nói dối bằng giao diện (§3a, cùng luật đã áp cho chấm trạm ở M4).
- */
-function substationLayer(fc: SubstationCollection, zoom: number): Layer {
-  const size = substationIconSize(zoom);
-  return new IconLayer<SubstationFeature>({
-    id: "substations",
-    data: fc.features,
-    getPosition: (d) => d.geometry.coordinates,
-    iconAtlas: getSubstationAtlas().atlasUrl,
-    iconMapping: getSubstationAtlas().mapping,
-    getIcon: () => SUBSTATION_ICON_ID,
-    getSize: size,
-    sizeUnits: "pixels",
-    // Billboard: mark giữ nguyên hình ở chế độ 3D. Một ngôi sao nghiêng theo pitch 50 sẽ
-    // dẹt lại và mất đúng cái kênh đang mang danh tính của lớp này (§4d-4).
-    billboard: true,
-    // `depthTest: false` — ĐÃ SỬA SAU KHI RENDER, không phải phòng xa. Ảnh 3D đầu tiên
-    // cho thấy ngôi sao bị **cắt mất nửa dưới**: mark nằm ở cao độ 0, đúng mặt phẳng mà
-    // mặt tô xã cũng nằm, nên nửa dưới của tấm billboard rơi ra sau mặt đó và bị depth
-    // buffer ăn. Cái còn lại là một cái nêm — tức đúng KÊNH DUY NHẤT mang danh tính của
-    // lớp này biến mất ở chế độ 3D.
-    //
-    // Hai cách khác đã loại: (a) nâng mark lên một cao độ mét — sai vì cỡ mark tính bằng
-    // PIXEL, nên cao độ cần thiết đổi theo zoom (23 m ở z15,2 nhưng 428 m ở z10), tức một
-    // hằng số nào cũng sẽ sai ở đâu đó; (b) đẩy bằng `getPixelOffset` — mark sẽ không còn
-    // ĐỨNG TẠI toạ độ của nó, mà "trạm biến áp ở đây" là toàn bộ nội dung của lớp này.
-    //
-    // Tắt depth test là phát biểu đúng về vai của lớp: đây là một CHÚ THÍCH, không phải
-    // một vật thể trong cảnh 3D. §4d đã nói điều đó bằng cách khác — overlay điểm giữ
-    // opacity đầy đủ + vòng viền surface để tách khỏi thứ bên dưới, tức nó luôn ở trên.
-    //
-    // Tên tham số là của luma.gl 9 (`depthCompare: "always"`), không phải `depthTest:
-    // false` của WebGL cũ — deck.gl 9 đi trên API mới và tên cũ **không nổ lúc chạy**, nó
-    // chỉ im lặng không có tác dụng. Đúng họ với bẫy `INITIAL_VIEW` của M0.
-    parameters: { depthCompare: "always" as const },
-    pickable: false,
-    updateTriggers: { getSize: size },
-  });
-}
-
 // ── Overlay: POI 4 nhóm — M3.5, §4d-4 ─────────────────────────────────────────
 
 /**
@@ -1589,7 +1602,7 @@ function poiLayers(
         sizeUnits: "pixels",
         getSize: size,
         billboard: true,
-        // Cùng thuốc, cùng bệnh với sao trạm biến áp (M5) và vòng nét đứt (M4.1) — nhưng
+        // Cùng thuốc, cùng bệnh với vòng nét đứt (M4.1) — nhưng
         // ở đây nó bị BỎ SÓT và lỗi sống từ M3.5. `interleaved: true` (xem `new
         // MapboxOverlay`) nghĩa là deck dùng CHUNG depth buffer với basemap, nên vật che
         // không chỉ là mặt tô xã: **khối nhà 3D của basemap** cắt cụt icon POI đứng trên
@@ -1624,9 +1637,9 @@ function poiLayers(
           filled: false,
           stroked: true,
           pickable: false,
-          getLineColor: rgba(COLD_RGB[2]!, 255),
+          getLineColor: rgba(SELECT_RGB, 255),
           lineWidthUnits: "pixels",
-          getLineWidth: 2.5,
+          getLineWidth: SELECT_CORE_W,
           updateTriggers: { getLineColor: selectedRef },
         }),
       );
@@ -1648,7 +1661,7 @@ function poiLayers(
  * đọc được trên cả nền biển xám lẫn mặt tô cam, cùng thủ pháp vòng viền của mark điểm.
  *
  * `billboard` + `depthCompare: "always"`: nhãn phải đọc được y hệt ở `m=3d` — cùng lý do
- * đã ghi cho sao trạm biến áp và icon POI, và ở đây còn gắt hơn vì chữ nghiêng theo pitch
+ * đã ghi cho icon POI, và ở đây còn gắt hơn vì chữ nghiêng theo pitch
  * là chữ không đọc được.
  */
 function dacKhuLayer(fc: CommuneCollection, zoom: number): Layer | null {

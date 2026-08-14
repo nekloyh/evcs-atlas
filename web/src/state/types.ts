@@ -20,12 +20,59 @@ export const BASEMAP_STYLES: readonly BasemapStyle[] = ["voyager", "positron", "
 export const DEMAND_REPRESENTATIONS = [
   "hex",
   "density",
-  "extrusion",
   "intensity",
   "bivariate",
   "hybrid",
 ] as const;
 export type DemandRepresentation = (typeof DEMAND_REPRESENTATIONS)[number];
+
+/**
+ * **Điểm nhìn sở hữu representation, không phải ngược lại.**
+ *
+ * Trước đây quan hệ này bị lật: nút `3D` trong bộ chọn representation tự gọi `setMode("3d")`,
+ * và lớp `extrusion` ép cứng `is3d = true` bất kể `mode`. Hệ quả là **chọn `extrusion` khi
+ * đang ở 2D cho ra khối hex dựng đứng trên một camera pitch 0** — người xem thấy 3D ở nơi
+ * giao diện nói là 2D, và không có nút nào giải thích được vì sao.
+ *
+ * Luật thay thế, một chiều:
+ *
+ * 1. `mode` là trạng thái NGOÀI. Đổi nó **chỉ** bằng nút 2D/3D.
+ * 2. Mỗi representation khai mình thuộc điểm nhìn nào. Bộ chọn chỉ hiện đúng nhóm đang mở.
+ * 3. Đổi điểm nhìn thì representation **tự chốt về mặc định của nhóm mới** nếu nó không
+ *    thuộc nhóm ấy.
+ *
+ * Tiêu chí phân nhóm là ĐỘ CAO có phải một kênh mã hoá đang chạy không — không phải "trông
+ * có vẻ 3D". `hex` nằm ở cả hai vì nó tự đi theo `mode`: phẳng ở 2D, dựng khối ở 3D, cùng
+ * một thang màu.
+ *
+ * **`extrusion` đã bị XOÁ khi áp luật này**, không phải bị chuyển nhóm. Áp xong thì nó dựng
+ * đúng cùng bộ lớp với `hex` ở 3D — hai nút cho một kết quả. Nó còn khác `hex` ở một chỗ
+ * duy nhất, và chỗ đó là lỗi: nó đi vòng qua cổng `plan.paint`, nên nó vẫn vẽ hex ở dưới
+ * `HEX_MIN_ZOOM`, nơi §13a-1 nói ô nhỏ hơn mức đọc được từng bậc màu.
+ *
+ * Hệ quả phải nói ra: điểm nhìn 3D hiện chỉ còn **một** cách đọc.
+ */
+export const REPRESENTATION_VIEWPOINT: Record<DemandRepresentation, readonly Mode[]> = {
+  hex: ["2d", "3d"],
+  density: ["2d"],
+  intensity: ["2d"],
+  bivariate: ["2d"],
+  hybrid: ["2d"],
+};
+
+export function representationsFor(mode: Mode): DemandRepresentation[] {
+  return DEMAND_REPRESENTATIONS.filter((r) => REPRESENTATION_VIEWPOINT[r].includes(mode));
+}
+
+/** Mặc định của một điểm nhìn — `hex` ở cả hai, vì nó là cách đọc GIÁ TRỊ TỪNG Ô ở cả hai. */
+export function defaultRepresentationFor(mode: Mode): DemandRepresentation {
+  return representationsFor(mode)[0] ?? "hex";
+}
+
+/** Representation này có hợp lệ ở điểm nhìn đang mở không. */
+export function representationFits(r: DemandRepresentation, mode: Mode): boolean {
+  return REPRESENTATION_VIEWPOINT[r].includes(mode);
+}
 
 export type RailTab = "field" | "layer" | "cell";
 
@@ -52,8 +99,6 @@ export type ReadingUnit = "cell" | "commune" | "road" | "station";
  * vì POI **là** overlay (§6b): một khái niệm một khoá, và bộ kiểm sẵn có (bỏ từng ID lạ,
  * thứ tự chuẩn hoá) áp luôn. Danh tính giữa 4 nhóm đến từ HÌNH DẠNG mark (§4d-4).
  *
- * `substations` thêm ở M5 đi qua **đúng cánh cửa đó**: một ID nữa trong cùng khoá `l`,
- * hình dạng riêng (sao 5 cánh, §4d-4), không luật mới nào.
  */
 export const OVERLAY_IDS = [
   "stations",
@@ -76,7 +121,6 @@ export const OVERLAY_IDS = [
   "poi_mall",
   "poi_public",
   "poi_edu_health",
-  "substations",
 ] as const;
 export type OverlayId = (typeof OVERLAY_IDS)[number];
 

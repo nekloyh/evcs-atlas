@@ -167,32 +167,32 @@ export function SceneCungLech({ communes }: { communes: CommuneCollection | null
             }`}
           >
             <div className="flex items-baseline gap-2">
-              <span className="text-[14px] font-semibold">{f.name}</span>
-              {on && <span className="text-[10px] tracking-[0.1em] text-cold-3">ĐANG XEM</span>}
+              <span className="text-heading font-semibold">{f.name}</span>
+              {on && <span className="text-note tracking-[0.1em] text-cold-3">ĐANG XEM</span>}
             </div>
-            <div className="pt-1 text-[11px] leading-snug text-ink-2">{named.why}</div>
+            <div className="pt-1 text-body leading-snug text-ink-2">{named.why}</div>
             <div className="flex gap-4 pt-2 tabular-nums">
               <span>
-                <span className="text-[18px] font-semibold">
+                <span className="text-display font-semibold">
                   {f.population === null ? "—" : formatNumber(f.population)}
                 </span>
-                <span className="pl-1 text-[10px] text-ink-muted">dân</span>
+                <span className="pl-1 text-note text-ink-muted">dân</span>
               </span>
               <span>
-                <span className="text-[18px] font-semibold">
+                <span className="text-display font-semibold">
                   {f.ports === null ? "—" : formatNumber(f.ports)}
                 </span>
-                <span className="pl-1 text-[10px] text-ink-muted">cổng</span>
+                <span className="pl-1 text-note text-ink-muted">cổng</span>
               </span>
               <span>
-                <span className="text-[18px] font-semibold">
+                <span className="text-display font-semibold">
                   {f.perPop === null ? "—" : formatNumber(f.perPop)}
                 </span>
-                <span className="pl-1 text-[10px] text-ink-muted">cổng/10k dân</span>
+                <span className="pl-1 text-note text-ink-muted">cổng/10k dân</span>
               </span>
             </div>
             {f.vsMedian !== null && (
-              <div className="pt-1 text-[11px] text-ink-muted tabular-nums">
+              <div className="pt-1 text-body text-ink-muted tabular-nums">
                 {f.vsMedian < 1
                   ? `${formatNumber(f.vsMedian)}× trung vị`
                   : `${formatNumber(f.vsMedian)}× trung vị 126 xã`}
@@ -264,7 +264,7 @@ export function SceneDiVong({ manifest }: { manifest: Manifest | null }) {
     <>
       {/* Chuyển NHỊP. Hai nhịp = hai vai đã phân ở §11: mạng đường là NGUYÊN NHÂN nhìn thấy
           được, 672 ô là HẬU QUẢ đo được. Nút đứng đầu panel vì nó đổi cả bản đồ. */}
-      <div className="flex gap-px border-b border-hairline bg-hairline text-[11px]">
+      <div className="flex gap-px border-b border-hairline bg-hairline text-body">
         {[
           { id: "mang-duong", label: "nguyên nhân" },
           { id: "hau-qua", label: "hậu quả đo được" },
@@ -324,18 +324,18 @@ export function SceneDiVong({ manifest }: { manifest: Manifest | null }) {
 
           {pairs.length > 0 && (
             <>
-              <h3 className="border-y border-hairline bg-basemap px-4 py-1 text-[11px] tracking-[0.1em] text-ink-2">
+              <h3 className="border-y border-hairline bg-basemap px-4 py-1 text-body tracking-[0.1em] text-ink-2">
                 BA CẶP TUYẾN — ĐƯỜNG THẬT ↔ CHIM BAY
               </h3>
               {pairs.map((p) => (
                 <div key={p.h3} className="border-b border-hairline px-4 py-2">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-[12px] font-semibold">{p.communeName}</span>
-                    <span className="ml-auto text-[15px] font-semibold tabular-nums">
+                    <span className="text-title font-semibold">{p.communeName}</span>
+                    <span className="ml-auto text-heading font-semibold tabular-nums">
                       {formatNumber(p.detour)}×
                     </span>
                   </div>
-                  <div className="pt-0.5 text-[11px] tabular-nums text-ink-2">
+                  <div className="pt-0.5 text-body tabular-nums text-ink-2">
                     đường thật {formatNumber(p.networkM)} m ↔ chim bay {formatNumber(p.euclidM)} m
                   </div>
                 </div>
@@ -500,10 +500,10 @@ function Unknown({ n, title, body }: { n: number; title: string; body: React.Rea
   return (
     <li className="border-b border-hairline px-4 py-3">
       <div className="flex gap-2">
-        <span className="shrink-0 text-[11px] tabular-nums text-ink-muted">{n}</span>
+        <span className="shrink-0 text-body tabular-nums text-ink-muted">{n}</span>
         <div>
-          <div className="text-[13px] font-semibold leading-snug">{title}</div>
-          <p className="pt-1.5 text-[11px] leading-relaxed text-ink-2">{body}</p>
+          <div className="text-heading font-semibold leading-snug">{title}</div>
+          <p className="pt-1.5 text-body leading-relaxed text-ink-2">{body}</p>
         </div>
       </div>
     </li>

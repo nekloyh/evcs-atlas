@@ -113,10 +113,9 @@ export function parseHash(hash: string): Partial<HashState> {
     // Bỏ từng ID lạ, giữ các ID hợp lệ còn lại — cùng luật "bỏ từng khoá" nhưng ở một bậc
     // sâu hơn. `l=stations,khongcothat` phải bật `stations`, không phải bỏ cả khoá.
     //
-    // Overlay KHÔNG DỰNG ĐƯỢC trên bộ đang mở cũng bị bỏ ở đây, cùng một nhánh với ID lạ:
-    // `#tinh=04&l=substations` sẽ bật một công tắc mà bản đồ không đổi gì, và một công tắc
-    // bật mà không có gì xảy ra là §3a — giao diện nói dối. Bỏ được ngay ở đây (thay vì dọn
-    // state sau khi manifest về) là nhờ `main.tsx` đặt cờ trước khi `store.ts` đọc hash.
+    // Overlay KHÔNG DỰNG ĐƯỢC trên bộ đang mở cũng bị bỏ ở đây, cùng một nhánh với ID lạ.
+    // Bỏ được ngay ở đây (thay vì dọn state sau khi manifest về) là nhờ `main.tsx` đặt cờ
+    // trước khi `store.ts` đọc hash.
     const ids = l
       .split(",")
       .map((s) => s.trim())

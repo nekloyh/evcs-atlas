@@ -9,15 +9,30 @@
  * `pop_source`). Tám cột đó **cố tình không có mặt** trong danh sách này — tô màu chúng
  * lên bản đồ là vô nghĩa; chúng chỉ xuất hiện trong panel Ô và khối NGUỒN.
  *
- * File này chỉ giữ CÂU CHỮ. Mọi con số (phủ %, số trạm biến áp, tỉ lệ tag) đến từ
+ * File này chỉ giữ CÂU CHỮ. Mọi con số (phủ %, tỉ lệ tag) đến từ
  * `manifest.json` — ràng buộc 4, DESIGN.md §7c. Đừng gõ phần trăm vào đây.
  */
 
 import { pct, type Manifest } from "./data/manifest";
 import { dataPath } from "./data/province";
 import type { ReadingUnit } from "./state/types";
+import { formatIn, scaleUnit, unitPhrase, type ScaledUnit, type UnitSpec } from "./units";
 import { OBSERVED_H_MIN } from "./viz/occ";
-import type { Polarity } from "./viz/palette";
+import type { Diverge, Polarity } from "./viz/palette";
+
+/**
+ * Khai báo phân kỳ ở tầng registry = mốc + phía cần can thiệp (`Diverge`, dùng cho MÀU và
+ * cho phép chia bậc) cộng hai chữ mà legend in ra.
+ *
+ * `ends` phải mô tả CHÍNH đại lượng đang tô, không mô tả kết luận mà nó gợi ra. Với
+ * `screen_margin_m` là "chưa đủ xa / đủ xa" chứ không phải "TỪ CHỐI / ĐỀ XUẤT": bộ rule của
+ * `screen_decision` còn một ngoại lệ (hạ ngưỡng Xã khi trạm gần nhất bận ≥ 40%) và một hạng
+ * mục thứ ba, nên dấu của biên KHÔNG bằng quyết định.
+ */
+export interface DivergeContract extends Diverge {
+  /** Đọc hai bên mốc là gì — `[dưới mốc, trên mốc]`. */
+  ends: readonly [string, string];
+}
 
 export type FieldKind = "numeric" | "bool" | "categorical";
 export type GroupId = "cau" | "dat" | "duong" | "cung" | "tiepcan" | "sosanh";
@@ -57,7 +72,60 @@ export const STATION_PREFIX = "station:";
 export const STATION_OCC_FIELD = `${STATION_PREFIX}occ`;
 export const STATION_PORTS_FIELD = `${STATION_PREFIX}ports`;
 
-export interface FieldMeta {
+/**
+ * **Hợp đồng thị giác** của một trường — thứ mà DESIGN.md §5 lâu nay chỉ nói bằng văn xuôi.
+ *
+ * Bốn thành viên này đã tồn tại và đã được khai đủ ở mọi trường; cái thiếu là một cái TÊN
+ * cho nhóm, và một chỗ để TypeScript đứng. Vì sao đó không phải chuyện hình thức: ngày
+ * thêm một loại bản đồ mới, hoặc lồng hai bản đồ lên nhau, chỉ cần thêm một thành viên vào
+ * interface này là trình biên dịch **liệt kê ra đúng những trường còn thiếu khai báo**.
+ *
+ * Cố ý KHÔNG dùng một hàm suy diễn (`visualContract(f)`) dù nó rẻ hơn hôm nay: nguồn sự
+ * thật phải là **bảng khai bám theo dữ liệu**, không phải một luật nằm trong code. Luật suy
+ * diễn không nói hộ được câu "trường này chịu được cách vẽ nào", và tới lúc cần thì phải
+ * bóc ngược cả lớp suy diễn ra mới khai lại được.
+ */
+export interface VisualContract {
+  /**
+   * Đơn vị đo + vế bổ nghĩa — xem `units.ts`. `null` với bool và hạng mục.
+   *
+   * Vế sau dấu · của câu đơn vị ở legend (§3b) nay do `unitPhrase()` dựng, không còn là
+   * chuỗi gõ tay: chuỗi gõ tay đã đẻ ra bốn cách viết cho cùng đơn vị mét.
+   */
+  unit: UnitSpec | null;
+  /**
+   * Cực tính — M2.1-(B). Vắng = trung tính (đậm = NHIỀU, nguyên trạng). `high-good` thì
+   * ĐẢO thứ tự gán màu để **đậm luôn là chỗ cần can thiệp** ở mọi bản đồ.
+   *
+   * Khai từng trường một, không suy ra: "nhiều đường trong ô" không tốt cũng không xấu,
+   * và đoán hộ người đọc là bịa thêm một phát biểu mà dữ liệu không nói.
+   */
+  polarity?: Polarity;
+  /**
+   * Trường có MỐC — hai bên mốc là hai phát biểu khác nhau, không phải "hơn" và "kém".
+   * Khai nó là đổi hẳn bảng màu sang PHÂN KỲ (§4f) và đổi cách chia bậc sang hai phía
+   * (§6a-6). Loại trừ lẫn nhau với `polarity`; `test/diverging.test.ts` giữ luật đó.
+   *
+   * Khai chứ không suy: một số 0 trong dữ liệu không tự nói nó là ranh giới quyết định hay
+   * chỉ là điểm thấp nhất của thang. `dist_station_asym_m` cũng có rất nhiều số 0 và nó
+   * KHÔNG phân kỳ — 0 ở đó nghĩa là "đi và về bằng nhau", không phải một ngưỡng.
+   */
+  diverge?: DivergeContract;
+  /**
+   * Trường này vẽ được thành **mặt liên tục** (`ContourLayer`, §1b) — chỉ đúng với đại
+   * lượng **cộng được**: cộng dân số của mấy ô lại thì ra dân số của vùng, còn cộng
+   * `built_frac` hay `detour_ratio` lại thì ra một con số vô nghĩa. Đây là lý do cờ này
+   * phải khai từng trường một chứ không suy ra từ `kind: "numeric"`.
+   */
+  surface?: boolean;
+  /**
+   * `false` = có giá trị để inspect hoặc làm input mô hình, nhưng không đủ hợp đồng thị
+   * giác để trở thành analytical field trên bản đồ. Mặc định là `true`.
+   */
+  map?: boolean;
+}
+
+export interface FieldMeta extends VisualContract {
   /**
    * Định danh dùng ở state và ở khoá `f` của hash. Trường của xã mang tiền tố
    * `commune:` (§6b); trường của ô là tên trần.
@@ -76,34 +144,12 @@ export interface FieldMeta {
   expr?: string;
   /** File parquet mà `expr` cần đăng ký thêm ngoài lưới. */
   deps?: string[];
-  /**
-   * Cực tính — M2.1-(B). Vắng = trung tính (đậm = NHIỀU, nguyên trạng). `high-good` thì
-   * ĐẢO thứ tự gán màu để **đậm luôn là chỗ cần can thiệp** ở mọi bản đồ.
-   *
-   * Khai từng trường một, không suy ra: "nhiều đường trong ô" không tốt cũng không xấu,
-   * và đoán hộ người đọc là bịa thêm một phát biểu mà dữ liệu không nói.
-   */
-  polarity?: Polarity;
-  /**
-   * Trường này vẽ được thành **mặt liên tục** (`ContourLayer`, §1b) — chỉ đúng với đại
-   * lượng **cộng được**: cộng dân số của mấy ô lại thì ra dân số của vùng, còn cộng
-   * `built_frac` hay `detour_ratio` lại thì ra một con số vô nghĩa. Đây là lý do cờ này
-   * phải khai từng trường một chứ không suy ra từ `kind: "numeric"`.
-   */
-  surface?: boolean;
-  /**
-   * `false` = có giá trị để inspect hoặc làm input mô hình, nhưng không có visual contract
-   * đủ mạnh để trở thành analytical field trên bản đồ. Mặc định là `true`.
-   */
-  map?: boolean;
   /** Lens là CÂU HỎI; `readAs` là geometry mang câu trả lời. */
   lens: LensId;
   group: GroupId;
   label: string;
   /** mô tả một câu — ô tìm kiếm lọc trên cả trường này, không chỉ trên tên cột */
   desc: string;
-  /** vế sau dấu · của câu đơn vị ở legend (§3b). null với bool và hạng mục. */
-  unit: string | null;
   kind: FieldKind;
   /**
    * Null ở trường này CÓ NGHĨA — §7a. Đặt chuỗi này là chặn badge ⚠ phủ ô lại:
@@ -145,7 +191,7 @@ export interface FieldMeta {
   caveat?: (m: Manifest) => string | null;
 }
 
-const FRAC = "tỉ lệ diện tích ô, 0–1";
+const FRAC: UnitSpec = { kind: "ratio", note: "diện tích ô" };
 
 /** Khai báo một trường trước khi gắn đơn vị đọc — `unit`/`column` do bảng dưới suy ra. */
 type Spec = Omit<FieldMeta, "readAs" | "column" | "lens"> & { lens?: LensId };
@@ -159,7 +205,7 @@ const CELL_SPECS: Spec[] = [
     group: "cau",
     label: "Dân số",
     desc: "Phân bổ dasymetric: bề mặt WorldPop 2025 neo theo số dân công bố của từng xã VNSDI.",
-    unit: "người trên ô ~0,74 km²",
+    unit: { kind: "person", note: "trên ô ~0,74 km²" },
     kind: "numeric",
     // Trường DUY NHẤT có mặt liên tục ở M2 (§13d-A: "cầu vón cục, không đều" là luận điểm
     // A, và mặt độ là mark của nó). Dân số cộng được, và nó không có ô null nào — nên phép
@@ -172,7 +218,7 @@ const CELL_SPECS: Spec[] = [
     group: "cau",
     label: "Mật độ dân số",
     desc: "Dân số chia cho diện tích ô.",
-    unit: "người/km²",
+    unit: { kind: "ppkm2" },
     kind: "numeric",
   },
   {
@@ -180,7 +226,7 @@ const CELL_SPECS: Spec[] = [
     group: "cau",
     label: "Chung cư",
     desc: "Số toà chung cư OSM nằm trong ô.",
-    unit: "toà",
+    unit: { kind: "building" },
     kind: "numeric",
   },
   {
@@ -188,7 +234,7 @@ const CELL_SPECS: Spec[] = [
     group: "cau",
     label: "Tổng tầng chung cư",
     desc: "Cộng số tầng của các toà chung cư trong ô — chặn dưới, vì phần lớn toà không có tag số tầng trong OSM.",
-    unit: "tầng",
+    unit: { kind: "floor" },
     kind: "numeric",
     sourceBadge: (m) => {
       const a = m.source_metrics?.apartment_levels_tagged;
@@ -206,7 +252,7 @@ const CELL_SPECS: Spec[] = [
     group: "cau",
     label: "Điểm quan tâm trong 1 km",
     desc: "Số POI trong bán kính 1 km quanh tâm ô — PHƠI NHIỄM, khác với “có gì trong ô”.",
-    unit: "POI trong bán kính 1 km",
+    unit: { kind: "poi", note: "trong bán kính 1 km" },
     kind: "numeric",
     lens: "context",
     // Khác `n_poi_total` ở KHÁI NIỆM, không phải ở thang đo. `n_poi_total` là KIỂM KÊ
@@ -231,7 +277,7 @@ const CELL_SPECS: Spec[] = [
     group: "cau",
     label: "Tổng điểm quan tâm",
     desc: "Cộng 8 loại POI: chung cư, bãi đỗ, đỗ lòng đường, cây xăng, siêu thị, chợ, trung tâm thương mại, bách hoá.",
-    unit: "điểm",
+    unit: { kind: "poi" },
     kind: "numeric",
     lens: "context",
   },
@@ -240,7 +286,7 @@ const CELL_SPECS: Spec[] = [
     group: "cau",
     label: "Trung tâm thương mại",
     desc: "Số trung tâm thương mại OSM trong ô.",
-    unit: "điểm",
+    unit: { kind: "poi" },
     kind: "numeric",
     lens: "context",
   },
@@ -249,7 +295,7 @@ const CELL_SPECS: Spec[] = [
     group: "cau",
     label: "Cửa hàng bách hoá",
     desc: "Số cửa hàng bách hoá OSM trong ô.",
-    unit: "điểm",
+    unit: { kind: "poi" },
     kind: "numeric",
     lens: "context",
   },
@@ -258,7 +304,7 @@ const CELL_SPECS: Spec[] = [
     group: "cau",
     label: "Siêu thị",
     desc: "Số siêu thị OSM trong ô.",
-    unit: "điểm",
+    unit: { kind: "poi" },
     kind: "numeric",
     lens: "context",
   },
@@ -267,7 +313,7 @@ const CELL_SPECS: Spec[] = [
     group: "cau",
     label: "Chợ",
     desc: "Số chợ OSM trong ô.",
-    unit: "điểm",
+    unit: { kind: "poi" },
     kind: "numeric",
     lens: "context",
   },
@@ -276,7 +322,7 @@ const CELL_SPECS: Spec[] = [
     group: "cau",
     label: "Bãi đỗ xe",
     desc: "Số bãi đỗ xe tách khỏi lòng đường.",
-    unit: "điểm",
+    unit: { kind: "poi" },
     kind: "numeric",
     lens: "context",
   },
@@ -285,7 +331,7 @@ const CELL_SPECS: Spec[] = [
     group: "cau",
     label: "Chỗ đỗ lòng đường",
     desc: "Số chỗ đỗ xe dọc lòng đường.",
-    unit: "điểm",
+    unit: { kind: "poi" },
     kind: "numeric",
     lens: "context",
   },
@@ -294,7 +340,7 @@ const CELL_SPECS: Spec[] = [
     group: "cau",
     label: "Cây xăng",
     desc: "Số cây xăng OSM trong ô.",
-    unit: "điểm",
+    unit: { kind: "poi" },
     kind: "numeric",
     lens: "context",
   },
@@ -303,7 +349,7 @@ const CELL_SPECS: Spec[] = [
     group: "cau",
     label: "Chỉ số nêm điểm đến",
     desc: "Tổng hợp có trọng số các POI thu hút xe dừng (Chung cư, Siêu thị, TTM, Cây xăng, Bãi đỗ).",
-    unit: "điểm chỉ số",
+    unit: { kind: "index" },
     kind: "numeric",
     // Proxy composite từ OSM: chưa có coverage/sensitivity contract để làm analytical map.
     map: false,
@@ -381,7 +427,7 @@ const CELL_SPECS: Spec[] = [
     group: "dat",
     label: "Diện tích ô",
     desc: "Diện tích hình học của ô H3 độ phân giải 8.",
-    unit: "km²",
+    unit: { kind: "km2" },
     kind: "numeric",
     map: false,
   },
@@ -393,7 +439,7 @@ const CELL_SPECS: Spec[] = [
     // ở MỌI tỉnh của store toàn quốc, và "Phần ô trong Hà Nội" ở bản đồ Cà Mau là một câu
     // sai đang hiển thị. Hà Nội cũng là một tỉnh, nên câu mới đúng ở cả hai bộ.
     desc: "Phần diện tích ô nằm trong ranh giới cấp tỉnh — ô ven biên chỉ thuộc một phần.",
-    unit: "tỉ lệ, 0–1",
+    unit: { kind: "ratio" },
     kind: "numeric",
     map: false,
   },
@@ -404,7 +450,7 @@ const CELL_SPECS: Spec[] = [
     group: "duong",
     label: "Tổng chiều dài đường",
     desc: "Tổng chiều dài đường ô tô đi được trong ô. Không tính lối bộ, đường mòn, làn xe đạp.",
-    unit: "mét",
+    unit: { kind: "m" },
     kind: "numeric",
     map: false,
   },
@@ -418,7 +464,7 @@ const CELL_SPECS: Spec[] = [
     group: "duong",
     label: "Đường trong ranh giới",
     desc: "Phần chiều dài đường nằm TRONG ranh giới tỉnh. Bằng tổng chiều dài ở ô nằm trọn trong tỉnh; nhỏ hơn ở ô biên.",
-    unit: "mét",
+    unit: { kind: "m" },
     kind: "numeric",
     map: false,
   },
@@ -427,7 +473,7 @@ const CELL_SPECS: Spec[] = [
     group: "duong",
     label: "Đường trục chính",
     desc: "Cộng 4 cấp cao nhất: cao tốc, quốc lộ, đường chính, đường thứ cấp.",
-    unit: "mét",
+    unit: { kind: "m" },
     kind: "numeric",
     map: false,
   },
@@ -436,7 +482,7 @@ const CELL_SPECS: Spec[] = [
     group: "duong",
     label: "Cao tốc",
     desc: "Chiều dài đường cấp cao tốc trong ô.",
-    unit: "mét",
+    unit: { kind: "m" },
     kind: "numeric",
     map: false,
   },
@@ -445,7 +491,7 @@ const CELL_SPECS: Spec[] = [
     group: "duong",
     label: "Quốc lộ",
     desc: "Chiều dài đường cấp quốc lộ trong ô.",
-    unit: "mét",
+    unit: { kind: "m" },
     kind: "numeric",
     map: false,
   },
@@ -454,7 +500,7 @@ const CELL_SPECS: Spec[] = [
     group: "duong",
     label: "Đường chính",
     desc: "Chiều dài đường cấp chính trong ô.",
-    unit: "mét",
+    unit: { kind: "m" },
     kind: "numeric",
     map: false,
   },
@@ -463,7 +509,7 @@ const CELL_SPECS: Spec[] = [
     group: "duong",
     label: "Đường thứ cấp",
     desc: "Chiều dài đường cấp thứ cấp trong ô.",
-    unit: "mét",
+    unit: { kind: "m" },
     kind: "numeric",
     map: false,
   },
@@ -472,7 +518,7 @@ const CELL_SPECS: Spec[] = [
     group: "duong",
     label: "Đường cấp ba",
     desc: "Chiều dài đường cấp ba trong ô.",
-    unit: "mét",
+    unit: { kind: "m" },
     kind: "numeric",
     map: false,
   },
@@ -481,7 +527,7 @@ const CELL_SPECS: Spec[] = [
     group: "duong",
     label: "Đường nội bộ",
     desc: "Chiều dài đường khu dân cư, ngõ phố trong ô.",
-    unit: "mét",
+    unit: { kind: "m" },
     kind: "numeric",
     map: false,
   },
@@ -490,7 +536,7 @@ const CELL_SPECS: Spec[] = [
     group: "duong",
     label: "Đường phục vụ",
     desc: "Chiều dài đường dẫn nội khu — lối vào bãi xe, sân, kho — trong ô.",
-    unit: "mét",
+    unit: { kind: "m" },
     kind: "numeric",
     map: false,
   },
@@ -501,7 +547,7 @@ const CELL_SPECS: Spec[] = [
     group: "cung",
     label: "Số trạm sạc",
     desc: "Số trạm sạc trong ô theo ảnh chụp canonical evcs.vn.",
-    unit: "trạm",
+    unit: { kind: "station" },
     kind: "numeric",
   },
   {
@@ -509,7 +555,7 @@ const CELL_SPECS: Spec[] = [
     group: "cung",
     label: "Trạm đang vận hành",
     desc: "Trong số đó, những trạm có trạng thái vận hành là OPERATIONAL.",
-    unit: "trạm",
+    unit: { kind: "station" },
     kind: "numeric",
   },
   {
@@ -517,7 +563,7 @@ const CELL_SPECS: Spec[] = [
     group: "cung",
     label: "Số súng sạc",
     desc: "Số súng LẮP ĐẶT (tầng tài sản), không phải số súng đang báo cáo — hai con số này khác nhau và không nên bằng nhau.",
-    unit: "súng",
+    unit: { kind: "port" },
     kind: "numeric",
   },
   {
@@ -525,7 +571,7 @@ const CELL_SPECS: Spec[] = [
     group: "cung",
     label: "Công suất điểm",
     desc: "Tổng công suất các tủ sạc trong ô, cộng theo tủ chứ không cộng nameplate từng súng.",
-    unit: "kW",
+    unit: { kind: "kw" },
     kind: "numeric",
   },
   {
@@ -533,7 +579,7 @@ const CELL_SPECS: Spec[] = [
     group: "tiepcan",
     label: "Cách trạm gần nhất, theo đường",
     desc: "Khoảng cách theo mạng đường từ tâm ô tới trạm gần nhất, Dijkstra đa nguồn, tôn trọng đường một chiều.",
-    unit: "mét, theo mạng đường",
+    unit: { kind: "m", note: "theo mạng đường" },
     kind: "numeric",
     polarity: "high-bad",
     coverageNote:
@@ -544,7 +590,7 @@ const CELL_SPECS: Spec[] = [
     group: "tiepcan",
     label: "Cách trạm gần nhất, chim bay",
     desc: "Khoảng cách đường thẳng từ tâm ô tới trạm gần nhất. Đây KHÔNG phải bản dự phòng của trường theo đường — nó là một khái niệm riêng, dùng cho câu hỏi về BỐ TRÍ không gian (hai trạm có gần nhau quá không), không dùng để trả lời “ô này đã được phủ chưa”.",
-    unit: "mét, đường chim bay",
+    unit: { kind: "m", note: "đường chim bay" },
     kind: "numeric",
     caveat: () =>
       "Đừng dùng bán kính chim bay để kết luận độ phủ: ở bán kính 3 km nó báo phủ nhầm khoảng một phần tư số ô nó nói là đã phủ, và sai LUÔN VỀ MỘT PHÍA (đường đi thật không bao giờ ngắn hơn chim bay). Xem trường Hệ số đi vòng.",
@@ -560,7 +606,7 @@ const CELL_SPECS: Spec[] = [
     group: "sosanh",
     label: "Hệ số đi vòng",
     desc: "Đường thật dài gấp mấy lần đường chim bay: khoảng cách theo mạng đường chia cho khoảng cách thẳng tới trạm gần nhất.",
-    unit: "lần, mạng ÷ chim bay",
+    unit: { kind: "times", note: "mạng ÷ chim bay" },
     kind: "numeric",
     polarity: "high-bad",
     // Hai loại null, không một — xem `nullSplit`. `s08` từ chối tính tỉ số khi khoảng cách
@@ -581,7 +627,7 @@ const CELL_SPECS: Spec[] = [
     group: "sosanh",
     label: "Chênh lệch đi ↔ về",
     desc: "Quãng đường tới trạm khác quãng đường từ trạm về bao nhiêu mét, do đường một chiều.",
-    unit: "m, |đi − về|",
+    unit: { kind: "m", note: "|đi − về|" },
     kind: "numeric",
     polarity: "high-bad",
     // Trường này KHÔNG phải cột khoảng cách thứ hai — nó là phần thông tin duy nhất mà chiều
@@ -598,7 +644,7 @@ const CELL_SPECS: Spec[] = [
     group: "tiepcan",
     label: "Quãng ra tới mạng đường",
     desc: "Khoảng cách đường thẳng từ tâm ô ra điểm vào mạng đường; đã cộng vào hai trường trên.",
-    unit: "mét",
+    unit: { kind: "m" },
     kind: "numeric",
   },
   {
@@ -606,7 +652,7 @@ const CELL_SPECS: Spec[] = [
     group: "tiepcan",
     label: "Mức sử dụng của ô",
     desc: "Trung bình có trọng số số cổng, trên các trạm đủ điều kiện công bố trong ô. Ô không có trạm đo được để TRỐNG, không phải 0.",
-    unit: "tỉ lệ cổng-giờ bận, 0–1",
+    unit: { kind: "ratio", note: "cổng-giờ bận" },
     kind: "numeric",
     // Aggregate chỉ để inspect: lens Sử dụng đọc trạng thái ở chính điểm trạm theo giờ.
     map: false,
@@ -632,7 +678,7 @@ const CELL_SPECS: Spec[] = [
     group: "tiepcan",
     label: "Số trạm đo được",
     desc: "Số trạm trong ô đóng góp vào mức sử dụng của ô.",
-    unit: "trạm",
+    unit: { kind: "station" },
     kind: "numeric",
     map: false,
   },
@@ -674,9 +720,17 @@ const CELL_SPECS: Spec[] = [
     group: "sosanh",
     label: "Cách ngưỡng phê duyệt",
     desc: "Khoảng cách chim bay tới trạm gần nhất TRỪ đi ngưỡng của loại đơn vị (Phường 500 m, Xã 2.000 m). Dương = đủ xa.",
-    unit: "m, âm = chưa đủ xa",
+    unit: { kind: "m", note: "âm = chưa đủ xa" },
     kind: "numeric",
-    polarity: "high-good",
+    // Trường PHÂN KỲ duy nhất của atlas, và nó là trường duy nhất CÓ giá trị âm: quét cả
+    // `grid_h3_r8` / `commune` / `stations` / `provinces` thì chỉ cột này có `min < 0`.
+    //
+    // Trước khai `polarity: "high-good"`, và cách khai đó vừa thiếu vừa tự mâu thuẫn. Thiếu:
+    // một thang tuần tự đặt ranh giới quyết định vào GIỮA bậc thứ 5 (−74 m → +372 m), tức
+    // tô cùng màu cho hai bên của đúng cái ranh giới mà trường này dựng ra để chỉ. Mâu
+    // thuẫn: câu cực tính in ra là "đậm = thiếu", trong khi đậm ở đây là ô SÁT trạm — chỗ
+    // không thiếu gì cả.
+    diverge: { at: 0, hue: "above", ends: ["chưa đủ xa", "đủ xa"] },
     coverageNote:
       "Số 0 là ranh giới quyết định: trên 0 thì ĐỀ XUẤT, dưới 0 thì TỪ CHỐI. Ô càng gần 0 thì quyết định càng nhạy với việc chọn ngưỡng — và ngưỡng là quy định, không phải phép đo.",
   },
@@ -685,7 +739,7 @@ const CELL_SPECS: Spec[] = [
     group: "sosanh",
     label: "Dân ngoài 2 km đường",
     desc: "Số người trong ô mà trạm gần nhất ở xa hơn 2 km TÍNH THEO ĐƯỜNG ĐI. Đây là CẦU CHƯA ĐƯỢC PHỤC VỤ — chính là đối tượng của bài toán đặt trạm.",
-    unit: "người, ngưỡng 2 km theo mạng đường",
+    unit: { kind: "person", note: "ngưỡng 2 km theo mạng đường" },
     kind: "numeric",
     polarity: "high-bad",
     // Ngưỡng bằng MÉT chứ không bằng PHÚT là có chủ đích: bộ dữ liệu không còn phát trường
@@ -705,7 +759,7 @@ const CELL_SPECS: Spec[] = [
     group: "sosanh",
     label: "Bận so với trạm cùng loại",
     desc: "Các trạm trong ô đứng ở phân vị nào so với những trạm CÙNG LOẠI dòng điện trong Hà Nội. 0,5 là đúng mức trung vị của nhóm; cao hơn nghĩa là bận bất thường.",
-    unit: "phân vị trong nhóm cùng loại, 0,5 = trung vị",
+    unit: { kind: "pctl", note: "trong nhóm cùng loại, 0,5 = trung vị" },
     kind: "numeric",
     map: false,
     deps: [dataPath("stations.parquet"), dataPath("station_occupancy.parquet")],
@@ -729,7 +783,7 @@ const CELL_SPECS: Spec[] = [
     group: "sosanh",
     label: "Chênh lệch Cung - Cầu",
     desc: "Chỉ số thiếu hụt trạm sạc: Dân số và POI cao nhưng thưa súng sạc. Giá trị càng cao càng thể hiện vùng lõm phục vụ.",
-    unit: "chỉ số chênh lệch, > 0 = thiếu hụt",
+    unit: { kind: "index", note: "chênh lệch, > 0 = thiếu hụt" },
     kind: "numeric",
     polarity: "high-bad",
     // Chỉ số có trọng số policy-like; linked/bivariate view là fallback trước khi ship score.
@@ -758,7 +812,7 @@ const COMMUNE_SPECS: Spec[] = [
     group: "cau",
     label: "Dân số xã",
     desc: "Số dân của xã/phường: số công bố VNSDI, trừ 2 xã có số hỏng đã thay bằng WorldPop có khai báo.",
-    unit: "người trên toàn xã",
+    unit: { kind: "person", note: "trên toàn xã" },
     kind: "numeric",
   },
   {
@@ -766,7 +820,7 @@ const COMMUNE_SPECS: Spec[] = [
     group: "cau",
     label: "Mật độ dân số xã",
     desc: "Dân số xã chia cho diện tích xã. So sánh được giữa các xã, khác với mật độ theo ô.",
-    unit: "người/km²",
+    unit: { kind: "ppkm2" },
     kind: "numeric",
   },
   {
@@ -774,7 +828,7 @@ const COMMUNE_SPECS: Spec[] = [
     group: "cung",
     label: "Số trạm trong xã",
     desc: "Số trạm sạc công cộng nằm trong ranh giới xã. Điểm sạc cá nhân 1 súng AC không được tính.",
-    unit: "trạm",
+    unit: { kind: "station" },
     kind: "numeric",
     // Tổng theo xã bị chi phối bởi quy mô đơn vị; xem point trạm hoặc cổng/10k dân.
     map: false,
@@ -784,7 +838,7 @@ const COMMUNE_SPECS: Spec[] = [
     group: "cung",
     label: "Số súng trong xã",
     desc: "Tổng số súng lắp đặt của các trạm trong xã — tầng tài sản, không phải số súng đang báo cáo.",
-    unit: "súng",
+    unit: { kind: "port" },
     kind: "numeric",
     map: false,
   },
@@ -793,7 +847,7 @@ const COMMUNE_SPECS: Spec[] = [
     group: "cung",
     label: "Công suất của xã",
     desc: "Tổng công suất tủ sạc trong xã.",
-    unit: "kW",
+    unit: { kind: "kw" },
     kind: "numeric",
     map: false,
   },
@@ -802,7 +856,7 @@ const COMMUNE_SPECS: Spec[] = [
     group: "tiepcan",
     label: "Khoảng cách trung bình theo dân",
     desc: "Trung bình khoảng cách theo đường tới trạm gần nhất, có trọng số DÂN SỐ — nên nó nói về người dân của xã chứ không về diện tích xã.",
-    unit: "mét theo mạng đường, trọng số dân",
+    unit: { kind: "m", note: "theo mạng đường, trọng số dân" },
     kind: "numeric",
     polarity: "high-bad",
   },
@@ -811,7 +865,7 @@ const COMMUNE_SPECS: Spec[] = [
     group: "tiepcan",
     label: "Mức sử dụng của xã",
     desc: "Trung bình mức sử dụng các trạm trong xã, trọng số số cổng. Xã không có trạm đo được để TRỐNG, không phải 0.",
-    unit: "tỉ lệ cổng-giờ bận, 0–1",
+    unit: { kind: "ratio", note: "cổng-giờ bận" },
     kind: "numeric",
     map: false,
     coverageNote:
@@ -825,7 +879,7 @@ const COMMUNE_SPECS: Spec[] = [
     group: "sosanh",
     label: "Cổng trên 10k dân",
     desc: "Số súng sạc trên mỗi 10.000 dân của xã — cung và cầu gộp vào MỘT con số, nên đọc được ngay là xã nào đang lệch.",
-    unit: "súng trên 10.000 dân",
+    unit: { kind: "port", note: "trên 10.000 dân" },
     kind: "numeric",
     polarity: "high-good",
     coverageNote:
@@ -848,7 +902,7 @@ const ROAD_SPECS: Spec[] = [
     group: "duong",
     label: "Đoạn đường — cách trạm gần nhất",
     desc: "Khoảng cách theo mạng đường từ ĐOẠN ĐƯỜNG này tới trạm gần nhất, lấy từ chính phép Dijkstra đa nguồn đã tính khoảng cách cho ô (s08). Đơn vị đọc là đoạn đường, không phải ô — nó cho thấy khoảng cách CHẢY thế nào dọc phố và khựng lại ở đâu.",
-    unit: "mét theo mạng đường · đo trên đoạn đường",
+    unit: { kind: "m", note: "theo mạng đường · đo trên đoạn đường" },
     kind: "numeric",
     polarity: "high-bad",
     // 396/160.823 đoạn không tới được mang null. Ràng buộc 1 áp cho cả đường: chúng không
@@ -876,7 +930,7 @@ const STATION_SPECS: Spec[] = [
     lens: "supply",
     label: "Số cổng đã lắp tại trạm",
     desc: "Số cổng sạc công cộng đã lắp tại từng trạm. Màu mã hoá quy mô tài sản; bán kính chấm cố định để không thêm encoding thứ hai.",
-    unit: "cổng đã lắp tại trạm",
+    unit: { kind: "port", note: "đã lắp tại trạm" },
     kind: "numeric",
     nullMeans: "Nguồn không khai số cổng của trạm này; không được đọc thành trạm 0 cổng.",
   },
@@ -885,7 +939,7 @@ const STATION_SPECS: Spec[] = [
     group: "sosanh",
     label: "Nhịp trạm tại giờ đang xem",
     desc: "Tỉ lệ cổng đang bận của từng trạm tại một ô giờ của tuần (7 thứ × 24 giờ). Kéo scrubber ở đáy để đổi giờ. Trạm chưa quan sát đủ ở giờ đó vẽ CHẤM RỖNG, không tô bậc nhạt — “chưa biết” không được đọc thành “vắng khách”.",
-    unit: `cổng bận ÷ cổng lắp đặt tại giờ đang xem · dưới ${OBSERVED_H_MIN} h quan sát thì không tô`,
+    unit: { kind: "ratio", note: `cổng bận ÷ cổng lắp đặt tại giờ đang xem · dưới ${OBSERVED_H_MIN} h quan sát thì không tô` },
     kind: "numeric",
     polarity: "high-bad",
     // Không phải một cột — §13c-1. Công thức KHÔNG chạy trong SQL như các trường phái sinh
@@ -1146,10 +1200,24 @@ export function unavailableFields(): FieldMeta[] {
  */
 export const DEFAULT_FIELD = `${COMMUNE_PREFIX}ports_per_10k_pop`;
 
-/** Câu đơn vị bên phải dải legend — DESIGN.md §3b. */
-export function unitSentence(f: FieldMeta): string {
+/**
+ * Câu đơn vị bên phải dải legend — DESIGN.md §3b.
+ *
+ * `scaled` là thang đã chọn cho ramp đang hiện (xem `scaleUnit`). Truyền vào thì câu nói
+ * đúng thang mà các ngưỡng đang in — "khoảng cách tới trạm · km, theo mạng đường" khi dải
+ * chạy tới hàng km. Không truyền thì rơi về thang gốc, dùng cho chỗ nhắc tên trường ngoài
+ * ngữ cảnh một ramp cụ thể.
+ *
+ * Đây là chỗ `isRatioField()` từng đứng. Hàm đó dò chuỗi `"0–1"` để ĐOÁN xem một trường có
+ * phải tỉ lệ không; phép đoán trượt `util_pctl_cell`, nhưng trường ấy khai `map: false`
+ * nên chưa lần nào tô được — lỗi tiềm ẩn, không phải lỗi đang chạy. Cái đang chạy là
+ * chuyện khác và nặng hơn: `formatBreak` rút gọn theo từng số một, nên một dải trộn hai
+ * đơn vị (`600` cạnh `1 ng`). Xem `units.ts`.
+ */
+export function unitSentence(f: FieldMeta, scaled?: ScaledUnit): string {
   const label = f.label.charAt(0).toLowerCase() + f.label.slice(1);
-  return f.unit ? `${label} · ${f.unit}` : label;
+  const phrase = unitPhrase(f.unit, scaled ?? scaleUnit(f.unit, 0));
+  return phrase ? `${label} · ${phrase}` : label;
 }
 
 /**
@@ -1158,8 +1226,15 @@ export function unitSentence(f: FieldMeta): string {
  * Đi KÈM phép đảo màu chứ không thay nó. Màu là kênh mạnh (đọc trước), chữ là kênh xác
  * nhận (đọc sau, khi người xem đã ngờ ngợ). Có cả hai thì không phải đoán; chỉ có chữ thì
  * nó thua chính cái gestalt nó đang cố sửa.
+ *
+ * Trường PHÂN KỲ trả về câu HAI VẾ thay cho câu một vế: ở đó không có "đầu nào cần can
+ * thiệp" mà có hai bên của một mốc, và cùng một ô chú giải phải nói ra cả hai.
  */
 export function polarityNote(f: FieldMeta): string | null {
+  if (f.diverge) {
+    const at = formatIn(f.diverge.at, scaleUnit(f.unit, f.diverge.at));
+    return `${f.diverge.ends[0]} ◂ ${at} ▸ ${f.diverge.ends[1]}`;
+  }
   if (f.polarity === "high-bad") return "↑ xấu hơn";
   if (f.polarity === "high-good") return "↑ tốt hơn · đậm = thiếu";
   return null;

@@ -20,7 +20,7 @@ export const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
       <BaseDialog.Popup
         ref={ref}
         className={cn(
-          "fixed z-50 bg-panel border-hairline shadow-sheet transition ease-out duration-200 outline-none flex flex-col",
+          "fixed z-50 bg-panel border-hairline shadow-sheet transition outline-none flex flex-col",
           {
             "top-0 bottom-0 right-0 w-full sm:w-[360px] border-l": side === "right",
             "top-0 bottom-0 left-0 w-full sm:w-[360px] border-r": side === "left",
@@ -50,11 +50,11 @@ export const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDi
 SheetHeader.displayName = "SheetHeader";
 
 export const SheetTitle = ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-  <h2 className={cn("text-xs font-semibold tracking-wider text-ink uppercase", className)} {...props} />
+  <h2 className={cn("text-title font-semibold tracking-wider text-ink uppercase", className)} {...props} />
 );
 SheetTitle.displayName = "SheetTitle";
 
 export const SheetDescription = ({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) => (
-  <p className={cn("text-[11px] text-ink-2", className)} {...props} />
+  <p className={cn("text-body text-ink-2", className)} {...props} />
 );
 SheetDescription.displayName = "SheetDescription";

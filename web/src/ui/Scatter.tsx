@@ -180,7 +180,7 @@ export function Scatter({
         )}
       </Readout>
       {nMissing > 0 && (
-        <p className="pt-0.5 text-[10px] leading-snug text-ink-muted">
+        <p className="pt-0.5 text-note leading-snug text-ink-muted">
           {nMissing.toLocaleString("vi-VN")} ô thiếu một trục — không có chỗ nào trên một mặt
           phẳng hai trục giá trị, nên chúng không được vẽ. Trên bản đồ chúng vẫn là vân xám.
         </p>

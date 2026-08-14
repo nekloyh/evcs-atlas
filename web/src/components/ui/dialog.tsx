@@ -37,6 +37,6 @@ export const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLD
 DialogHeader.displayName = "DialogHeader";
 
 export const DialogTitle = ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-  <h2 className={cn("text-sm font-semibold tracking-wide text-ink", className)} {...props} />
+  <h2 className={cn("text-heading font-semibold tracking-wide text-ink", className)} {...props} />
 );
 DialogTitle.displayName = "DialogTitle";

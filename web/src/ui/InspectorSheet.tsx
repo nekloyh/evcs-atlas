@@ -81,12 +81,12 @@ export function InspectorSheet({
     >
       <div className="flex shrink-0 items-center border-b border-hairline px-3 py-2">
         <div>
-          <div className="text-[10px] tracking-[0.12em] text-ink-muted">KIỂM TRA</div>
-          <div className="text-[12px] font-semibold text-ink">bằng chứng của đối tượng đã chọn</div>
+          <div className="text-note tracking-[0.12em] text-ink-muted">KIỂM TRA</div>
+          <div className="text-title font-semibold text-ink">bằng chứng của đối tượng đã chọn</div>
         </div>
         <button
           onClick={() => selectCell(null)}
-          className="ml-auto cursor-pointer border border-hairline px-2 py-1 text-[11px] text-ink-2 hover:bg-basemap hover:text-ink"
+          className="ml-auto cursor-pointer border border-hairline px-2 py-1 text-body text-ink-2 hover:bg-basemap hover:text-ink"
         >
           đóng
         </button>

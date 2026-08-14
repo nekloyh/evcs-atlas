@@ -10,6 +10,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
+import { baseUnitPhrase } from "../src/units.ts";
+
 import {
   COMMUNE_PREFIX,
   FIELDS,
@@ -76,7 +78,12 @@ test("cùng tên cột tồn tại được ở HAI đơn vị mà không đụn
   assert.equal(cell.column, commune.column);
   assert.notEqual(cell.id, commune.id);
   // Và hai cái nói hai đại lượng khác nhau — đó là lý do §6b tách chúng bằng công tắc.
-  assert.notEqual(cell.unit, commune.unit);
+  //
+  // So trên CÂU đơn vị chứ không so hai object: từ khi `unit` là token, `notEqual` trên hai
+  // object literal luôn đúng vì chúng là hai tham chiếu khác nhau — test sẽ xanh kể cả khi
+  // hai trường nói y hệt một đại lượng.
+  assert.equal(cell.unit!.kind, commune.unit!.kind);
+  assert.notEqual(baseUnitPhrase(cell.unit), baseUnitPhrase(commune.unit));
 });
 
 test("cả hai đơn vị đều có ít nhất một trường — công tắc không dẫn tới danh sách rỗng", () => {

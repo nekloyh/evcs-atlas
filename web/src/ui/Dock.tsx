@@ -46,19 +46,19 @@ function Section({
 }) {
   return (
     <section className="border-b border-hairline">
-      <h3 className="flex items-baseline gap-2 border-b border-hairline bg-basemap px-2 py-1 text-[11px] tracking-[0.1em] text-ink-2">
+      <h3 className="flex items-baseline gap-2 border-b border-hairline bg-basemap px-2 py-1 text-body tracking-[0.1em] text-ink-2">
         {title}
         {onClear && (
           <button
             onClick={onClear}
-            className="ml-auto cursor-pointer border border-hairline px-1 tracking-normal text-[10px] text-ink-2 hover:bg-panel"
+            className="ml-auto cursor-pointer border border-hairline px-1 tracking-normal text-note text-ink-2 hover:bg-panel"
           >
             bỏ chọn
           </button>
         )}
       </h3>
       <div className="px-2 pt-1">{children}</div>
-      <p className="px-2 pb-2 text-[10px] leading-snug text-ink-muted">{note}</p>
+      <p className="px-2 pb-2 text-note leading-snug text-ink-muted">{note}</p>
     </section>
   );
 }
@@ -90,7 +90,7 @@ export function Dock({ field, data, view }: { field: FieldMeta; data: DockData; 
       {/* Kết quả của phép AND, ngay dưới tiêu đề: đây là con số duy nhất nói được "bộ lọc
           đang làm gì", và §13b-2 đòi một tập đã thu hẹp phải ĐẾM ĐƯỢC. */}
       {view === "distribution" && data.kept && (
-        <p className="shrink-0 border-b border-hairline px-2 py-1 text-[11px] text-ink-2">
+        <p className="shrink-0 border-b border-hairline px-2 py-1 text-body text-ink-2">
           <span className="tabular-nums">
             {data.kept.n.toLocaleString("vi-VN")}/{data.kept.total.toLocaleString("vi-VN")}
           </span>{" "}
@@ -120,7 +120,7 @@ export function Dock({ field, data, view }: { field: FieldMeta; data: DockData; 
             unitNoun={unitNoun(field.readAs)}
           />
         ) : (
-          <p className="py-3 text-[11px] text-ink-muted">
+          <p className="py-3 text-body text-ink-muted">
             Trường này không phải thang số, nên nó không có “khoảng giá trị” để kéo.
           </p>
         )}
@@ -169,11 +169,11 @@ export function Dock({ field, data, view }: { field: FieldMeta; data: DockData; 
               hai màu không nói được vì thang màu đã bị khoá chung với chấm trạm.
             */}
             <HourProfile cells={data.city} t={t} onT={setT} />
-            <p className="pb-1 text-[10px] leading-snug text-ink-muted">
+            <p className="pb-1 text-note leading-snug text-ink-muted">
               {hourProfileSentence(hourProfile(data.city))}
             </p>
             {!isOcc && (
-              <p className="pb-1 text-[10px] leading-snug text-ink-muted">
+              <p className="pb-1 text-note leading-snug text-ink-muted">
                 Bản đồ đang tô một trường khác, nên giờ đang xem chưa đổi gì trên đó.{" "}
                 <button
                   onClick={() => setField(STATION_OCC_FIELD)}
@@ -185,7 +185,7 @@ export function Dock({ field, data, view }: { field: FieldMeta; data: DockData; 
             )}
           </>
         ) : (
-          <p className="py-3 text-[11px] text-ink-muted">Đang nạp hồ sơ 168 giờ…</p>
+          <p className="py-3 text-body text-ink-muted">Đang nạp hồ sơ 168 giờ…</p>
         )}
       </Section>}
     </div>

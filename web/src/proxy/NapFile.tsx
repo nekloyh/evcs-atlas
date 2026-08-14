@@ -68,7 +68,7 @@ export function NapFile({ onFiles, dangNap }: NapFileProps) {
   return (
     <>
       <label
-        className={`cursor-pointer border border-hairline px-2 py-0.5 text-[11px] uppercase tracking-wide ${
+        className={`cursor-pointer border border-hairline px-2 py-0.5 text-body uppercase tracking-wide ${
           dangNap ? "text-ink-muted" : "text-ink-2 hover:bg-basemap"
         }`}
         title="Đọc ngay trong trình duyệt — file KHÔNG được gửi đi đâu và KHÔNG ghi xuống đĩa"
@@ -93,8 +93,8 @@ export function NapFile({ onFiles, dangNap }: NapFileProps) {
       {treo && (
         <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-panel/80">
           <div className="border-2 border-dashed border-ink-muted px-10 py-8 text-center">
-            <div className="text-[15px] font-semibold">Thả file vào đây</div>
-            <div className="mt-1 text-[12px] text-ink-muted">
+            <div className="text-heading font-semibold">Thả file vào đây</div>
+            <div className="mt-1 text-title text-ink-muted">
               .geojson · .parquet — đọc trong tab, không gửi đi đâu
             </div>
           </div>

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { ChevronDown, ChevronUp, Eye, EyeOff } from "lucide-react";
 import { unitSentence, type FieldMeta, type RuntimeCoverage } from "../../fields";
+import { scaleUnit } from "../../units";
 import type { Manifest } from "../../data/manifest";
 import { useStore } from "../../state/store";
 import type { Scale } from "../../viz/palette";
@@ -15,6 +16,8 @@ export interface FloatingLegendProps {
   manifest: Manifest | null;
   runtime: Map<string, RuntimeCoverage>;
   surfaceBreaks: number[];
+  /** Giá trị của đối tượng đang chọn theo measure đang tô — mốc trên thước đo. */
+  selectedValue: number | null;
 }
 
 export function FloatingLegend({
@@ -23,6 +26,7 @@ export function FloatingLegend({
   manifest,
   runtime,
   surfaceBreaks,
+  selectedValue,
 }: FloatingLegendProps) {
   const [collapsed, setCollapsed] = React.useState(false);
   const paintOn = useStore((s) => s.paintOn);
@@ -31,15 +35,15 @@ export function FloatingLegend({
   return (
     <TooltipProvider>
       <AtlasSurface
-        className="fixed top-3 left-18 z-20 w-[min(28rem,calc(100vw-5rem))] text-xs transition-all duration-200"
+        className="fixed top-3 left-18 z-20 w-[min(22rem,calc(100vw-5rem))] text-title transition-all"
         aria-label="Chú giải bản đồ"
       >
         <AtlasSurfaceHeader className="justify-between gap-2 select-none">
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="font-semibold text-ink truncate text-[12px]">
+            <span className="font-semibold text-ink truncate text-title">
               {field.label}
             </span>
-            <span className="border border-hairline bg-panel px-1 font-mono text-[10px] text-ink-2">
+            <span className="border border-hairline bg-panel px-1 font-mono text-note text-ink-2">
               {field.readAs === "commune" ? "XÃ" : field.readAs === "station" ? "TRẠM" : field.readAs === "road" ? "ĐƯỜNG" : "H3"}
             </span>
           </div>
@@ -86,8 +90,8 @@ export function FloatingLegend({
 
         {/* Collapsed view summary */}
         {collapsed ? (
-          <div className="px-3 py-2 text-[11px] text-ink-2 select-none">
-            {unitSentence(field)}
+          <div className="px-3 py-2 text-body text-ink-2 select-none">
+            {unitSentence(field, scaleUnit(field.unit, scale?.kind === "numeric" ? scale.max ?? 0 : 0))}
           </div>
         ) : (
           <div className="p-3">
@@ -97,6 +101,7 @@ export function FloatingLegend({
               manifest={manifest}
               runtime={runtime}
               surfaceBreaks={surfaceBreaks}
+              selectedValue={selectedValue}
               variant="floating"
             />
           </div>

@@ -59,7 +59,7 @@ export function SourceBlock({
       ];
 
   return (
-    <div className="shrink-0 border-t border-hairline px-2 py-2 text-[11px] leading-snug text-ink-muted">
+    <div className="shrink-0 border-t border-hairline px-2 py-2 text-body leading-snug text-ink-muted">
       <div className="tracking-[0.1em]">NGUỒN</div>
       <table className="mt-1 w-full">
         <tbody>

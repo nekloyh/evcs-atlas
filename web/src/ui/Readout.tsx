@@ -32,7 +32,7 @@ export function Readout({ children, hint }: { children: ReactNode; hint: string 
     // rỗng và trạng thái có số, và một câu dài không được đẩy khối chữ bên dưới xuống. Ảnh
     // render đã bắt đúng lỗi đó ở bản đầu — dòng readout xuống hai hàng và đè lên câu đơn vị
     // của mục ngay dưới. Câu dài thuộc về `note` của mục, chỗ có bề rộng để xuống dòng.
-    <div className="flex h-4 items-center gap-1 overflow-hidden whitespace-nowrap text-[10px] leading-4 text-ink-2">
+    <div className="flex h-4 items-center gap-1 overflow-hidden whitespace-nowrap text-note leading-4 text-ink-2">
       {/*
         Kiểm THẬT/GIẢ, KHÔNG dùng `children ?? hint`. Bẫy đã sập một lần và ảnh render bắt
         được: chỗ gọi viết `{a !== null && b !== null && (<>…</>)}`, và khi điều kiện sai

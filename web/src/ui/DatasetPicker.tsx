@@ -71,7 +71,7 @@ export function DatasetPicker() {
   const now = currentDataset(window.location.hash);
 
   return (
-    <label className="flex items-center gap-1.5 text-[11px] text-ink-2">
+    <label className="flex items-center gap-1.5 text-body text-ink-2">
       <span className="uppercase tracking-wide text-ink-muted">BỘ</span>
       <select
         value={now}

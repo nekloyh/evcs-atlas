@@ -2,7 +2,7 @@
  * Bản đồ của màn hình TOÀN QUỐC — MapLibre + deck.gl interleaved, cùng khuôn với `MapView`.
  *
  * Là một component RIÊNG chứ không phải một nhánh trong `MapView`: `MapView` nhận 12 prop
- * của bậc tỉnh (cảnh, scrubber, brush, POI 3D, trạm biến áp, mạng đường…) và đọc `useStore`
+ * của bậc tỉnh (cảnh, scrubber, brush, POI 3D, mạng đường…) và đọc `useStore`
  * ở chín chỗ. Nhồi bậc toàn quốc vào đó là thêm một cờ `isNational` phải kiểm ở từng chỗ
  * một, và chỗ nào quên là một lớp của tỉnh vẽ đè lên bản đồ cả nước.
  *

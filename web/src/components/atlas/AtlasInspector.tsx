@@ -164,8 +164,8 @@ export function AtlasInspector({
         <div className="flex items-center gap-2 min-w-0">
           <MapPin className="h-4 w-4 text-cold-2 shrink-0" />
           <div>
-            <div className="text-[10px] uppercase font-bold tracking-wider text-ink-muted">KIỂM TRA</div>
-            <div className="text-[12px] font-semibold text-ink truncate">Bằng chứng đối tượng</div>
+            <div className="text-note uppercase font-bold tracking-wider text-ink-muted">KIỂM TRA</div>
+            <div className="text-title font-semibold text-ink truncate">Bằng chứng đối tượng</div>
           </div>
         </div>
         <Button
@@ -180,7 +180,7 @@ export function AtlasInspector({
       </AtlasSurfaceHeader>
 
       {/* Scrollable Evidence Content */}
-      <AtlasSurfaceBody className="custom-scrollbar space-y-4 p-3 text-xs">
+      <AtlasSurfaceBody className="custom-scrollbar space-y-4 p-3 text-title">
         {h3 && (
           <CellPanel
             h3={h3}
@@ -248,8 +248,12 @@ export function AtlasInspector({
   // Desktop (≥1024px): Non-modal map-anchored side panel (NO backdrop, map fully interactive)
   if (isDesktop) {
     return (
+      /* Cao theo NỘI DUNG, chặn trên bằng chiều cao khung nhìn — không kéo dài xuống đáy.
+         `bottom-3` ép tấm cao bằng cả màn hình bất kể nó có bao nhiêu chữ; với một xã (bốn
+         fact và một dòng nguồn) đó là ~450 px trống ở giữa, và khối nguồn bị đẩy xuống đáy
+         xa khỏi thứ nó dẫn nguồn cho. Panel dài bằng thứ nó nói. */
       <AtlasSurface
-        className="fixed top-3 right-3 bottom-3 z-30 w-[360px] transition-all duration-200"
+        className="fixed top-3 right-3 z-30 flex max-h-[calc(100vh-1.5rem)] w-[360px] flex-col transition-all"
         aria-label="Kiểm tra đối tượng đang chọn"
       >
         {inspectorInnerContent}

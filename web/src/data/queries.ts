@@ -8,7 +8,6 @@ import { isInScope } from "./scope";
 export { isInScope } from "./scope";
 import type { AreaPop } from "../story/lorenz";
 import type { PoiCollection } from "./poi";
-import type { SubstationCollection } from "./substations";
 import type { CellValue } from "../viz/palette";
 import { FIELDS, type FieldMeta, type RuntimeCoverage } from "../fields";
 
@@ -20,8 +19,6 @@ export { H3_RE };
  * Chỉ áp ở chế độ TỈNH. Ở bộ Hà Nội gốc, 404 vẫn NỔ như cũ: nuốt nó ở đó là giấu một lỗi
  * build thật sau một lớp trông như trống.
  */
-const EMPTY_FC = { type: "FeatureCollection", features: [] };
-
 // Tên file KHÔNG đổi; chỉ đi qua `dataPath()` để mang tiền tố tỉnh khi hash có khoá `tinh`
 // (xem `province.ts`). Không hàm nào dưới đây đổi chữ ký — đó là điều kiện của "có shim".
 export const GRID = dataPath("grid_h3_r8.parquet");
@@ -486,9 +483,13 @@ export function fetchShowcaseRoutes(): Promise<ShowcaseRoute[]> {
   routeCache ??= fetch(new URL(`data/${ROUTES_GEOJSON}`, window.location.href))
     .then((r) => {
       // Cặp đường minh hoạ là tài sản của CẢNH C, và cảnh chỉ mở ở Hà Nội.
+      // Cặp tuyến vắng ở tỉnh khác là ĐÚNG, không phải lỗi — trả rỗng thay vì ném.
       if (!r.ok && isProvinceMode)
-        return EMPTY_FC as unknown as {
-          features: { geometry: { coordinates: [number, number][] }; properties: Record<string, unknown> }[];
+        return {
+          features: [] as {
+            geometry: { coordinates: [number, number][] };
+            properties: Record<string, unknown>;
+          }[],
         };
       if (!r.ok) throw new Error(`${ROUTES_GEOJSON}: HTTP ${r.status} — chạy \`make web-data\` chưa?`);
       return r.json() as Promise<{
@@ -589,29 +590,6 @@ export function fetchPoi(): Promise<PoiCollection> {
     return r.json() as Promise<PoiCollection>;
   });
   return poiCache;
-}
-
-let substationCache: Promise<SubstationCollection> | null = null;
-
-export const SUBSTATION_GEOJSON = dataPath("substations.geojson");
-
-/**
- * 132 trạm biến áp OSM — M5. Nạp LƯỜI như poi/roads, dù chỉ 20 KB: điều kiện bật là một
- * checkbox, nên nạp lúc boot là trả một request cho một lớp mà phần lớn phiên xem không
- * mở. Đây là lớp ĐIỂM và file chỉ mang toạ độ — không cột công suất nào tồn tại để một
- * kênh thị giác sau này lỡ đọc phải (§12).
- */
-export function fetchSubstations(): Promise<SubstationCollection> {
-  substationCache ??= fetch(new URL(`data/${SUBSTATION_GEOJSON}`, window.location.href)).then(
-    (r) => {
-      // store toàn quốc không có lớp trạm biến áp (M5 chỉ trích cho Hà Nội).
-      if (!r.ok && isProvinceMode) return EMPTY_FC as SubstationCollection;
-      if (!r.ok)
-        throw new Error(`${SUBSTATION_GEOJSON}: HTTP ${r.status} — chạy \`make web-data\` chưa?`);
-      return r.json() as Promise<SubstationCollection>;
-    },
-  );
-  return substationCache;
 }
 
 /** Phủ của MỌI trường xã, đo trên chính 126 feature vừa nạp. Mẫu số là 126, không phải 4.427. */

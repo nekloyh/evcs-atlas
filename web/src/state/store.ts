@@ -13,6 +13,7 @@ import {
 } from "./brush";
 import { readHash } from "./hash";
 import type { BasemapStyle, CompareView, DemandRepresentation, HashState, Mode, OverlayId, RailTab, View } from "./types";
+import { defaultRepresentationFor, representationFits } from "./types";
 
 export type { BasemapStyle, Mode, OverlayId, RailTab, ReadingUnit, View } from "./types";
 
@@ -203,7 +204,22 @@ export const useStore = create<AppState>((set, get) => ({
   // Hash mang brush ⇒ dock mở sẵn, để ô xám nhạt có chỗ giải thích nó.
   dockOpen: brushCount(bootBrush) > 0,
   compareView: "distribution",
-  workspaceOpen: false,
+  /*
+   * Workspace MỞ sẵn trên màn hình rộng — nó là chỗ đổi CÂU HỎI, thứ đầu tiên của mô hình
+   * làm việc (DESIGN.md §1).
+   *
+   * Đóng sẵn thì lần mở app đầu tiên là một bản đồ, một thang màu, và không có gì trên màn
+   * hình nói rằng câu hỏi đổi được: lối vào duy nhất là một viên thuốc "Workspace" ở góc
+   * dưới-phải, cạnh dòng attribution, nơi mắt đi qua sau cùng. Một phiên xem bắt đầu ở
+   * measure mặc định rồi kết thúc ở đó.
+   *
+   * Ngưỡng theo bề rộng chứ không mở vô điều kiện: dưới 1024 px workspace là drawer che
+   * bản đồ (xem `FloatingWorkspace`), và mở sẵn một drawer là giấu mất chính thứ người xem
+   * vào đây để nhìn. `c=` trong hash là ngoại lệ thứ hai — deep-link tới một đối tượng thì
+   * inspector là nhân vật chính, và §2 chỉ cho phép một panel mở.
+   */
+  workspaceOpen:
+    typeof window !== "undefined" && window.innerWidth >= 1024 && !boot.cell,
   basemapStyle: "positron",
 
   // Hash mang `s` ⇒ cảnh GHI ĐÈ ngay từ lúc boot (L1). Đặt SAU các mặc định, không trộn
@@ -225,13 +241,25 @@ export const useStore = create<AppState>((set, get) => ({
       brush: reconcileBrush(s.brush, f),
       // P1 chỉ có nghĩa với `population` của Ô H3. Không để một representation cũ âm
       // thầm đổi cách vẽ một metric khác khi người dùng chọn trường mới.
-      demandRepresentation: f === "population" ? (s.mode === "3d" ? "extrusion" : "hex") : "hex",
+      demandRepresentation: defaultRepresentationFor(s.mode),
     })),
-  setDemandRepresentation: (demandRepresentation) => set({ demandRepresentation }),
+  // Bộ chọn KHÔNG được đổi điểm nhìn — nó chỉ chọn trong nhóm của điểm nhìn đang mở.
+  // Một giá trị lạc nhóm bị chốt về mặc định thay vì âm thầm kéo `mode` theo (§15a).
+  setDemandRepresentation: (r) =>
+    set((s) => ({ demandRepresentation: representationFits(r, s.mode) ? r : defaultRepresentationFor(s.mode) })),
   setView: (v) => set({ view: v }),
   // `mode` quyết định LỚP (fill-extrusion + khối POI); pitch chỉ là camera đi kèm cho
   // tiện — sau đó người dùng nghiêng tự do và pitch ghi vào `v` như mọi khi (§9).
-  setMode: (m) => set((s) => ({ mode: m, view: { ...s.view, pitch: m === "3d" ? 50 : 0 } })),
+  // Đây là CỬA DUY NHẤT đổi điểm nhìn. Representation không thuộc điểm nhìn mới thì chốt
+  // về mặc định của nó — nếu không, `extrusion` sống sót sang 2D và dựng khối trên pitch 0.
+  setMode: (m) =>
+    set((s) => ({
+      mode: m,
+      view: { ...s.view, pitch: m === "3d" ? 50 : 0 },
+      demandRepresentation: representationFits(s.demandRepresentation, m)
+        ? s.demandRepresentation
+        : defaultRepresentationFor(m),
+    })),
   setBasemapStyle: (basemapStyle) => set({ basemapStyle }),
   setPaintOn: (on) => set({ paintOn: on }),
   setTab: (t) => set(t === "cell" ? { tab: t } : { tab: t, backTab: t }),

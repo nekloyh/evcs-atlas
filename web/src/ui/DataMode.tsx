@@ -45,7 +45,7 @@ export function DataMode({
   occupancy: StationOccupancy | null;
 }) {
   if (!manifest) {
-    return <div className="p-6 text-[12px] text-ink-muted">đang nạp manifest…</div>;
+    return <div className="p-6 text-title text-ink-muted">đang nạp manifest…</div>;
   }
   return (
     <div className="min-h-0 flex-1 overflow-y-auto">
@@ -71,8 +71,8 @@ function Block({
 }) {
   return (
     <section className="border-t border-hairline pt-3 pb-7 first:border-t-0 first:pt-0">
-      <h2 className="pb-1 text-[11px] tracking-[0.14em] text-ink-2">{title}</h2>
-      {note && <p className="max-w-[70ch] pb-3 text-[11px] leading-snug text-ink-muted">{note}</p>}
+      <h2 className="pb-1 text-body tracking-[0.14em] text-ink-2">{title}</h2>
+      {note && <p className="max-w-[70ch] pb-3 text-body leading-snug text-ink-muted">{note}</p>}
       {children}
     </section>
   );
@@ -97,7 +97,7 @@ function Kpi({ manifest }: { manifest: Manifest }) {
   if (!tt) {
     return (
       <Block title="TỔNG CUNG">
-        <p className="text-[11px] text-ink-2">
+        <p className="text-body text-ink-2">
           Manifest của bộ dữ liệu này chưa có khối <code>totals</code> — hàng KPI không hiện.
           Nó KHÔNG được đoán từ đâu khác: §7c cấm gõ con số vào TS, và một tổng tính lại ở
           client sẽ là con số thứ hai cho cùng một khái niệm.
@@ -160,7 +160,7 @@ function Kpi({ manifest }: { manifest: Manifest }) {
       </div>
       {/* Trạng thái vận hành — cùng nguồn với vòng nét đứt của §4d-3a, nên bảng và bản đồ
           không thể nói hai con số khác nhau. */}
-      <p className="pt-2 text-[11px] leading-snug text-ink-2">
+      <p className="pt-2 text-body leading-snug text-ink-2">
         Trạng thái vận hành:{" "}
         {Object.entries(tt.op_status)
           .sort((a, b) => b[1] - a[1])
@@ -180,9 +180,9 @@ function Tile({ label, value, sub }: { label: string; value: string; sub: string
     <div className="bg-panel px-3 py-2.5">
       {/* Số lớn dùng figure TỈ LỆ, không `tabular-nums` — §4e: tabular để dành cho CỘT số
           phải thẳng hàng, và năm ô này không xếp thành cột. */}
-      <div className="text-[22px] font-semibold leading-none">{value}</div>
-      <div className="pt-1 text-[11px] leading-tight text-ink-2">{label}</div>
-      <div className="pt-0.5 text-[10px] leading-tight text-ink-muted">{sub}</div>
+      <div className="text-readout font-semibold leading-none">{value}</div>
+      <div className="pt-1 text-body leading-tight text-ink-2">{label}</div>
+      <div className="pt-0.5 text-note leading-tight text-ink-muted">{sub}</div>
     </div>
   );
 }
@@ -239,7 +239,7 @@ function Connectors({ manifest }: { manifest: Manifest }) {
           />
         ))}
       </div>
-      <div className="flex flex-wrap gap-x-5 gap-y-1 pt-1.5 text-[11px] text-ink-2">
+      <div className="flex flex-wrap gap-x-5 gap-y-1 pt-1.5 text-body text-ink-2">
         {entries.map((e) => (
           <span key={e.k} className="tabular-nums">
             {e.k === "UNKNOWN" ? "không khớp registry" : e.k} —{" "}
@@ -317,7 +317,7 @@ function ShapeMultiples({
         sai trông thuyết phục" — nên cảnh báo phải đọc được TRƯỚC khi mắt đọc hình.
       */}
       {unusable && (
-        <p className="mb-3 flex max-w-[70ch] gap-1.5 border border-warn/60 px-2 py-1.5 text-[11px] leading-snug text-ink-2">
+        <p className="mb-3 flex max-w-[70ch] gap-1.5 border border-warn/60 px-2 py-1.5 text-body leading-snug text-ink-2">
           <span aria-hidden className="shrink-0 text-warn">
             ⚠
           </span>
@@ -329,16 +329,16 @@ function ShapeMultiples({
         </p>
       )}
       {!unusable && occOk && occOk.share < 1 && (
-        <p className="pb-2 text-[11px] text-ink-muted">
+        <p className="pb-2 text-body text-ink-muted">
           Mẫu số: <span className="tabular-nums">{occOk.n_ok}/{occOk.n_total}</span> trạm báo
           cáo đủ chuẩn ({pct(occOk.share)}). Trạm không có hồ sơ không đóng góp vào đường nào
           — chúng không được coi là “vắng khách”.
         </p>
       )}
 
-      {err && <p className="text-[11px] text-ink-2">Không đọc được shape_class: {err}</p>}
+      {err && <p className="text-body text-ink-2">Không đọc được shape_class: {err}</p>}
       {!err && profiles.length === 0 && (
-        <p className="text-[11px] text-ink-muted">
+        <p className="text-body text-ink-muted">
           {occupancy
             ? "Không trạm nào của bộ dữ liệu này có nhãn dạng nhịp — không có gì để vẽ, và đó là một sự thật về dữ liệu chứ không phải một lỗi."
             : "đang gộp hồ sơ 168 giờ…"}
@@ -347,7 +347,7 @@ function ShapeMultiples({
       <div className="flex flex-wrap gap-x-8 gap-y-3">
         {profiles.map((p) => (
           <div key={p.cls}>
-            <div className="flex items-baseline gap-2 text-[11px]">
+            <div className="flex items-baseline gap-2 text-body">
               <span className="font-semibold">{CONSTANTS[p.cls]?.short ?? p.cls}</span>
               <span className="tabular-nums text-ink-muted">{p.nStations} trạm</span>
             </div>
@@ -356,7 +356,7 @@ function ShapeMultiples({
         ))}
       </div>
       {profiles.length > 0 && (
-        <p className="pt-1 text-[10px] text-ink-muted">
+        <p className="pt-1 text-note text-ink-muted">
           Trục y chung: 0 – {(top * 100).toLocaleString("vi-VN", { maximumFractionDigits: 0 })}% ·
           trục x: 0h → 23h · đoạn ĐỨT = không trạm nào của dạng đó đủ quan sát ở giờ ấy (không
           phải 0).
@@ -446,7 +446,7 @@ function CoverageTable({ manifest }: { manifest: Manifest }) {
         </>
       }
     >
-      <label className="flex cursor-pointer items-center gap-1.5 pb-2 text-[11px] text-ink-2">
+      <label className="flex cursor-pointer items-center gap-1.5 pb-2 text-body text-ink-2">
         <input
           type="checkbox"
           checked={onlyGaps}
@@ -456,7 +456,7 @@ function CoverageTable({ manifest }: { manifest: Manifest }) {
         chỉ hiện cột chưa phủ 100% ({Object.values(manifest.coverage).filter((c) => c.cell_share < 1).length})
       </label>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] text-[11px]">
+        <table className="w-full min-w-[640px] text-body">
           <thead>
             <tr className="border-b border-hairline text-left text-ink-2">
               <th className="py-1 pr-2 font-normal">cột</th>
@@ -471,7 +471,7 @@ function CoverageTable({ manifest }: { manifest: Manifest }) {
               const f = FIELD_BY_ID.get(col);
               return (
                 <tr key={col} className="border-b border-hairline align-middle">
-                  <td className="py-1 pr-2 font-mono text-[10px]">{col}</td>
+                  <td className="py-1 pr-2 font-mono text-note">{col}</td>
                   <td className="py-1 pr-2 text-ink-2">{f?.label ?? "—"}</td>
                   <td className="py-1 pr-2">
                     <Meter share={c.cell_share} />
@@ -564,7 +564,7 @@ function GridTable() {
         </>
       }
     >
-      <div className="flex flex-wrap items-center gap-3 pb-2 text-[11px]">
+      <div className="flex flex-wrap items-center gap-3 pb-2 text-body">
         <input
           value={filter}
           onChange={(e) => {
@@ -596,13 +596,13 @@ function GridTable() {
         </span>
       </div>
 
-      {err && <p className="text-[11px] text-ink-2">Không đọc được bảng: {err}</p>}
-      {!err && !data && <p className="text-[11px] text-ink-muted">đang đọc…</p>}
+      {err && <p className="text-body text-ink-2">Không đọc được bảng: {err}</p>}
+      {!err && !data && <p className="text-body text-ink-muted">đang đọc…</p>}
 
       {data && (
         // Bảng 53 cột KHÔNG được kéo giãn trang — nó cuộn ngang trong hộp của chính nó.
         <div className="max-h-[520px] overflow-auto border border-hairline">
-          <table className="text-[10px]">
+          <table className="text-note">
             <thead className="sticky top-0 z-10 bg-basemap">
               <tr className="text-left">
                 {data.columns.map((c) => (
@@ -648,7 +648,7 @@ function GridTable() {
           </table>
         </div>
       )}
-      <p className="pt-1 text-[10px] text-ink-muted">
+      <p className="pt-1 text-note text-ink-muted">
         Bấm tiêu đề cột để sắp xếp; <span className="tabular-nums">null</span> luôn nằm cuối ở
         cả hai chiều, nên “dòng đầu” không đổi nghĩa khi đảo chiều sắp.
       </p>

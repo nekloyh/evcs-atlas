@@ -26,6 +26,17 @@ export interface NavRailProps {
   onToggleWorkspace: () => void;
 }
 
+/**
+ * Chữ tắt của một tỉnh: chữ cái đầu của hai từ cuối trong tên.
+ *
+ * Bỏ tiền tố hành chính vì nó không phân biệt được gì — "Thành phố Hà Nội" và "Thành phố
+ * Hải Phòng" cùng bắt đầu bằng "TP". Hai từ CUỐI mới là tên riêng: `HN`, `HP`, `ĐN`.
+ */
+function provinceMark(name: string | undefined): string {
+  const words = (name ?? "Hà Nội").trim().split(/\s+/).slice(-2);
+  return words.map((w) => w.charAt(0).toLocaleUpperCase("vi")).join("");
+}
+
 export function NavRail({
   manifest,
   activeMode,
@@ -52,11 +63,15 @@ export function NavRail({
         aria-label="Thanh điều hướng ứng dụng"
       >
         {/* Header Badge */}
+        {/* Dấu hiệu nhận dạng phải là một CÁI TÊN.
+            `province_code` là `"01"` — trên màn hình nó đọc thành số thứ tự của một danh
+            sách, không thành "Hà Nội". Chữ đầu của tên tỉnh thì luôn là chữ, luôn khác nhau
+            giữa 34 tỉnh, và khớp với thứ mà người xem gọi nơi này. */}
         <div
-          className="flex h-12 items-center justify-center border-b border-hairline font-bold text-[11px] tracking-wider text-ink"
-          title={`EVCS ${manifest?.province?.province_name ?? "Hà Nội"}`}
+          className="flex h-12 items-center justify-center border-b border-hairline text-heading font-semibold tracking-wide text-ink"
+          title={`EVCS Atlas · ${manifest?.province?.province_name ?? "Hà Nội"}`}
         >
-          {manifest?.province?.province_code?.toUpperCase() ?? "HN"}
+          {provinceMark(manifest?.province?.province_name)}
         </div>
 
         {/* Top Group: Primary Navigation Modes */}
@@ -145,18 +160,22 @@ export function NavRail({
           {/* Basemap Switcher Popover */}
           <Popover>
             <Tooltip>
-              <TooltipTrigger render={<PopoverTrigger />}>
-                <button
-                  aria-label="Chọn nền bản đồ"
-                  className="grid h-9 w-9 place-items-center rounded border border-transparent text-ink-2 hover:border-hairline hover:text-ink cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <Palette className="h-4 w-4" />
-                </button>
+              {/* `TooltipTrigger` và `PopoverTrigger` đều tự dựng một `<button>`; lồng thêm
+                  một `<button>` con vào trong tạo `<button><button>` — HTML không hợp lệ,
+                  React báo lỗi mỗi lần render, và bàn phím thấy hai điểm dừng tab cho một
+                  điều khiển. `render` đã là cơ chế để hai trigger dùng CHUNG một phần tử,
+                  nên nút thật chính là phần tử đó. */}
+              <TooltipTrigger
+                render={<PopoverTrigger />}
+                aria-label="Chọn nền bản đồ"
+                className="grid h-9 w-9 place-items-center rounded border border-transparent text-ink-2 hover:border-hairline hover:text-ink cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <Palette className="h-4 w-4" />
               </TooltipTrigger>
               <TooltipContent side="right">Nền bản đồ</TooltipContent>
             </Tooltip>
             <PopoverContent side="right" align="end" className="w-48 p-2 z-50">
-              <div className="text-[11px] font-semibold tracking-wider text-ink uppercase mb-2">
+              <div className="text-body font-semibold tracking-wider text-ink uppercase mb-2">
                 Nền bản đồ
               </div>
               <div className="flex flex-col gap-1">
@@ -164,7 +183,7 @@ export function NavRail({
                   <button
                     key={opt.id}
                     onClick={() => onSelectBasemap(opt.id)}
-                    className={`flex items-center gap-2.5 px-2 py-1.5 text-xs rounded border text-left cursor-pointer transition-colors ${
+                    className={`flex items-center gap-2.5 px-2 py-1.5 text-title rounded border text-left cursor-pointer transition-colors ${
                       basemapStyle === opt.id
                         ? "border-ink bg-basemap text-ink font-medium"
                         : "border-transparent hover:bg-surface-hover text-ink-2"
@@ -196,7 +215,7 @@ export function NavRail({
             <TooltipTrigger
               aria-label={viewMode === "2d" ? "Chuyển sang chế độ 3D" : "Chuyển sang chế độ 2D"}
               onClick={onToggle2D3D}
-              className="grid h-9 w-9 place-items-center rounded border border-transparent font-bold text-[10px] text-ink-2 hover:border-hairline hover:text-ink cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="grid h-9 w-9 place-items-center rounded border border-transparent font-bold text-note text-ink-2 hover:border-hairline hover:text-ink cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <Box className="h-4 w-4" />
             </TooltipTrigger>

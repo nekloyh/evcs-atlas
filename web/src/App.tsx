@@ -9,7 +9,6 @@ import {
   fetchDerivedCoverage,
   fetchField,
   fetchPoi,
-  fetchSubstations,
   fetchRoads,
   fetchShowcaseRoutes,
   fetchStations,
@@ -22,8 +21,7 @@ import {
   type StationPoint,
 } from "./data/queries";
 import { poiGroupsOn, type PoiCollection } from "./data/poi";
-import type { SubstationCollection } from "./data/substations";
-import { poiRefOf, roadIdOf, stationIdOf } from "./data/h3";
+import { cellIdOf, communeCodeOf, poiRefOf, roadIdOf, stationIdOf } from "./data/h3";
 import { fetchOccupancy, type StationOccupancy } from "./data/occupancy";
 import { loadManifest, type Manifest } from "./data/manifest";
 import {
@@ -90,7 +88,6 @@ export default function App() {
   const [roadsLoading, setRoadsLoading] = useState(false);
   const [routes, setRoutes] = useState<ShowcaseRoute[]>([]);
   const [poi, setPoi] = useState<PoiCollection | null>(null);
-  const [substations, setSubstations] = useState<SubstationCollection | null>(null);
   const [occupancy, setOccupancy] = useState<StationOccupancy | null>(null);
   const [scale, setScale] = useState<Scale | null>(null);
   const [manifest, setManifest] = useState<Manifest | null>(null);
@@ -188,7 +185,7 @@ export default function App() {
   useEffect(() => {
     if (meta.readAs !== "commune") return;
     if (!communes) return;
-    setScale(buildScale(meta.kind, communes.features.map((f: CommuneFeature) => f.properties[meta.column] ?? null)));
+    setScale(buildScale(meta.kind, communes.features.map((f: CommuneFeature) => f.properties[meta.column] ?? null), meta.diverge));
   }, [meta, communes]);
 
   useEffect(() => {
@@ -199,7 +196,7 @@ export default function App() {
         const rows = await fetchField(meta);
         if (cancelled) return;
         setCells(rows);
-        setScale(buildScale(meta.kind, rows.map((r) => r.value)));
+        setScale(buildScale(meta.kind, rows.map((r) => r.value), meta.diverge));
       } catch (e) {
         if (!cancelled) fail(e);
       }
@@ -227,7 +224,7 @@ export default function App() {
         // Cold road deep-link cần feature để inspector đọc, nhưng không được thay scale/
         // legend của measure đang xem bằng scale khoảng cách đường.
         if (meta.readAs === "road") {
-          setScale(buildScale(meta.kind, segs.map((r) => r.dist)));
+          setScale(buildScale(meta.kind, segs.map((r) => r.dist), meta.diverge));
           setRoadCov(new Map([[meta.id, roadCoverage(segs)]]));
         }
       } catch (e) {
@@ -250,14 +247,6 @@ export default function App() {
     if (!needPoi || poi) return;
     void fetchPoi().then(setPoi, fail);
   }, [needPoi, poi]);
-
-  // Trạm biến áp — M5. Nạp lười cùng khuôn, dù chỉ 20 KB: điều kiện là một checkbox, và
-  // một lớp không ai bật thì không đáng một request. Chỉ MỘT đường cần nó (overlay bật) —
-  // khác POI, vì không có `c=substation:` nào: lớp này không bấm được (chưa có panel).
-  useEffect(() => {
-    if (!layersSet.has("substations") || substations) return;
-    void fetchSubstations().then(setSubstations, fail);
-  }, [layersSet, substations]);
 
   // Ô lưới vẫn cần nạp cả khi đang xem trường XÃ: overlay `beyond2km` và mặt độ cầu đọc từ
   // đó, và chúng phải bật được bất kể trường nào đang chọn.
@@ -332,8 +321,45 @@ export default function App() {
   // scale đọc trực tiếp `stations` và null là “chưa khai cổng”, không là “chưa quan sát”.
   useEffect(() => {
     if (meta.id !== STATION_PORTS_FIELD) return;
-    setScale(buildScale(meta.kind, stations.map((s) => s.nPorts)));
+    setScale(buildScale(meta.kind, stations.map((s) => s.nPorts), meta.diverge));
   }, [meta, stations]);
+
+  /**
+   * Giá trị của ĐỐI TƯỢNG ĐANG CHỌN theo measure đang tô — mốc trên thước đo của legend.
+   *
+   * §8 của DESIGN.md đòi map, legend và inspector cùng nói MỘT measure; ba mặt ấy đang nói
+   * đúng một measure nhưng không nói với nhau. Người xem bấm một xã, inspector đưa ra con
+   * số, rồi phải tự ước lượng con số đó nằm đâu trên thang màu — tức tự làm bằng mắt đúng
+   * phép tra mà thang màu tồn tại để làm hộ.
+   *
+   * Tính ở đây vì đây là chỗ duy nhất giữ cả năm mảng dữ liệu. Trả `null` khi không tra
+   * được (chưa nạp, đối tượng không có trong measure này) — mốc vắng mặt là câu trả lời
+   * đúng cho "không biết", không phải 0.
+   */
+  const selectedValue = useMemo<number | null>(() => {
+    if (!cellSel) return null;
+    const num = (v: unknown): number | null =>
+      typeof v === "number" && Number.isFinite(v) ? v : null;
+
+    const commune = communeCodeOf(cellSel);
+    if (commune && meta.readAs === "commune" && communes) {
+      const f = communes.features.find((c) => c.properties["commune_code"] === commune);
+      return f ? num(f.properties[meta.column]) : null;
+    }
+    const h3 = cellIdOf(cellSel);
+    if (h3 && meta.readAs === "cell") return num(cells.find((c) => c.h3 === h3)?.value);
+
+    const station = stationIdOf(cellSel);
+    if (station && meta.id === STATION_PORTS_FIELD)
+      return num(stations.find((s) => s.id === station)?.nPorts);
+    if (station && meta.id === STATION_OCC_FIELD && occupancy) {
+      const i = occupancy.stations.findIndex((s) => s.id === station);
+      return i < 0 ? null : num(stationOccAt(occupancy.profiles, i, t));
+    }
+    const road = roadIdOf(cellSel);
+    if (road && meta.readAs === "road") return num(roads.find((r) => r.id === road)?.dist);
+    return null;
+  }, [cellSel, meta, communes, cells, stations, occupancy, roads, t]);
 
   const dockData: DockData = useMemo(() => {
     let histValues: number[] = [];
@@ -394,7 +420,23 @@ export default function App() {
 
   const activeNavMode = dataMode ? "data" : scene ? "story" : "map";
   const isStoryEnabled = manifest?.story_enabled !== false && storyEnabled();
-  const scrubberVisible = !scene && !dataMode && layerUsable("occupancy");
+  /*
+   * Scrubber chỉ có mặt khi nó ĐIỀU KHIỂN được thứ gì đó — DESIGN.md §3.3.
+   *
+   * Điều kiện cũ là "bộ dữ liệu có lớp occupancy", tức nó hiện ở gần như mọi phiên xem, kể
+   * cả khi bản đồ đang tô một trường của XÃ mà nó không đụng tới. Hậu quả không phải chỉ là
+   * thừa: nó chiếm một dải ngang đáy màn hình và tự dán lên mình dòng "chỉ tác động khi
+   * chọn trường nhịp trạm" — một điều khiển vô hiệu, giải thích vì sao nó vô hiệu, ngay
+   * cạnh bản đồ. Cùng loại lỗi mà §3a cấm ở nav: giao diện không được hứa thứ nó không có.
+   *
+   * Hai đường nó thật sự tác động: trường đang tô LÀ nhịp trạm, hoặc một TRẠM đang được
+   * chọn (panel trạm có mini-heatmap 168h đọc theo `t`).
+   */
+  const scrubberVisible =
+    !scene &&
+    !dataMode &&
+    layerUsable("occupancy") &&
+    (meta.id === STATION_OCC_FIELD || stationIdOf(cellSel) !== null);
 
   const handleSelectNavMode = (mode: "map" | "story" | "data") => {
     if (mode === "data") {
@@ -442,7 +484,7 @@ export default function App() {
 
       <div className="flex min-w-0 flex-1 flex-col relative overflow-hidden">
         {error && (
-          <div className="shrink-0 border-b border-hairline bg-panel px-4 py-2 text-[13px]">
+          <div className="shrink-0 border-b border-hairline bg-panel px-4 py-2 text-heading">
             Không nạp được dữ liệu: {error}
             <span className="text-ink-muted"> — đã chạy `make web-data` chưa?</span>
           </div>
@@ -465,7 +507,6 @@ export default function App() {
                 routes={routes}
                 poi={poi}
                 occupancy={occupancy}
-                substations={substations}
               />
 
               {/* Floating Legend Top-Left */}
@@ -475,6 +516,7 @@ export default function App() {
                 manifest={manifest}
                 runtime={runtimeCov}
                 surfaceBreaks={surfaceBreaks}
+                selectedValue={selectedValue}
               />
 
               {/* Inspector Sheet from Right */}

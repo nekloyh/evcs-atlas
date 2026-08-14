@@ -24,18 +24,18 @@ export function PoiPanel({
   );
 
   return (
-    <div className="text-[12px]">
+    <div className="text-title">
       <div className="flex items-center gap-2 border-b border-hairline px-2 py-1.5">
-        <button onClick={onBack} className="cursor-pointer text-[11px] text-ink-2 hover:text-ink">
+        <button onClick={onBack} className="cursor-pointer text-body text-ink-2 hover:text-ink">
           ‹ quay lại
         </button>
-        <span className="ml-auto font-mono text-[10px] text-ink-muted">poi {refId}</span>
+        <span className="ml-auto font-mono text-note text-ink-muted">poi {refId}</span>
       </div>
 
-      {!poi && <p className="p-3 text-[11px] text-ink-muted">đang nạp poi.geojson…</p>}
+      {!poi && <p className="p-3 text-body text-ink-muted">đang nạp poi.geojson…</p>}
 
       {poi && !feature && (
-        <p className="p-3 text-[11px] leading-snug text-ink-2">
+        <p className="p-3 text-body leading-snug text-ink-2">
           Không có POI nào mang tham chiếu <span className="font-mono">{refId}</span>. Tham
           chiếu đúng hình dạng nhưng không thuộc bản trích. Chỉ panel này rỗng — các khoá
           còn lại của hash giữ nguyên.
@@ -56,20 +56,20 @@ function PoiBody({ f }: { f: PoiFeature }) {
   return (
     <>
       <div className="border-b border-hairline px-2 py-2">
-        <div className="text-[14px] font-semibold leading-tight">
+        <div className="text-heading font-semibold leading-tight">
           {p.name ?? group?.label ?? p.group}
         </div>
         {/* Tên vắng là sự thật về OSM, nói ra được — khác với một giá trị đo thiếu. */}
         {p.name === null && (
-          <div className="pt-0.5 text-[11px] italic text-ink-muted">OSM không đặt tên</div>
+          <div className="pt-0.5 text-body italic text-ink-muted">OSM không đặt tên</div>
         )}
-        <div className="pt-0.5 text-[11px] text-ink-muted">
+        <div className="pt-0.5 text-body text-ink-muted">
           {group?.label} · <span className="font-mono">{p.tag}</span>
         </div>
       </div>
 
       <section>
-        <h3 className="border-b border-hairline bg-basemap px-2 py-1 text-[11px] tracking-[0.1em] text-ink-2">
+        <h3 className="border-b border-hairline bg-basemap px-2 py-1 text-body tracking-[0.1em] text-ink-2">
           THUỘC TÍNH
         </h3>
         {/* Diện tích chỉ tồn tại khi có cạnh — tính lúc chạy từ hình học đã ship (§13c-1). */}
@@ -89,7 +89,7 @@ function PoiBody({ f }: { f: PoiFeature }) {
       </section>
 
       {!withShape && (
-        <p className="p-3 text-[11px] leading-snug text-ink-muted">
+        <p className="p-3 text-body leading-snug text-ink-muted">
           POI này vẽ bằng mark <strong>rỗng</strong> trên bản đồ: vị trí biết, cạnh không
           biết — không vẽ vòng tròn thay hình, và ở chế độ 3D nó không có khối.
         </p>
@@ -100,7 +100,7 @@ function PoiBody({ f }: { f: PoiFeature }) {
 
 function Row({ k, v }: { k: string; v: string }) {
   return (
-    <div className="flex items-baseline gap-2 border-b border-hairline px-2 py-1 text-[11px]">
+    <div className="flex items-baseline gap-2 border-b border-hairline px-2 py-1 text-body">
       <span className="min-w-0 flex-1 truncate text-ink-muted">{k}</span>
       <span className="text-ink-2">{v}</span>
     </div>

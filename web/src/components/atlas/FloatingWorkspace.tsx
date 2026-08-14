@@ -54,12 +54,12 @@ export function FloatingWorkspace({
       <button
         onClick={() => setWorkspaceOpen(true)}
         aria-label="Mở Workspace điều tra"
-        className={`fixed ${bottomSlot} right-3 z-20 flex items-center gap-2 rounded-full border border-hairline bg-panel/95 backdrop-blur-md px-3.5 py-2 text-xs font-semibold text-ink shadow-float hover:bg-surface-hover transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+        className={`fixed ${bottomSlot} right-3 z-20 flex items-center gap-2 rounded-full border border-hairline bg-panel/95 backdrop-blur-md px-3.5 py-2 text-title font-semibold text-ink shadow-float hover:bg-surface-hover transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
       >
         <SlidersHorizontal className="h-4 w-4 text-ink-2" />
         <span>Workspace</span>
         {layers.size > 0 && (
-          <span className="grid h-4 min-w-4 place-items-center rounded-full bg-basemap px-1 font-mono text-[10px] text-cold-2 border border-hairline">
+          <span className="grid h-4 min-w-4 place-items-center rounded-full bg-basemap px-1 font-mono text-note text-cold-2 border border-hairline">
             {layers.size}
           </span>
         )}
@@ -69,7 +69,7 @@ export function FloatingWorkspace({
 
   // Content shared between Desktop Floating Panel & Mobile Sheet
   const workspaceContent = (
-    <div className="flex h-full flex-col text-ink text-xs select-text">
+    <div className="flex h-full flex-col text-ink text-title select-text">
       {/* Header Tabs */}
       <AtlasSurfaceHeader className="justify-between p-0 select-none">
         <Tabs
@@ -78,13 +78,13 @@ export function FloatingWorkspace({
           className="w-full"
         >
           <TabsList className="h-9 border-b-0 bg-transparent">
-            <TabsTrigger value="question" className="py-2 text-[11px] tracking-wider uppercase">
+            <TabsTrigger value="question" className="py-2 text-body tracking-wider uppercase">
               CÂU HỎI
             </TabsTrigger>
-            <TabsTrigger value="context" className="py-2 text-[11px] tracking-wider uppercase flex items-center justify-center gap-1.5">
+            <TabsTrigger value="context" className="py-2 text-body tracking-wider uppercase flex items-center justify-center gap-1.5">
               <span>BỐI CẢNH</span>
               {layers.size > 0 && (
-                <span className="font-mono text-[10px] text-cold-2 font-bold">
+                <span className="font-mono text-note text-cold-2 font-bold">
                   ({layers.size})
                 </span>
               )}
@@ -120,7 +120,7 @@ export function FloatingWorkspace({
       </AtlasSurfaceBody>
 
       {/* Footer Source Block */}
-      <AtlasSurfaceFooter className="p-2 text-[11px]">
+      <AtlasSurfaceFooter className="p-2 text-body">
         <SourceBlock manifest={manifest} cell={null} occ={null} />
       </AtlasSurfaceFooter>
     </div>
@@ -143,7 +143,7 @@ export function FloatingWorkspace({
   // Desktop Floating Panel (320px at bottom-right)
   return (
     <AtlasSurface
-      className={`fixed ${bottomSlot} right-3 z-20 ${maxHeight} w-[320px] transition-all duration-200`}
+      className={`fixed ${bottomSlot} right-3 z-20 ${maxHeight} w-[320px] transition-all`}
       aria-label="Không gian điều tra"
     >
       {workspaceContent}

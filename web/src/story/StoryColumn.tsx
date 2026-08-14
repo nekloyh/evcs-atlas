@@ -76,19 +76,19 @@ export function StoryColumn({
           // một cảnh mỗi lúc, nên không có trạng thái "hai cảnh cùng đang hoạt động".
           className={`flex min-h-full flex-col justify-center border-b border-hairline ${
             scene === s.id ? "" : "opacity-45"
-          } transition-opacity duration-300`}
+          } transition-opacity`}
         >
           <div className="py-6">
             <header className="px-4 pb-3">
-              <div className="flex items-baseline gap-2 text-[10px] tracking-[0.14em] text-ink-muted">
+              <div className="flex items-baseline gap-2 text-note tracking-[0.14em] text-ink-muted">
                 <span>{s.kicker}</span>
                 <span className="tabular-nums">
                   {i + 1}/{SCENES.length}
                 </span>
               </div>
-              <h2 className="pt-1 text-[19px] font-semibold leading-tight">{s.title}</h2>
+              <h2 className="pt-1 text-display font-semibold leading-tight">{s.title}</h2>
               {/* MỘT câu — §3a. Đây là luận điểm, không phải đoạn tóm tắt. */}
-              <p className="pt-2 text-[12px] leading-relaxed text-ink-2">{s.claim}</p>
+              <p className="pt-2 text-title leading-relaxed text-ink-2">{s.claim}</p>
             </header>
 
             {s.id === "von-cuc" && <SceneVonCuc />}
@@ -105,11 +105,11 @@ export function StoryColumn({
       <div className="border-t border-hairline px-4 py-4">
         <button
           onClick={() => enterScene(null)}
-          className="cursor-pointer border border-hairline px-3 py-1.5 text-[12px] hover:bg-basemap"
+          className="cursor-pointer border border-hairline px-3 py-1.5 text-title hover:bg-basemap"
         >
           Mở trong BẢN ĐỒ →
         </button>
-        <p className="pt-2 text-[11px] leading-snug text-ink-muted">
+        <p className="pt-2 text-body leading-snug text-ink-muted">
           Giữ nguyên trường, khung nhìn và lớp của cảnh đang xem — chỉ khác là rail hiện ra và
           mọi thứ bấm được.
         </p>

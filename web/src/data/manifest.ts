@@ -152,21 +152,6 @@ export interface Manifest {
       share_of_hanoi_ports_before: number;
       share_of_hanoi_power_before: number;
     };
-    /**
-     * Trạm biến áp OSM — M5, §7c đã liệt kê khoá này từ M1 và M5 mới phát nó thật.
-     *
-     * Đây là số đo về NGUỒN, và nó thuộc loại "chặn dưới": OSM phủ hạ tầng điện rất thưa,
-     * nên `n` nói *ít nhất bấy nhiêu*, không nói *bấy nhiêu*. Tab LAYER phải in ra điều đó
-     * TRƯỚC KHI người xem bấm — cùng khuôn `apartment_levels_sum` ở §7.
-     */
-    osm_substations?: {
-      n: number;
-      n_mapped_as_area: number;
-      n_mapped_as_node: number;
-      n_named: number;
-      tag: string;
-      aoi: string;
-    };
   };
   /**
    * Lớp POI VISUAL 4 nhóm — M3.5. Tab LAYER in tỉ lệ có-polygon từng nhóm từ đây

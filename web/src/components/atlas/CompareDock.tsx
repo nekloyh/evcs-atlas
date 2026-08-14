@@ -60,7 +60,7 @@ export function CompareDock({ field, dockData }: CompareDockProps) {
       <AtlasSurfaceHeader className="justify-between gap-2 px-3.5 py-2.5">
         <div className="flex items-center gap-2">
           <BarChart3 className="h-4 w-4 text-cold-2" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-ink">
+          <span className="text-title font-semibold uppercase tracking-wider text-ink">
             SO SÁNH PHÂN TÍCH
           </span>
         </div>
@@ -68,7 +68,7 @@ export function CompareDock({ field, dockData }: CompareDockProps) {
           {activeBrushes > 0 && (
             <Button
               variant="ghost"
-              className="h-7 px-2 text-[10px] text-ink-2"
+              className="h-7 px-2 text-note text-ink-2"
               onClick={() => setBrush({})}
             >
               Bỏ {activeBrushes} lọc
@@ -97,7 +97,7 @@ export function CompareDock({ field, dockData }: CompareDockProps) {
   if (isDesktop) {
     return (
       <AtlasSurface
-        className="fixed top-3 right-3 bottom-3 z-30 w-[360px] transition-all duration-200"
+        className="fixed top-3 right-3 bottom-3 z-30 w-[360px] transition-all"
         aria-label="Đốc so sánh phân tích"
       >
         {dockInnerContent}

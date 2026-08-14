@@ -68,16 +68,20 @@ export function Scrubber({ field }: { field: string }) {
   }, [playing, stepT]);
 
   return (
-    <div className="flex h-14 shrink-0 items-stretch border-t border-hairline bg-panel text-[11px]">
+    /* Chiều cao theo NỘI DUNG, không phải `h-14` cố định.
+       Bên trong là ba hàng xếp dọc (nhãn giờ · snapshot · 168 vạch); `h-14` = 56 px chỉ đủ
+       hai hàng đầu, nên hàng vạch — thứ duy nhất ở đây thật sự là một điều khiển — bị xén
+       mất một nửa ở mép dưới màn hình và không bấm trúng được. */
+    <div className="flex shrink-0 items-stretch border-t border-hairline bg-panel text-body">
       <button
         onClick={() => setPlaying(!playing)}
         title={playing ? "dừng" : `chạy — ${HOURS_PER_SEC} giờ/giây, lặp vô hạn`}
-        className="w-14 shrink-0 cursor-pointer border-r border-hairline text-[13px] hover:bg-basemap"
+        className="w-14 shrink-0 cursor-pointer border-r border-hairline text-heading hover:bg-basemap"
       >
         {playing ? "▮▮" : "▶"}
       </button>
 
-      <div className="flex min-w-0 flex-1 flex-col justify-center px-3">
+      <div className="flex min-w-0 flex-1 flex-col justify-center px-3 py-2">
         <div className="flex items-baseline gap-2 pb-1">
           <span className="tabular-nums font-semibold">
             {DOW_LABELS[dowOf(t)]} {String(hourOf(t)).padStart(2, "0")}:00
@@ -102,7 +106,7 @@ export function Scrubber({ field }: { field: string }) {
           )}
         </div>
 
-        <div className="flex items-center gap-1 pb-1 text-[10px] text-ink-muted">
+        <div className="flex items-center gap-1 pb-1 text-note text-ink-muted">
           <span>snapshot:</span>
           {PRESETS.map((p) => (
             <button
@@ -168,7 +172,7 @@ function Track({
           className="relative min-w-0 flex-1 border-r border-hairline last:border-r-0"
           style={{ background: d % 2 === 0 ? "transparent" : `${HAIRLINE_HEX}55` }}
         >
-          <span className="pointer-events-none absolute left-1 top-0 text-[9px] leading-none text-ink-muted">
+          <span className="pointer-events-none absolute left-1 top-0 text-note leading-none text-ink-muted">
             {label}
           </span>
           {/* 24 vạch giờ. Giờ ngoài cửa sổ brush MỜ đi — cùng ký hiệu "bị loại" của bản đồ. */}
