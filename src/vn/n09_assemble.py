@@ -52,7 +52,6 @@ REJECTED = {
     "drive_time_station_min",
     "buildable",
     "not_buildable_reason",
-    "dist_substation_m",
 }
 
 

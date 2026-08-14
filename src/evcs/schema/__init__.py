@@ -15,7 +15,7 @@ from .column import ARROW, Column, Table
 from .commune import COMMUNE
 from .grid import GRID
 from .national import NATIONAL_R6
-from .supply import CONNECTORS, OCCUPANCY, PROFILE_168H, STATIONS, SUBSTATIONS
+from .supply import CONNECTORS, OCCUPANCY, PROFILE_168H, STATIONS
 
 __all__ = [
     "ARROW",
@@ -26,7 +26,6 @@ __all__ = [
     "OCCUPANCY",
     "PROFILE_168H",
     "STATIONS",
-    "SUBSTATIONS",
     "Column",
     "Table",
     "TABLES",
@@ -34,5 +33,5 @@ __all__ = [
 
 TABLES: dict[str, Table] = {
     t.name: t
-    for t in (GRID, COMMUNE, STATIONS, CONNECTORS, OCCUPANCY, PROFILE_168H, SUBSTATIONS, NATIONAL_R6)
+    for t in (GRID, COMMUNE, STATIONS, CONNECTORS, OCCUPANCY, PROFILE_168H, NATIONAL_R6)
 }

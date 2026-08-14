@@ -1,4 +1,4 @@
-"""Bốn bảng của lớp CUNG + lớp trạm biến áp.
+"""Bốn bảng của lớp CUNG.
 
 Chúng khai ở đây vì lý do đã sinh ra module này: bản mô tả cột duy nhất của chúng từng nằm
 trong ``DATA_DICTIONARY.md``, viết tay, và **phần lớn con số ở đó chép từ trước bộ lọc điểm
@@ -230,39 +230,3 @@ PROFILE_168H = Table(
         Column("province_code", "str", "occupancy", role="identity"),
     ),
 )
-
-# ── TRẠM BIẾN ÁP ──────────────────────────────────────────────────────────────
-SUBSTATIONS = Table(
-    name="substations",
-    key="osm_id",
-    desc="Trạm biến áp OSM — lớp ĐIỂM để vẽ. Bảy cột, và bảy là con số có ý nghĩa.",
-    columns=(
-        Column("osm_type", "str", "substation", role="identity", desc="node · way · relation"),
-        Column(
-            "osm_id",
-            "i64",
-            "substation",
-            role="key",
-            desc="`orig_id()` với area — KHÔNG phải id tổng hợp của osmium",
-        ),
-        Column("name", "str", "substation", role="identity", null_means="OSM không đặt tên"),
-        Column(
-            "lat",
-            "f64",
-            "substation",
-            role="identity",
-            unit="độ",
-            desc="TÂM đa giác nếu OSM vẽ bằng đa giác",
-        ),
-        Column("lng", "f64", "substation", role="identity", unit="độ"),
-        Column("province_code", "str", "substation", role="identity"),
-        Column(
-            "scope", "str", "substation", desc="IN · BUFFER — lớp bối cảnh, không cộng dồn ở đâu"
-        ),
-    ),
-)
-
-# Bảy cột và KHÔNG hơn. Không `voltage`, không `substation=*`, không công suất, không
-# khoảng cách. Đây là chỗ `DECISIONS §8` có thể bị đảo ngược bằng một dòng ba từ, nên hàng
-# rào có test (`tests/test_core_osm.py`) và một phép kiểm chạy ở bước.
-SUBSTATION_CAM = frozenset({"voltage", "substation", "capacity", "power", "rating", "kva"})

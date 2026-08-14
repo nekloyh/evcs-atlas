@@ -2970,75 +2970,6 @@
    "n_cols": 26,
    "n_rows": 939
   },
-  "p/01/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 21.387330603,
-     "min": 20.5666448746,
-     "n_finite": 132,
-     "n_null": 0,
-     "p50": 21.0310351847,
-     "sum": 2775.87078576,
-     "sumsq": 58377.8898386
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 106.061694905,
-     "min": 105.28352423,
-     "n_finite": 132,
-     "n_null": 0,
-     "p50": 105.842606727,
-     "sum": 13965.7001505,
-     "sumsq": 1477585.02146
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "ff8fd46bef749544",
-     "n_null": 91,
-     "n_unique": 40
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 13827995385.0,
-     "min": 251790836.0,
-     "n_finite": 132,
-     "n_null": 0,
-     "p50": 1229927540.0,
-     "sum": 192294475936.0,
-     "sumsq": 7.28813978159e+20
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "300993eee147af52",
-     "n_null": 0,
-     "n_unique": 2
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "0661319aac4ce12d",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 132
-  },
   "p/01/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -5726,75 +5657,6 @@
    "n_cols": 26,
    "n_rows": 31
   },
-  "p/04/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 22.9451346346,
-     "min": 22.5413147701,
-     "n_finite": 12,
-     "n_null": 0,
-     "p50": 22.8202449177,
-     "sum": 273.377682224,
-     "sumsq": 6228.14127601
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 106.833253343,
-     "min": 105.507472383,
-     "n_finite": 12,
-     "n_null": 0,
-     "p50": 106.469510175,
-     "sum": 1275.54163702,
-     "sumsq": 135586.627865
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "d47e024246932ec0",
-     "n_null": 9,
-     "n_unique": 3
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1458074487.0,
-     "min": 144131595.0,
-     "n_finite": 12,
-     "n_null": 0,
-     "p50": 1240377521.5,
-     "sum": 12301806522.0,
-     "sumsq": 1.4448946174e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "c99707f00544a122",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 12
-  },
   "p/04/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -8471,75 +8333,6 @@
    "key_hash": "decc280e8dbcc479",
    "n_cols": 26,
    "n_rows": 110
-  },
-  "p/08/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 23.17188035,
-     "min": 21.7025880431,
-     "n_finite": 27,
-     "n_null": 0,
-     "p50": 22.5422961826,
-     "sum": 606.074120078,
-     "sumsq": 13610.5321878
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 105.4986585,
-     "min": 104.45435733,
-     "n_finite": 27,
-     "n_null": 0,
-     "p50": 105.019395816,
-     "sum": 2835.82714396,
-     "sumsq": 297850.548249
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "5a18ce4606d9d45c",
-     "n_null": 26,
-     "n_unique": 1
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1462548693.0,
-     "min": 853273538.0,
-     "n_finite": 27,
-     "n_null": 0,
-     "p50": 1264593812.0,
-     "sum": 34275765770.0,
-     "sumsq": 4.4214716367e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "9ae209aca831cd5f",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 27
   },
   "p/08/traveltime_cell.parquet": {
    "col": {
@@ -11223,75 +11016,6 @@
    "n_cols": 26,
    "n_rows": 41
   },
-  "p/11/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 21.9679671,
-     "min": 21.2323908666,
-     "n_finite": 12,
-     "n_null": 0,
-     "p50": 21.4251067639,
-     "sum": 258.085626019,
-     "sumsq": 5551.42135391
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 103.42988544,
-     "min": 102.932650674,
-     "n_finite": 12,
-     "n_null": 0,
-     "p50": 103.102365453,
-     "sum": 1237.91347761,
-     "sumsq": 127702.806662
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "e3b0c44298fc1c14",
-     "n_null": 12,
-     "n_unique": 0
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1462548671.0,
-     "min": 1318145095.0,
-     "n_finite": 12,
-     "n_null": 0,
-     "p50": 1458074472.5,
-     "sum": 17102115346.0,
-     "sumsq": 2.44186508572e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "e4dda54e86921e36",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 12
-  },
   "p/11/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -13969,75 +13693,6 @@
    "n_cols": 26,
    "n_rows": 28
   },
-  "p/12/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 22.606242842,
-     "min": 21.6566454403,
-     "n_finite": 33,
-     "n_null": 0,
-     "p50": 22.39019435,
-     "sum": 735.979567847,
-     "sumsq": 16415.9723433
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 103.99275325,
-     "min": 102.50887065,
-     "n_finite": 33,
-     "n_null": 0,
-     "p50": 103.09872438,
-     "sum": 3406.99616055,
-     "sumsq": 351753.387135
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "22c02f8eb755f937",
-     "n_null": 32,
-     "n_unique": 1
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1462548681.0,
-     "min": 712584132.0,
-     "n_finite": 33,
-     "n_null": 0,
-     "p50": 1320783853.0,
-     "sum": 42102867114.0,
-     "sumsq": 5.46465576306e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "d189e509a912fc3e",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 33
-  },
   "p/12/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -16709,75 +16364,6 @@
    "key_hash": "878cc9412caf54cd",
    "n_cols": 26,
    "n_rows": 66
-  },
-  "p/14/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 21.6566454403,
-     "min": 20.6118476233,
-     "n_finite": 24,
-     "n_null": 0,
-     "p50": 21.3926720793,
-     "sum": 512.033095633,
-     "sumsq": 10925.4955182
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 104.849134976,
-     "min": 103.40535564,
-     "n_finite": 24,
-     "n_null": 0,
-     "p50": 104.080196405,
-     "sum": 2499.5879374,
-     "sumsq": 260333.729819
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "e3b0c44298fc1c14",
-     "n_null": 24,
-     "n_unique": 0
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1462548670.0,
-     "min": 714513856.0,
-     "n_finite": 24,
-     "n_null": 0,
-     "p50": 1329368383.0,
-     "sum": 31117383016.0,
-     "sumsq": 4.11689072799e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "6acdf8126c4c306f",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 24
   },
   "p/14/traveltime_cell.parquet": {
    "col": {
@@ -19466,75 +19052,6 @@
    "n_cols": 26,
    "n_rows": 100
   },
-  "p/15/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 22.7426334267,
-     "min": 21.4974422707,
-     "n_finite": 51,
-     "n_null": 0,
-     "p50": 22.0404802,
-     "sum": 1125.51001564,
-     "sumsq": 24844.9880424
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 105.02486355,
-     "min": 103.6866605,
-     "n_finite": 51,
-     "n_null": 0,
-     "p50": 104.078492562,
-     "sum": 5315.12935571,
-     "sumsq": 553939.724939
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "e3b0c44298fc1c14",
-     "n_null": 51,
-     "n_unique": 0
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1462548694.0,
-     "min": 481965040.0,
-     "n_finite": 51,
-     "n_null": 0,
-     "p50": 1320783907.0,
-     "sum": 66305639427.0,
-     "sumsq": 8.79951317942e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "8a09ba1d32f76bb7",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 51
-  },
   "p/15/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -22217,75 +21734,6 @@
    "n_cols": 26,
    "n_rows": 152
   },
-  "p/19/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 22.1994989771,
-     "min": 21.3014425125,
-     "n_finite": 20,
-     "n_null": 0,
-     "p50": 21.522122323,
-     "sum": 432.011166453,
-     "sumsq": 9333.12198231
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 105.932925927,
-     "min": 105.584266178,
-     "n_finite": 20,
-     "n_null": 0,
-     "p50": 105.853624925,
-     "sum": 2116.43625315,
-     "sumsq": 223965.304693
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "befb975c788fd6e1",
-     "n_null": 18,
-     "n_unique": 2
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1458074460.0,
-     "min": 483057097.0,
-     "n_finite": 20,
-     "n_null": 0,
-     "p50": 1240467336.0,
-     "sum": 21572871806.0,
-     "sumsq": 2.51933165137e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "ee387e45749ed6a9",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 20
-  },
   "p/19/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -24957,75 +24405,6 @@
    "key_hash": "9ec398d71c333ccb",
    "n_cols": 26,
    "n_rows": 42
-  },
-  "p/20/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 21.9727240077,
-     "min": 21.5660596,
-     "n_finite": 6,
-     "n_null": 0,
-     "p50": 21.7745837611,
-     "sum": 130.635751637,
-     "sumsq": 2844.41856221
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 106.977341274,
-     "min": 106.4918034,
-     "n_finite": 6,
-     "n_null": 0,
-     "p50": 106.680312997,
-     "sum": 640.134991946,
-     "sumsq": 68295.6118072
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "4a4136854980547e",
-     "n_null": 5,
-     "n_unique": 1
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1458074453.0,
-     "min": 482621639.0,
-     "n_finite": 6,
-     "n_null": 0,
-     "p50": 1360684102.0,
-     "sum": 6837186449.0,
-     "sumsq": 8.7140079455e+18
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "50b78625ea91251f",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "88f230c251923b2d",
-     "n_null": 0,
-     "n_unique": 1
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 6
   },
   "p/20/traveltime_cell.parquet": {
    "col": {
@@ -27714,75 +27093,6 @@
    "n_cols": 26,
    "n_rows": 181
   },
-  "p/22/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 21.5435203902,
-     "min": 20.8003855069,
-     "n_finite": 52,
-     "n_null": 0,
-     "p50": 21.0081532978,
-     "sum": 1094.175149,
-     "sumsq": 23024.9587479
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 107.960884121,
-     "min": 106.398251862,
-     "n_finite": 52,
-     "n_null": 0,
-     "p50": 106.846148258,
-     "sum": 5563.026455,
-     "sumsq": 595146.853427
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "e932630fcb275c8f",
-     "n_null": 40,
-     "n_unique": 12
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1495906646.0,
-     "min": 19032321.0,
-     "n_finite": 52,
-     "n_null": 0,
-     "p50": 1265612886.0,
-     "sum": 56716268368.0,
-     "sumsq": 6.99695199029e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "63d00ad1ac5deaaf",
-     "n_null": 0,
-     "n_unique": 2
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "e61a83a4df784c41",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 52
-  },
   "p/22/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -30470,75 +29780,6 @@
    "n_cols": 26,
    "n_rows": 344
   },
-  "p/24/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 21.6311365488,
-     "min": 20.9341248797,
-     "n_finite": 62,
-     "n_null": 0,
-     "p50": 21.1598969235,
-     "sum": 1312.84058276,
-     "sumsq": 27800.4809032
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 106.801463084,
-     "min": 105.86171328,
-     "n_finite": 62,
-     "n_null": 0,
-     "p50": 106.084447467,
-     "sum": 6579.19384794,
-     "sumsq": 698160.511892
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "14a7192c0a708f29",
-     "n_null": 48,
-     "n_unique": 14
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 6924044149.0,
-     "min": 469414362.0,
-     "n_finite": 62,
-     "n_null": 0,
-     "p50": 1264912330.0,
-     "sum": 74379298955.0,
-     "sumsq": 1.27373560135e+20
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "300993eee147af52",
-     "n_null": 0,
-     "n_unique": 2
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "1c2153bb843599dd",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 62
-  },
   "p/24/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -33215,75 +32456,6 @@
    "key_hash": "d44b7d35d6ca04ea",
    "n_cols": 26,
    "n_rows": 425
-  },
-  "p/25/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 21.6788997879,
-     "min": 20.3137588631,
-     "n_finite": 50,
-     "n_null": 0,
-     "p50": 21.202689815,
-     "sum": 1051.57986827,
-     "sumsq": 22123.6254004
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 105.903172969,
-     "min": 104.83970992,
-     "n_finite": 50,
-     "n_null": 0,
-     "p50": 105.447918693,
-     "sum": 5273.38005227,
-     "sumsq": 556174.337096
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "30f5367a604f467c",
-     "n_null": 43,
-     "n_unique": 7
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1462548622.0,
-     "min": 400591170.0,
-     "n_finite": 50,
-     "n_null": 0,
-     "p50": 1265902480.5,
-     "sum": 59328968303.0,
-     "sumsq": 7.35669668254e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "5a57650459d61e02",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 50
   },
   "p/25/traveltime_cell.parquet": {
    "col": {
@@ -35972,75 +35144,6 @@
    "n_cols": 26,
    "n_rows": 295
   },
-  "p/31/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 21.2016386652,
-     "min": 20.6357212953,
-     "n_finite": 70,
-     "n_null": 0,
-     "p50": 20.9136339884,
-     "sum": 1463.75414316,
-     "sumsq": 30609.2838728
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 107.055677927,
-     "min": 106.111903712,
-     "n_finite": 70,
-     "n_null": 0,
-     "p50": 106.56781898,
-     "sum": 7457.66246701,
-     "sumsq": 794527.855618
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "70a11a5bfd909140",
-     "n_null": 61,
-     "n_unique": 9
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1509687301.0,
-     "min": 241065371.0,
-     "n_finite": 70,
-     "n_null": 0,
-     "p50": 1261043666.5,
-     "sum": 74369644712.0,
-     "sumsq": 8.69677510819e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "283981ff7da17721",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 70
-  },
   "p/31/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -38727,75 +37830,6 @@
    "key_hash": "cfee4c4705dfd7e2",
    "n_cols": 26,
    "n_rows": 360
-  },
-  "p/33/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 21.0305535249,
-     "min": 20.2725913372,
-     "n_finite": 61,
-     "n_null": 0,
-     "p50": 20.8822317165,
-     "sum": 1267.67921331,
-     "sumsq": 26347.3861176
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 106.566051593,
-     "min": 105.854185503,
-     "n_finite": 61,
-     "n_null": 0,
-     "p50": 106.061694905,
-     "sum": 6472.99371114,
-     "sumsq": 686882.130505
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "ac2dfef6f9d77651",
-     "n_null": 49,
-     "n_unique": 12
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 13827995385.0,
-     "min": 153608703.0,
-     "n_finite": 61,
-     "n_null": 0,
-     "p50": 1266260752.0,
-     "sum": 92075360184.0,
-     "sumsq": 4.00691316192e+20
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "300993eee147af52",
-     "n_null": 0,
-     "n_unique": 2
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "674bc9d1ad91b2d8",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 61
   },
   "p/33/traveltime_cell.parquet": {
    "col": {
@@ -41484,75 +40518,6 @@
    "n_cols": 26,
    "n_rows": 274
   },
-  "p/37/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 20.6803158107,
-     "min": 20.084868057,
-     "n_finite": 45,
-     "n_null": 0,
-     "p50": 20.4287236311,
-     "sum": 918.977188783,
-     "sumsq": 18768.1180463
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 106.422700103,
-     "min": 105.733368354,
-     "n_finite": 45,
-     "n_null": 0,
-     "p50": 105.928040749,
-     "sum": 4769.41852511,
-     "sumsq": 505497.654673
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "f15c9096473b6dd0",
-     "n_null": 35,
-     "n_unique": 10
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1463511136.0,
-     "min": 251048155.0,
-     "n_finite": 45,
-     "n_null": 0,
-     "p50": 1279065857.0,
-     "sum": 51526079452.0,
-     "sumsq": 6.24033692376e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "eea6dcf1843cd679",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 45
-  },
   "p/37/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -44240,75 +43205,6 @@
    "n_cols": 26,
    "n_rows": 201
   },
-  "p/38/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 20.6118476233,
-     "min": 19.2656196,
-     "n_finite": 32,
-     "n_null": 0,
-     "p50": 19.8684555116,
-     "sum": 635.266208573,
-     "sumsq": 12616.1455458
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 106.085843982,
-     "min": 104.83970992,
-     "n_finite": 32,
-     "n_null": 0,
-     "p50": 105.672758697,
-     "sum": 3377.98200477,
-     "sumsq": 356589.076356
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "e32e2220b8c44482",
-     "n_null": 27,
-     "n_unique": 5
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1500961241.0,
-     "min": 484052979.0,
-     "n_finite": 32,
-     "n_null": 0,
-     "p50": 1047626360.0,
-     "sum": 35577492904.0,
-     "sumsq": 4.14494892325e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "15b9305c141732f0",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 32
-  },
   "p/38/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -46980,75 +45876,6 @@
    "key_hash": "6863347dc8944f18",
    "n_cols": 26,
    "n_rows": 131
-  },
-  "p/40/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 19.8703259692,
-     "min": 18.5284704718,
-     "n_finite": 33,
-     "n_null": 0,
-     "p50": 19.1793890464,
-     "sum": 630.077909018,
-     "sumsq": 12033.8889118
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 105.798918562,
-     "min": 104.470741261,
-     "n_finite": 33,
-     "n_null": 0,
-     "p50": 105.59216385,
-     "sum": 3478.39097013,
-     "sumsq": 366647.661866
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "32e41dd211c8868f",
-     "n_null": 24,
-     "n_unique": 9
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1500961241.0,
-     "min": 400632258.0,
-     "n_finite": 33,
-     "n_null": 0,
-     "p50": 1050835279.0,
-     "sum": 37716701697.0,
-     "sumsq": 4.56397767855e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "366f6906bd95f6ab",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 33
   },
   "p/40/traveltime_cell.parquet": {
    "col": {
@@ -49737,75 +48564,6 @@
    "n_cols": 26,
    "n_rows": 131
   },
-  "p/42/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 18.685268004,
-     "min": 17.9307090621,
-     "n_finite": 21,
-     "n_null": 0,
-     "p50": 18.3320586,
-     "sum": 384.606317302,
-     "sumsq": 7045.09643019
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 106.496425038,
-     "min": 105.167514774,
-     "n_finite": 21,
-     "n_null": 0,
-     "p50": 105.888151742,
-     "sum": 2224.82009797,
-     "sumsq": 235709.027611
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "6a8dceb727deb656",
-     "n_null": 14,
-     "n_unique": 7
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1500644326.0,
-     "min": 400633260.0,
-     "n_finite": 21,
-     "n_null": 0,
-     "p50": 1267717404.0,
-     "sum": 23965870399.0,
-     "sumsq": 2.95048688667e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "e08de2656532c105",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 21
-  },
   "p/42/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -52488,75 +51246,6 @@
    "n_cols": 26,
    "n_rows": 155
   },
-  "p/44/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 17.9486240022,
-     "min": 16.5228406763,
-     "n_finite": 32,
-     "n_null": 0,
-     "p50": 17.2237778184,
-     "sum": 549.658617286,
-     "sumsq": 9448.27284507
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 107.343149578,
-     "min": 106.031161215,
-     "n_finite": 32,
-     "n_null": 0,
-     "p50": 106.7324259,
-     "sum": 3415.76600699,
-     "sumsq": 364610.995226
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "ed9f0aa698513471",
-     "n_null": 24,
-     "n_unique": 8
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1458087680.0,
-     "min": 400645442.0,
-     "n_finite": 32,
-     "n_null": 0,
-     "p50": 1050762829.5,
-     "sum": 34780269361.0,
-     "sumsq": 3.97873498365e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "9484ca56a023a465",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 32
-  },
   "p/44/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -55238,75 +53927,6 @@
    "key_hash": "cee0c273f0f16945",
    "n_cols": 26,
    "n_rows": 67
-  },
-  "p/46/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 16.6902133346,
-     "min": 16.1350022845,
-     "n_finite": 27,
-     "n_null": 0,
-     "p50": 16.4017507305,
-     "sum": 443.128036181,
-     "sumsq": 7273.25068725
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 108.113233517,
-     "min": 107.199838904,
-     "n_finite": 27,
-     "n_null": 0,
-     "p50": 107.464891273,
-     "sum": 2903.93793226,
-     "sumsq": 312329.614533
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "e3b0c44298fc1c14",
-     "n_null": 27,
-     "n_unique": 0
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1488629674.0,
-     "min": 401042492.0,
-     "n_finite": 27,
-     "n_null": 0,
-     "p50": 1318145171.0,
-     "sum": 31501144156.0,
-     "sumsq": 4.00743732635e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "6346ee0797a99ba3",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 27
   },
   "p/46/traveltime_cell.parquet": {
    "col": {
@@ -57995,75 +56615,6 @@
    "n_cols": 26,
    "n_rows": 194
   },
-  "p/48/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 16.1392985977,
-     "min": 15.135270433,
-     "n_finite": 45,
-     "n_null": 0,
-     "p50": 15.7258007844,
-     "sum": 706.450888472,
-     "sumsq": 11093.6554397
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 108.74656135,
-     "min": 107.557147218,
-     "n_finite": 45,
-     "n_null": 0,
-     "p50": 108.126728022,
-     "sum": 4865.49563568,
-     "sumsq": 526071.836944
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "de96546f54a51b38",
-     "n_null": 37,
-     "n_unique": 8
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1488629672.0,
-     "min": 400791086.0,
-     "n_finite": 45,
-     "n_null": 0,
-     "p50": 1270687947.0,
-     "sum": 47997462499.0,
-     "sumsq": 5.83749076844e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "9f5ce5988a92d739",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 45
-  },
   "p/48/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -60735,75 +59286,6 @@
    "key_hash": "e17af716b1b8c9f7",
    "n_cols": 26,
    "n_rows": 86
-  },
-  "p/51/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 15.3885355863,
-     "min": 13.9299739,
-     "n_finite": 51,
-     "n_null": 0,
-     "p50": 14.72996975,
-     "sum": 751.91162837,
-     "sumsq": 11094.1008689
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 109.04463049,
-     "min": 107.4658826,
-     "n_finite": 51,
-     "n_null": 0,
-     "p50": 108.216213913,
-     "sum": 5520.49785114,
-     "sumsq": 597577.211385
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "ac139b84b088d1f9",
-     "n_null": 33,
-     "n_unique": 18
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1509741455.0,
-     "min": 401532710.0,
-     "n_finite": 51,
-     "n_null": 0,
-     "p50": 1271492912.0,
-     "sum": 61482577487.0,
-     "sumsq": 7.78267735435e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "2fec19d9988aa18f",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 51
   },
   "p/51/traveltime_cell.parquet": {
    "col": {
@@ -63492,75 +61974,6 @@
    "n_cols": 26,
    "n_rows": 174
   },
-  "p/52/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 14.4217045746,
-     "min": 13.2097402163,
-     "n_finite": 71,
-     "n_null": 0,
-     "p50": 13.9299739,
-     "sum": 988.447881812,
-     "sumsq": 13766.3225363
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 109.284786147,
-     "min": 107.4658826,
-     "n_finite": 71,
-     "n_null": 0,
-     "p50": 108.228282517,
-     "sum": 7695.58968846,
-     "sumsq": 834133.917245
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "f4f4b07e63067e4d",
-     "n_null": 50,
-     "n_unique": 21
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1492226578.0,
-     "min": 401532710.0,
-     "n_finite": 71,
-     "n_null": 0,
-     "p50": 1309081759.0,
-     "sum": 86595068551.0,
-     "sumsq": 1.11306002489e+20
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "66e34559abce5b04",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 71
-  },
   "p/52/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -66247,75 +64660,6 @@
    "key_hash": "46523c190c12eb43",
    "n_cols": 26,
    "n_rows": 111
-  },
-  "p/56/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 12.9042679403,
-     "min": 11.4001897219,
-     "n_finite": 76,
-     "n_null": 0,
-     "p50": 11.6681585203,
-     "sum": 894.497511985,
-     "sumsq": 10537.9684055
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 109.364896585,
-     "min": 108.681947637,
-     "n_finite": 76,
-     "n_null": 0,
-     "p50": 108.907006794,
-     "sum": 8281.31381988,
-     "sumsq": 902372.203154
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "845c342f12b10580",
-     "n_null": 62,
-     "n_unique": 14
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1524809125.0,
-     "min": 400474243.0,
-     "n_finite": 76,
-     "n_null": 0,
-     "p50": 1273898571.5,
-     "sum": 92985700914.0,
-     "sumsq": 1.16424910793e+20
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "d30b0c7fbcfe0475",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 76
   },
   "p/56/traveltime_cell.parquet": {
    "col": {
@@ -69004,75 +67348,6 @@
    "n_cols": 26,
    "n_rows": 247
   },
-  "p/66/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 13.5744815,
-     "min": 12.2106810557,
-     "n_finite": 55,
-     "n_null": 0,
-     "p50": 12.9042679403,
-     "sum": 708.469647496,
-     "sumsq": 9131.40263005
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 109.364896585,
-     "min": 107.676103052,
-     "n_finite": 55,
-     "n_null": 0,
-     "p50": 108.265321192,
-     "sum": 5964.38283198,
-     "sumsq": 646812.629743
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "d966f6fe0b697691",
-     "n_null": 29,
-     "n_unique": 26
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1492537575.0,
-     "min": 183249722.0,
-     "n_finite": 55,
-     "n_null": 0,
-     "p50": 1273328710.0,
-     "sum": 60207843822.0,
-     "sumsq": 7.35777357988e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "e8171f72e7e78c1c",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 55
-  },
   "p/66/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -71759,75 +70034,6 @@
    "key_hash": "82dbe22e107e9d6e",
    "n_cols": 26,
    "n_rows": 263
-  },
-  "p/68/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 12.8098245802,
-     "min": 10.6207532,
-     "n_finite": 113,
-     "n_null": 0,
-     "p50": 11.45220355,
-     "sum": 1308.59863369,
-     "sumsq": 15185.7284817
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 108.878273936,
-     "min": 107.379269417,
-     "n_finite": 113,
-     "n_null": 0,
-     "p50": 108.119602857,
-     "sum": 12221.87146,
-     "sumsq": 1321915.57381
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "bb9b84523ac372d4",
-     "n_null": 76,
-     "n_unique": 37
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1467920806.0,
-     "min": 183249722.0,
-     "n_finite": 113,
-     "n_null": 0,
-     "p50": 1273898576.0,
-     "sum": 120448335512.0,
-     "sumsq": 1.44655757411e+20
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "b28170f8e18ea382",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 113
   },
   "p/68/traveltime_cell.parquet": {
    "col": {
@@ -74516,75 +72722,6 @@
    "n_cols": 26,
    "n_rows": 518
   },
-  "p/75/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 12.02263675,
-     "min": 10.5773310027,
-     "n_finite": 112,
-     "n_null": 0,
-     "p50": 10.9178624659,
-     "sum": 1235.28812101,
-     "sumsq": 13644.6276044
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 107.483468503,
-     "min": 106.466455368,
-     "n_finite": 112,
-     "n_null": 0,
-     "p50": 106.931531713,
-     "sum": 11976.4668364,
-     "sumsq": 1280681.50946
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "4286566fcd398e2f",
-     "n_null": 32,
-     "n_unique": 79
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1524926253.0,
-     "min": 13938785.0,
-     "n_finite": 112,
-     "n_null": 0,
-     "p50": 1200254927.5,
-     "sum": 117659728438.0,
-     "sumsq": 1.3706382572e+20
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "63d00ad1ac5deaaf",
-     "n_null": 0,
-     "n_unique": 2
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "22bc0a29f004d83a",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 112
-  },
   "p/75/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -77272,75 +75409,6 @@
    "n_cols": 26,
    "n_rows": 1017
   },
-  "p/79/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 11.417395892,
-     "min": 10.3571742141,
-     "n_finite": 182,
-     "n_null": 0,
-     "p50": 10.7985423592,
-     "sum": 1966.93597044,
-     "sumsq": 21265.6553609
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 107.58841295,
-     "min": 106.366728427,
-     "n_finite": 182,
-     "n_null": 0,
-     "p50": 106.745027837,
-     "sum": 19438.1084621,
-     "sumsq": 2076052.8501
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "b73c8c8bcb63bde8",
-     "n_null": 57,
-     "n_unique": 125
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 10837884264.0,
-     "min": 224446807.0,
-     "n_finite": 182,
-     "n_null": 0,
-     "p50": 1199780727.0,
-     "sum": 200188578103.0,
-     "sumsq": 3.40000728479e+20
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "300993eee147af52",
-     "n_null": 0,
-     "n_unique": 2
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "0a9548a6a77b4073",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 182
-  },
   "p/79/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -80017,75 +78085,6 @@
    "key_hash": "1fe45ba0e9e4409d",
    "n_cols": 26,
    "n_rows": 264
-  },
-  "p/80/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 11.625053539,
-     "min": 10.3541211286,
-     "n_finite": 50,
-     "n_null": 0,
-     "p50": 10.9194662827,
-     "sum": 547.025678993,
-     "sumsq": 5990.60535181
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 106.75112755,
-     "min": 106.017214758,
-     "n_finite": 50,
-     "n_null": 0,
-     "p50": 106.380597571,
-     "sum": 5318.666283,
-     "sumsq": 565765.453203
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "263fbded0fb34d0c",
-     "n_null": 29,
-     "n_unique": 21
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1458145425.0,
-     "min": 368245998.0,
-     "n_finite": 50,
-     "n_null": 0,
-     "p50": 1273786480.0,
-     "sum": 60347918219.0,
-     "sumsq": 7.50628102765e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "1761d3251fefab75",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 50
   },
   "p/80/traveltime_cell.parquet": {
    "col": {
@@ -82774,75 +80773,6 @@
    "n_cols": 26,
    "n_rows": 202
   },
-  "p/82/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 10.796896747,
-     "min": 10.1016660908,
-     "n_finite": 33,
-     "n_null": 0,
-     "p50": 10.3609263187,
-     "sum": 342.585293931,
-     "sumsq": 3557.32845671
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 106.760909692,
-     "min": 105.345494132,
-     "n_finite": 33,
-     "n_null": 0,
-     "p50": 105.87151719,
-     "sum": 3497.32484646,
-     "sumsq": 370650.596251
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "dd3751715c4a1576",
-     "n_null": 19,
-     "n_unique": 14
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1484382988.0,
-     "min": 169917851.0,
-     "n_finite": 33,
-     "n_null": 0,
-     "p50": 1178448393.0,
-     "sum": 36760469118.0,
-     "sumsq": 4.43350153832e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "0260b8e994da89e4",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 33
-  },
   "p/82/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -85519,75 +83449,6 @@
    "key_hash": "da4a429e5f2a46ea",
    "n_cols": 26,
    "n_rows": 196
-  },
-  "p/86/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 10.3667948345,
-     "min": 9.58795161938,
-     "n_finite": 29,
-     "n_null": 0,
-     "p50": 10.0931602874,
-     "sum": 290.574470229,
-     "sumsq": 2913.00598517
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 106.774434164,
-     "min": 105.665344557,
-     "n_finite": 29,
-     "n_null": 0,
-     "p50": 106.283469151,
-     "sum": 3079.01685821,
-     "sumsq": 326911.30946
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "3eb1769a567bae90",
-     "n_null": 23,
-     "n_unique": 6
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 5003536554.0,
-     "min": 548829947.0,
-     "n_finite": 29,
-     "n_null": 0,
-     "p50": 1320784118.0,
-     "sum": 38683433658.0,
-     "sumsq": 6.77371373028e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "300993eee147af52",
-     "n_null": 0,
-     "n_unique": 2
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "decce661a92cb87a",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 29
   },
   "p/86/traveltime_cell.parquet": {
    "col": {
@@ -88276,75 +86137,6 @@
    "n_cols": 26,
    "n_rows": 208
   },
-  "p/91/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 10.8302424,
-     "min": 9.52252788377,
-     "n_finite": 28,
-     "n_null": 0,
-     "p50": 10.2414444097,
-     "sum": 286.163060314,
-     "sumsq": 2927.31673743
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 105.56587415,
-     "min": 104.000439727,
-     "n_finite": 28,
-     "n_null": 0,
-     "p50": 105.118853341,
-     "sum": 2940.39102851,
-     "sumsq": 308786.432928
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "72db66a215d79755",
-     "n_null": 9,
-     "n_unique": 19
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1458145421.0,
-     "min": 223156504.0,
-     "n_finite": 28,
-     "n_null": 0,
-     "p50": 1220417889.0,
-     "sum": 30559415248.0,
-     "sumsq": 3.55754796077e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "035f788fc541b00e",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 28
-  },
   "p/91/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -91032,75 +88824,6 @@
    "n_cols": 26,
    "n_rows": 153
   },
-  "p/92/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 10.3107988,
-     "min": 9.25984591618,
-     "n_finite": 28,
-     "n_null": 0,
-     "p50": 9.95653514692,
-     "sum": 276.656341625,
-     "sumsq": 2735.9721119
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 106.186688702,
-     "min": 105.274885437,
-     "n_finite": 28,
-     "n_null": 0,
-     "p50": 105.730537289,
-     "sum": 2961.11103045,
-     "sumsq": 313150.430103
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "6b8e1a14fb60a3e3",
-     "n_null": 15,
-     "n_unique": 13
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 5003536554.0,
-     "min": 548829947.0,
-     "n_finite": 28,
-     "n_null": 0,
-     "p50": 1296520471.5,
-     "sum": 36278259047.0,
-     "sumsq": 6.42099357011e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "300993eee147af52",
-     "n_null": 0,
-     "n_unique": 2
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "4008b01283dd5f86",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 28
-  },
   "p/92/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -93778,75 +91501,6 @@
    "n_cols": 26,
    "n_rows": 81
   },
-  "p/96/substations.parquet": {
-   "col": {
-    "lat": {
-     "dtype": "num",
-     "max": 9.4368882415,
-     "min": 8.73379329832,
-     "n_finite": 20,
-     "n_null": 0,
-     "p50": 9.19747365652,
-     "sum": 182.562895742,
-     "sumsq": 1667.10155735
-    },
-    "lng": {
-     "dtype": "num",
-     "max": 105.820985518,
-     "min": 104.866167106,
-     "n_finite": 20,
-     "n_null": 0,
-     "p50": 105.094142702,
-     "sum": 2104.9356116,
-     "sumsq": 221539.703531
-    },
-    "name": {
-     "dtype": "cat",
-     "hash": "94e43df476e3def7",
-     "n_null": 4,
-     "n_unique": 16
-    },
-    "osm_id": {
-     "dtype": "num",
-     "max": 1458145405.0,
-     "min": 548970101.0,
-     "n_finite": 20,
-     "n_null": 0,
-     "p50": 1052655166.0,
-     "sum": 20342319985.0,
-     "sumsq": 2.21909852768e+19
-    },
-    "osm_type": {
-     "dtype": "cat",
-     "hash": "9bbb01d607a697b1",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "province_code": {
-     "dtype": "cat",
-     "hash": "e62a77d7df731c7b",
-     "n_null": 0,
-     "n_unique": 1
-    },
-    "scope": {
-     "dtype": "cat",
-     "hash": "d7e9a90819a59b39",
-     "n_null": 0,
-     "n_unique": 2
-    }
-   },
-   "columns": [
-    "lat",
-    "lng",
-    "name",
-    "osm_id",
-    "osm_type",
-    "province_code",
-    "scope"
-   ],
-   "n_cols": 7,
-   "n_rows": 20
-  },
   "p/96/traveltime_cell.parquet": {
    "col": {
     "detour_ratio": {
@@ -95901,7 +93555,7 @@
      "max": 21148.9609375,
      "min": 0.665219783783,
      "n_finite": 115709,
-     "n_null": 485,
+     "n_null": 222,
      "p50": 1489.9440918,
      "sum": 209678944.796,
      "sumsq": 579645224761.0
@@ -95910,11 +93564,11 @@
      "dtype": "num",
      "max": 1540901001.0,
      "min": 9656653.0,
-     "n_finite": 116194,
+     "n_finite": 115931,
      "n_null": 0,
-     "p50": 934447866.5,
-     "sum": 103875829378000.0,
-     "sumsq": 1.01968830452e+23
+     "p50": 934430921.0,
+     "sum": 103583920607000.0,
+     "sumsq": 1.01606547971e+23
     },
     "road_class": {
      "dtype": "cat",
@@ -95931,7 +93585,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 116194
+   "n_rows": 115931
   },
   "web/p/01/station_occupancy.parquet": {
    "col": {
@@ -97201,7 +94855,7 @@
      "max": 55889.1679688,
      "min": 4.85993814468,
      "n_finite": 8793,
-     "n_null": 724,
+     "n_null": 710,
      "p50": 10057.2177734,
      "sum": 114387207.579,
      "sumsq": 2676028322050.0
@@ -97210,11 +94864,11 @@
      "dtype": "num",
      "max": 1518592829.0,
      "min": 135742765.0,
-     "n_finite": 9517,
+     "n_finite": 9503,
      "n_null": 0,
-     "p50": 912685798.0,
-     "sum": 9226332160560.0,
-     "sumsq": 9.32377139333e+21
+     "p50": 912675462.0,
+     "sum": 9209947891760.0,
+     "sumsq": 9.30365687932e+21
     },
     "road_class": {
      "dtype": "cat",
@@ -97231,7 +94885,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 9517
+   "n_rows": 9503
   },
   "web/p/04/station_occupancy.parquet": {
    "col": {
@@ -98501,7 +96155,7 @@
      "max": 83334.140625,
      "min": 5.27921628952,
      "n_finite": 35898,
-     "n_null": 1187,
+     "n_null": 1179,
      "p50": 7655.91186523,
      "sum": 381334731.793,
      "sumsq": 7549479285560.0
@@ -98510,11 +96164,11 @@
      "dtype": "num",
      "max": 1533535695.0,
      "min": 48117222.0,
-     "n_finite": 37085,
+     "n_finite": 37077,
      "n_null": 0,
-     "p50": 912256139.0,
-     "sum": 33957472688900.0,
-     "sumsq": 3.14656511467e+22
+     "p50": 912255869.0,
+     "sum": 33949637051700.0,
+     "sumsq": 3.1456802623e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -98531,7 +96185,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 37085
+   "n_rows": 37077
   },
   "web/p/08/station_occupancy.parquet": {
    "col": {
@@ -99801,7 +97455,7 @@
      "max": 81347.5234375,
      "min": 3.56924629211,
      "n_finite": 15623,
-     "n_null": 491,
+     "n_null": 490,
      "p50": 8459.5625,
      "sum": 219399903.238,
      "sumsq": 6748958079540.0
@@ -99810,11 +97464,11 @@
      "dtype": "num",
      "max": 1529974336.0,
      "min": 36856316.0,
-     "n_finite": 16114,
+     "n_finite": 16113,
      "n_null": 0,
-     "p50": 890511321.5,
-     "sum": 14400445577200.0,
-     "sumsq": 1.30004643995e+22
+     "p50": 890511321.0,
+     "sum": 14399285257600.0,
+     "sumsq": 1.29991180579e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -99831,7 +97485,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 16114
+   "n_rows": 16113
   },
   "web/p/11/station_occupancy.parquet": {
    "col": {
@@ -102396,7 +100050,7 @@
      "max": 77051.9296875,
      "min": 5.02026891708,
      "n_finite": 33655,
-     "n_null": 688,
+     "n_null": 681,
      "p50": 9195.97558594,
      "sum": 424699814.901,
      "sumsq": 9822935962560.0
@@ -102405,11 +100059,11 @@
      "dtype": "num",
      "max": 1530250363.0,
      "min": 38040942.0,
-     "n_finite": 34343,
+     "n_finite": 34336,
      "n_null": 0,
-     "p50": 885811929.0,
-     "sum": 30591879651900.0,
-     "sumsq": 2.74075243581e+22
+     "p50": 885811929.5,
+     "sum": 30584567519600.0,
+     "sumsq": 2.73994711295e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -102426,7 +100080,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 34343
+   "n_rows": 34336
   },
   "web/p/14/station_occupancy.parquet": {
    "col": {
@@ -103691,7 +101345,7 @@
      "max": 126889.984375,
      "min": 4.40526199341,
      "n_finite": 33673,
-     "n_null": 518,
+     "n_null": 510,
      "p50": 7950.68603516,
      "sum": 364365718.434,
      "sumsq": 7333882420680.0
@@ -103700,11 +101354,11 @@
      "dtype": "num",
      "max": 1541018477.0,
      "min": 32771359.0,
-     "n_finite": 34191,
+     "n_finite": 34183,
      "n_null": 0,
      "p50": 911115686.0,
-     "sum": 31755620836300.0,
-     "sumsq": 3.03915360543e+22
+     "sum": 31746180614300.0,
+     "sumsq": 3.03797661974e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -103721,7 +101375,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 34191
+   "n_rows": 34183
   },
   "web/p/15/station_occupancy.parquet": {
    "col": {
@@ -104991,7 +102645,7 @@
      "max": 77011.125,
      "min": 1.20742094517,
      "n_finite": 37666,
-     "n_null": 503,
+     "n_null": 490,
      "p50": 3862.6204834,
      "sum": 256648765.176,
      "sumsq": 4493195438230.0
@@ -105000,11 +102654,11 @@
      "dtype": "num",
      "max": 1539624870.0,
      "min": 48117382.0,
-     "n_finite": 38169,
+     "n_finite": 38156,
      "n_null": 0,
-     "p50": 924732899.0,
-     "sum": 35396728820200.0,
-     "sumsq": 3.336074299e+22
+     "p50": 924733102.5,
+     "sum": 35382988454600.0,
+     "sumsq": 3.33454248498e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -105021,7 +102675,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 38169
+   "n_rows": 38156
   },
   "web/p/19/station_occupancy.parquet": {
    "col": {
@@ -106291,7 +103945,7 @@
      "max": 61522.5039062,
      "min": 1.33801949024,
      "n_finite": 23848,
-     "n_null": 442,
+     "n_null": 435,
      "p50": 9783.45996094,
      "sum": 265400814.973,
      "sumsq": 4706693476670.0
@@ -106300,11 +103954,11 @@
      "dtype": "num",
      "max": 1527718700.0,
      "min": 51252811.0,
-     "n_finite": 24290,
+     "n_finite": 24283,
      "n_null": 0,
-     "p50": 909858520.5,
-     "sum": 21980613441800.0,
-     "sumsq": 2.02984330225e+22
+     "p50": 909857502.0,
+     "sum": 21971997686900.0,
+     "sumsq": 2.02874635103e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -106321,7 +103975,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 24290
+   "n_rows": 24283
   },
   "web/p/20/station_occupancy.parquet": {
    "col": {
@@ -107586,7 +105240,7 @@
      "max": 42654.1992188,
      "min": 3.33530664444,
      "n_finite": 30751,
-     "n_null": 596,
+     "n_null": 469,
      "p50": 2350.41992188,
      "sum": 118131776.73,
      "sumsq": 1206238048230.0
@@ -107595,11 +105249,11 @@
      "dtype": "num",
      "max": 1539003841.0,
      "min": 50483279.0,
-     "n_finite": 31347,
+     "n_finite": 31220,
      "n_null": 0,
-     "p50": 885335782.0,
-     "sum": 26921918896600.0,
-     "sumsq": 2.50067874382e+22
+     "p50": 885335706.5,
+     "sum": 26769478067400.0,
+     "sumsq": 2.48145497042e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -107616,7 +105270,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 31347
+   "n_rows": 31220
   },
   "web/p/22/station_occupancy.parquet": {
    "col": {
@@ -108886,7 +106540,7 @@
      "max": 42411.03125,
      "min": 1.9484962225,
      "n_finite": 85301,
-     "n_null": 137,
+     "n_null": 122,
      "p50": 2731.22314453,
      "sum": 304260052.562,
      "sumsq": 2085302804510.0
@@ -108895,11 +106549,11 @@
      "dtype": "num",
      "max": 1541005335.0,
      "min": 26550937.0,
-     "n_finite": 85438,
+     "n_finite": 85423,
      "n_null": 0,
-     "p50": 930813764.5,
-     "sum": 79654558446000.0,
-     "sumsq": 7.76636778505e+22
+     "p50": 930812094.0,
+     "sum": 79637291829400.0,
+     "sumsq": 7.76431622994e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -108916,7 +106570,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 85438
+   "n_rows": 85423
   },
   "web/p/24/station_occupancy.parquet": {
    "col": {
@@ -110186,7 +107840,7 @@
      "max": 52412.0195312,
      "min": 2.04266309738,
      "n_finite": 81620,
-     "n_null": 96,
+     "n_null": 85,
      "p50": 2679.99658203,
      "sum": 314250530.426,
      "sumsq": 2472550311560.0
@@ -110195,11 +107849,11 @@
      "dtype": "num",
      "max": 1540760104.0,
      "min": 36037117.0,
-     "n_finite": 81716,
+     "n_finite": 81705,
      "n_null": 0,
-     "p50": 912475803.5,
-     "sum": 74184822750600.0,
-     "sumsq": 6.89228674513e+22
+     "p50": 912475800.0,
+     "sum": 74172593760400.0,
+     "sumsq": 6.89082440959e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -110216,7 +107870,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 81716
+   "n_rows": 81705
   },
   "web/p/25/station_occupancy.parquet": {
    "col": {
@@ -111486,7 +109140,7 @@
      "max": 23232.1992188,
      "min": 2.03310966492,
      "n_finite": 70587,
-     "n_null": 53,
+     "n_null": 48,
      "p50": 2864.99072266,
      "sum": 221915293.448,
      "sumsq": 959748768467.0
@@ -111495,11 +109149,11 @@
      "dtype": "num",
      "max": 1539633241.0,
      "min": 10593272.0,
-     "n_finite": 70640,
+     "n_finite": 70635,
      "n_null": 0,
-     "p50": 885332539.5,
-     "sum": 59214012296900.0,
-     "sumsq": 5.20350890049e+22
+     "p50": 885332395.0,
+     "sum": 59207089911600.0,
+     "sumsq": 5.20254854916e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -111516,7 +109170,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 70640
+   "n_rows": 70635
   },
   "web/p/31/station_occupancy.parquet": {
    "col": {
@@ -112786,7 +110440,7 @@
      "max": 14129.1191406,
      "min": 2.90532946587,
      "n_finite": 75069,
-     "n_null": 63,
+     "n_null": 36,
      "p50": 2757.04199219,
      "sum": 235233820.465,
      "sumsq": 1067073022920.0
@@ -112795,11 +110449,11 @@
      "dtype": "num",
      "max": 1536965024.0,
      "min": 28362158.0,
-     "n_finite": 75132,
+     "n_finite": 75105,
      "n_null": 0,
-     "p50": 885707034.5,
-     "sum": 68406661560000.0,
-     "sumsq": 6.39765874324e+22
+     "p50": 885707034.0,
+     "sum": 68375741143600.0,
+     "sumsq": 6.39392101321e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -112816,7 +110470,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 75132
+   "n_rows": 75105
   },
   "web/p/33/station_occupancy.parquet": {
    "col": {
@@ -114086,7 +111740,7 @@
      "max": 31046.3886719,
      "min": 0.895988464355,
      "n_finite": 91591,
-     "n_null": 160,
+     "n_null": 85,
      "p50": 3046.57421875,
      "sum": 301187519.104,
      "sumsq": 1349830721070.0
@@ -114095,11 +111749,11 @@
      "dtype": "num",
      "max": 1540910258.0,
      "min": 10592872.0,
-     "n_finite": 91751,
+     "n_finite": 91676,
      "n_null": 0,
-     "p50": 871448154.0,
-     "sum": 81067325060500.0,
-     "sumsq": 7.42190688459e+22
+     "p50": 871446464.0,
+     "sum": 80985568447100.0,
+     "sumsq": 7.4121922807e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -114116,7 +111770,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 91751
+   "n_rows": 91676
   },
   "web/p/37/station_occupancy.parquet": {
    "col": {
@@ -115386,7 +113040,7 @@
      "max": 64165.53125,
      "min": 4.62195634842,
      "n_finite": 79036,
-     "n_null": 128,
+     "n_null": 118,
      "p50": 3800.39758301,
      "sum": 384047603.031,
      "sumsq": 3680677277980.0
@@ -115395,11 +113049,11 @@
      "dtype": "num",
      "max": 1540962656.0,
      "min": 38147198.0,
-     "n_finite": 79164,
+     "n_finite": 79154,
      "n_null": 0,
-     "p50": 852787004.5,
-     "sum": 69958398090200.0,
-     "sumsq": 6.32440403317e+22
+     "p50": 852786949.5,
+     "sum": 69948389800600.0,
+     "sumsq": 6.3233843091e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -115416,7 +113070,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 79164
+   "n_rows": 79154
   },
   "web/p/38/station_occupancy.parquet": {
    "col": {
@@ -116686,7 +114340,7 @@
      "max": 123589.71875,
      "min": 0.873489379883,
      "n_finite": 87501,
-     "n_null": 348,
+     "n_null": 325,
      "p50": 4366.05419922,
      "sum": 579888446.685,
      "sumsq": 10931860502900.0
@@ -116695,11 +114349,11 @@
      "dtype": "num",
      "max": 1540206014.0,
      "min": 37724761.0,
-     "n_finite": 87849,
+     "n_finite": 87826,
      "n_null": 0,
-     "p50": 845300816.0,
-     "sum": 74529127787500.0,
-     "sumsq": 6.52983410334e+22
+     "p50": 845300805.5,
+     "sum": 74502757322600.0,
+     "sumsq": 6.52649658853e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -116716,7 +114370,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 87849
+   "n_rows": 87826
   },
   "web/p/40/station_occupancy.parquet": {
    "col": {
@@ -117981,7 +115635,7 @@
      "max": 39194.0273438,
      "min": 6.57120943069,
      "n_finite": 57939,
-     "n_null": 224,
+     "n_null": 218,
      "p50": 3538.68847656,
      "sum": 242685851.284,
      "sumsq": 1528549317930.0
@@ -117990,11 +115644,11 @@
      "dtype": "num",
      "max": 1538989731.0,
      "min": 35976486.0,
-     "n_finite": 58163,
+     "n_finite": 58157,
      "n_null": 0,
-     "p50": 843348124.0,
-     "sum": 48593063064400.0,
-     "sumsq": 4.19112637376e+22
+     "p50": 843348122.0,
+     "sum": 48587500019700.0,
+     "sumsq": 4.19043786308e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -118011,7 +115665,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 58163
+   "n_rows": 58157
   },
   "web/p/42/station_occupancy.parquet": {
    "col": {
@@ -119281,7 +116935,7 @@
      "max": 59780.1835938,
      "min": 4.63324689865,
      "n_finite": 50950,
-     "n_null": 251,
+     "n_null": 229,
      "p50": 3329.46313477,
      "sum": 227374683.164,
      "sumsq": 2025106825550.0
@@ -119290,11 +116944,11 @@
      "dtype": "num",
      "max": 1540746682.0,
      "min": 32781228.0,
-     "n_finite": 51201,
+     "n_finite": 51179,
      "n_null": 0,
-     "p50": 842568492.0,
-     "sum": 42805235184300.0,
-     "sumsq": 3.75691311148e+22
+     "p50": 842568482.0,
+     "sum": 42777205935700.0,
+     "sumsq": 3.75325678869e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -119311,7 +116965,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 51201
+   "n_rows": 51179
   },
   "web/p/44/station_occupancy.parquet": {
    "col": {
@@ -120581,7 +118235,7 @@
      "max": 97199.8125,
      "min": 7.57483196259,
      "n_finite": 21823,
-     "n_null": 163,
+     "n_null": 155,
      "p50": 3185.65869141,
      "sum": 135786999.593,
      "sumsq": 3212099160250.0
@@ -120590,11 +118244,11 @@
      "dtype": "num",
      "max": 1540746669.0,
      "min": 35926886.0,
-     "n_finite": 21986,
+     "n_finite": 21978,
      "n_null": 0,
-     "p50": 830659072.5,
-     "sum": 16723713207000.0,
-     "sumsq": 1.45987101879e+22
+     "p50": 830659075.5,
+     "sum": 16718675700500.0,
+     "sumsq": 1.45936505298e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -120611,7 +118265,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 21986
+   "n_rows": 21978
   },
   "web/p/46/station_occupancy.parquet": {
    "col": {
@@ -121876,7 +119530,7 @@
      "max": 129540.171875,
      "min": 1.931666255,
      "n_finite": 53433,
-     "n_null": 1030,
+     "n_null": 975,
      "p50": 2668.92089844,
      "sum": 276562268.711,
      "sumsq": 6745809260890.0
@@ -121885,11 +119539,11 @@
      "dtype": "num",
      "max": 1540859870.0,
      "min": 12207187.0,
-     "n_finite": 54463,
+     "n_finite": 54408,
      "n_null": 0,
-     "p50": 828036739.0,
-     "sum": 38762083722200.0,
-     "sumsq": 3.15655507177e+22
+     "p50": 828033272.5,
+     "sum": 38706576940700.0,
+     "sumsq": 3.15043462182e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -121906,7 +119560,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 54463
+   "n_rows": 54408
   },
   "web/p/48/station_occupancy.parquet": {
    "col": {
@@ -123176,7 +120830,7 @@
      "max": 104883.0,
      "min": 1.39081943035,
      "n_finite": 51303,
-     "n_null": 438,
+     "n_null": 412,
      "p50": 5261.47412109,
      "sum": 436912129.636,
      "sumsq": 9621295572620.0
@@ -123185,11 +120839,11 @@
      "dtype": "num",
      "max": 1540710465.0,
      "min": 38563046.0,
-     "n_finite": 51741,
+     "n_finite": 51715,
      "n_null": 0,
-     "p50": 830633532.0,
-     "sum": 41960617785700.0,
-     "sumsq": 3.60870729918e+22
+     "p50": 830633515.0,
+     "sum": 41928112156000.0,
+     "sumsq": 3.60450407768e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -123206,7 +120860,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 51741
+   "n_rows": 51715
   },
   "web/p/51/station_occupancy.parquet": {
    "col": {
@@ -124471,7 +122125,7 @@
      "max": 81073.0546875,
      "min": 5.15945339203,
      "n_finite": 102474,
-     "n_null": 1083,
+     "n_null": 1073,
      "p50": 4732.84545898,
      "sum": 691004433.347,
      "sumsq": 9894175040360.0
@@ -124480,11 +122134,11 @@
      "dtype": "num",
      "max": 1539477593.0,
      "min": 33265867.0,
-     "n_finite": 103557,
+     "n_finite": 103547,
      "n_null": 0,
-     "p50": 826839220.0,
-     "sum": 84629842411200.0,
-     "sumsq": 7.19906331752e+22
+     "p50": 826839086.0,
+     "sum": 84619233391200.0,
+     "sumsq": 7.19778585706e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -124501,7 +122155,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 103557
+   "n_rows": 103547
   },
   "web/p/52/station_occupancy.parquet": {
    "col": {
@@ -125771,7 +123425,7 @@
      "max": 47598.765625,
      "min": 2.61643624306,
      "n_finite": 30476,
-     "n_null": 361,
+     "n_null": 292,
      "p50": 3237.38696289,
      "sum": 140282949.351,
      "sumsq": 1453060910820.0
@@ -125780,11 +123434,11 @@
      "dtype": "num",
      "max": 1540964204.0,
      "min": 32778690.0,
-     "n_finite": 30837,
+     "n_finite": 30768,
      "n_null": 0,
-     "p50": 771187125.0,
-     "sum": 24960469765300.0,
-     "sumsq": 2.30561395794e+22
+     "p50": 771185398.0,
+     "sum": 24884363172400.0,
+     "sumsq": 2.29608070424e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -125801,7 +123455,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 30837
+   "n_rows": 30768
   },
   "web/p/56/station_occupancy.parquet": {
    "col": {
@@ -127071,7 +124725,7 @@
      "max": 45949.171875,
      "min": 2.71881556511,
      "n_finite": 52028,
-     "n_null": 296,
+     "n_null": 228,
      "p50": 4124.84106445,
      "sum": 286470174.961,
      "sumsq": 2864882757990.0
@@ -127080,11 +124734,11 @@
      "dtype": "num",
      "max": 1539693455.0,
      "min": 36075168.0,
-     "n_finite": 52324,
+     "n_finite": 52256,
      "n_null": 0,
-     "p50": 801526422.5,
-     "sum": 41365264243000.0,
-     "sumsq": 3.46749046557e+22
+     "p50": 801526386.5,
+     "sum": 41275291278200.0,
+     "sumsq": 3.45512901381e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -127101,7 +124755,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 52324
+   "n_rows": 52256
   },
   "web/p/66/station_occupancy.parquet": {
    "col": {
@@ -128371,7 +126025,7 @@
      "max": 60250.9804688,
      "min": 2.41184425354,
      "n_finite": 60507,
-     "n_null": 890,
+     "n_null": 843,
      "p50": 3551.20043945,
      "sum": 302613095.591,
      "sumsq": 2853212304540.0
@@ -128380,11 +126034,11 @@
      "dtype": "num",
      "max": 1540221629.0,
      "min": 31908775.0,
-     "n_finite": 61397,
+     "n_finite": 61350,
      "n_null": 0,
-     "p50": 786406876.0,
-     "sum": 48005116658800.0,
-     "sumsq": 4.04593427414e+22
+     "p50": 786406357.5,
+     "sum": 47959573549800.0,
+     "sumsq": 4.04133642665e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -128401,7 +126055,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 61397
+   "n_rows": 61350
   },
   "web/p/68/station_occupancy.parquet": {
    "col": {
@@ -129671,7 +127325,7 @@
      "max": 49607.3242188,
      "min": 2.2857427597,
      "n_finite": 79811,
-     "n_null": 751,
+     "n_null": 603,
      "p50": 2521.39038086,
      "sum": 290652836.038,
      "sumsq": 2052478781640.0
@@ -129680,11 +127334,11 @@
      "dtype": "num",
      "max": 1537053674.0,
      "min": 26163073.0,
-     "n_finite": 80562,
+     "n_finite": 80414,
      "n_null": 0,
-     "p50": 835663202.5,
-     "sum": 63738882849700.0,
-     "sumsq": 5.43154804569e+22
+     "p50": 835663200.0,
+     "sum": 63610760111300.0,
+     "sumsq": 5.41847027487e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -129701,7 +127355,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 80562
+   "n_rows": 80414
   },
   "web/p/75/station_occupancy.parquet": {
    "col": {
@@ -130971,7 +128625,7 @@
      "max": 31599.53125,
      "min": 0.445875704288,
      "n_finite": 124202,
-     "n_null": 735,
+     "n_null": 434,
      "p50": 1169.61175537,
      "sum": 221978684.344,
      "sumsq": 919335472094.0
@@ -130980,11 +128634,11 @@
      "dtype": "num",
      "max": 1540996814.0,
      "min": 31096786.0,
-     "n_finite": 124937,
+     "n_finite": 124636,
      "n_null": 0,
-     "p50": 690984600.0,
-     "sum": 89888752593100.0,
-     "sumsq": 7.88010417852e+22
+     "p50": 689316672.5,
+     "sum": 89592724844600.0,
+     "sumsq": 7.84479368091e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -131001,7 +128655,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 124937
+   "n_rows": 124636
   },
   "web/p/79/station_occupancy.parquet": {
    "col": {
@@ -132271,7 +129925,7 @@
      "max": 39189.96875,
      "min": 1.53697061539,
      "n_finite": 66785,
-     "n_null": 175,
+     "n_null": 120,
      "p50": 4247.90039062,
      "sum": 382342730.612,
      "sumsq": 3651611815930.0
@@ -132280,11 +129934,11 @@
      "dtype": "num",
      "max": 1540948011.0,
      "min": 31094951.0,
-     "n_finite": 66960,
+     "n_finite": 66905,
      "n_null": 0,
-     "p50": 783117006.5,
-     "sum": 55159541716500.0,
-     "sumsq": 4.87267481412e+22
+     "p50": 783084470.0,
+     "sum": 55104048953100.0,
+     "sumsq": 4.86617339462e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -132301,7 +129955,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 66960
+   "n_rows": 66905
   },
   "web/p/80/station_occupancy.parquet": {
    "col": {
@@ -133571,7 +131225,7 @@
      "max": 27466.0996094,
      "min": 2.54156517982,
      "n_finite": 65381,
-     "n_null": 687,
+     "n_null": 677,
      "p50": 4358.15869141,
      "sum": 317839534.643,
      "sumsq": 2247207229450.0
@@ -133580,11 +131234,11 @@
      "dtype": "num",
      "max": 1540962865.0,
      "min": 31096566.0,
-     "n_finite": 66068,
+     "n_finite": 66058,
      "n_null": 0,
-     "p50": 836876803.5,
-     "sum": 53780248617500.0,
-     "sumsq": 4.65358021184e+22
+     "p50": 836878024.5,
+     "sum": 53773057818800.0,
+     "sumsq": 4.65297772889e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -133601,7 +131255,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 66068
+   "n_rows": 66058
   },
   "web/p/82/station_occupancy.parquet": {
    "col": {
@@ -134871,7 +132525,7 @@
      "max": 28028.0703125,
      "min": 4.18542146683,
      "n_finite": 49008,
-     "n_null": 1397,
+     "n_null": 1392,
      "p50": 6140.47338867,
      "sum": 343826831.975,
      "sumsq": 3631896115770.0
@@ -134880,11 +132534,11 @@
      "dtype": "num",
      "max": 1540975481.0,
      "min": 10417553.0,
-     "n_finite": 50405,
+     "n_finite": 50400,
      "n_null": 0,
-     "p50": 825889075.0,
-     "sum": 41539197977300.0,
-     "sumsq": 3.66717016721e+22
+     "p50": 825885921.5,
+     "sum": 41533775120700.0,
+     "sumsq": 3.66651761482e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -134901,7 +132555,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 50405
+   "n_rows": 50400
   },
   "web/p/86/station_occupancy.parquet": {
    "col": {
@@ -136171,7 +133825,7 @@
      "max": 33486.2773438,
      "min": 1.2018545866,
      "n_finite": 35681,
-     "n_null": 1140,
+     "n_null": 1049,
      "p50": 5819.69921875,
      "sum": 268685586.976,
      "sumsq": 3428839819940.0
@@ -136180,11 +133834,11 @@
      "dtype": "num",
      "max": 1540933556.0,
      "min": 10416871.0,
-     "n_finite": 36821,
+     "n_finite": 36730,
      "n_null": 0,
-     "p50": 797167908.0,
-     "sum": 29708360268600.0,
-     "sumsq": 2.63737249884e+22
+     "p50": 797166608.0,
+     "sum": 29608961561400.0,
+     "sumsq": 2.6255293411e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -136201,7 +133855,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 36821
+   "n_rows": 36730
   },
   "web/p/91/station_occupancy.parquet": {
    "col": {
@@ -137471,7 +135125,7 @@
      "max": 38675.140625,
      "min": 2.02710008621,
      "n_finite": 36237,
-     "n_null": 612,
+     "n_null": 534,
      "p50": 7097.88769531,
      "sum": 279861364.108,
      "sumsq": 3239211596470.0
@@ -137480,11 +135134,11 @@
      "dtype": "num",
      "max": 1541093278.0,
      "min": 10417532.0,
-     "n_finite": 36849,
+     "n_finite": 36771,
      "n_null": 0,
-     "p50": 805672222.0,
-     "sum": 30247672030600.0,
-     "sumsq": 2.72588685022e+22
+     "p50": 805589538.0,
+     "sum": 30141354384100.0,
+     "sumsq": 2.71108940047e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -137501,7 +135155,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 36849
+   "n_rows": 36771
   },
   "web/p/92/station_occupancy.parquet": {
    "col": {
@@ -138771,7 +136425,7 @@
      "max": 42335.640625,
      "min": 2.98684573174,
      "n_finite": 25498,
-     "n_null": 1096,
+     "n_null": 1095,
      "p50": 7310.32495117,
      "sum": 228858914.052,
      "sumsq": 3402492994220.0
@@ -138780,11 +136434,11 @@
      "dtype": "num",
      "max": 1533847552.0,
      "min": 126748653.0,
-     "n_finite": 26594,
+     "n_finite": 26593,
      "n_null": 0,
-     "p50": 853095871.0,
-     "sum": 22206066998900.0,
-     "sumsq": 1.93162709449e+22
+     "p50": 853095870.0,
+     "sum": 22204546664200.0,
+     "sumsq": 1.93139595271e+22
     },
     "road_class": {
      "dtype": "cat",
@@ -138801,7 +136455,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 26594
+   "n_rows": 26593
   },
   "web/p/96/station_occupancy.parquet": {
    "col": {
@@ -139348,7 +137002,7 @@
      "max": 21148.9609375,
      "min": 0.665219783783,
      "n_finite": 115709,
-     "n_null": 485,
+     "n_null": 222,
      "p50": 1489.9440918,
      "sum": 209678944.796,
      "sumsq": 579645224761.0
@@ -139357,11 +137011,11 @@
      "dtype": "num",
      "max": 1540901001.0,
      "min": 9656653.0,
-     "n_finite": 116194,
+     "n_finite": 115931,
      "n_null": 0,
-     "p50": 934447866.5,
-     "sum": 103875829378000.0,
-     "sumsq": 1.01968830452e+23
+     "p50": 934430921.0,
+     "sum": 103583920607000.0,
+     "sumsq": 1.01606547971e+23
     },
     "road_class": {
      "dtype": "cat",
@@ -139378,7 +137032,7 @@
     "road_class"
    ],
    "n_cols": 5,
-   "n_rows": 116194
+   "n_rows": 115931
   },
   "web/station_occupancy.parquet": {
    "col": {

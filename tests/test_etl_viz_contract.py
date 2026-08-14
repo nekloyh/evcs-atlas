@@ -174,37 +174,6 @@ def test_commune_geojson_khong_mang_thuoc_tinh_la(pdir: Path):
     assert la == set(), f"thuộc tính chưa khai: {sorted(la)}"
 
 
-# ── lớp trạm biến áp: hàng rào phạm vi kiểm bằng MÁY ─────────────────────
-@pytest.mark.parametrize("pdir", TINH, ids=lambda p: p.name)
-def test_substations_khong_mang_cot_cong_suat_hay_dien_ap(pdir: Path):
-    """Đây là chỗ DECISIONS §8 có thể bị đảo ngược bằng một dòng ba từ.
-
-    Ở toàn quốc cám dỗ lớn hơn hẳn Hà Nội: đo được 972/1.387 đối tượng CÓ tag `voltage`
-    và 733/1.387 có `substation=*`. Hàng rào phải có một phép kiểm chạy, không phải một câu.
-    """
-    f = ROOT / "store" / "p" / pdir.name / "substations.parquet"
-    if not f.exists():
-        pytest.skip("tỉnh chưa có lớp trạm biến áp")
-    co = {c.lower() for c in pq.read_schema(f).names}
-    cam = {"voltage", "substation", "capacity", "power", "rating", "kva", "dist_substation_m"}
-    assert co & cam == set(), f"cột phạm phạm vi: {sorted(co & cam)}"
-    assert co == {"osm_type", "osm_id", "name", "lat", "lng", "province_code", "scope"}
-
-
-def test_substations_tinh_01_khop_bo_ha_noi():
-    """Đối chứng mạnh nhất của bản port: cùng nguồn, hai đường mã, cùng con số.
-
-    132 dòng = 98 IN + 34 BUFFER, và cả bốn số đếm của manifest trùng khít.
-    """
-    a = ROOT / "data" / "raw" / "osm_hanoi_substations.parquet"
-    b = ROOT / "store" / "p" / "01" / "substations.parquet"
-    if not (a.exists() and b.exists()):
-        pytest.skip("thiếu một trong hai bộ")
-    ha_noi = pq.read_table(a).to_pandas()
-    tinh01 = pq.read_table(b).to_pandas()
-    assert len(tinh01) == len(ha_noi)
-    assert set(zip(tinh01.osm_type, tinh01.osm_id)) == set(zip(ha_noi.osm_type, ha_noi.osm_id))
-    assert int((tinh01.scope == "IN").sum()) + int((tinh01.scope == "BUFFER").sum()) == len(ha_noi)
 
 
 # ── B4: cặp tuyến + nhãn đường theo đoạn ─────────────────────────────────
