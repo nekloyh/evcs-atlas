@@ -13,7 +13,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { parseHash, serializeHash } from "../src/state/hash.ts";
+import { parseHash, resolveHashField, serializeHash } from "../src/state/hash.ts";
 import {
   parseNationalHash,
   serializeNationalHash,
@@ -30,9 +30,38 @@ const BASE: HashState = {
   scene: null,
   paintOn: true,
   dataMode: false,
+  nationalMode: false,
   t: 0,
   brush: {},
 };
+
+test("field hash phân biệt khoá bị xoá với khoá có mặt nhưng sai", () => {
+  assert.equal(resolveHashField("built_frac", undefined, { fieldPresent: false }), "population");
+  assert.equal(resolveHashField("built_frac", undefined, { fieldPresent: true }), "built_frac");
+  assert.equal(resolveHashField("built_frac", "n_ports", { fieldPresent: true }), "n_ports");
+});
+
+test("hash Hà Nội canonicalize khoá dataset cũ thay vì giữ state giả", () => {
+  const serialized = serializeHash(BASE, "#tinh=79&f=population");
+  assert.doesNotMatch(serialized, /(?:^|&)tinh=/);
+  assert.match(serialized, /(?:^|&)f=population/);
+});
+
+test("`tinh=vn` là primary mode bền và thắng các mode chung trong hash gõ tay", () => {
+  assert.deepEqual(parseHash("#tinh=vn&d=1&s=von-cuc&f=population"), { nationalMode: true });
+});
+
+test("serializer chung giữ state do NationalApp sở hữu nhưng xoá mode xung đột", () => {
+  const out = serializeHash(
+    { ...BASE, nationalMode: true },
+    "#tinh=vn&f=ports_per_10k_pop&l=stations&m=3d&s=von-cuc&d=1",
+  );
+  assert.match(out, /(?:^|&)tinh=vn/);
+  assert.match(out, /(?:^|&)f=ports_per_10k_pop/);
+  assert.match(out, /(?:^|&)l=stations/);
+  assert.match(out, /(?:^|&)m=3d/);
+  assert.doesNotMatch(out, /(?:^|&)(?:s|d)=/);
+});
 
 // ── Khoá `l` — overlay (§4d, mới ở M2) ─────────────────────────────────────────
 
@@ -269,6 +298,7 @@ test("ghi rồi đọc lại cho đúng state ban đầu", () => {
     scene: null,
     paintOn: true,
     dataMode: false,
+    nationalMode: false,
     t: 0,
     brush: {},
   };
@@ -399,4 +429,16 @@ test("đổi mode KHÔNG làm mất khoá khác của hash", () => {
   assert.match(s, /tinh=vn/);
   assert.match(s, /l=stations/);
   assert.match(s, /m=3d/);
+});
+
+test("hash toàn quốc loại khoá do workspace tỉnh sở hữu nhưng giữ extension lạ", () => {
+  const s = serializeNationalHash("#v=105,21,9,0,0&c=commune:00004&t=46&giu=nguyen", {
+    field: "c:population",
+    layers: new Set(),
+    mode: "2d",
+  });
+  assert.doesNotMatch(s, /(?:^|[&#])(?:v|c|t)=/);
+  assert.match(s, /giu=nguyen/);
+  assert.match(s, /f=c:population/);
+  assert.doesNotMatch(s, /%3A/i);
 });

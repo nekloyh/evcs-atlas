@@ -7,6 +7,9 @@
  */
 
 import type { ReadingUnit } from "../state/types";
+import { HEX_MIN_ZOOM } from "../design-tokens";
+
+export { HEX_MIN_ZOOM };
 
 /**
  * Dưới mức này, ô H3 không được vẽ — DESIGN §13b-1.
@@ -15,8 +18,6 @@ import type { ReadingUnit } from "../state/types";
  * nhân đôi ⇒ `9 × 2^(z − 9,3)`. Ở z11 ra ~29 px, chỗ ô lục giác thôi là hạt và bắt đầu là
  * vật thể chỉ tay vào được. Dưới đó, 4,4 nghìn mark là texture chứ không phải bản đồ.
  */
-export const HEX_MIN_ZOOM = 11;
-
 /** Bề rộng xấp xỉ của một ô H3 r8 theo pixel ở mức zoom cho trước. Neo: 9 px tại z 9,3. */
 export function hexPixelWidth(zoom: number): number {
   return 9 * 2 ** (zoom - 9.3);

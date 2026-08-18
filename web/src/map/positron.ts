@@ -1,4 +1,5 @@
 import type { StyleSpecification, LayerSpecification, SymbolLayerSpecification } from "maplibre-gl";
+import { COLOR_INK, COLOR_INK_2, COLOR_PANEL } from "../design-tokens";
 import type { BasemapStyle } from "../state/types";
 export { INITIAL_VIEW, setInitialViewFromBbox, zoomForBbox } from "../state/view-config";
 
@@ -44,12 +45,12 @@ const KEPT_LABELS: readonly string[] = [
 ];
 
 /** Nhãn phải mang MỰC CỦA APP, không mang mực của nhà cung cấp style. */
-const LABEL_INK = "#0b0b0b";
-const LABEL_INK_SOFT = "#52514e";
+const LABEL_INK = COLOR_INK;
+const LABEL_INK_SOFT = COLOR_INK_2;
 const LABEL_INK_WATER = "#5b6b78";
 /** Quầng sáng lấy màu PANEL, không lấy trắng: trên mặt tô sẫm nó là thứ duy nhất giữ chữ
     đọc được, và nó phải là cùng một màu với các mặt nổi của app để không thành viền lạ. */
-const LABEL_HALO = "#f9f9f7";
+const LABEL_HALO = COLOR_PANEL;
 
 function isSymbol(l: LayerSpecification): l is SymbolLayerSpecification {
   return l.type === "symbol";

@@ -15,10 +15,14 @@
 
 import { pct, type Manifest } from "./data/manifest";
 import { dataPath } from "./data/province";
-import type { ReadingUnit } from "./state/types";
+import type { CompareView, OverlayId, ReadingUnit } from "./state/types";
 import { formatIn, scaleUnit, unitPhrase, type ScaledUnit, type UnitSpec } from "./units";
 import { OBSERVED_H_MIN } from "./viz/occ";
 import type { Diverge, Polarity } from "./viz/palette";
+
+/** Lens là metadata của field registry, không phải một state độc lập. */
+export const LENS_IDS = ["demand", "supply", "access", "utilization", "opportunity"] as const;
+export type LensId = (typeof LENS_IDS)[number];
 
 /**
  * Khai báo phân kỳ ở tầng registry = mốc + phía cần can thiệp (`Diverge`, dùng cho MÀU và
@@ -36,16 +40,20 @@ export interface DivergeContract extends Diverge {
 
 export type FieldKind = "numeric" | "bool" | "categorical";
 export type GroupId = "cau" | "dat" | "duong" | "cung" | "tiepcan" | "sosanh";
-export type LensId = "demand" | "supply" | "access" | "utilization" | "policy" | "context";
 
-export const LENSES: { id: LensId; label: string; hint: string; defaultField: string }[] = [
-  { id: "demand", label: "CẦU", hint: "ai cần sạc", defaultField: "population" },
-  { id: "supply", label: "CUNG", hint: "đã có gì", defaultField: "station:ports" },
-  { id: "access", label: "TIẾP CẬN", hint: "đi xa ở đâu", defaultField: "road:dist_station_m" },
-  { id: "utilization", label: "SỬ DỤNG", hint: "bận lúc nào", defaultField: "station:occ" },
-  { id: "policy", label: "CHÍNH SÁCH", hint: "phân bổ / rule", defaultField: "commune:ports_per_10k_pop" },
-  { id: "context", label: "BỐI CẢNH", hint: "đọc để giải thích", defaultField: "built_frac" },
-];
+export interface LensMeta {
+  id: LensId;
+  label: string;
+  hint: string;
+  businessQuestion: string;
+  defaultField: string;
+  /** Khoá registry-qualified; field ô dùng `cell:` để không đụng tên cùng cột ở xã. */
+  fieldKeys: readonly string[];
+  defaultOverlays: readonly OverlayId[];
+  cellEvidence: readonly [string, string, string];
+  communeEvidence: readonly [string, string, string];
+  stationEvidence: readonly [string, string, string];
+}
 
 export const GROUPS: { id: GroupId; label: string; hint: string }[] = [
   { id: "cau", label: "CẦU", hint: "ai cần sạc" },
@@ -94,8 +102,8 @@ export interface VisualContract {
    */
   unit: UnitSpec | null;
   /**
-   * Cực tính — M2.1-(B). Vắng = trung tính (đậm = NHIỀU, nguyên trạng). `high-good` thì
-   * ĐẢO thứ tự gán màu để **đậm luôn là chỗ cần can thiệp** ở mọi bản đồ.
+   * Cực tính chỉ phục vụ câu giải thích. Thang tuần tự luôn giữ nhạt = ít,
+   * đậm = nhiều của chính đại lượng; không đảo màu theo phán đoán tốt/xấu.
    *
    * Khai từng trường một, không suy ra: "nhiều đường trong ô" không tốt cũng không xấu,
    * và đoán hộ người đọc là bịa thêm một phát biểu mà dữ liệu không nói.
@@ -111,6 +119,12 @@ export interface VisualContract {
    * KHÔNG phân kỳ — 0 ở đó nghĩa là "đi và về bằng nhau", không phải một ngưỡng.
    */
   diverge?: DivergeContract;
+  /** Màu hạng mục ổn định theo nghĩa, không theo tần suất của dataset. */
+  categorical?: {
+    order: readonly string[];
+    colors: readonly string[];
+    inks: readonly string[];
+  };
   /**
    * Trường này vẽ được thành **mặt liên tục** (`ContourLayer`, §1b) — chỉ đúng với đại
    * lượng **cộng được**: cộng dân số của mấy ô lại thì ra dân số của vùng, còn cộng
@@ -145,7 +159,8 @@ export interface FieldMeta extends VisualContract {
   /** File parquet mà `expr` cần đăng ký thêm ngoài lưới. */
   deps?: string[];
   /** Lens là CÂU HỎI; `readAs` là geometry mang câu trả lời. */
-  lens: LensId;
+  /** `null` = bối cảnh/bằng chứng, không phải một lens thứ sáu. */
+  lens: LensId | null;
   group: GroupId;
   label: string;
   /** mô tả một câu — ô tìm kiếm lọc trên cả trường này, không chỉ trên tên cột */
@@ -194,7 +209,7 @@ export interface FieldMeta extends VisualContract {
 const FRAC: UnitSpec = { kind: "ratio", note: "diện tích ô" };
 
 /** Khai báo một trường trước khi gắn đơn vị đọc — `unit`/`column` do bảng dưới suy ra. */
-type Spec = Omit<FieldMeta, "readAs" | "column" | "lens"> & { lens?: LensId };
+type Spec = Omit<FieldMeta, "readAs" | "column" | "lens"> & { column?: string };
 
 // ── Trường của Ô (bảng grid_h3_r8.parquet) ─────────────────────────────────────
 
@@ -254,7 +269,6 @@ const CELL_SPECS: Spec[] = [
     desc: "Số POI trong bán kính 1 km quanh tâm ô — PHƠI NHIỄM, khác với “có gì trong ô”.",
     unit: { kind: "poi", note: "trong bán kính 1 km" },
     kind: "numeric",
-    lens: "context",
     // Khác `n_poi_total` ở KHÁI NIỆM, không phải ở thang đo. `n_poi_total` là KIỂM KÊ
     // (ô này chứa gì); trường này là PHƠI NHIỄM (quanh điểm này có gì). Đo được là phơi
     // nhiễm mới dự báo nhu cầu: trên 632 trạm có `util` tin cậy, thêm nó vào mô hình đưa
@@ -279,7 +293,6 @@ const CELL_SPECS: Spec[] = [
     desc: "Cộng 8 loại POI: chung cư, bãi đỗ, đỗ lòng đường, cây xăng, siêu thị, chợ, trung tâm thương mại, bách hoá.",
     unit: { kind: "poi" },
     kind: "numeric",
-    lens: "context",
   },
   {
     id: "n_mall",
@@ -288,7 +301,6 @@ const CELL_SPECS: Spec[] = [
     desc: "Số trung tâm thương mại OSM trong ô.",
     unit: { kind: "poi" },
     kind: "numeric",
-    lens: "context",
   },
   {
     id: "n_dept_store",
@@ -297,7 +309,6 @@ const CELL_SPECS: Spec[] = [
     desc: "Số cửa hàng bách hoá OSM trong ô.",
     unit: { kind: "poi" },
     kind: "numeric",
-    lens: "context",
   },
   {
     id: "n_supermarket",
@@ -306,7 +317,6 @@ const CELL_SPECS: Spec[] = [
     desc: "Số siêu thị OSM trong ô.",
     unit: { kind: "poi" },
     kind: "numeric",
-    lens: "context",
   },
   {
     id: "n_market",
@@ -315,7 +325,6 @@ const CELL_SPECS: Spec[] = [
     desc: "Số chợ OSM trong ô.",
     unit: { kind: "poi" },
     kind: "numeric",
-    lens: "context",
   },
   {
     id: "n_parking_off",
@@ -324,7 +333,6 @@ const CELL_SPECS: Spec[] = [
     desc: "Số bãi đỗ xe tách khỏi lòng đường.",
     unit: { kind: "poi" },
     kind: "numeric",
-    lens: "context",
   },
   {
     id: "n_parking_street",
@@ -333,7 +341,6 @@ const CELL_SPECS: Spec[] = [
     desc: "Số chỗ đỗ xe dọc lòng đường.",
     unit: { kind: "poi" },
     kind: "numeric",
-    lens: "context",
   },
   {
     id: "n_fuel",
@@ -342,7 +349,6 @@ const CELL_SPECS: Spec[] = [
     desc: "Số cây xăng OSM trong ô.",
     unit: { kind: "poi" },
     kind: "numeric",
-    lens: "context",
   },
   {
     id: "poi_anchor_index",
@@ -697,6 +703,11 @@ const CELL_SPECS: Spec[] = [
     desc: "Con số khoảng cách được tạo ra bằng cách nào, hoặc vì sao không có.",
     unit: null,
     kind: "categorical",
+    categorical: {
+      order: ["OSM_NETWORK", "UNREACHABLE_NO_ROAD_ACCESS", "UNREACHABLE_NO_PATH"],
+      colors: ["#2f7d68", "#8d4e49", "#6b5b95"],
+      inks: ["#ffffff", "#ffffff", "#ffffff"],
+    },
   },
 
   // ── 6. SO SÁNH — trường phái sinh (§13c-1) ────────────────────────────────
@@ -709,6 +720,12 @@ const CELL_SPECS: Spec[] = [
     desc: "Nếu có đơn xin đặt trạm ở ô này, engine quy hoạch trả về gì — ĐỀ XUẤT, ĐỀ XUẤT NẾU CÓ DC, hay TỪ CHỐI.",
     unit: null,
     kind: "categorical",
+    categorical: {
+      order: ["TU_CHOI", "DE_XUAT_NEU_CO_DC", "DE_XUAT"],
+      colors: ["#8d4e49", "#b7791f", "#2f7d68"],
+      inks: ["#ffffff", "#0b0b0b", "#ffffff"],
+    },
+    nullLabel: "không đủ dữ liệu chạy rule",
     // Đây là ĐẦU RA CỦA RULE, không phải một số đo về thành phố. Nó đổi khi rule đổi.
     // Ngưỡng: Phường > 500 m, Xã > 2.000 m, đo bằng CHIM BAY (khách hàng chốt); ngoại lệ
     // hạ Xã xuống 500 m khi trạm gần nhất có util ≥ 40%.
@@ -722,6 +739,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Khoảng cách chim bay tới trạm gần nhất TRỪ đi ngưỡng của loại đơn vị (Phường 500 m, Xã 2.000 m). Dương = đủ xa.",
     unit: { kind: "m", note: "âm = chưa đủ xa" },
     kind: "numeric",
+    nullLabel: "không đủ dữ liệu tính biên rule",
     // Trường PHÂN KỲ duy nhất của atlas, và nó là trường duy nhất CÓ giá trị âm: quét cả
     // `grid_h3_r8` / `commune` / `stations` / `provinces` thì chỉ cột này có `min < 0`.
     //
@@ -732,7 +750,7 @@ const CELL_SPECS: Spec[] = [
     // không thiếu gì cả.
     diverge: { at: 0, hue: "above", ends: ["chưa đủ xa", "đủ xa"] },
     coverageNote:
-      "Số 0 là ranh giới quyết định: trên 0 thì ĐỀ XUẤT, dưới 0 thì TỪ CHỐI. Ô càng gần 0 thì quyết định càng nhạy với việc chọn ngưỡng — và ngưỡng là quy định, không phải phép đo.",
+      "Số 0 chỉ là ranh giới của ĐIỀU KIỆN KHOẢNG CÁCH CƠ SỞ: trên 0 là đủ xa, dưới 0 là chưa đủ. Nó không đồng nhất với quyết định cuối vì screen_decision còn ngoại lệ DC/tải cao. Ngưỡng là quy định, không phải phép đo.",
   },
   {
     id: "pop_beyond_2km",
@@ -741,7 +759,6 @@ const CELL_SPECS: Spec[] = [
     desc: "Số người trong ô mà trạm gần nhất ở xa hơn 2 km TÍNH THEO ĐƯỜNG ĐI. Đây là CẦU CHƯA ĐƯỢC PHỤC VỤ — chính là đối tượng của bài toán đặt trạm.",
     unit: { kind: "person", note: "ngưỡng 2 km theo mạng đường" },
     kind: "numeric",
-    polarity: "high-bad",
     // Ngưỡng bằng MÉT chứ không bằng PHÚT là có chủ đích: bộ dữ liệu không còn phát trường
     // thời gian nào, vì con số phút hoàn toàn do một bảng tốc độ giả định quyết định.
     // Mét thì đo trên chính hình học đường — ngưỡng vẫn là lựa chọn, nhưng ĐẠI LƯỢNG thì không.
@@ -881,7 +898,6 @@ const COMMUNE_SPECS: Spec[] = [
     desc: "Số súng sạc trên mỗi 10.000 dân của xã — cung và cầu gộp vào MỘT con số, nên đọc được ngay là xã nào đang lệch.",
     unit: { kind: "port", note: "trên 10.000 dân" },
     kind: "numeric",
-    polarity: "high-good",
     coverageNote:
       "Đây là tỉ số, không phải số đếm: một xã ít dân có vài trạm lớn sẽ vọt lên rất cao mà không có nghĩa là nó được phục vụ tốt hơn. Đọc kèm dân số xã.",
   },
@@ -927,7 +943,6 @@ const STATION_SPECS: Spec[] = [
   {
     id: "ports",
     group: "cung",
-    lens: "supply",
     label: "Số cổng đã lắp tại trạm",
     desc: "Số cổng sạc công cộng đã lắp tại từng trạm. Màu mã hoá quy mô tài sản; bán kính chấm cố định để không thêm encoding thứ hai.",
     unit: { kind: "port", note: "đã lắp tại trạm" },
@@ -941,7 +956,6 @@ const STATION_SPECS: Spec[] = [
     desc: "Tỉ lệ cổng đang bận của từng trạm tại một ô giờ của tuần (7 thứ × 24 giờ). Kéo scrubber ở đáy để đổi giờ. Trạm chưa quan sát đủ ở giờ đó vẽ CHẤM RỖNG, không tô bậc nhạt — “chưa biết” không được đọc thành “vắng khách”.",
     unit: { kind: "ratio", note: `cổng bận ÷ cổng lắp đặt tại giờ đang xem · dưới ${OBSERVED_H_MIN} h quan sát thì không tô` },
     kind: "numeric",
-    polarity: "high-bad",
     // Không phải một cột — §13c-1. Công thức KHÔNG chạy trong SQL như các trường phái sinh
     // khác: nó phụ thuộc `t`, thứ đổi 4 lần mỗi giây khi play. Một truy vấn DuckDB mỗi
     // khung hình là sai kiến trúc, nên hồ sơ 168h nạp một lần vào `Float32Array` và công
@@ -949,6 +963,28 @@ const STATION_SPECS: Spec[] = [
     deps: [dataPath("stations.parquet"), dataPath("station_occupancy_profile_168h.parquet")],
     coverageNote:
       "Ba đường vào cùng một chấm rỗng, và cả ba là “không biết” nên chúng đúng là MỘT ký hiệu: 236/939 trạm không có hồ sơ 168h nào · ô giờ có dưới 1 h quan sát · 26/939 trạm khuyết n_ports (không có mẫu số thì không có tỉ số). Mẫu số là số cổng LẮP ĐẶT (tầng tài sản), không phải số cổng đang báo cáo — nên trạm báo cáo thiếu hiện THẤP, và đó là sự thật về báo cáo chứ không phải về khách.",
+  },
+  {
+    id: "power_kw",
+    column: "power_kw_site",
+    group: "cung",
+    label: "Công suất trạm",
+    desc: "Tổng công suất các cổng sạc đã lắp tại trạm.",
+    unit: { kind: "kw", note: "lắp đặt tại trạm" },
+    kind: "numeric",
+    nullMeans: "Nguồn không khai công suất của trạm này; không được đọc thành trạm 0 kW.",
+    map: false,
+  },
+  {
+    id: "op_status",
+    column: "op_status",
+    group: "cung",
+    label: "Trạng thái vận hành",
+    desc: "Trạng thái vận hành của trạm theo dữ liệu nguồn.",
+    unit: null,
+    kind: "categorical",
+    nullMeans: "Nguồn không nói trạng thái vận hành của trạm này.",
+    map: false,
   },
 ];
 
@@ -967,56 +1003,118 @@ const PREFIX: Record<ReadingUnit, string> = {
  * `readAs` hay vị trí trong mảng. Prefix làm các trường trùng tên ở ô/xã không thể vô tình
  * dùng chung quyết định. Danh sách được kiểm đủ ở `declaredLens` lúc module khởi tạo.
  */
-export const LENS_DECLARATIONS: Record<LensId, readonly string[]> = {
-  demand: [
+const DEMAND_FIELDS = [
     "cell:population", "cell:pop_density_ppkm2", "cell:n_apartment", "cell:apartment_levels_sum",
-    "cell:poi_anchor_index", "cell:demand_supply_gap", "commune:population", "commune:pop_density_ppkm2",
-  ],
-  supply: [
+    "cell:poi_anchor_index", "commune:population", "commune:pop_density_ppkm2",
+] as const;
+const SUPPLY_FIELDS = [
     "cell:n_stations", "cell:n_stations_operational", "cell:n_ports", "cell:power_kw_site",
-    "commune:n_stations", "commune:n_ports", "commune:power_kw_site", "station:ports",
-  ],
-  access: [
+    "commune:n_stations", "commune:n_ports", "commune:power_kw_site", "commune:ports_per_10k_pop", "station:ports",
+    "station:power_kw", "station:op_status",
+] as const;
+const ACCESS_FIELDS = [
     "cell:road_len_m", "cell:road_len_in_province_m", "cell:road_len_arterial_m", "cell:road_len_motorway_m",
     "cell:road_len_trunk_m", "cell:road_len_primary_m", "cell:road_len_secondary_m", "cell:road_len_tertiary_m",
     "cell:road_len_local_m", "cell:road_len_service_m", "cell:dist_station_network_m", "cell:dist_station_euclid_m",
     "cell:detour_ratio", "cell:dist_station_asym_m", "cell:road_access_offset_m", "cell:network_reachable",
-    "cell:evidence_grade_distance", "cell:pop_beyond_2km", "commune:dist_station_m_pop_weighted", "road:dist_station_m",
-  ],
-  utilization: ["cell:util_cell", "cell:n_stations_measured", "cell:util_pctl_cell", "commune:util_mean_port_weighted", "station:occ"],
-  policy: ["cell:screen_decision", "cell:screen_margin_m", "commune:ports_per_10k_pop"],
-  context: [
-    "cell:n_poi_1km", "cell:n_poi_total", "cell:n_mall", "cell:n_dept_store", "cell:n_supermarket", "cell:n_market",
-    "cell:n_parking_off", "cell:n_parking_street", "cell:n_fuel", "cell:built_frac", "cell:water_frac", "cell:crop_frac",
-    "cell:tree_frac", "cell:grass_frac", "cell:shrub_frac", "cell:bare_frac", "cell:wetland_frac", "cell:area_km2", "cell:area_frac",
-  ],
-};
+    "cell:evidence_grade_distance", "commune:dist_station_m_pop_weighted", "road:dist_station_m",
+] as const;
+const UTILIZATION_FIELDS = ["cell:util_cell", "cell:n_stations_measured", "cell:util_pctl_cell", "commune:util_mean_port_weighted", "station:occ"] as const;
+const OPPORTUNITY_FIELDS = ["cell:screen_decision", "cell:screen_margin_m", "cell:pop_beyond_2km", "cell:demand_supply_gap"] as const;
+
+const DEFAULT_COMMUNE_EVIDENCE = ["commune:population", "commune:pop_density_ppkm2", "commune:ports_per_10k_pop"] as const;
+
+/** Một registry duy nhất sở hữu danh tính, membership, default và evidence của lens. */
+export const LENSES: readonly LensMeta[] = [
+  {
+    id: "demand",
+    label: "CẦU",
+    hint: "ai cần sạc",
+    businessQuestion: "Nhu cầu sạc tập trung ở đâu và mật độ dân cư khu vực nào cao nhất?",
+    defaultField: "population",
+    fieldKeys: DEMAND_FIELDS,
+    defaultOverlays: ["stations"],
+    cellEvidence: ["population", "pop_density_ppkm2", "n_apartment"],
+    communeEvidence: DEFAULT_COMMUNE_EVIDENCE,
+    stationEvidence: ["station:ports", "station:power_kw", "station:op_status"],
+  },
+  {
+    id: "supply",
+    label: "CUNG",
+    hint: "đã có gì",
+    businessQuestion: "Hạ tầng trạm sạc hiện hữu phân bổ ra sao và cơ cấu công suất thế nào?",
+    defaultField: "station:ports",
+    fieldKeys: SUPPLY_FIELDS,
+    defaultOverlays: ["stations", "station_status"],
+    cellEvidence: ["n_stations", "n_ports", "power_kw_site"],
+    communeEvidence: ["commune:n_stations", "commune:n_ports", "commune:ports_per_10k_pop"],
+    stationEvidence: ["station:ports", "station:power_kw", "station:op_status"],
+  },
+  {
+    id: "access",
+    label: "TIẾP CẬN",
+    hint: "đi xa ở đâu",
+    businessQuestion: "Khu vực nào người dân phải di chuyển quá xa trên mạng đường thật để sạc xe?",
+    defaultField: "road:dist_station_m",
+    fieldKeys: ACCESS_FIELDS,
+    defaultOverlays: ["stations", "beyond2km"],
+    cellEvidence: ["dist_station_network_m", "population", "detour_ratio"],
+    communeEvidence: ["commune:population", "commune:dist_station_m_pop_weighted", "commune:ports_per_10k_pop"],
+    stationEvidence: ["station:ports", "station:power_kw", "station:op_status"],
+  },
+  {
+    id: "utilization",
+    label: "SỬ DỤNG",
+    hint: "bận lúc nào",
+    businessQuestion: "Trạm sạc nào đang bị quá tải hoặc thiếu tải trong từng khung giờ tuần?",
+    defaultField: "station:occ",
+    fieldKeys: UTILIZATION_FIELDS,
+    defaultOverlays: ["stations", "station_status"],
+    cellEvidence: ["util_cell", "n_stations_measured", "util_pctl_cell"],
+    communeEvidence: DEFAULT_COMMUNE_EVIDENCE,
+    stationEvidence: ["station:occ", "station:ports", "station:op_status"],
+  },
+  {
+    id: "opportunity",
+    label: "CƠ HỘI",
+    hint: "khoảng trống ưu tiên",
+    businessQuestion: "Nơi nào có khoảng trống phục vụ hoặc vượt ngưỡng sàng lọc để xem xét đầu tư?",
+    defaultField: "screen_margin_m",
+    fieldKeys: OPPORTUNITY_FIELDS,
+    defaultOverlays: ["stations", "beyond2km"],
+    cellEvidence: ["screen_margin_m", "pop_beyond_2km", "population"],
+    communeEvidence: ["commune:ports_per_10k_pop", "commune:n_ports", "commune:population"],
+    stationEvidence: ["station:ports", "station:power_kw", "station:op_status"],
+  },
+] as const;
+
+/** Compatibility export for callers that validate full registry coverage. */
+export const LENS_DECLARATIONS: Record<LensId, readonly string[]> = Object.fromEntries(
+  LENSES.map((lens) => [lens.id, lens.fieldKeys]),
+) as Record<LensId, readonly string[]>;
 
 const DECLARED_LENS = new Map<string, LensId>(
   Object.entries(LENS_DECLARATIONS).flatMap(([lens, ids]) => ids.map((id) => [id, lens as LensId] as const)),
 );
 
-function declaredLens(id: string, readAs: ReadingUnit): LensId {
+function declaredLens(id: string, readAs: ReadingUnit): LensId | null {
   const key = `${readAs}:${id}`;
-  const lens = DECLARED_LENS.get(key);
-  if (!lens) throw new Error(`Field registry lacks an explicit lens declaration: ${key}`);
-  return lens;
+  return DECLARED_LENS.get(key) ?? null;
 }
 
 const withUnit = (specs: Spec[], readAs: ReadingUnit): FieldMeta[] =>
-  specs.map((s) => ({
-    ...s,
-    readAs,
-    column: s.id,
-    id: PREFIX[readAs] + s.id,
-    // `lens` viết cạnh vài Spec cũ chỉ là chú thích lịch sử. Registry ở trên mới là nguồn
-    // sự thật; chặn lệch tại đây thay vì để một edit sau này âm thầm đổi câu hỏi của map.
-    lens: (() => {
-      const lens = declaredLens(s.id, readAs);
-      if (s.lens && s.lens !== lens) throw new Error(`Conflicting lens declarations for ${readAs}:${s.id}`);
-      return lens;
-    })(),
-  }));
+  specs.map((s) => {
+    const lens = declaredLens(s.id, readAs);
+    return {
+      ...s,
+      readAs,
+      column: s.column ?? s.id,
+      id: PREFIX[readAs] + s.id,
+      lens,
+      // Context/evidence không được lách thành analytical ramp thứ sáu.
+      map: lens === null ? false : s.map,
+    };
+  });
 
 export const FIELDS: FieldMeta[] = [
   ...withUnit(CELL_SPECS, "cell"),
@@ -1138,6 +1236,56 @@ export function fieldMapAvailable(f: FieldMeta): boolean {
   return f.map !== false && fieldAvailable(f);
 }
 
+/**
+ * Trường này có bộ đọc DEMAND·P1 (hex · density · intensity · bivariate · hybrid) không.
+ *
+ * Một hàm chứ không phải một điều kiện chép ba lần. `MapView`, `Legend` và `FloatingLegend`
+ * đều phải trả lời cùng câu hỏi này; hồi nó là ba biểu thức `field.id === "population" &&
+ * field.readAs === "cell"` viết tay thì không có gì bắt chúng đồng ý, và bất đồng ở đây cho
+ * ra đúng loại lỗi tệ nhất — một chú giải mô tả một mặt tô không có trên bản đồ.
+ *
+ * `population` của Ô là trường DUY NHẤT khai `surface: true`, và ba trong năm cách đọc
+ * (density, hybrid, contour) đứng được là nhờ đúng khai báo đó — xem `FieldMeta.surface`.
+ * Điều kiện `readAs === "cell"` là cần: `commune:population` cùng tên nhưng cộng lên đơn vị
+ * khác, gộp nó thành mặt liên tục là gộp một con số đã gộp rồi.
+ *
+ * Điều kiện "đang ở CÂU CHUYỆN hay không" **không** thuộc về đây — mỗi nơi gọi tự AND thêm.
+ */
+export function hasDemandRepresentations(f: FieldMeta): boolean {
+  return f.id === "population" && f.readAs === "cell" && Boolean(f.surface);
+}
+
+/**
+ * Câu hỏi SO SÁNH mà measure đang tô trả lời được — DESIGN.md §3d.
+ *
+ * Danh sách này từng nằm ở HAI chỗ phải đồng ý với nhau mà không có gì bắt chúng đồng ý:
+ * ba nút "mở compare" trong tab CÂU HỎI, và một effect trong `App` **đóng** compare khi
+ * trường đổi sang thứ không khớp. Kết quả là một tấm tự đóng ngay sau khi mở, không có lời
+ * giải thích nào trên màn hình. Nay chỉ còn một hàm; bảng SO SÁNH đọc nó để dựng bộ chuyển,
+ * và trường không có câu nào thì **nói ra** thay vì biến mất.
+ *
+ * Thứ tự trả về là thứ tự ưu tiên: phần tử đầu là câu chốt lại khi câu đang mở hết nghĩa.
+ */
+export function compareViewsFor(f: FieldMeta): CompareView[] {
+  const out: CompareView[] = [];
+  if (f.kind === "numeric") out.push("distribution");
+  // Xếp hạng có tên chỉ dựng được ở đơn vị đọc XÃ: nó đọc thẳng `commune.geojson` đã nạp,
+  // và một cái tên là thứ chỉ xã mới có (ô H3 có mã, đoạn đường có id OSM — không ai gọi
+  // tên chúng trong một cuộc họp).
+  if (f.readAs === "commune" && f.kind === "numeric") out.push("rank-communes");
+  // Hai trục của scatter là `population` × `dist_station_network_m` của ô H3 — một cặp cố
+  // định, không phải "trường đang tô × một trường khác". Nên nó chỉ có nghĩa ở đúng `population`.
+  if (f.id === "population") out.push("demand-access");
+  // Gắn với LENS, không với từng id: cả sáu measure của lens Tiếp cận đều hỏi cùng một câu
+  // ("đi xa ở đâu"), và đường tích luỹ theo dân là câu trả lời chung của chúng. Điều kiện dữ
+  // liệu là cột khoảng cách của LƯỚI — đường này luôn đọc ô H3, kể cả khi đang tô trường xã.
+  if (f.lens === "access" && gridColumnAvailable("dist_station_network_m")) out.push("access-curve");
+  if (f.lens === "supply" && gridColumnAvailable("n_ports"))
+    out.push("supply-equity");
+  if (f.id === STATION_OCC_FIELD && layerUsable("occupancy")) out.push("utilization-pattern");
+  return out;
+}
+
 /** Trường của một đơn vị đọc, giữ nguyên thứ tự khai báo, ĐÃ lọc theo cột có mặt. */
 export function fieldsOfUnit(unit: ReadingUnit): FieldMeta[] {
   return FIELDS.filter((f) => f.readAs === unit && fieldAvailable(f));
@@ -1155,15 +1303,46 @@ export function mapFieldsOfLens(lens: LensId): FieldMeta[] {
 
 /** Default lens khai báo; fallback chỉ dùng khi dataset thiếu default. */
 export function defaultFieldOfLens(lens: LensId): FieldMeta | undefined {
-  const id = LENSES.find((l) => l.id === lens)?.defaultField;
+  const id = lensMeta(lens)?.defaultField;
   const preferred = id ? FIELD_BY_ID.get(id) : undefined;
   return preferred && fieldMapAvailable(preferred) ? preferred : mapFieldsOfLens(lens)[0];
 }
 
 /** Lens là hệ quả của field; không có state/hash lens thứ hai để lệch khỏi `f`. */
-export function lensOfField(id: string): LensId {
-  return FIELD_BY_ID.get(id)?.lens ?? "demand";
+export function lensOfField(id: string): LensId | null {
+  return FIELD_BY_ID.get(id)?.lens ?? null;
 }
+
+/** Kiểm tra một giá trị có phải là LensId hợp lệ hay không. */
+export function isLensId(id: unknown): id is LensId {
+  return typeof id === "string" && (LENS_IDS as readonly string[]).includes(id);
+}
+
+/** Lấy metadata đầy đủ của một Lens. */
+export function lensMeta(lens: LensId): LensMeta | undefined {
+  return LENSES.find((l) => l.id === lens);
+}
+
+/** Danh sách ID thuộc tính/trường bằng chứng chính cho ô H3 theo Lens. */
+export function evidenceIdsForLens(lens: LensId | string | null | undefined): string[] {
+  return [...(isLensId(lens) ? lensMeta(lens)!.cellEvidence : lensMeta("demand")!.cellEvidence)];
+}
+
+/** Danh sách ID thuộc tính/trường bằng chứng chính cho Xã/phường theo Lens. */
+export function communeEvidenceForLens(lens: LensId | string | null | undefined): string[] {
+  return [...(isLensId(lens) ? lensMeta(lens)!.communeEvidence : lensMeta("demand")!.communeEvidence)];
+}
+
+/** Danh sách ID thuộc tính/trường bằng chứng chính cho Trạm sạc theo Lens. */
+export function stationEvidenceForLens(lens: LensId | string | null | undefined): string[] {
+  return [...(isLensId(lens) ? lensMeta(lens)!.stationEvidence : lensMeta("supply")!.stationEvidence)];
+}
+
+/** Danh sách overlay IDs mặc định được kích hoạt khi chuyển sang một Lens. */
+export function defaultOverlaysOfLens(lens: LensId | string | null | undefined): OverlayId[] {
+  return [...(isLensId(lens) ? lensMeta(lens)!.defaultOverlays : lensMeta("demand")!.defaultOverlays)];
+}
+
 
 /**
  * Một CỘT của lưới có mặt không — dùng ở tầng SQL, khác `fieldAvailable` ở tầng TRƯỜNG.
@@ -1195,10 +1374,29 @@ export function unavailableFields(): FieldMeta[] {
  *   2. **không phải một MỨC** (§13a-4) — "người ở giữa" là thứ mentor đã biết trước khi
  *      mở app. Thứ đáng vẽ là ĐỘ LỆCH khỏi kỳ vọng.
  *
- * `ports_per_10k_pop` thoả cả hai: nó gộp cung và cầu vào một con số, và với cực tính
- * `high-good` (M2.1-B) thì **đậm = thiếu cung** — mở app ra là thấy ngay chỗ có vấn đề.
+ * `ports_per_10k_pop` thoả cả hai: nó gộp cung và cầu vào một con số ở
+ * hình học xã luôn có trong mọi dataset. Thang vẫn giữ nhạt = ít, đậm = nhiều.
  */
 export const DEFAULT_FIELD = `${COMMUNE_PREFIX}ports_per_10k_pop`;
+
+/**
+ * Trường mà một phiên MỚI mở ra — khác `DEFAULT_FIELD`, và hai cái tên là hai việc.
+ *
+ * `DEFAULT_FIELD` là **lưới an toàn**: nó là thứ app rơi về khi trường được yêu cầu không
+ * dựng được trên bộ dữ liệu đang mở, nên nó phải tồn tại ở **mọi** tỉnh — và nó tồn tại,
+ * vì nó đọc từ `commune.geojson` mà bộ nào cũng ship. Đừng đổi nó thành một cột của lưới.
+ *
+ * `FIRST_FIELD` là **màn hình đầu tiên**. Từ đợt 17/8/2026 bố cục A′ được dựng quanh đúng
+ * một measure (§3h): cột đọc có tiết CÁCH ĐỌC, và tiết ấy chỉ tồn tại cho `population`
+ * (`hasDemandRepresentations`). Mở app ra ở một trường khác thì cột đọc hiện ra **thiếu
+ * một tiết** và không có gì trên màn hình nói làm sao tới được nó — danh sách measure đã
+ * bị xoá cùng workspace.
+ *
+ * Không dựng được (tỉnh chưa có cột `population`) thì `App` kéo về `DEFAULT_FIELD` bằng
+ * đúng con đường đã có cho mọi trường vắng mặt. Nên hằng này là một **ưu tiên**, không
+ * phải một lời hứa.
+ */
+export const FIRST_FIELD = "population";
 
 /**
  * Câu đơn vị bên phải dải legend — DESIGN.md §3b.
@@ -1223,9 +1421,7 @@ export function unitSentence(f: FieldMeta, scaled?: ScaledUnit): string {
 /**
  * Chỉ dấu cực tính cho legend — M2.1-(B).
  *
- * Đi KÈM phép đảo màu chứ không thay nó. Màu là kênh mạnh (đọc trước), chữ là kênh xác
- * nhận (đọc sau, khi người xem đã ngờ ngợ). Có cả hai thì không phải đoán; chỉ có chữ thì
- * nó thua chính cái gestalt nó đang cố sửa.
+ * Cực tính chỉ giải thích hướng đọc; nó không đảo thang màu tuần tự.
  *
  * Trường PHÂN KỲ trả về câu HAI VẾ thay cho câu một vế: ở đó không có "đầu nào cần can
  * thiệp" mà có hai bên của một mốc, và cùng một ô chú giải phải nói ra cả hai.
@@ -1235,8 +1431,8 @@ export function polarityNote(f: FieldMeta): string | null {
     const at = formatIn(f.diverge.at, scaleUnit(f.unit, f.diverge.at));
     return `${f.diverge.ends[0]} ◂ ${at} ▸ ${f.diverge.ends[1]}`;
   }
-  if (f.polarity === "high-bad") return "↑ xấu hơn";
-  if (f.polarity === "high-good") return "↑ tốt hơn · đậm = thiếu";
+  if (f.polarity === "high-bad") return "đậm = giá trị cao hơn · thường bất lợi hơn";
+  if (f.polarity === "high-good") return "đậm = giá trị cao hơn · thường thuận lợi hơn";
   return null;
 }
 

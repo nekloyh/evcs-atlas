@@ -26,6 +26,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { DatasetPicker } from "../ui/DatasetPicker";
+import { COLD_HEX } from "../viz/palette";
 import {
   bboxOf,
   chiMuc,
@@ -325,7 +326,7 @@ export default function ProxyApp() {
             <div className="flex items-start gap-2 px-3 py-1.5">
               <span
                 className="mt-0.5 inline-block h-3 w-3 shrink-0 border-[1.5px]"
-                style={{ borderColor: "#1c5cab", background: "rgba(28,92,171,0.18)" }}
+                style={{ borderColor: COLD_HEX[1], background: `${COLD_HEX[1]}2e` }}
               />
               <span>
                 POI

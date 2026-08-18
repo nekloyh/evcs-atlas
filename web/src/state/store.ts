@@ -1,21 +1,22 @@
 import { create } from "zustand";
 
-import { DEFAULT_FIELD, FIELD_BY_ID } from "../fields";
+import { FIRST_FIELD, defaultFieldOfLens, type LensId } from "../fields";
 import { INITIAL_VIEW } from "./view-config";
-import { beatOf, parseScene, sceneState, type SceneId } from "../story/scenes";
+import { SCENES, beatOf, parseScene, sceneState, type SceneId } from "../story/scenes";
 import {
   NO_BRUSH,
-  brushCount,
   clampToWindow,
   nextT,
   reconcileBrush,
   type BrushState,
 } from "./brush";
-import { readHash } from "./hash";
-import type { BasemapStyle, CompareView, DemandRepresentation, HashState, Mode, OverlayId, RailTab, View } from "./types";
+import { readHash, resolveHashField, type HashApplyContext } from "./hash";
+import { type EntitySelection, parseEntitySelection, serializeEntitySelection } from "./selection";
+import type { AppNavMode, BasemapStyle, DemandRepresentation, HashState, Mode, OverlayId, View } from "./types";
 import { defaultRepresentationFor, representationFits } from "./types";
 
-export type { BasemapStyle, Mode, OverlayId, RailTab, ReadingUnit, View } from "./types";
+export type { AppNavMode, BasemapStyle, Mode, OverlayId, ReadingUnit, View } from "./types";
+export type { EntitySelection, DatasetId, StationId, H3R8, CommuneCode } from "./selection";
 
 export interface AppState {
   field: string;
@@ -31,11 +32,10 @@ export interface AppState {
    * trong chế độ CÂU CHUYỆN (L3 — một cảnh luôn tô đúng một trường của nó).
    */
   paintOn: boolean;
-  /** `h3_r8` của ô đang chọn. Đúng một ô, hoặc không ô nào. */
-  cell: string | null;
-  tab: RailTab;
-  /** tab để quay về từ panel Ô — nút `‹ quay lại` (§3c) */
-  backTab: Exclude<RailTab, "cell">;
+  /** Đối tượng đang chọn theo Phase 3 (§3). null = không chọn gì. */
+  selection: EntitySelection | null;
+  /** Road/POI context only; never duplicates a Phase 3 EntitySelection. */
+  contextSelection: string | null;
   /**
    * Cảnh CÂU CHUYỆN đang mở, hoặc `null` = chế độ BẢN ĐỒ — §9a, §14a.
    *
@@ -52,6 +52,10 @@ export interface AppState {
    * ngay chỗ đặt, nên không có state nào mang cả hai.
    */
   dataMode: boolean;
+  /**
+   * Chế độ TOÀN QUỐC (34 tỉnh thành) đang mở hay không.
+   */
+  nationalMode: boolean;
   /**
    * Nhịp đang xem trong cảnh — M3.1. `null` = nhịp đầu.
    *
@@ -75,19 +79,23 @@ export interface AppState {
   /** Ba ô brush của dock — khoá `b`, §9b. */
   brush: BrushState;
   /**
-   * Dock có đang mở không — thuần UI, không vào hash, cùng hạng với `tab`/`backTab`.
+   * Cột ĐỌC có đang mở không — CHỈ có nghĩa dưới 1024 px (§3h).
    *
-   * Nhưng nó **mở sẵn khi hash mang `b`**: một link có brush mà dock đóng thì mentor thấy
-   * một bản đồ đầy ô xám nhạt và không có gì trên màn hình nói vì sao. Cùng ý với "hash
-   * mang sẵn một ô ⇒ mở thẳng panel Ô".
+   * Từ 1024 px trở lên cột nằm **trong luồng** và không đóng được: nó là chỗ duy nhất giải
+   * mã bản đồ, nên một nút đóng nó là một nút biến bản đồ thành hình trang trí. Dưới ngưỡng
+   * đó không đủ bề rộng cho cả hai, nên cột thành sheet phủ và cờ này nói sheet đang mở hay
+   * đóng. Mặc định ĐÓNG: mở app ra trên màn hẹp phải thấy bản đồ, không thấy một tấm chắn.
+   *
+   * Thay cho `workspaceOpen` + `infoPanelOpen` của bố cục cũ. Hai cờ ấy tồn tại vì có hai bề
+   * mặt đóng/mở được tranh chỗ nhau; A′ chỉ còn một bề mặt trong luồng, nên chỉ còn một cờ —
+   * và mọi luật điều phối giữa chúng biến mất cùng cờ thứ hai, không phải được viết lại.
    */
-  dockOpen: boolean;
-  /** Compare đang trả lời câu nào. Thuần UI, không vào hash. */
-  compareView: CompareView;
-  workspaceOpen: boolean;
+  readColumnOpen: boolean;
   basemapStyle: BasemapStyle;
 
   setField: (f: string) => void;
+  /** Chuyển sang Lens phân tích mới: đổi trường mặc định và overlay mặc định, giữ nguyên đối tượng đang chọn. */
+  switchLens: (lensId: LensId) => void;
   setDemandRepresentation: (representation: DemandRepresentation) => void;
   setView: (v: View) => void;
   /** Đổi 2D ↔ 3D — M3.5 (P5). Kèm nghiêng camera, vì đó là điều người bấm muốn. */
@@ -95,8 +103,9 @@ export interface AppState {
   setBasemapStyle: (style: BasemapStyle) => void;
   /** Bật/tắt mặt tô — nút thứ ba cạnh Ô H3 | XÃ. Không đụng `field`. */
   setPaintOn: (on: boolean) => void;
-  setTab: (t: RailTab) => void;
   toggleLayer: (id: OverlayId) => void;
+  selectEntity: (selection: EntitySelection | null) => void;
+  clearSelection: (reason?: string) => void;
   selectCell: (h3: string | null) => void;
   /** Vào một cảnh (hoặc `null` để về BẢN ĐỒ) — cảnh GHI ĐÈ state dùng chung, §14a-L1. */
   enterScene: (id: SceneId | null) => void;
@@ -109,6 +118,10 @@ export interface AppState {
    * L2, chỉ theo chiều ngược lại.
    */
   setDataMode: (on: boolean) => void;
+  /** Mở/đóng chế độ TOÀN QUỐC */
+  setNationalMode: (on: boolean) => void;
+  /** Chuyển đổi giữa 4 primary modes: map, story, data, national */
+  setAppNavMode: (navMode: AppNavMode) => void;
   /** Chuyển nhịp trong cảnh đang mở — nhịp đổi `field`, nên nó đổi mặt tô. */
   setBeat: (beatId: string) => void;
   /** Bay camera trong một cảnh mà không rời cảnh — cảnh B gọi tên từng xã. */
@@ -120,22 +133,26 @@ export interface AppState {
   setPlaying: (on: boolean) => void;
   /** Đặt/xoá một brush. `undefined` = xoá ô đó. */
   setBrush: (b: BrushState) => void;
-  setDockOpen: (on: boolean) => void;
-  openCompare: (view: CompareView) => void;
-  setWorkspaceOpen: (on: boolean) => void;
-  /** nạp ngược từ hash (`hashchange`) — §9. Khoá vắng mặt thì giữ nguyên giá trị hiện tại. */
-  applyHash: (s: Partial<HashState>) => void;
+  setReadColumnOpen: (on: boolean) => void;
+  /** Nạp snapshot hash (`hashchange`); khoá vắng về mặc định, khoá sai bị bỏ riêng. */
+  applyHash: (s: Partial<HashState>, context?: Partial<HashApplyContext>) => void;
 }
 
-/**
- * State của một cảnh, đổ vào hình dạng của store.
- *
- * `tab` đi kèm có lý do: cảnh B chọn sẵn một xã, và nếu người xem thoát ra BẢN ĐỒ ngay lúc
- * đó thì rail phải mở đúng panel XÃ đó — đấy chính là phần bàn giao của luật L2. Không đặt
- * `tab` thì rail mở ra tab TRƯỜNG và thứ vừa được gọi tên biến mất.
- */
+export function selectionWireOf(
+  state: Pick<AppState, "selection" | "contextSelection">,
+): string | null {
+  return state.selection ? serializeEntitySelection(state.selection) : state.contextSelection;
+}
+
+function contextSelectionOf(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  return /^road:\d+$/.test(raw) || /^poi:[nwr]\d+$/.test(raw) ? raw : null;
+}
+
+/** State của một cảnh, đổ vào hình dạng của store. */
 function fromScene(id: SceneId) {
   const s = sceneState(id);
+  const selectSel = parseEntitySelection(s.select);
   return {
     scene: id,
     // Vào cảnh là vào từ NHỊP ĐẦU, kể cả khi tới bằng link giữa chừng.
@@ -143,7 +160,8 @@ function fromScene(id: SceneId) {
     field: s.field,
     view: s.view,
     layers: new Set(s.layers),
-    cell: s.select,
+    selection: selectSel,
+    contextSelection: selectSel ? null : contextSelectionOf(s.select),
     // Nút "TẮT mặt tô" thuộc rail BẢN ĐỒ; một cảnh luôn tô đúng một trường (L3) nên nó
     // ép `paintOn` về true kể cả khi người xem vừa tắt trước lúc bấm vào cảnh.
     paintOn: true,
@@ -153,7 +171,6 @@ function fromScene(id: SceneId) {
     // scrubber thì không có gì đang chạy.
     brush: NO_BRUSH,
     playing: false,
-    ...(s.select ? { tab: "cell" as const } : {}),
   };
 }
 
@@ -169,16 +186,25 @@ const DEFAULT_VIEW: View = {
 
 const bootScene = parseScene(boot.scene);
 
-// Brush của lúc boot, đã áp bất biến "histogram luôn nói về trường đang tô" (§9b).
-const bootBrush = reconcileBrush(boot.brush ?? NO_BRUSH, boot.field ?? DEFAULT_FIELD);
+// Trường của phiên: hash thắng, không có hash thì `FIRST_FIELD` (§3h). KHÔNG phải
+// `DEFAULT_FIELD` — xem hai đoạn khai báo trong `fields.ts`: một cái là màn hình đầu tiên,
+// cái kia là lưới an toàn khi trường không dựng được, và trộn chúng làm một đã từng cho ra
+// một cột đọc thiếu tiết CÁCH ĐỌC mà không có đường nào tới được nó.
+const bootField = boot.field ?? FIRST_FIELD;
 
-export const useStore = create<AppState>((set, get) => ({
+// Brush của lúc boot, đã áp bất biến "histogram luôn nói về trường đang tô" (§9b).
+const bootBrush = reconcileBrush(boot.brush ?? NO_BRUSH, bootField);
+const bootSelection = boot.selection ?? parseEntitySelection(boot.cell);
+const bootContextSelection = bootSelection ? null : contextSelectionOf(boot.cell);
+
+export const useStore = create<AppState>((set) => ({
   scene: null,
   // `s` thắng `d` ở chiều VÀO (xem `parseHash`), nên `bootScene` đã quyết định xong: khi
   // có cảnh thì `parseHash` không phát `dataMode`, và dòng này không phải kiểm lại.
   dataMode: boot.dataMode ?? false,
+  nationalMode: boot.nationalMode ?? false,
   beat: null,
-  field: boot.field ?? DEFAULT_FIELD,
+  field: bootField,
   demandRepresentation: "hex",
   mode: boot.mode ?? "2d",
   // Link `#m=3d` không kèm `v` phải mở ra ĐÃ nghiêng — pitch 50 là một nửa nghĩa của
@@ -186,10 +212,8 @@ export const useStore = create<AppState>((set, get) => ({
   view: boot.view ?? (boot.mode === "3d" ? { ...DEFAULT_VIEW, pitch: 50 } : DEFAULT_VIEW),
   layers: new Set(boot.layers ?? []),
   paintOn: boot.paintOn ?? true,
-  cell: boot.cell ?? null,
-  // Hash mang sẵn một ô ⇒ mở thẳng panel Ô, vì đó là điều người gửi link muốn cho xem.
-  tab: boot.cell ? "cell" : "field",
-  backTab: "field",
+  selection: bootSelection,
+  contextSelection: bootContextSelection,
 
   // Scrubber mở ở giờ 0 (Thứ Hai 0h) khi hash không nói gì. Play KHÔNG tự chạy: một link
   // là ảnh chụp, và một bản đồ tự động thay đổi ngay khi mở là thứ người nhận không yêu cầu.
@@ -201,25 +225,8 @@ export const useStore = create<AppState>((set, get) => ({
   t: clampToWindow(bootBrush.win, boot.t ?? 0),
   playing: false,
   brush: bootBrush,
-  // Hash mang brush ⇒ dock mở sẵn, để ô xám nhạt có chỗ giải thích nó.
-  dockOpen: brushCount(bootBrush) > 0,
-  compareView: "distribution",
-  /*
-   * Workspace MỞ sẵn trên màn hình rộng — nó là chỗ đổi CÂU HỎI, thứ đầu tiên của mô hình
-   * làm việc (DESIGN.md §1).
-   *
-   * Đóng sẵn thì lần mở app đầu tiên là một bản đồ, một thang màu, và không có gì trên màn
-   * hình nói rằng câu hỏi đổi được: lối vào duy nhất là một viên thuốc "Workspace" ở góc
-   * dưới-phải, cạnh dòng attribution, nơi mắt đi qua sau cùng. Một phiên xem bắt đầu ở
-   * measure mặc định rồi kết thúc ở đó.
-   *
-   * Ngưỡng theo bề rộng chứ không mở vô điều kiện: dưới 1024 px workspace là drawer che
-   * bản đồ (xem `FloatingWorkspace`), và mở sẵn một drawer là giấu mất chính thứ người xem
-   * vào đây để nhìn. `c=` trong hash là ngoại lệ thứ hai — deep-link tới một đối tượng thì
-   * inspector là nhân vật chính, và §2 chỉ cho phép một panel mở.
-   */
-  workspaceOpen:
-    typeof window !== "undefined" && window.innerWidth >= 1024 && !boot.cell,
+  // Chỉ đọc dưới 1024 px, nơi cột là sheet phủ — xem khai báo ở trên.
+  readColumnOpen: false,
   basemapStyle: "positron",
 
   // Hash mang `s` ⇒ cảnh GHI ĐÈ ngay từ lúc boot (L1). Đặt SAU các mặc định, không trộn
@@ -227,7 +234,9 @@ export const useStore = create<AppState>((set, get) => ({
   // mang chúng, nên chúng không có gì để tranh chấp — trừ `c`, thứ vẫn đọc được ở cả hai
   // chế độ, nên nó thắng lại lựa chọn mặc định của cảnh ngay dưới đây.
   ...(bootScene ? fromScene(bootScene) : {}),
-  ...(bootScene && boot.cell ? { cell: boot.cell, tab: "cell" as const } : {}),
+  ...(bootScene && boot.cell
+    ? { selection: bootSelection, contextSelection: bootContextSelection }
+    : {}),
 
   // Ràng buộc 2: `field` là MỘT chuỗi, không phải mảng. Không có API nào thêm trường thứ hai.
   //
@@ -243,6 +252,19 @@ export const useStore = create<AppState>((set, get) => ({
       // thầm đổi cách vẽ một metric khác khi người dùng chọn trường mới.
       demandRepresentation: defaultRepresentationFor(s.mode),
     })),
+  switchLens: (lensId) =>
+    set((s) => {
+      const nextField = defaultFieldOfLens(lensId);
+      if (!nextField || nextField.id === s.field) return {};
+      const fieldId = nextField.id;
+      return {
+        field: fieldId,
+        // Lens chỉ đổi analytical field. Selection, overlay và dataset session
+        // là ngữ cảnh do người dùng sở hữu, không phải default của lens mới.
+        brush: reconcileBrush(s.brush, fieldId),
+        demandRepresentation: defaultRepresentationFor(s.mode),
+      };
+    }),
   // Bộ chọn KHÔNG được đổi điểm nhìn — nó chỉ chọn trong nhóm của điểm nhìn đang mở.
   // Một giá trị lạc nhóm bị chốt về mặc định thay vì âm thầm kéo `mode` theo (§15a).
   setDemandRepresentation: (r) =>
@@ -262,7 +284,6 @@ export const useStore = create<AppState>((set, get) => ({
     })),
   setBasemapStyle: (basemapStyle) => set({ basemapStyle }),
   setPaintOn: (on) => set({ paintOn: on }),
-  setTab: (t) => set(t === "cell" ? { tab: t } : { tab: t, backTab: t }),
   toggleLayer: (id) =>
     set((s) => {
       const next = new Set(s.layers);
@@ -270,26 +291,61 @@ export const useStore = create<AppState>((set, get) => ({
       next.has(id) ? next.delete(id) : next.add(id);
       return { layers: next };
     }),
-  selectCell: (h3) =>
-    set(h3 === null ? { cell: null, tab: get().backTab } : { cell: h3, tab: "cell", workspaceOpen: false }),
+  selectEntity: (selection) =>
+    set({
+      selection,
+      contextSelection: null,
+    }),
+  clearSelection: (_reason) =>
+    set({
+      selection: null,
+      contextSelection: null,
+    }),
+  selectCell: (h3) => {
+    const selection = parseEntitySelection(h3);
+    set({
+      selection,
+      contextSelection: selection ? null : contextSelectionOf(h3),
+    });
+  },
 
   // Luật L1 và L2 của §14a, cả hai trong một hàm — vì chúng là hai chiều của cùng một
   // quyết định. Vào cảnh: cảnh ghi đè state dùng chung. Ra khỏi cảnh (`null`): CHỈ bỏ
   // `scene`, không đặt lại gì cả. Cái thứ hai trông như thiếu sót nên nó phải được viết ra
   // — nó là bàn giao: mentor xem xong cảnh C thì đứng nguyên ở 672 ô đó, chỉ khác là rail
   // hiện ra và mọi thứ bấm được.
-  // Vào một cảnh thì ĐÓNG trang dữ liệu: hai chế độ loại trừ nhau, và chỗ đúng để thực thi
-  // điều đó là nơi đặt state, không phải nơi render.
+  // Vào một cảnh thì ĐÓNG trang dữ liệu và trang toàn quốc.
   enterScene: (id) =>
-    set(id === null ? { scene: null, beat: null, dataMode: false } : { ...fromScene(id), dataMode: false }),
-  setDataMode: (on) => set(on ? { dataMode: true, scene: null, beat: null } : { dataMode: false }),
+    set(id === null ? { scene: null, beat: null, dataMode: false, nationalMode: false } : { ...fromScene(id), dataMode: false, nationalMode: false }),
+  setDataMode: (on) => set(on ? { dataMode: true, scene: null, beat: null, nationalMode: false } : { dataMode: false }),
+  setNationalMode: (on) => set(on ? { nationalMode: true, dataMode: false, scene: null, beat: null } : { nationalMode: false }),
+  setAppNavMode: (navMode) => {
+    if (navMode === "data") {
+      set({ dataMode: true, nationalMode: false, scene: null, beat: null });
+    } else if (navMode === "story") {
+      const first = SCENES[0];
+      set(first
+        ? { ...fromScene(first.id), dataMode: false, nationalMode: false }
+        : { dataMode: false, nationalMode: false, scene: null, beat: null });
+    } else if (navMode === "national") {
+      set({ nationalMode: true, dataMode: false, scene: null, beat: null });
+    } else {
+      // "map"
+      set({ nationalMode: false, dataMode: false, scene: null, beat: null });
+    }
+  },
 
   // Nhịp đổi trường, nên nó đi qua đúng `field` mà mọi thứ khác đọc — không có state song
   // song nào. Ràng buộc 2 nguyên vẹn: vẫn một chuỗi, vẫn một trường.
   setBeat: (beatId) =>
     set((s) => (s.scene ? { beat: beatId, field: beatOf(s.scene, beatId).field } : {})),
 
-  flyTo: (v, select) => set(select === undefined ? { view: v } : { view: v, cell: select, tab: "cell" }),
+  flyTo: (v, select) =>
+    set(() => {
+      if (select === undefined) return { view: v };
+      const selection = parseEntitySelection(select);
+      return { view: v, selection, contextSelection: selection ? null : contextSelectionOf(select) };
+    }),
 
   setT: (t) => set((s) => ({ t: clampToWindow(s.brush.win, Math.max(0, Math.min(167, Math.round(t)))) })),
   stepT: () => set((s) => ({ t: nextT(s.brush.win, s.t) })),
@@ -297,17 +353,28 @@ export const useStore = create<AppState>((set, get) => ({
   // Đổi cửa sổ thì KÉO `t` vào cửa sổ mới — nếu không, scrubber đứng ở một giờ mà chính
   // brush vừa loại ra, tức bản đồ hiện một giờ mà dock nói là không xem.
   setBrush: (b) => set((s) => ({ brush: b, t: clampToWindow(b.win, s.t) })),
-  setDockOpen: (on) => set({ dockOpen: on }),
-  openCompare: (compareView) => set({ dockOpen: true, compareView }),
-  setWorkspaceOpen: (workspaceOpen) => set({ workspaceOpen }),
+  setReadColumnOpen: (readColumnOpen) => set({ readColumnOpen }),
 
-  applyHash: (h) =>
+  applyHash: (h, context) =>
     set((s) => {
       // Khoá hỏng đã bị `parseHash` bỏ; ở đây khoá VẮNG nghĩa là "về mặc định của khoá đó",
       // vì người sửa tay URL xoá `l=` là có ý tắt hết overlay, không phải giữ nguyên.
       // Ngoại lệ `field`: tên trường hỏng thì giữ trường đang xem chứ không nhảy về mặc
       // định — nhảy sẽ vứt mất thứ người dùng đang nhìn vì một ký tự gõ sai.
-      const cell = h.cell ?? null;
+      const selection = h.selection !== undefined ? h.selection : parseEntitySelection(h.cell);
+      const contextSelection = selection ? null : contextSelectionOf(h.cell);
+
+      // `tinh=vn` là primary surface riêng. Không reset state bản đồ đang đỗ phía sau:
+      // quay lại BẢN ĐỒ phải trả đúng ngữ cảnh trước đó, giống luật bàn giao của DATA.
+      if (h.nationalMode) {
+        return {
+          nationalMode: true,
+          dataMode: false,
+          scene: null,
+          beat: null,
+          playing: false,
+        };
+      }
 
       // `s` hợp lệ ⇒ cảnh quyết định `field`/`view`/`layers` (§9a), nên chúng lấy từ cảnh
       // chứ không từ hash — và `parseHash` đã không đọc chúng, nên không có gì để lỡ dùng
@@ -315,11 +382,13 @@ export const useStore = create<AppState>((set, get) => ({
       const scene = parseScene(h.scene);
       if (scene) {
         const st = sceneState(scene);
+        const sceneSel = selection ?? parseEntitySelection(st.select);
         return {
           scene,
           // `parseHash` đã bỏ `d` khi có cảnh; đặt lại ở đây để một lần `applyHash` cũng
           // đủ đưa app ra khỏi trang dữ liệu, không cần ai gọi thêm hàm thứ hai.
           dataMode: false,
+          nationalMode: false,
           beat: null,
           field: st.field,
           mode: h.mode ?? "2d",
@@ -331,12 +400,12 @@ export const useStore = create<AppState>((set, get) => ({
           // brush phải tắt và play phải dừng — y như `fromScene`.
           brush: NO_BRUSH,
           playing: false,
-          cell: cell ?? st.select,
-          tab: (cell ?? st.select) ? ("cell" as const) : s.tab === "cell" ? s.backTab : s.tab,
+          selection: sceneSel,
+          contextSelection: sceneSel ? null : (contextSelection ?? contextSelectionOf(st.select)),
         };
       }
 
-      const field = h.field && FIELD_BY_ID.has(h.field) ? h.field : s.field;
+      const field = resolveHashField(s.field, h.field, context);
       // Bất biến: brush histogram luôn nói về trường đang tô. Mệnh đề `h` trỏ trường khác
       // bị bỏ RIÊNG nó, cùng luật với mọi khoá hỏng khác (§9b).
       const brush = reconcileBrush(h.brush ?? NO_BRUSH, field);
@@ -344,6 +413,7 @@ export const useStore = create<AppState>((set, get) => ({
         scene: null,
         // Khoá vắng ⇒ về mặc định của khoá đó, cùng luật với `l` và `p`.
         dataMode: h.dataMode ?? false,
+        nationalMode: false,
         beat: null,
         field,
         mode: h.mode ?? "2d",
@@ -355,11 +425,8 @@ export const useStore = create<AppState>((set, get) => ({
         // `b=` là có ý bỏ brush, không phải giữ nguyên.
         brush,
         t: clampToWindow(brush.win, h.t ?? 0),
-        // Dock mở khi link mang brush, và KHÔNG tự đóng khi không mang: đóng nó lại là
-        // giật một panel khỏi tay người đang mở nó chỉ vì họ bấm Back.
-        dockOpen: s.dockOpen || brushCount(brush) > 0,
-        cell,
-        tab: cell ? "cell" : s.tab === "cell" ? s.backTab : s.tab,
+        selection,
+        contextSelection,
       };
     }),
 }));

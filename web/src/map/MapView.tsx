@@ -9,6 +9,7 @@ import type { Layer } from "@deck.gl/core";
 import { IconLayer } from "@deck.gl/layers";
 
 import { labelLayerIds, loadStyle } from "./positron";
+import { getMapTooltip } from "./tooltip";
 import type {
   CommuneCollection,
   GridCell,
@@ -17,8 +18,8 @@ import type {
   StationPoint,
 } from "../data/queries";
 import { SURFACE_CELL_M } from "../data/queries";
-import { STATION_PORTS_FIELD, type FieldMeta } from "../fields";
-import { useStore } from "../state/store";
+import { STATION_PORTS_FIELD, hasDemandRepresentations, type FieldMeta } from "../fields";
+import { selectionWireOf, useStore } from "../state/store";
 import {
   SCENE_BY_ID,
   activeCellFilter,
@@ -51,6 +52,7 @@ import {
 import { buildPoiIconAtlas, iconId, type IconEntry } from "../viz/poi-icons";
 import {
   BASEMAP_RGB,
+  COLD_HEX,
   COLD_RGB,
   HATCH_RGB,
   MUTED_ALPHA,
@@ -143,7 +145,7 @@ function setRiverLayer(m: maplibregl.Map, on: boolean): void {
 }
 
 /** Lạnh NHẠT (§4d, blue-400) — nhạt nhất trong họ, vì đây là bối cảnh chứ không phải dữ liệu. */
-const COLD_HEX_LIGHT = "#3987e5";
+const COLD_HEX_LIGHT = COLD_HEX[0];
 
 /**
  * Lớp NHÀ CỬA 3D của basemap — §2a-3, bật ở chế độ `m=3d` (M3.5-P5).
@@ -180,7 +182,7 @@ function setThemeContextLayer(m: maplibregl.Map, theme: AnalysisTheme): void {
       source: BASEMAP_SOURCE,
       "source-layer": "water",
       filter: ["==", ["get", "class"], "river"],
-      paint: { "line-color": "#3987e5", "line-width": 1.5, "line-opacity": 0.8 },
+      paint: { "line-color": COLD_HEX[0], "line-width": 1.5, "line-opacity": 0.8 },
     });
   }
   if (theme === "urban-context") {
@@ -230,7 +232,7 @@ export function MapView(props: Props) {
   // dưới đây phải chạy LẠI lúc nó có — một `ref` không kích hoạt render, nên cần một state.
   // Không có nó thì link mở thẳng vào cảnh C sẽ không có sông: effect chạy một lần, quá sớm.
   const [ready, setReady] = useState(false);
-  const selected = useStore((s) => s.cell);
+  const selected = useStore(selectionWireOf);
   const layersOn = useStore((s) => s.layers);
   const zoom = useStore((s) => s.view.zoom);
   const mode = useStore((s) => s.mode);
@@ -277,7 +279,25 @@ export function MapView(props: Props) {
           bearing: m.getBearing(),
         });
       });
-      const ov = new MapboxOverlay({ interleaved: true, layers: [] });
+      const ov = new MapboxOverlay({
+        interleaved: true,
+        layers: [],
+        /*
+         * Bấm trúng KHOẢNG TRỐNG của bản đồ = bỏ chọn — đường thứ ba đóng thẻ bằng chứng
+         * (§3h), cạnh `Esc` và nút `×`. Cả ba đi qua đúng `selectCell(null)`.
+         *
+         * Đặt ở `onClick` GỐC của deck chứ không phải một listener `pointerdown` trên
+         * `document`, và đó là khác biệt duy nhất giữa "bấm ra ngoài" và "kéo bản đồ": deck
+         * chỉ phát `onClick` khi con trỏ không đi quá ngưỡng kéo của nó, nên một lượt pan
+         * không bỏ chọn. Listener trên `document` thì bắt cả cú nhấn mở đầu lượt pan ấy.
+         *
+         * `info.picked` là cổng: bấm trúng một mark thì `onClick` của chính lớp đó đã chọn
+         * đối tượng mới, và bỏ chọn ngay sau đấy sẽ huỷ đúng cú bấm vừa xảy ra.
+         */
+        onClick: (info: { picked?: boolean }) => {
+          if (!info.picked) useStore.getState().selectCell(null);
+        },
+      });
       overlay.current = ov;
       m.addControl(ov);
       m.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
@@ -288,17 +308,39 @@ export function MapView(props: Props) {
       cancelled = true;
       setReady(false);
       overlay.current = null;
-      map.current?.remove();
+      // Đánh dấu instance hết quyền sở hữu TRƯỚC khi remove. React dọn passive effects
+      // theo thứ tự khai báo, nên các effect phụ phía dưới chạy cleanup sau effect này;
+      // chúng phải thấy `null` và không gọi `getLayer()` trên một style đã bị remove.
+      const doomed = map.current;
       map.current = null;
+      doomed?.remove();
     };
   }, []);
+
+  // Layout shell đổi hình học mà không remount map (320→340 ở 1440 px; rail trái→bottom
+  // dưới 1024 px). Gọi `resize()` theo chính container, không theo `window.resize`: drawer,
+  // devtools và thay đổi CSS đều có thể đổi phần tử mà không đổi viewport theo cùng nhịp.
+  // MapLibre hiện cũng tự quan sát, nhưng contract này thuộc MapView và không phụ thuộc một
+  // chi tiết triển khai của phiên bản thư viện.
+  useEffect(() => {
+    const el = container.current;
+    const m = map.current;
+    if (!el || !m || !ready || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => m.resize());
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [ready]);
 
   useEffect(() => {
     const m = map.current;
     if (!m || !ready) return;
+    let cancelled = false;
     void loadStyle(basemapStyle).then((style) => {
-      m.setStyle(style);
+      if (!cancelled && map.current === m) m.setStyle(style);
     });
+    return () => {
+      cancelled = true;
+    };
   }, [basemapStyle, ready]);
 
   // Hash đổi khung nhìn (sửa tay URL / Back — §9) thì camera phải đi theo. `moveend` ở trên
@@ -347,6 +389,7 @@ export function MapView(props: Props) {
     // phải gắn lại. Đây là đường phục hồi, không phải đường chính.
     m.on("styledata", apply);
     return () => {
+      if (map.current !== m) return;
       m.off("styledata", apply);
     };
   }, [wantRiver, ready]);
@@ -360,6 +403,7 @@ export function MapView(props: Props) {
     apply();
     m.on("styledata", apply);
     return () => {
+      if (map.current !== m) return;
       m.off("styledata", apply);
     };
   }, [want3d, ready]);
@@ -384,6 +428,7 @@ export function MapView(props: Props) {
     apply();
     m.on("styledata", apply);
     return () => {
+      if (map.current !== m) return;
       m.off("styledata", apply);
       for (const id of THEME_CONTEXT_LAYER_IDS) if (m.getLayer(id)) m.removeLayer(id);
     };
@@ -393,6 +438,16 @@ export function MapView(props: Props) {
     if (!ov) return;
     ov.setProps({
       layers: buildLayers({ ...props, selected, layersOn, zoom, mode, paintOn, filter, marks, t, brush, demandRepresentation, inStory: scene !== null }),
+      getTooltip: ({ object, layer }: { object?: unknown; layer?: { id: string } | null }) =>
+        getMapTooltip({
+          object,
+          layerId: layer?.id,
+          field,
+          t,
+          scale,
+          stations,
+          communes,
+        }),
     });
     // Nhãn định vị phải nằm TRÊN mặt tô, nếu không giữ lại chúng cũng vô nghĩa: `interleaved`
     // chèn lớp deck vào cuối stack của maplibre, nên một choropleth mờ 100% sẽ nuốt sạch
@@ -500,7 +555,7 @@ export function buildLayers({
     inStory,
   });
   const out: Layer[] = [];
-  const demandP1 = !inStory && field.id === "population" && field.readAs === "cell";
+  const demandP1 = !inStory && hasDemandRepresentations(field);
   const demandSurface = demandP1 && (demandRepresentation === "density" || demandRepresentation === "hybrid");
 
   const activeTheme = themeFor(field, demandRepresentation);
@@ -581,7 +636,7 @@ export function buildLayers({
   // §6b: khi `f=station:occ`, overlay `stations` **tự thay bằng lớp trường** — không bao
   // giờ vẽ chấm hai lần (một lạnh, một ramp) cho cùng một trạm. Người xem sẽ không có cách
   // nào biết chấm nào là dữ liệu, đúng thứ ràng buộc 2 dựng ra để tránh.
-  const stationDotsOn = plan.paint === "station" || layersOn.has("stations");
+  const stationDotsOn = (paintOn && plan.paint === "station") || layersOn.has("stations");
   if (layersOn.has("stations") && plan.paint !== "station" && !(demandP1 && demandRepresentation === "hybrid")) out.push(...stationLayers(stations, zoom));
   // Vòng NÉT ĐỨT — M4.1, §4d-3a. Vẽ ngay sau chấm trạm vì nó là **chú thích trên chấm đó**,
   // không phải một lớp độc lập vô tình nằm cùng chỗ: không có chấm thì nó không có gì để
@@ -712,7 +767,17 @@ export function buildLayers({
       }
     }
   }
+  assertUniqueLayerIds(out);
   return out;
+}
+
+/** Fail fast: deck.gl thay layer trùng id thay vì báo stack bị nhân đôi. */
+export function assertUniqueLayerIds(layers: Layer[]): void {
+  const seen = new Set<string>();
+  for (const layer of layers) {
+    if (seen.has(layer.id)) throw new Error(`Duplicate map layer id: ${layer.id}`);
+    seen.add(layer.id);
+  }
 }
 
 // ── Mặt tô: ô H3 ───────────────────────────────────────────────────────────────
@@ -748,32 +813,53 @@ function hexLayers(
   // dùng ký hiệu của §4b để nói một điều §4b không nói — §7a ở dạng hình học.
   if (filter) {
     const kept = cells.filter((c) => filter.keep(c.value));
+    const valued = kept.filter((c) => c.value !== null && c.value !== undefined);
+    const notApplicable = kept.filter(
+      (c) => (c.value === null || c.value === undefined) && Boolean(field.nullSplit && c.reachable === true),
+    );
+    const missing = kept.filter(
+      (c) => (c.value === null || c.value === undefined) && !Boolean(field.nullSplit && c.reachable === true),
+    );
     const { colors } = rampFor(scale, field.polarity, theme);
+    const common = {
+      getHexagon: (d: GridCell) => d.h3,
+      extruded: is3d,
+      getElevation: elevationForCell,
+      elevationScale: is3d ? 1 : 0,
+      stroked: false,
+      filled: true,
+      pickable: true,
+      onClick: (info: { object?: GridCell }) => {
+        if (info.object) useStore.getState().selectCell(info.object.h3);
+        return true;
+      },
+    } as const;
     return [
       new H3HexagonLayer<GridCell>({
-        id: "grid-filtered",
-        data: kept,
-        getHexagon: (d) => d.h3,
-        extruded: is3d,
-        // KHÔNG viết `is3d ? elevationForCell : undefined`: deck.gl coi một khoá có mặt
-        // mang giá trị `undefined` là ĐÃ KHAI, nên nó đè mất mặc định của `ColumnLayer` và
-        // lớp chết ngay lúc dựng ("accessor is not a function") — tức là ở chế độ 2D thì
-        // KHÔNG ô H3 nào được vẽ. Luôn đưa hàm vào; `extruded: false` đã tắt nó rồi.
-        getElevation: elevationForCell,
-        elevationScale: is3d ? 1 : 0,
-        stroked: false,
-        filled: true,
-        pickable: true,
-        onClick: (info: { object?: GridCell }) => {
-          if (info.object) useStore.getState().selectCell(info.object.h3);
-          return true;
-        },
+        ...common,
+        id: "grid-filtered-value",
+        data: valued,
         getFillColor: (d) => {
           if (!keepCell(brush, d)) return MUTED;
           const k = classOf(d.value, scale);
+          // `valued` không chứa null; magenta chỉ là fail-visible cho mismatch scale.
           return rgba(k === null ? ([255, 0, 255] as RGB) : colors[k]!, 217);
         },
         updateTriggers: { getFillColor: [scale, brush, theme] },
+      }),
+      new H3HexagonLayer<GridCell>({
+        ...common,
+        id: "grid-filtered-null",
+        data: missing,
+        getFillColor: () => rgba(HATCH_RGB, 255),
+        extensions: [NULL_HATCH],
+      }),
+      new H3HexagonLayer<GridCell>({
+        ...common,
+        id: "grid-filtered-na",
+        data: notApplicable,
+        getFillColor: () => rgba(HATCH_RGB, 255),
+        extensions: [NA_HATCH],
       }),
     ];
   }

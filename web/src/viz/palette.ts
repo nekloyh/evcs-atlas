@@ -10,6 +10,16 @@
  */
 
 import type { AnalysisTheme } from "./theme";
+import {
+  COLD_HEX as TOKEN_COLD_HEX,
+  COLOR_BASEMAP,
+  COLOR_HAIRLINE,
+  COLOR_INK_2,
+  COLOR_INK_MUTED,
+  COLOR_SELECT,
+  COLOR_SELECT_CASING,
+  DEFAULT_RAMP_HEX,
+} from "../design-tokens";
 
 export type RGB = [number, number, number];
 
@@ -32,15 +42,7 @@ export interface ThemePalette {
 }
 
 /** Ramp choropleth mặc định (demand / exploration): cam tuần tự, 7 bậc, nhạt → đậm. */
-export const RAMP_HEX = [
-  "#e7997e",
-  "#dd7b57",
-  "#d25b2c",
-  "#b74817",
-  "#9a380b",
-  "#7d2a03",
-  "#601e01",
-] as const;
+export const RAMP_HEX = DEFAULT_RAMP_HEX;
 
 /** Mực chữ đè lên swatch legend. Đổi ở bậc 4; mọi ô ≥ 4,5:1. DESIGN.md §4c. */
 export const RAMP_INK = [
@@ -304,7 +306,7 @@ export function seriesColorForTheme(theme?: AnalysisTheme): string {
 }
 
 /** Họ màu lạnh dùng chung cho MỌI overlay. Danh tính overlay đến từ hình học. */
-export const COLD_HEX = ["#3987e5", "#1c5cab", "#0d366b"] as const;
+export const COLD_HEX = TOKEN_COLD_HEX;
 
 /**
  * Mực chữ đè lên swatch lạnh — cùng phép đo với RAMP_INK (§4c), chạy trên cùng công thức
@@ -313,8 +315,23 @@ export const COLD_HEX = ["#3987e5", "#1c5cab", "#0d366b"] as const;
 export const COLD_INK = ["#0b0b0b", "#ffffff", "#ffffff"] as const;
 
 export const HATCH_HEX = "#898781"; // nét gạch chéo cho ô null
-export const BASEMAP_HEX = "#f2f3f0";
-export const HAIRLINE_HEX = "#e1e0d9";
+export const BASEMAP_HEX = COLOR_BASEMAP;
+export const HAIRLINE_HEX = COLOR_HAIRLINE;
+
+/**
+ * Mực MỜ cho CHỮ trong biểu đồ — nhãn trục, mốc "trung vị", dòng đọc số.
+ *
+ * Cùng một giá trị với `--color-ink-muted` của `index.css`, và nó ở đây vì Observable Plot
+ * nhận màu bằng chuỗi chứ không đọc được biến CSS. Trước đợt 17/8/2026 có **tám** bản chép
+ * `const INK_MUTED = "#898781"` nằm rải trong `ui/`, tức tám chỗ phải nhớ sửa khi token đổi
+ * — và chúng đã lệch khỏi token thật ngay ở lần đổi đầu tiên.
+ *
+ * KHÁC `HATCH_HEX` một cách có chủ ý dù hai giá trị từng trùng nhau: vân null là **mark**
+ * trên bản đồ, ΔE của nó với dải phân kỳ đã đo ở §4f trên đúng `#898781`; còn đây là CHỮ,
+ * nên nó chịu cổng 4,5:1 (đo được 4,90:1 trên nền panel).
+ */
+export const INK_MUTED_HEX = COLOR_INK_MUTED;
+export const INK_2_HEX = COLOR_INK_2;
 
 export const COLD_RGB: RGB[] = COLD_HEX.map(hexToRgb);
 export const HATCH_RGB: RGB = hexToRgb(HATCH_HEX);
@@ -338,8 +355,8 @@ export const HATCH_RGB: RGB = hexToRgb(HATCH_HEX);
  * casing sáng: cặp này đọc được trên bậc sáng nhất lẫn bậc sẫm nhất của cả bảy ramp, và nó
  * không thể bị nhầm với một giá trị vì nó không có màu nào để nhầm.
  */
-export const SELECT_HEX = "#0b0b0b";
-export const SELECT_CASING_HEX = "#ffffff";
+export const SELECT_HEX = COLOR_SELECT;
+export const SELECT_CASING_HEX = COLOR_SELECT_CASING;
 export const SELECT_RGB: RGB = hexToRgb(SELECT_HEX);
 export const SELECT_CASING_RGB: RGB = hexToRgb(SELECT_CASING_HEX);
 /**
@@ -449,6 +466,15 @@ export interface CategoricalScale {
   counts: number[];
   n: number;
   nNull: number;
+  /** Màu semantic cố định theo `categories`; vắng thì dùng palette hạng mục chung. */
+  colors?: RGB[];
+  inks?: string[];
+}
+
+export interface CategoricalContract {
+  order: readonly string[];
+  colors: readonly string[];
+  inks: readonly string[];
 }
 
 /** Cách một trường được chia bậc. Một `Scale` phục vụ CẢ bản đồ lẫn legend — hai chỗ đó
@@ -670,6 +696,7 @@ export function buildScale(
   values: CellValue[],
   /** Khai báo phân kỳ của trường (`FieldMeta.diverge`) — vắng thì chia bậc tuần tự. */
   diverge?: Diverge | null,
+  categorical?: CategoricalContract,
 ): Scale {
   if (kind === "numeric") {
     const nums = values.map((v) => (typeof v === "number" ? v : null));
@@ -691,13 +718,33 @@ export function buildScale(
     if (v === null || v === undefined) nNull++;
     else tally.set(String(v), (tally.get(String(v)) ?? 0) + 1);
   }
-  const sorted = [...tally.entries()].sort((a, b) => b[1] - a[1]);
+  const byFrequency = [...tally.entries()].sort((a, b) => b[1] - a[1]);
+  const declared = categorical?.order.filter((key) => tally.has(key)) ?? [];
+  const declaredSet = new Set(declared);
+  const sorted = [
+    ...declared.map((key) => [key, tally.get(key)!] as const),
+    ...byFrequency.filter(([key]) => !declaredSet.has(key)),
+  ];
+  const colors = categorical
+    ? sorted.map(([key]) => {
+        const i = categorical.order.indexOf(key);
+        return i >= 0 && categorical.colors[i] ? hexToRgb(categorical.colors[i]!) : COLD_RGB[0]!;
+      })
+    : undefined;
+  const inks = categorical
+    ? sorted.map(([key]) => {
+        const i = categorical.order.indexOf(key);
+        return i >= 0 && categorical.inks[i] ? categorical.inks[i]! : COLD_INK[0]!;
+      })
+    : undefined;
   return {
     kind: "categorical",
     categories: sorted.map(([k]) => k),
     counts: sorted.map(([, c]) => c),
     n: sorted.reduce((s, [, c]) => s + c, 0),
     nNull,
+    colors,
+    inks,
   };
 }
 
@@ -717,7 +764,7 @@ export function classCount(s: Scale): number {
 export function scaleColors(s: Scale, theme?: AnalysisTheme): RGB[] {
   const palette = getThemePalette(theme);
   if (s.kind === "bool") return [palette.rgb[1]!, palette.rgb[5]!]; // c2, c6 — §6a quy tắc 4
-  if (s.kind === "categorical") return s.categories.map((_, i) => COLD_RGB[i % COLD_RGB.length]!);
+  if (s.kind === "categorical") return s.colors ?? s.categories.map((_, i) => COLD_RGB[i % COLD_RGB.length]!);
   const div = divergingSwatches(s, theme);
   if (div) return div.hex.map(hexToRgb);
   // Khi số bậc thật < 7, trải các bậc còn lại đều trên toàn ramp để vẫn dùng hết biên độ
@@ -776,34 +823,23 @@ export type Polarity = "high-bad" | "high-good";
 /**
  * Màu + mực cho từng bậc, đã áp cực tính và theo theme của cảnh.
  *
- * `high-good` thì **đảo thứ tự gán**, để bất biến duy nhất mà mắt cần nhớ là:
+ * Cực tính không đảo ramp. Mọi thang tuần tự giữ một ngữ pháp duy nhất:
+ * nhạt = ít, đậm = nhiều của đại lượng mang tên trong legend. Phán đoán tốt/xấu
+ * nằm ở câu chữ, không đổi nghĩa của cùng một độ đậm giữa hai lens.
  *
- * > **ĐẬM = CHỖ CẦN CAN THIỆP**, ở mọi bản đồ.
- *
- * Đây là đảo ÁNH XẠ giá trị→bậc, không phải đảo bản thân ramp: vẫn đúng 7 hex đã PASS
- * validator, nên §4a còn nguyên và không có màu mới nào cần đo lại. Đó cũng là lý do
- * chọn cách này thay vì một ramp phân kỳ (xem M2.1-B).
- *
- * Chỉ áp cho thang SỐ. Bool và hạng mục không có "nhiều/ít" để đảo — hạng mục còn dùng
- * bậc lạnh chứ không dùng ramp (§6a-5).
- *
- * Thang PHÂN KỲ đi thẳng qua đây không đảo gì: bảng màu của nó đã tự nói phía nào cần can
- * thiệp bằng SẮC (§4f), nên áp thêm cực tính là đảo hai lần theo hai luật khác nhau.
+ * Bool, hạng mục và thang phân kỳ cũng đi qua nguyên trạng.
  */
-export function rampFor(s: Scale, polarity?: Polarity, theme?: AnalysisTheme): { colors: RGB[]; inks: string[] } {
+export function rampFor(s: Scale, _polarity?: Polarity, theme?: AnalysisTheme): { colors: RGB[]; inks: string[] } {
   const colors = scaleColors(s, theme);
   const inks = scaleInks(s, theme);
-  if (s.kind !== "numeric" || s.diverge || polarity !== "high-good") return { colors, inks };
-  // Đảo CẢ HAI, cùng lúc: mực chữ phải đi theo swatch của nó, nếu không §4c gãy và chữ
-  // trắng rơi lên nền nhạt.
-  return { colors: [...colors].reverse(), inks: [...inks].reverse() };
+  return { colors, inks };
 }
 
 /** Mực chữ đè lên từng swatch — §4c. Đi kèm `scaleColors`, cùng thứ tự. */
 export function scaleInks(s: Scale, theme?: AnalysisTheme): string[] {
   const palette = getThemePalette(theme);
   if (s.kind === "bool") return [palette.ink[1]!, palette.ink[5]!];
-  if (s.kind === "categorical") return s.categories.map((_, i) => COLD_INK[i % COLD_INK.length]!);
+  if (s.kind === "categorical") return s.inks ?? s.categories.map((_, i) => COLD_INK[i % COLD_INK.length]!);
   const div = divergingSwatches(s, theme);
   if (div) return div.ink;
   const n = s.breaks.length;

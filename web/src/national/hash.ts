@@ -62,6 +62,10 @@ export function parseNationalHash(
  */
 export function serializeNationalHash(prev: string, s: NationalHash): string {
   const p = new URLSearchParams(prev.replace(/^#/, ""));
+  // Các khoá chỉ có nghĩa trong workspace tỉnh không được đi theo link toàn quốc. Vẫn giữ
+  // khoá lạ của caller (`giu=nguyen` trong test), nhưng loại state đã có owner rõ ràng để
+  // URL không mang hai workspace chồng lên nhau.
+  for (const key of ["s", "d", "v", "p", "c", "t", "b"]) p.delete(key);
   p.set(PROVINCE_KEY, NATIONAL);
   p.set("f", s.field);
   if (s.layers.size) p.set("l", [...s.layers].sort().join(","));
@@ -70,5 +74,5 @@ export function serializeNationalHash(prev: string, s: NationalHash): string {
   // dài ra và làm người đọc tưởng nó mang thông tin; cùng luật với `l` rỗng ngay trên.
   if (s.mode === "3d") p.set("m", "3d");
   else p.delete("m");
-  return `#${p.toString()}`;
+  return `#${p.toString().replace(/%2C/g, ",").replace(/%3A/g, ":")}`;
 }

@@ -41,13 +41,13 @@ test("scaleColors and scaleInks adopt the theme palette", () => {
   assert.deepEqual(supplyColors[0], THEME_PALETTES.supply.rgb[0]);
 });
 
-test("rampFor inverts theme palette correctly on high-good polarity", () => {
+test("sequential polarity never inverts pale-less / dark-more semantics", () => {
   const scale = buildScale("numeric", [10, 20, 30, 40, 50, 60, 70]);
   const normal = rampFor(scale, "high-bad", "utilization");
   const inverted = rampFor(scale, "high-good", "utilization");
 
-  assert.deepEqual(normal.colors[0], inverted.colors[6]);
-  assert.deepEqual(normal.colors[6], inverted.colors[0]);
+  assert.deepEqual(normal.colors, inverted.colors);
+  assert.deepEqual(normal.inks, inverted.inks);
 });
 
 test("seriesColorForTheme returns unique theme series colors", () => {

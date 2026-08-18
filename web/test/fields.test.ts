@@ -115,12 +115,12 @@ test("mọi field map-hoá có đúng một lens; lens suy ra từ field, không
   }
 });
 
-test("registry khai lens tường minh và phủ đúng một lần mọi field", () => {
+test("registry khai lens tường minh và phủ đúng một lần mọi analytical field", () => {
   const ids = Object.values(LENS_DECLARATIONS).flat();
   assert.equal(new Set(ids).size, ids.length, "một field không được trả lời hai câu hỏi");
   assert.deepEqual(
     new Set(ids),
-    new Set(FIELDS.map((f) => f.readAs === "cell" ? `cell:${f.id}` : f.id)),
+    new Set(FIELDS.filter((f) => f.lens !== null).map((f) => f.readAs === "cell" ? `cell:${f.id}` : f.id)),
   );
 });
 
@@ -133,12 +133,13 @@ test("lens Tiếp cận chứa line distance, còn lens Sử dụng chứa point
 test("mỗi lens có default khai báo, không phụ thuộc thứ tự field", () => {
   assert.equal(defaultFieldOfLens("supply")?.id, "station:ports");
   assert.equal(defaultFieldOfLens("access")?.id, "road:dist_station_m");
-  assert.equal(defaultFieldOfLens("policy")?.id, "commune:ports_per_10k_pop");
+  assert.equal(defaultFieldOfLens("opportunity")?.id, "screen_margin_m");
 });
 
 test("POI là bối cảnh, không được xếp làm bằng chứng cầu", () => {
   for (const id of ["n_poi_1km", "n_poi_total", "n_mall", "n_market", "n_fuel"]) {
-    assert.equal(lensOfField(id), "context", id);
+    assert.equal(lensOfField(id), null, id);
+    assert.equal(FIELD_BY_ID.get(id)!.map, false, id);
   }
 });
 
@@ -232,7 +233,7 @@ test("§7a: trường mà null CÓ NGHĨA không mang badge, dù phủ chỉ 33%
     id: "gia_dinh",
     column: "gia_dinh",
     readAs: "cell",
-    lens: "context",
+    lens: null,
     group: "dat",
     label: "Trường giả định",
     desc: "Null ở đây nghĩa là “biết là không”, không phải “không biết”.",

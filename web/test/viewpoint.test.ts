@@ -21,6 +21,12 @@ import {
   type DemandRepresentation,
   type Mode,
 } from "../src/state/types.ts";
+import {
+  COMMUNE_PREFIX,
+  FIELDS,
+  FIELD_BY_ID,
+  hasDemandRepresentations,
+} from "../src/fields.ts";
 // `store.ts` đọc `window.location.hash` ngay lúc nạp module (§9: hash là nguồn khởi tạo).
 // Dựng một `window` tối thiểu TRƯỚC khi import, thay vì gỡ lời gọi ấy ra khỏi store — nó
 // đúng ở runtime, chỉ là không có DOM ở đây.
@@ -121,4 +127,25 @@ test("cách đọc giữ nguyên khi nó VẪN hợp lệ ở điểm nhìn mớ
     useStore.getState().setMode("2d");
     assert.equal(useStore.getState().demandRepresentation, r);
   }
+});
+
+// ══ Trường nào CÓ bộ đọc P1 — một luật, ba nơi gọi ════════════════════════════
+
+test("`hasDemandRepresentations` khớp đúng `population` của Ô, không khớp của XÃ", () => {
+  const cellPop = FIELD_BY_ID.get("population")!;
+  assert.equal(cellPop.readAs, "cell");
+  assert.ok(hasDemandRepresentations(cellPop));
+
+  // `commune:population` cùng tên nhưng đã gộp lên xã rồi; gộp tiếp thành mặt liên tục là
+  // gộp một con số đã gộp. Nó cũng không khai `surface`.
+  const communePop = FIELD_BY_ID.get(`${COMMUNE_PREFIX}population`);
+  if (communePop) assert.ok(!hasDemandRepresentations(communePop));
+});
+
+test("không trường nào KHÁC lọt vào bộ đọc P1 — nếu lọt thì chú giải sẽ mô tả một mặt tô không tồn tại", () => {
+  const yes = FIELDS.filter(hasDemandRepresentations);
+  assert.deepEqual(yes.map((f) => f.id + "/" + f.readAs), ["population/cell"]);
+  // Điều kiện `surface` không thừa: nó là thứ `ContourLayer` dựa vào, và nó được khai từng
+  // trường một chứ không suy ra được từ kiểu dữ liệu.
+  for (const f of yes) assert.ok(f.surface, `${f.id} phải khai surface`);
 });

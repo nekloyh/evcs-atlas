@@ -26,9 +26,11 @@
  *      serialization.
  */
 
-import { FIELD_BY_ID } from "../fields";
+import { FIELD_BY_ID, FIRST_FIELD } from "../fields";
 import { parseSelection } from "../data/h3";
+import { parseEntitySelection, serializeEntitySelection } from "./selection";
 import { overlayUnavailable } from "../data/overlays";
+import { NATIONAL, PROVINCE_KEY } from "../data/province";
 import { parseScene } from "../story/scenes";
 import { brushCount, parseBrush, serializeBrush } from "./brush";
 import {
@@ -44,6 +46,28 @@ function params(hash: string): URLSearchParams {
   return new URLSearchParams(hash.replace(/^#/, ""));
 }
 
+export interface HashApplyContext {
+  /** `true` kể cả khi giá trị `f` sai và bị `parseHash` loại. */
+  fieldPresent: boolean;
+}
+
+/**
+ * Phân biệt `f` bị xoá với `f` có mặt nhưng sai.
+ *
+ * - thiếu khoá: hash là snapshot đầy đủ, nên về field mặc định;
+ * - khoá sai: bỏ riêng khoá đó và giữ field đang xem;
+ * - khoá hợp lệ: áp giá trị mới.
+ */
+export function resolveHashField(
+  current: string,
+  parsed: string | undefined,
+  context: Partial<HashApplyContext> = {},
+): string {
+  if (parsed && FIELD_BY_ID.has(parsed)) return parsed;
+  const fieldPresent = context.fieldPresent ?? parsed !== undefined;
+  return fieldPresent ? current : FIRST_FIELD;
+}
+
 /**
  * Phân tích một chuỗi hash. Mỗi khoá được kiểm riêng; khoá hỏng bị bỏ, khoá khác vẫn dùng.
  *
@@ -53,6 +77,11 @@ function params(hash: string): URLSearchParams {
 export function parseHash(hash: string): Partial<HashState> {
   const p = params(hash);
   const out: Partial<HashState> = {};
+
+  // Surface TOÀN QUỐC sở hữu các khoá `f`/`l`/`m` của chính nó. Trả sớm để store tỉnh
+  // không diễn giải cùng một chuỗi bằng từ vựng khác. `tinh=vn` đồng thời là mode bền qua
+  // refresh; các mode còn lại được loại trừ ở `applyHash`.
+  if (p.get(PROVINCE_KEY) === NATIONAL) return { nationalMode: true };
 
   // Khoá `s` đọc TRƯỚC, vì nó quyết định `f`/`v`/`l` có được đọc hay không (§9a). Slug lạ
   // bị bỏ như mọi khoá hỏng, và bỏ nó chính là về chế độ BẢN ĐỒ — không cần nhánh lỗi riêng.
@@ -68,13 +97,14 @@ export function parseHash(hash: string): Partial<HashState> {
   const m = p.get("m");
   if (m && MODES.includes(m)) out.mode = m as Mode;
 
-  // Khoá `c` mang MỘT đối tượng: ô (`h3_r8`) hoặc xã (`commune:<mã 5 số>`) — M2.1-A.
+  // Khoá `c` mang MỘT đối tượng: ô (`h3_r8`), trạm (`station:<id>`), hoặc xã (`commune:<mã 5 số>`).
   // Chỉ kiểm HÌNH DẠNG; đối tượng không có thật bị bỏ khi truy vấn trả rỗng.
-  //
-  // Đọc cả trong chế độ CÂU CHUYỆN: `c` là thứ người xem chọn BÊN TRONG một cảnh (cảnh B
-  // gọi tên từng xã), không phải thứ cảnh áp đặt — nên nó không tranh chấp với `s` (§9a).
   const c = p.get("c");
-  if (c && parseSelection(c)) out.cell = c;
+  if (c && parseSelection(c)) {
+    out.cell = c;
+    const entitySel = parseEntitySelection(c);
+    if (entitySel) out.selection = entitySel;
+  }
 
   // ── Khoá do CẢNH quyết định khi `s` có mặt (§9a) ──────────────────────────────
   //
@@ -156,21 +186,25 @@ export function parseHash(hash: string): Partial<HashState> {
 
 /** Đọc hash hiện tại của trang. */
 export function readHash(): Partial<HashState> {
+  if (typeof window === "undefined") return {};
   return parseHash(window.location.hash);
 }
 
-/** Chuỗi hash của một state, kèm các khoá để dành lấy từ `prev`. Hàm thuần — test được. */
+/** Chuỗi hash chuẩn của một state. `_prev` được giữ để tương thích API gọi cũ. */
 export function serializeHash(s: HashState, prev = ""): string {
+  if (s.nationalMode) {
+    // NationalApp sở hữu `f`/`l`/`m`; serializer chung chỉ duy trì route và không được
+    // ghi đè lựa chọn bên trong surface đó. Xoá hai mode chung để hash không biểu diễn hai
+    // primary surface cùng lúc.
+    const national = params(prev);
+    national.set(PROVINCE_KEY, NATIONAL);
+    for (const key of ["s", "d", "v", "p", "c", "t", "b"]) national.delete(key);
+    return national.toString().replace(/%2C/g, ",").replace(/%3A/g, ":");
+  }
   const p = new URLSearchParams();
-  // `tinh` được CHÉP LẠI từ hash cũ, và nó là khoá đầu tiên.
-  //
-  // Nó không nằm trong `HashState` vì nó không phải một phần của trạng thái xem: nó chọn
-  // BỘ DỮ LIỆU, và đổi nó là tải lại trang (xem `data/province.ts`). Nhưng nó vẫn phải sống
-  // sót mỗi lần ghi hash — nếu không, thao tác đầu tiên của người dùng (kéo bản đồ) sẽ xoá
-  // nó khỏi URL và lần tải lại tiếp theo âm thầm về Hà Nội. Đây đúng là trường hợp mà
-  // tham số `prev` được giữ lại để chờ.
-  const tinh = new URLSearchParams(prev.replace(/^#/, "")).get("tinh");
-  if (tinh) p.set("tinh", tinh);
+  // Build hiện tại chỉ phát hành dataset Hà Nội (`parseDataset` canonicalize mọi `tinh`
+  // về cùng dataset). Không ghi lại một khoá không còn điều khiển state: sync đầu tiên sẽ
+  // chuẩn hoá deep-link cũ, trong khi parser vẫn đọc tương thích các khoá còn lại.
   const scene = parseScene(s.scene);
   if (scene) p.set("s", scene);
   // Không bao giờ ghi cả `s` lẫn `d` — xem `HashState.dataMode`. Đây là chỗ bất biến "đúng
@@ -208,7 +242,8 @@ export function serializeHash(s: HashState, prev = ""): string {
     const b = serializeBrush(s.brush);
     if (b) p.set("b", b);
   }
-  if (s.cell) p.set("c", s.cell);
+  const serializedSel = s.selection ? serializeEntitySelection(s.selection) : s.cell;
+  if (serializedSel) p.set("c", serializedSel);
 
   // Không encode `,` và `:` — hash là thứ mentor đọc và gửi cho nhau; `%2C`/`%3A` chỉ
   // làm nó xấu đi và cả hai ký tự đều hợp lệ trong fragment. `:` cần cho `commune:` (§6b)
@@ -233,7 +268,7 @@ export function serializeHash(s: HashState, prev = ""): string {
 export function syncHash(
   subscribe: (fn: () => void) => () => void,
   getState: () => HashState,
-  apply: (s: Partial<HashState>) => void,
+  apply: (s: Partial<HashState>, context: HashApplyContext) => void,
 ): () => void {
   let timer: number | undefined;
   let lastWritten = "";
@@ -249,7 +284,8 @@ export function syncHash(
   const onHashChange = () => {
     if (window.location.hash === lastWritten) return;
     lastWritten = window.location.hash;
-    apply(parseHash(window.location.hash));
+    const raw = window.location.hash;
+    apply(parseHash(raw), { fieldPresent: params(raw).has("f") });
   };
 
   const unsub = subscribe(() => {

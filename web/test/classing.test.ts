@@ -228,16 +228,15 @@ test("trung tính và `high-bad` cho cùng thứ tự màu — 40+ trường kh�
   assert.deepEqual(rampFor(s).colors, scaleColors(s));
 });
 
-test("`high-good` đảo thứ tự gán ⇒ ĐẬM luôn là chỗ cần can thiệp", () => {
+test("`high-good` không đảo nghĩa độ đậm", () => {
   const s = numeric([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
   const base = rampFor(s).colors;
   const flipped = rampFor(s, "high-good").colors;
-  assert.deepEqual(flipped, [...base].reverse());
-  // Bậc THẤP NHẤT của trường "cao = tốt" phải mang màu ĐẬM NHẤT.
-  assert.deepEqual(flipped[0], base[base.length - 1]);
+  assert.deepEqual(flipped, base);
+  assert.deepEqual(flipped[0], base[0]);
 });
 
-test("mực chữ đảo CÙNG swatch — nếu không thì §4c gãy và chữ trắng rơi lên nền nhạt", () => {
+test("mực chữ vẫn đi cùng swatch khi field có polarity", () => {
   const s = numeric([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
   const { colors, inks } = rampFor(s, "high-good");
   const { colors: c0, inks: i0 } = rampFor(s);
