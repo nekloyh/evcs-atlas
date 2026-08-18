@@ -14,7 +14,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(
           "inline-flex items-center justify-center whitespace-nowrap text-title font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-40 cursor-pointer",
           {
-            "bg-foreground text-background hover:bg-foreground/90":
+            // `ink`/`panel` là token có thật; `foreground`/`background` thì không — xem
+            // ghi chú ở `tooltip.tsx`.
+            "bg-ink text-panel hover:bg-ink/90":
               variant === "default",
             "border border-hairline bg-panel hover:bg-basemap text-ink":
               variant === "outline",

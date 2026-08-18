@@ -9,9 +9,16 @@
  * nó không vẽ gì khác đi — nói dối bằng UI (§3a).
  */
 import type { BrushState } from "./brush";
+import type { EntitySelection } from "./selection";
+
+export type { EntitySelection, DatasetId, StationId, H3R8, CommuneCode } from "./selection";
 
 export type Mode = "2d" | "3d";
 export const MODES: readonly string[] = ["2d", "3d"];
+
+/** 4 primary navigation modes: Bản đồ, Câu chuyện, Dữ liệu, Toàn quốc */
+export const APP_NAV_MODES = ["map", "story", "data", "national"] as const;
+export type AppNavMode = (typeof APP_NAV_MODES)[number];
 
 export type BasemapStyle = "voyager" | "positron" | "dark";
 export const BASEMAP_STYLES: readonly BasemapStyle[] = ["voyager", "positron", "dark"];
@@ -74,10 +81,25 @@ export function representationFits(r: DemandRepresentation, mode: Mode): boolean
   return REPRESENTATION_VIEWPOINT[r].includes(mode);
 }
 
-export type RailTab = "field" | "layer" | "cell";
-
-/** Một compare view trả lời một câu hỏi; không có dock đa-biểu-đồ mặc định. */
-export type CompareView = "distribution" | "demand-access" | "utilization-pattern";
+/**
+ * Một compare view trả lời **một** câu hỏi — không có dashboard đa-biểu-đồ (§0, §3d).
+ *
+ * Sáu câu, và câu nào dựng được trên measure đang tô là do `compareViewsFor()` quyết định.
+ * Ba câu thêm ngày 15/8/2026, mỗi câu vá một chỗ mù cụ thể chứ không phải "thêm biểu đồ":
+ *
+ * - `access-curve` — histogram của cột khoảng cách đếm **ô**; đơn vị ra quyết định là
+ *   **người**, và lưới H3 phủ đều không gian chứ không phủ đều dân.
+ * - `supply-equity` — bản đồ và histogram đều nói "có lệch", không cái nào nói lệch **bao
+ *   nhiêu** bằng một con số kiểm được.
+ * - `rank-communes` — §13d-B đòi **gọi được tên**; màu và cột không gọi tên ai.
+ */
+export type CompareView =
+  | "distribution"
+  | "demand-access"
+  | "utilization-pattern"
+  | "access-curve"
+  | "supply-equity"
+  | "rank-communes";
 
 /**
  * Đơn vị đọc của một trường — DESIGN.md §6b.
@@ -171,6 +193,7 @@ export interface HashState {
   view: View;
   layers: OverlayId[];
   cell: string | null;
+  selection?: EntitySelection | null;
   /**
    * Cảnh CÂU CHUYỆN đang mở — khoá `s`, §9a.
    *
@@ -195,6 +218,14 @@ export interface HashState {
    * MỘT trong ba chế độ, và một hash gõ tay mang cả hai vẫn cho một trạng thái xác định.
    */
   dataMode: boolean;
+  /**
+   * Chế độ TOÀN QUỐC — nhận diện bằng `tinh=vn`.
+   *
+   * Các khoá `f`/`l`/`m` của màn hình toàn quốc do `national/hash.ts` sở hữu. Store chung
+   * chỉ sở hữu việc surface nào đang mở, để bốn primary mode vẫn loại trừ nhau và mode
+   * sống qua refresh/deep-link.
+   */
+  nationalMode: boolean;
   /**
    * Mặt tô (hex/xã/đường/mặt liên tục) có đang VẼ hay không — khoá `p`, thêm sau M3.5.
    *

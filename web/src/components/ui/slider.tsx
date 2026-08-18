@@ -13,7 +13,9 @@ export const Slider = React.forwardRef<
   >
     <BaseSlider.Control className="relative flex w-full items-center">
       <BaseSlider.Track className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-surface-active">
-        <BaseSlider.Indicator className="absolute h-full bg-foreground" />
+        {/* `bg-ink`: `bg-foreground` không có trong `@theme`, nên phần đã trượt qua của
+            thanh trượt trước đây **không có màu** — xem ghi chú ở `tooltip.tsx`. */}
+        <BaseSlider.Indicator className="absolute h-full bg-ink" />
       </BaseSlider.Track>
       <BaseSlider.Thumb className="block h-4 w-4 rounded-full border border-hairline bg-panel shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-grab active:cursor-grabbing" />
     </BaseSlider.Control>

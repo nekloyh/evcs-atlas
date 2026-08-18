@@ -3,7 +3,7 @@
 Contract thi công của app bản đồ. Một quy tắc một chỗ; số liệu và lý do dài ở
 `DECISIONS.md`, giới hạn dữ liệu ở `HAN_CHE.md`, cột ở `docs/COT.md`.
 
-**Số § là ĐỊA CHỈ, không phải thứ tự.** Code trỏ vào chúng 748 lượt trên 76 ký hiệu (đếm lại
+**Số § là ĐỊA CHỈ, không phải thứ tự.** Code trỏ vào chúng 830 lượt trên 86 ký hiệu (đếm lại
 bằng script ở DECISIONS §21; nó bỏ qua `DECISIONS §N` — cùng dấu, khác tài liệu). Đừng đánh số lại,
 đừng tái sử dụng một số đã bỏ. Mục nào hết hiệu lực thì **giữ lại tiêu đề** và ghi nó trỏ đi
 đâu — xoá hẳn sẽ biến hàng trăm dòng comment thành con trỏ chết.
@@ -74,45 +74,77 @@ Giữ nhãn **địa danh** (`place_*`, tên nước, tên thuỷ vực) và b�
 ### 2b. Khung nhìn ban đầu
 
 Fit theo bbox của dataset đang mở, trừ phần chrome che mất bản đồ:
-`NAV_RAIL = 56 px` (trái) · `BOTTOM = 96 px` (scrubber + attribution) · `FIT_PADDING = 1,12`.
+`NAV_RAIL = 56 px` (trái) · `READ_COL = READ_COL_W` (trái, chỉ trừ từ 1024 px trở lên — dưới
+ngưỡng đó §3h là sheet, không chiếm bề rộng nào) · `BOTTOM = 32 px` (attribution + nút phóng
+của MapLibre) · `FIT_PADDING = 1,12`.
 
-Chrome chiếm chỗ **thật**; fit vào bề rộng cửa sổ sẽ đẩy trung tâm dataset ra sau panel.
+**Chỉ trừ thứ nằm TRONG LUỒNG.** Một mặt nổi không lấy pixel nào của phần tử bản đồ, nên trừ
+nó là co khung nhìn cho một cột không tồn tại; một cột trong luồng thì ngược lại, không trừ
+nó là tính mức phóng cho một bề rộng rộng hơn bề rộng thật. Bảng cũ vi phạm **cả hai chiều
+cùng lúc** — xem §3h, khuyết tật 1.
+
+`BOTTOM` tụt từ **96** xuống **32** vì con số cũ gộp cả scrubber, thứ §3e chỉ dựng khi trường
+đang tô là nhịp trạm. Và vì bbox Hà Nội cao hơn rộng (§3h), mỗi px trừ thừa theo CHIỀU CAO
+thu nhỏ tỉnh thật, còn px trừ thừa theo bề rộng thì không.
 
 ---
 
-## 3. Layout — một rail trong luồng, ba mặt NỔI trên bản đồ
+## 3. Layout — MỘT cột trong luồng, MỘT mặt nổi có điều kiện
 
-> **Đã thay bố cục "4 dải dán cạnh".** Bản đồ nay là nền liên tục; workspace, chú giải và
-> inspector **nổi** lên trên nó. Lý do: bốn dải cắt bản đồ thành một ô nhỏ ở giữa, và cái
-> app này bán chính là bản đồ.
+> **Đã thay ba lần.** "4 dải dán cạnh" (bốn dải cắt bản đồ thành một ô nhỏ ở giữa, và cái app
+> này bán chính là bản đồ) → "ba mặt nổi" → "hai cột + hai mặt nổi" (§3g, 15/8/2026) →
+> **A′** (§3h, 17/8/2026). Xem §3h cho lý do và số đo.
 
 | Bề mặt | Vị trí | Kích thước |
 |---|---|---|
 | §3a Nav rail | trái, **trong luồng** | 56 px, cao hết màn hình |
-| §3b Chú giải | **nổi**, trên-trái (`top-3 left-18`) | ≤ 22 rem |
-| §3c Workspace | **nổi**, dưới-phải | 320 px, thu được thành một nút |
-| §8 Inspector | **nổi**, trên-phải | 360 px, cao **theo nội dung** |
-| §3d Compare dock | **nổi**, cạnh phải | 360 px, cao hết cạnh, chỉ mở theo hành động |
+| §3h Cột đọc | trái, **trong luồng**, sau rail | 320 px (340 px từ 1440), cao hết màn hình, không đóng được |
+| §3b Chú giải | tiết TÍN HIỆU của §3h | cao theo nội dung |
+| §3d Compare | tiết TÍN HIỆU của §3h, dưới chú giải | cao theo nội dung |
+| §8 Bằng chứng | **nổi**, góc trên-phải vùng bản đồ | 320 px (340 px từ 1440), ≤ 60% chiều cao bản đồ |
 | §3e Scrubber | đáy, **trong luồng** | cao theo nội dung |
+| §14 Story column | thay chỗ §3h trong chế độ CÂU CHUYỆN | 400 px |
 
-Inspector và compare dock **neo cùng một chỗ** (trên-phải). Đó là có chủ ý, và điều phối bằng
-một luật: chọn một đối tượng thì compare dock **đóng**, để inspector có trọn cạnh phải. Hai
-tấm chồng lên nhau là lỗi, không phải một bố cục.
+**Luật một câu, thay cho mọi luật điều phối cũ:**
 
-Màn hẹp (< 1024 px): inspector thành sheet toàn màn hình.
+> **Phạm vi quyết định LOẠI bề mặt, không phải % chiều cao.**
+> Luôn đúng ⇒ trong luồng, vuông cạnh, không bóng, không đóng được.
+> Chỉ đúng sau một hành động ⇒ nổi, bo `--radius-surface`, `Esc` đóng.
 
-Mọi **tấm** nổi dùng chung một vỏ (`AtlasSurface`): một bán kính, một bóng, một độ mờ nền —
-§4e. Ngoại lệ duy nhất là workspace lúc **thu gọn**: nó không còn là tấm mà là một nút, nên
-nó bo tròn hoàn toàn. Hình dạng nói ra trạng thái.
+Hệ quả: **không còn `max-h-[44%]` / `max-h-[54%]`, không còn luật "A mở thì B đóng".** Chỉ
+có một bề mặt trong luồng nên không có gì tranh chỗ với nó, và mặt nổi duy nhất tồn tại đúng
+bằng `cell !== null` — nó không có cờ mở riêng để mà đồng bộ.
+
+Màn hẹp (< 1024 px): nav rail thành **bottom navigation**; cột đọc là sheet **TRÁI** gọi từ
+bottom navigation; bằng chứng là **bottom sheet**. Map chiếm toàn bộ vùng còn lại. Nút công
+cụ gom nền bản đồ, reset và 2D/3D vào một popover để không làm mất chức năng trên mobile.
+
+Mọi **tấm nổi** dùng chung vỏ `AtlasSurface`: một bán kính, một bóng, một độ mờ nền — §4e.
+Cột trong luồng thì không: nền đặc, hairline, không bóng — nó không nổi trên gì cả.
 
 ### 3a. Nav rail
 
-Chuyển mode (Bản đồ · Câu chuyện · Dữ liệu), chọn tỉnh, bật/tắt lớp, 2D/3D. Không chứa
-measure, không chứa dữ liệu của đối tượng.
+Chuyển mode (Bản đồ · Câu chuyện · Dữ liệu · Toàn quốc), bật/tắt lớp, nền bản đồ, 2D/3D.
+Không chứa measure, không chứa dữ liệu của đối tượng.
+
+Từ 17/8/2026 danh mục **BỐI CẢNH** (8 overlay, §4d) sống ở đây trong một **popover**, không
+còn là một tab của workspace. Popover chứ không phải panel vì nó được mở, dùng, rồi đóng —
+đúng luật loại bề mặt của §3h. Số lớp đang bật phải đọc được **khi popover đóng**: đó là
+trạng thái duy nhất của công cụ này còn nhìn thấy từ bên ngoài, và không có nó thì bật ba lớp
+rồi đóng popover là mất dấu.
+
+Bộ chọn **nền bản đồ** chỉ có **một** bản, ở đây. Bản thứ hai từng nằm trong danh mục overlay
+và dùng ba class không tồn tại trong `@theme` (`text-ink-1`, `border-cold`, `text-cold`), nên
+trạng thái "đang chọn" của nó rơi về không có kiểu gì — một trạng thái vô hình.
+
+Nút mở **cột đọc** chỉ dựng dưới 1024 px. Trên màn rộng cột không đóng được (§3h), nên một
+nút bật/tắt ở đây sẽ là một điều khiển không có trạng thái nào để chuyển — đúng loại nói dối
+bằng giao diện mà chính mục này cấm ở nav.
 
 ### 3b. Chú giải
 
-Thuộc **bản đồ đang thấy**, không thuộc workspace. Nội dung mặc định chỉ gồm: dải màu, mốc
+Thuộc **bản đồ đang thấy**, không thuộc workspace — từ 17/8/2026 nó là nửa trên của tiết
+TÍN HIỆU (§3h), không còn là một tấm nổi. Nội dung mặc định chỉ gồm: dải màu, mốc
 **giá trị thật** (không phải "bậc 1..7"), nhãn đơn vị, và ô trống. Câu đơn vị đầy đủ, luật
 chia bậc, độ phủ nằm sau một `<details>`.
 
@@ -126,21 +158,44 @@ chia bậc, độ phủ nằm sau một `<details>`.
 - Đang tải thì giữ **nguyên hình dạng** thước đo bằng một khung xám cùng kích thước; nhảy
   layout đọc thành "trang bị lỗi".
 
-### 3c. Workspace
+### 3c. Workspace — ĐÃ BỎ (17/8/2026), trỏ tới §3h
 
-Ba tầng, đúng thứ tự: **câu hỏi → measure → context**.
+Mục này hết hiệu lực; giữ lại tiêu đề vì code còn trỏ vào nó. Workspace là khung dựng cho
+**40 measure × 6 lens**; app đang chở đúng **một** measure, nên lưới lens, danh sách measure
+và ô tìm kiếm đều là chỗ trống có viền. Ba mảnh của nó đi ba đường:
 
-- Sáu nút lens, mỗi nút mang một câu hỏi hoàn chỉnh chứ không chỉ nhãn nhóm.
-- Measure: chỉ hiện trường có visual contract đủ (`map !== false`), kèm tag hình học
-  (`H3` · `TRẠM` · `ĐƯỜNG` · `XÃ`), đơn vị ngắn, và badge phủ **trước khi chọn**.
-- Không hiện tên cột thô ở UI chính. Tìm kiếm tìm *câu hỏi + measure*.
-- Context là checklist phụ, chỉ chứa lớp giúp giải thích câu hỏi hiện hành.
-- Default của mỗi lens là **metadata khai báo**, không suy từ thứ tự mảng.
+- **Câu hỏi** → tiết CÂU HỎI của cột đọc (§3h). Một measure thì không có gì để chọn; thứ
+  còn chọn được là **dạng hình** của nó (§15a-0).
+- **Bối cảnh** → popover của nav rail (§3a). Overlay không trả lời câu hỏi nào, nó chỉ giúp
+  ĐỌC câu trả lời — nên nó là công cụ, không phải một tiết của dòng đọc.
+- **Khối NGUỒN ở chân workspace** → chân cột đọc (§3h).
 
-### 3d. Compare dock
+Hai luật sống sót vì chúng nói về *registry*, không về bố cục: measure chỉ hiện khi visual
+contract đủ (`map !== false`), và default của mỗi lens là **metadata khai báo** chứ không
+suy từ thứ tự mảng.
 
-Không mặc định mở. Nó là chế độ *so sánh*, mở từ một hành động cụ thể, và phải ghi rõ hai
-biến, số mark bị loại, và cách nó liên kết với selection.
+Muốn dựng lại danh sách measure thì nó **không** quay về đây: nó là một tiết mới của §3h và
+phải qua cổng §0 như mọi thứ khác.
+
+### 3d. Compare
+
+**Là nửa dưới của tiết TÍN HIỆU (§3h) từ đợt 17/8/2026** — trước đó là một tiết gấp được của
+§3g, trước nữa là một tấm nổi riêng. Ba điều đổi ở đợt này:
+
+- **Một câu duy nhất dựng: `distribution`.** Năm câu kia đều hỏi về CUNG (cổng, trạm, nhịp
+  168h) hoặc về xếp hạng XÃ; với một bộ dữ liệu chỉ còn dân số thì chúng là năm bộ chuyển
+  dẫn tới năm hình rỗng. Hàm `compareViewsFor()` vẫn nguyên và vẫn là chỗ duy nhất biết câu
+  nào dựng được — cái bị gỡ là **bộ chuyển**, không phải cái luật.
+- **Không còn tiêu đề riêng** (`bare` của `Dock`). Nó nằm dưới nhãn `TÍN HIỆU`, và hai dải
+  tiêu đề chồng nhau trong 320 px không dựng thêm thứ bậc nào — chỉ dựng hai dải xám.
+- **Dòng đếm "còn lại sau brush" chỉ hiện khi CÓ brush.** §13b-2 nói về một tập ĐÃ thu hẹp;
+  chưa thu hẹp thì `4.400/4.400 còn lại sau brush` không sai, nó chỉ không phải một câu — và
+  nó cao 48 px trong chiều đắt của bố cục này.
+
+Luật cũ còn nguyên: đổi measure làm câu hỏi cũ hết nghĩa thì **chốt về câu dựng được**,
+không đóng tấm; measure không trả lời được câu nào thì **nói ra vì sao**.
+
+Vẫn phải ghi rõ hai biến, số mark bị loại, và cách nó liên kết với selection.
 
 Một widget chỉ được xuất hiện khi hành động của nó là một trong hai loại:
 **filter** (đổi tập mark — phải ghi predicate, số mark còn lại, và có nút xoá) hoặc
@@ -157,6 +212,63 @@ tách nhau.
 
 Ô không có giá trị **bị loại** khi brush khoảng bật: không biết thì không khẳng định được là
 "trong khoảng". Số ô bị loại vì lý do đó phải hiện ra.
+
+#### Sáu câu hỏi, và luật chung của chúng
+
+`distribution` · `rank-communes` · `demand-access` · `access-curve` · `supply-equity` ·
+`utilization-pattern`. Ba câu sau cùng thêm ngày 15/8/2026 (§3d-2 → §3d-4).
+
+**Một câu mới chỉ được thêm khi nó vá một chỗ MÙ cụ thể**, không phải khi nó "cũng hay".
+Chỗ mù phải phát biểu được thành một câu mà mọi hình đang có đều không trả lời nổi — nếu
+không, tiết SO SÁNH trượt thành dashboard, thứ §0 nói app này không phải.
+
+Ba luật hình thức, chung cho cả sáu:
+
+1. **Một chuỗi ⇒ không legend** (§4d-2); màu dữ liệu là `c5`, mốc được gọi tên là `c7`
+   (đậm hơn trong CÙNG ramp), đường tham chiếu và lưới là hairline. Chữ không mang màu dữ liệu.
+2. **Đúng MỘT nhãn trực tiếp** trên hình; mọi con số khác trả lời bằng dải `Readout` khi rê.
+   Một con số cạnh mọi điểm thì không con số nào được đọc.
+3. **Cái bị bỏ khỏi hình phải ra chữ** — ràng buộc 1 ở tầng chữ, cùng luật §3f-4.
+
+#### 3d-2. Đường TIẾP CẬN theo dân
+
+"Bao nhiêu phần **DÂN** nằm trong bán kính d." Cùng cột mà histogram vẽ, nhưng đếm theo
+NGƯỜI chứ không theo Ô — lưới H3 phủ đều không gian, không phủ đều dân, nên hai hình khác
+nhau, và **chênh lệch giữa chúng chính là một phát biểu**.
+
+- Mốc gọi tên là **2 km** vì đó là ngưỡng đã có trong dữ liệu (`beyond2km`, §4d) — không
+  đặt thêm ngưỡng mới.
+- Trục dừng ở bán kính phủ 99% dân, phần còn lại là khoảng **MỞ** kèm câu nói ra `max` —
+  cùng luật §3b đã áp cho bậc cuối của legend. Ở Hà Nội `max` là 21,2 km trong khi 99% dân
+  nằm trong ~5 km; vẽ hết miền thì phần có hình dạng bị ép vào 60 px đầu.
+- `step-after`, không nối thẳng: giá trị của một hàm bậc thang tại `d` là bậc **đã** đạt tới.
+
+#### 3d-3. Đường tập trung CUNG ↔ CẦU
+
+"x% dân được phục vụ dày nhất nắm y% số cổng", kèm **Gini**. Dùng lại nguyên `lorenz()` của
+§13d-A với hai vai đổi chỗ (`area` ← dân, `pop` ← cổng) — cùng phép tính, khác hai cái tên,
+nên nó được **gọi lại chứ không chép lại**.
+
+Gini đi kèm đường cong chứ không thay nó: một con số nói *lệch bao nhiêu*, đường cong nói
+*lệch theo hình dạng nào*, và câu hỏi này cần cả hai. Cổng nằm ở ô **không có dân** rơi khỏi
+đường cong (`lorenz` bỏ `area = 0`) nên chúng phải được đếm riêng và nói ra — đó đúng là
+phần cung mà câu hỏi "cung theo cầu" không giải thích được.
+
+Đây là **tóm tắt chỉ-đọc**: nó không lọc bản đồ.
+
+#### 3d-4. Xếp hạng GỌI TÊN hai đầu
+
+§13d-B đòi app gọi được tên; màu và cột không gọi tên ai. Bảng xã đầu/cuối, mỗi hàng bấm
+được để mở bằng chứng của xã đó ở tiết ĐỐI TƯỢNG ngay bên trên.
+
+- Dựng bằng **HTML**, không bằng Plot: khoá là tên tiếng Việt dài (cần cắt đuôi + `title`)
+  và mỗi hàng phải bấm được — nhãn trục băng của Plot không làm được cả ba.
+- **Một thang cho cả hai đầu**, và **neo ở 0**. Thang riêng cho mỗi nhóm sẽ vẽ cột dài bằng
+  nhau ở cả hai bảng; neo ở `min` biến hiệu số giữa hai xã thành toàn bộ chiều dài cột.
+- Đầu nào "đáng lo" do **cực tính đã khai** của trường quyết định (`polarity`), không do
+  đoán. Trường không khai thì không dán nhãn nào.
+- Nhóm **HOÀ** phải nói ra: 40 xã cùng bằng 0 mà bảng hiện 8 thì tám cái tên ấy là tám cái
+  rút ngẫu nhiên, và thứ tự giữa chúng do `sort` quyết định chứ không do dữ liệu.
 
 ### 3e. Scrubber
 
@@ -175,6 +287,87 @@ Workspace kiểm toán riêng, **không giả làm bản đồ**: độ phủ, s
 3. Số lớn dùng figure **tỉ lệ**, không `tabular-nums` — chúng không xếp thành cột (§4e).
 4. Nói ra cái **bị loại**, không chỉ cái được giữ.
 5. Lớp không dùng được (`unusable_layers`) hiện kèm **lý do**, không im lặng biến mất.
+
+### 3g. Bảng THÔNG TIN — ĐÃ BỎ (17/8/2026), trỏ tới §3h
+
+Mục này hết hiệu lực; giữ tiêu đề vì code còn trỏ vào nó. Nó đúng ở điều lớn nhất — **hai
+tấm tranh một cạnh là bài toán của bố cục, không phải của luật điều phối** — và §3h chỉ áp
+tiếp chính câu đó cho ba bề mặt còn lại. Cái nó chưa làm: nó **gộp** một thứ luôn đúng (so
+sánh cả tập) với một thứ chỉ đúng sau một cú bấm (bằng chứng của một đối tượng) vào cùng một
+vật chứa, nên bằng chứng vẫn phải có "trạng thái rỗng" và cột vẫn phải có nút thu gọn.
+
+### 3h. Bố cục A′ — cột đọc trong luồng, bằng chứng nổi
+
+**Số đo đặt ra luật chơi.** bbox Hà Nội `[105,289 · 20,564 · 106,020 · 21,383]` có tỉ lệ
+rộng/cao **0,833** — thành phố này *cao hơn rộng*. Khung nhìn vì thế bị giới hạn bởi **chiều
+cao** với mọi tỉ lệ màn hình `r > 0,833`, tức mọi màn hình thực tế. Hệ quả đảo ngược trực
+giác thông thường về panel:
+
+> **Bề rộng gần như miễn phí; chiều cao thì không.**
+> Lấy 320–340 px bề rộng làm cột không làm Hà Nội nhỏ đi **một pixel** — chỉ bớt khoảng trống
+> hai bên. Lấy 208 px chiều cao làm một dải đáy thì Hà Nội co còn **79%**.
+
+Đó là lý do bố cục này đặt cột theo chiều dọc chứ không theo chiều ngang, và cũng là lý do
+`CHROME.BOTTOM` tụt từ 96 xuống 32 (§2b).
+
+**Ba khuyết tật đo được của bố cục §3g** mà A′ chữa:
+
+1. `zoomForBbox` trừ nav rail + cột phải + đáy nhưng **không trừ chồng nổi trái** (352 px).
+   Fit canh tỉnh vào giữa một hộp mà mép tây đang bị che, nên Ba Vì và Sơn Tây nằm dưới thẻ
+   chú giải ngay khung hình đầu. Không sửa được bằng một phép trừ nữa: mặt nổi che một phần
+   bản đồ mà hàm ấy không biết là phần nào, nên nó chỉ biết thu nhỏ, không biết dịch tâm.
+2. **9 vật chứa cho 12 khối nội dung.**
+3. `44%` và `54%` không đến từ nội dung nào, và vì cả hai đều nổi nên cộng lại chúng che
+   **~28%** diện tích bản đồ thường trực.
+
+**Hình học.** `rail 56` + `cột đọc READ_COL_W` + bản đồ. Bề rộng cột **suy ra** từ bề rộng
+biểu đồ (`CHART_W + 2 × 12`, xem `ui/chart-size.ts`), không gõ tay ở hai chỗ — một hình rộng
+344 px trong một cột 320 px tràn 48 px, và phần tràn ở mép cột thì mất luôn (§11-12).
+
+**Sáu slot, đúng chuỗi §0** — tổng quan → lens → câu hỏi → tín hiệu → giới hạn → đi tiếp:
+
+| tiết | chứa gì |
+|---|---|
+| TỔNG QUAN | 3–4 KPI lấy từ `manifest`, không gõ số trong TS |
+| LENS | sáu góc nhìn controlled; lens suy ra từ field, không có state song song |
+| CÂU HỎI | tên measure + tag hình học + câu đơn vị + nút tắt mặt tô + bộ CÁCH ĐỌC (§15a-0) |
+| TÍN HIỆU | chú giải (§3b) rồi phân bố (§3d) — hai kênh của cùng một tập số |
+| GIỚI HẠN | cách dựng, số ô khuyết đọc từ chính thang đang vẽ, badge ⚠ (§7) |
+| ĐI TIẾP | câu bắc sang tầng đối tượng, và hai lớp bối cảnh mà chính câu hỏi này cần |
+| *(chân cột)* | khối NGUỒN, gấp lại, `summary` luôn mang ngày xuất — ràng buộc 5 |
+
+**Mắt xích thứ ba của §0 — bằng chứng — cố tình KHÔNG nằm trong cột.** Trong năm mắt xích,
+nó là mắt xích duy nhất **chỉ tồn tại sau một hành động**, nên nó là thứ duy nhất xứng đáng
+nổi. Thẻ 320–340 px, neo góc trên-phải vùng bản đồ cách 12 px, `≤ 60%` chiều cao — trần ấy không
+phải để chia chiều cao với ai (không còn ai để chia), nó là trần **che khuất**: một thẻ cao
+hết bản đồ sẽ giấu mất chính vùng vừa được bấm. **Không có trạng thái rỗng** — câu mời bấm
+nằm ở tiết ĐI TIẾP, trong một dòng đọc, chứ không lơ lửng trong một tấm rỗng.
+
+Ba đường đóng, cả ba đi qua đúng `selectCell(null)`: `Esc` · nút `×` · **bấm trúng khoảng
+trống bản đồ**. Đường thứ ba nằm ở `onClick` gốc của deck, **không** phải một listener
+`pointerdown` trên `document` — listener ấy bắt cả cú nhấn mở đầu một lượt KÉO bản đồ, nên
+pan sẽ âm thầm bỏ chọn. Cổng là `info.picked`: bấm trúng một mark thì lớp của nó đã chọn đối
+tượng mới rồi.
+
+**Cột không đóng được trên màn rộng**, và đó là quyết định chứ không phải thiếu sót: nó là
+chỗ duy nhất giải mã bản đồ, nên một nút đóng nó là một nút biến bản đồ thành hình trang trí.
+Thứ đóng được là thứ chỉ đúng đôi lúc.
+
+**Nhịp dọc — một thang, một cách kẻ, một cách đặt tiêu đề.** Lề tiết `px-3 py-3`; nhãn → thân
+`mt-2`; hai khối trong một tiết `space-y-3`. Phân tiết chỉ bằng `border-b border-hairline`,
+**không** bằng nền. Tiêu đề tiết chỉ bằng `.eyebrow`. Tiết **cuối** không kẻ vạch dưới: dưới
+nó không có tiết nào để ngăn, nên vạch ấy chỉ còn là một nét chì lơ lửng.
+
+**Số đo nghiệm thu (17/8/2026, CDP, dựng thật):**
+
+| | 1600×1000 | 1440×900 | 1280×800 |
+|---|---|---|---|
+| bản đồ | 1224×1000 | 1064×900 | 904×800 |
+| cột tràn | 0 px | 0 px | 0 px |
+| bản đồ bị che thường trực | 0 px² | 0 px² | 0 px² |
+| `elementFromPoint` trượt | 0/18 | 0/18 | 0/18 |
+| tương phản chữ < 4,5:1 | 0 | 0 | 0 |
+| tâm fit | `105,6545 · 20,9735` — đúng tâm bbox, cả ba |
 
 ---
 
@@ -249,8 +442,25 @@ thành "vắng khách".
 
 ### 4e. Chrome, mực và chữ
 
-**Mực:** `#0b0b0b` chính · `#52514e` phụ · `#898781` mờ. Nền `#f9f9f7` (panel) trên
+**Mực:** `#0b0b0b` chính · `#52514e` phụ · `#6f6d68` mờ. Nền `#f9f9f7` (panel) trên
 `#f2f3f0` (basemap), hairline `#e1e0d9`.
+
+**Mọi mực CHỮ qua cổng 4,5:1, và cổng ấy được đo chứ không được ước lượng.** Mực mờ cũ
+`#898781` cho **3,41:1** trên panel và **3,22:1** trên basemap — nó qua cổng 3:1 của *đồ hoạ*
+nhưng mọi chỗ nó xuất hiện đều là chữ 10–11 px. `#6f6d68` giữ nguyên sắc ấm của họ mực và đo
+được **4,90 · 4,64 · 5,17** trên `#f9f9f7` · `#f2f3f0` · `#ffffff`. Bảng đầy đủ:
+
+| mực | trên panel | trên basemap | trên trắng |
+|---|---|---|---|
+| `#0b0b0b` | 18,67 | 17,67 | 19,68 |
+| `#52514e` | 7,53 | 7,13 | 7,94 |
+| `#6f6d68` | 4,90 | 4,64 | 5,17 |
+
+Observable Plot nhận màu bằng chuỗi chứ không đọc được biến CSS, nên mực mờ có **một** bản
+sao JS (`INK_MUTED_HEX` trong `palette.ts`) — trước 17/8/2026 nó có **tám**, và cả tám lệch
+khỏi token ngay ở lần đổi đầu tiên. `HATCH_HEX` **vẫn là** `#898781` và đó không phải sót:
+vân null là MARK, không phải chữ, và ΔE của nó với dải phân kỳ đã đo ở §4f trên đúng giá trị
+ấy.
 
 **Đang chọn là ký hiệu VÔ SẮC** (`#0b0b0b` lõi + casing trắng, 1,5/4 px, vẽ hai lượt). Nó là
 trạng thái UI, không phải giá trị của trường, nên phải đọc được trên **cả bảy** ramp cùng
@@ -451,12 +661,20 @@ Bốn tầng, cùng một cấu trúc cho mọi loại đối tượng:
 4. **Đi tiếp** — một tới hai hành động hợp lệ. **Không** có CTA "đề xuất đặt trạm": bộ dữ
    liệu không tạo khuyến nghị cuối cùng.
 
-Panel cao **theo nội dung**. `Chi tiết dữ liệu` là disclosure cuối, chỉ-đọc, không mặc định mở.
+Panel cao **theo nội dung**, và từ đợt 17/8/2026 nó là **thân** của thẻ nổi BẰNG CHỨNG
+(§3h): không vỏ riêng, không sheet riêng, không nút đóng riêng, không trạng thái rỗng, không
+listener bàn phím. Vỏ sở hữu cả bốn thứ đó — thẻ chỉ dựng khi có selection, nên "chưa chọn
+gì" không còn là một trạng thái của panel. `Chi tiết dữ liệu` là disclosure cuối, chỉ-đọc,
+không mặc định mở.
 
 **Radar bị cấm**: các trục khác đơn vị và không có chuẩn hoá sẽ tạo một điểm số thị giác giả.
 Số tuyệt đối tách thành fact card có nhãn và mẫu số.
 
-Khối **NGUỒN** xám mờ ở đáy mọi panel (ràng buộc 5, §10).
+Khối **NGUỒN** xám mờ ở đáy mọi panel (ràng buộc 5, §10). Hai biến thể, hai chỗ: biến thể
+**đối tượng** ở đáy thẻ bằng chứng, biến thể **cả bộ dữ liệu** ở chân cột đọc — và biến thể
+thứ hai **gấp lại**, với dòng `summary` luôn mang ngày xuất. Ràng buộc 5 đòi provenance
+**tra được**, không đòi nó chiếm chỗ; trải sẵn nó tốn 112 px và đã một lần sơn đè lên tiết
+cuối của cột (§11-14).
 
 ### 8a. Panel TRẠM
 
@@ -513,7 +731,7 @@ ghép lại là tên trường. Dùng `-` làm phân cách khoảng sẽ gãy ng
 
 ---
 
-## 11. Mười một bẫy đã sập một lần — đừng sập lại
+## 11. Mười bốn bẫy đã sập một lần — đừng sập lại
 
 1. `INITIAL_VIEW` phải dùng từ vựng MapLibre (`center`), không phải `longitude`/`latitude`.
 2. **`m.isStyleLoaded()` là cổng SAI để THÊM layer.** Cửa sổ mà hai điều kiện cùng đúng có
@@ -540,9 +758,34 @@ ghép lại là tên trường. Dùng `-` làm phân cách khoảng sẽ gãy ng
     (`accessor "getElevation" is not a function`). `getElevation: is3d ? f : undefined` đã
     làm **toàn bộ ô H3 biến mất ở chế độ 2D** — tức mọi bản đồ chính của app — và console chỉ
     ghi ba dòng chìm giữa log khởi động. Luôn đưa hàm vào; `extruded: false` đã tắt nó rồi.
+12. **`truncate` không cắt gì nếu flex item thiếu `min-w-0`.** Mặc định `min-width: auto` cho
+    phép item nở theo chữ, nên nó **đẩy chữ ra khỏi cột** thay vì cắt — và cột ở mép phải
+    màn hình thì phần tràn không có chỗ nào để hiện, nó chỉ mất. Đã bắt bằng ảnh render ở bộ
+    chuyển của §3d ("tổng hợp toàn datase|"), không phải bằng test.
+13. **`sticky top-0` + nền ĐỤC trong một khung cuộn thấp = nội dung bị sơn đè.** Lưới lens
+    của tab CÂU HỎI cao 164 px và mang `bg-panel`; khung cuộn của workspace chỉ 359 px, nên
+    nó chiếm **46%** khung và phủ kín mọi thứ trượt qua dưới nó. Nạn nhân là bộ **CÁCH ĐỌC**
+    của trường dân số: nút `ĐỒNG MỨC` vẫn ở trong DOM, vẫn có kích thước, `getBoundingClientRect`
+    vẫn báo nó nằm trong màn hình — nhưng `elementFromPoint` tại tâm nó trả về một nút lens.
+    **Vừa vô hình vừa không bấm được, mà mọi phép đo trừ ảnh chụp đều báo "ổn".** Cổng kiểm
+    là `elementFromPoint`, không phải rect. Luật: phần `sticky` không được cao quá ~1/4 khung
+    cuộn chứa nó; vượt thì đừng `sticky`. Kèm theo: `scrollIntoView({block:"center"})` trong
+    một khung thấp cũng đẩy đầu danh sách ra khỏi màn hình — dùng `"nearest"`.
+14. **Chân trang `shrink-0` trong một cột flex = nó SƠN ĐÈ nội dung, không đẩy nội dung.**
+    Mặt kia của bẫy 13, và nó sập ở ĐÁY nên nó không giống bẫy 13 chút nào khi nhìn.
+    Cột đọc §3h là `flex-col`: một vùng cuộn `flex-1` cộng một chân trang `shrink-0`. Khối
+    NGUỒN trải ra cao **112 px**; ở 1280 × 800 nó ép vùng cuộn còn **688 px** trong khi nội
+    dung bốn tiết cao **764 px**, nên tiết ĐI TIẾP trôi ra ngoài — và `elementFromPoint` tại
+    tâm hai chip của nó trả về một `<td>` của chính bảng NGUỒN. Bấm không được, và ảnh chụp
+    ở 1600 và 1440 đều "ổn" vì ở đó cột còn dư chỗ.
+    **Luật: cổng chiều cao phải chạy ở kích thước NHỎ NHẤT được hỗ trợ, không ở kích thước
+    đang mở.** Một bố cục vừa ở 1000 px không nói được gì về 800 px. Và số đo phải là
+    `scrollHeight − clientHeight` của chính vùng cuộn, không phải "trông có vẻ vừa".
 
 Và một bẫy của bố cục: container bản đồ dùng `h-full w-full`, **không** dùng chiều cao tính
-bằng `calc()` trừ chrome — chrome đổi thì bản đồ lệch.
+bằng `calc()` trừ chrome — chrome đổi thì bản đồ lệch. Cùng lý do, một tấm nổi neo bằng
+`fixed` phải tự trừ mọi thứ trong LUỒNG mà nó không biết (scrubber có hiện không, cột phải
+rộng bao nhiêu); `absolute` bên trong vùng bản đồ thì không phải trừ gì cả — §3g.
 
 ---
 
@@ -570,8 +813,16 @@ bằng `calc()` trừ chrome — chrome đổi thì bản đồ lệch.
 được hình dáng chung, không đọc được từng bậc màu.
 
 **13a-4.** Màn hình đầu tiên không được là một **MỨC** ("người ở giữa" là thứ mentor đã biết
-trước khi mở app). Thứ đáng vẽ là **độ lệch khỏi kỳ vọng** — vì thế trường mặc định là
+trước khi mở app). Thứ đáng vẽ là **độ lệch khỏi kỳ vọng** — vì thế trường mặc định từng là
 `commune:ports_per_10k_pop`, đơn vị xã, cực tính `high-good`.
+
+> **Đình chỉ từ 17/8/2026, không bác bỏ.** Luật này giả định có nhiều measure để mà chọn giữa
+> chúng; app đang chở đúng một, nên "chọn cái không phải MỨC" không còn là một lựa chọn.
+> `FIRST_FIELD = population` là màn hình đầu tiên, và nó **khác** `DEFAULT_FIELD` — hai hằng,
+> hai việc: một là *mở ra thấy gì*, một là *rơi về đâu khi trường không dựng được trên bộ
+> đang mở*. Trộn chúng làm một thì hoặc cột đọc thiếu tiết CÁCH ĐỌC (§3h) mà không có đường
+> nào tới được nó, hoặc tỉnh không có cột `population` mở ra là một `Binder Error`.
+> Dựng lại danh sách measure thì luật này sống lại nguyên văn.
 
 ### 13b. Hex vẫn dùng, nhưng chỉ ở nơi nó xứng đáng
 
@@ -628,6 +879,48 @@ quyền điều khiển với nó.
 
 Đây là **UI của phiên**, **chưa vào hash** (§9): chúng còn đang được đánh giá, và một link
 tái lập được một representation chưa qua review là một lời hứa mà bộ dữ liệu chưa giữ được.
+
+Nhãn trên màn hình gọi tên **dạng hình**, không gọi tên lớp deck.gl: `Ô H3` · `ĐỒNG MỨC` ·
+`BẢN ĐỒ NHIỆT` · `CẦU × CUNG` · `ĐỒNG MỨC + TRẠM`. `DENSITY`/`INTENSITY` là tên trong mã
+nguồn; không ai nhìn `DENSITY` mà đoán ra bản đồ đồng mức, nên hai cách đọc mạnh nhất của
+trường dân số nằm ngay trước mắt mà vẫn coi như không có.
+
+`density` là đồng mức **tô dải** (isopleth), không phải đường viền trần: `ContourLayer` nhận
+`threshold` dạng `[min, max]` nên nó tô kín khoảng giữa hai ngưỡng. Cố ý — trên nền sáng của
+một thành phố dày, đường viền trần chồng nhau thành nhiễu và không mang được thang màu, mà
+thang màu chính là thứ làm hình này **đọc được định lượng**, khác hẳn bản đồ nhiệt bên cạnh.
+
+### 15a-0. Bộ chọn ở đâu — tiết CÂU HỎI
+
+Ba chỗ trong ba đợt, và đường đi nói ra nó là gì:
+
+1. giữa **danh sách measure** (§3c) — nơi nó bị lưới lens sơn đè (§11-13) và suốt một thời
+   gian dài là **không tồn tại đối với người dùng**;
+2. trong **chú giải** (§3b), ngay trên dải màu — 15/8/2026;
+3. trong tiết **CÂU HỎI** của cột đọc (§3h) — 17/8/2026.
+
+Bước 2 → 3 không phải đổi ý mà là đi hết một câu. Năm dạng hình ấy **không** phải năm cách
+trang trí một mặt tô: chúng là năm câu hỏi hơi khác nhau về cùng một dữ liệu (`hex` hỏi *ô
+này bao nhiêu*, `density` hỏi *vùng nào dày*, `intensity` hỏi *đâu nóng*, `bivariate` hỏi
+*cầu có gặp cung không*). Chọn giữa chúng là chọn **câu hỏi**, không phải chọn thang màu —
+nên chỗ của nó là tiết CÂU HỎI, đứng ngay dưới tên measure, và thang màu của lựa chọn ấy
+nằm ở tiết ngay sau. Thứ tự trên-dưới vẫn giữ nguyên nghĩa cũ: cách đọc đứng **trên** thang
+của cách đọc đó, vì `density` gộp lên ô 3 km nên nó đọc theo ngưỡng khác hẳn `hex`.
+
+Nó **không** mang nhãn tiết riêng và **không** kẻ vạch riêng: nó nằm trong một tiết đã có
+tên, và một tiêu đề cấp hai cho một nhóm nút đã tự gọi tên mình là chrome thừa. Dòng duy
+nhất trên nó nói thứ mà nhãn các nút không nói được — *cùng dân số, khác dạng hình*.
+
+Trạng thái ĐANG CHỌN nói bằng **ba** kênh: nền `bg-basemap`, chữ đậm + mực chính, và một nét
+`--color-select` 2 px ở cạnh trái ô. Kênh thứ ba không thừa — nền chênh nền cột đúng 0,05 độ
+sáng tương đối, tức một gợi ý chứ không phải một tín hiệu, và trong lưới 2 × 3 mắt phải quét
+cả sáu ô mới thấy ô nào sẫm hơn.
+
+Điều kiện hiện nút là **một hàm** (`hasDemandRepresentations`) — xem đoạn dưới.
+
+Điều kiện hiện nút là **một hàm** (`hasDemandRepresentations`), không phải một biểu thức chép
+ba lần ở `MapView` · `Legend` · `FloatingLegend`. Bất đồng giữa ba bản chép cho ra đúng loại
+lỗi tệ nhất: một chú giải mô tả một mặt tô không có trên bản đồ.
 
 ### 15a. Điểm nhìn SỞ HỮU representation
 

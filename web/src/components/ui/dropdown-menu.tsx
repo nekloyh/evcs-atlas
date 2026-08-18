@@ -10,7 +10,8 @@ export const DropdownMenuContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof BaseMenu.Popup> & { sideOffset?: number }
 >(({ className, sideOffset = 4, ...props }, ref) => (
   <BaseMenu.Portal>
-    <BaseMenu.Positioner sideOffset={sideOffset}>
+    {/* `z-index` ở POSITIONER, không ở Popup — xem lý do đầy đủ ở `popover.tsx`. */}
+    <BaseMenu.Positioner className="z-50" sideOffset={sideOffset}>
       <BaseMenu.Popup
         ref={ref}
         className={cn(

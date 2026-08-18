@@ -34,6 +34,8 @@ web/tsconfig.tsbuildinfo
 # Tài liệu .md thì để ngoài git — theo dõi qua memory thay vì file.
 # Riêng báo cáo QA vẫn GIỮ (xem dòng 7-8): phủ định sau *.md mới có tác dụng.
 *.md
+!docs/PHASE2_LENS_MAP_SYSTEM.md
+!docs/PHASE3_INSPECTOR.md
 !web/DESIGN.md
 !docs/visual-research.md
 !store/qa/*.md

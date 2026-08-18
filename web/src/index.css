@@ -19,11 +19,11 @@
 @theme {
   /* ramp choropleth — cam tuần tự 7 bậc (Analytical colors PRESERVED) */
   --color-c1: #e7997e;
-  --color-c2: #dd7c58;
-  --color-c3: #d35c2d;
-  --color-c4: #b94918;
-  --color-c5: #9b380b;
-  --color-c6: #7e2a03;
+  --color-c2: #dd7b57;
+  --color-c3: #d25b2c;
+  --color-c4: #b74817;
+  --color-c5: #9a380b;
+  --color-c6: #7d2a03;
   --color-c7: #601e01;
 
   /* họ màu lạnh dùng chung cho overlay */
@@ -38,7 +38,19 @@
   --color-border-subtle: rgba(15, 23, 42, 0.12);
   --color-ink: #0b0b0b;
   --color-ink-2: #52514e;
-  --color-ink-muted: #898781;
+  /* Mực MỜ — đã đo lại ngày 17/8/2026, không chọn bằng mắt.
+
+     `#898781` cũ cho **3,41:1** trên `--color-panel` và **3,17:1** trên `--color-basemap`:
+     nó qua cổng 3:1 của *đồ hoạ*, nhưng mọi chỗ nó xuất hiện đều là **CHỮ** 10–11 px —
+     nhãn tiết, mốc thước đo, khối NGUỒN, nhãn trục biểu đồ — nên cổng phải là 4,5:1. Cả
+     giao diện đọc được, chỉ là không ai đo.
+
+     `#6f6d68` giữ nguyên sắc ấm của họ mực (cùng tỉ lệ R>G>B) và đo được:
+     4,90:1 trên `#f9f9f7` · 4,64:1 trên `#f2f3f0` · 5,17:1 trên `#ffffff`.
+
+     KHÔNG đổi `HATCH_HEX`/mực "bị loại" của bản đồ (`palette.ts`): chúng là MARK, không
+     phải chữ, và ΔE của chúng với dải phân kỳ đã được đo ở §4f trên đúng `#898781`. */
+  --color-ink-muted: #6f6d68;
   --color-warn: #fab219;
 
   --color-surface: #ffffff;
