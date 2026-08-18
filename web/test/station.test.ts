@@ -66,6 +66,7 @@ test("`station:` KHÔNG bị nhầm thành mã H3 hay mã xã", () => {
 
 const VIEW = { lng: 105.84, lat: 21, zoom: 9.3, pitch: 0, bearing: 0 };
 const BASE: HashState = {
+  nationalMode: false,
   field: "population",
   mode: "2d",
   view: VIEW,

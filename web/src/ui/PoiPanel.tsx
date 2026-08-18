@@ -13,11 +13,9 @@ import { formatValue } from "./format";
 export function PoiPanel({
   refId,
   poi,
-  onBack,
 }: {
   refId: string;
   poi: PoiCollection | null;
-  onBack: () => void;
 }) {
   const feature: PoiFeature | undefined = poi?.features.find(
     (f) => poiRef(f.properties) === refId,
@@ -25,11 +23,8 @@ export function PoiPanel({
 
   return (
     <div className="text-title">
-      <div className="flex items-center gap-2 border-b border-hairline px-2 py-1.5">
-        <button onClick={onBack} className="cursor-pointer text-body text-ink-2 hover:text-ink">
-          ‹ quay lại
-        </button>
-        <span className="ml-auto font-mono text-note text-ink-muted">poi {refId}</span>
+      <div className="flex items-center justify-end border-b border-hairline px-2 py-1.5">
+        <span className="font-mono text-note text-ink-muted">poi {refId}</span>
       </div>
 
       {!poi && <p className="p-3 text-body text-ink-muted">đang nạp poi.geojson…</p>}
