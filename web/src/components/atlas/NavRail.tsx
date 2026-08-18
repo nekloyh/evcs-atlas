@@ -2,28 +2,36 @@ import {
   Map as MapIcon,
   BookOpen,
   Database,
+  Globe,
   Layers,
   Compass,
   Box,
   Palette,
+  PanelLeftOpen,
   Check,
+  SlidersHorizontal,
 } from "lucide-react";
 import type { Manifest } from "../../data/manifest";
+import type { AppNavMode } from "../../state/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { useIsDesktop } from "./use-desktop";
 
 export interface NavRailProps {
   manifest: Manifest | null;
-  activeMode: "map" | "story" | "data";
+  activeMode: AppNavMode;
   storyEnabled: boolean;
-  onSelectMode: (mode: "map" | "story" | "data") => void;
+  onSelectMode: (mode: AppNavMode) => void;
   basemapStyle: "voyager" | "positron" | "dark";
   onSelectBasemap: (style: "voyager" | "positron" | "dark") => void;
   viewMode: "2d" | "3d";
   onToggle2D3D: () => void;
   onResetView: () => void;
-  workspaceOpen: boolean;
-  onToggleWorkspace: () => void;
+  /** Chỉ dùng dưới 1024 px, nơi cột đọc là sheet — xem `readColumnOpen` trong store. */
+  readColumnOpen: boolean;
+  onToggleReadColumn: () => void;
+  layerCount: number;
+  overlayControls: React.ReactNode;
 }
 
 /**
@@ -47,9 +55,13 @@ export function NavRail({
   viewMode,
   onToggle2D3D,
   onResetView,
-  workspaceOpen,
-  onToggleWorkspace,
+  readColumnOpen,
+  onToggleReadColumn,
+  layerCount,
+  overlayControls,
 }: NavRailProps) {
+  const isDesktop = useIsDesktop();
+  const tooltipSide = isDesktop ? "right" : "top";
   const basemapOptions = [
     { id: "voyager", label: "Voyager", color: "bg-[#d8e9eb]" },
     { id: "positron", label: "Light", color: "bg-[#f4f3ef]" },
@@ -58,8 +70,10 @@ export function NavRail({
 
   return (
     <TooltipProvider>
-      <aside
-        className="z-10 flex w-14 shrink-0 flex-col border-r border-hairline bg-panel select-none h-full"
+      <nav
+        /* KHÔNG `z-10` — cùng lý do với cột đọc: flex item có `z-index` tự tạo ngữ cảnh xếp
+           lớp, và chính thanh này từng che mất popover của chính nó. Xem `ui/popover.tsx`. */
+        className="flex h-14 w-full shrink-0 flex-row border-t border-hairline bg-panel select-none lg:h-full lg:w-14 lg:flex-col lg:border-r lg:border-t-0"
         aria-label="Thanh điều hướng ứng dụng"
       >
         {/* Header Badge */}
@@ -68,14 +82,14 @@ export function NavRail({
             sách, không thành "Hà Nội". Chữ đầu của tên tỉnh thì luôn là chữ, luôn khác nhau
             giữa 34 tỉnh, và khớp với thứ mà người xem gọi nơi này. */}
         <div
-          className="flex h-12 items-center justify-center border-b border-hairline text-heading font-semibold tracking-wide text-ink"
+          className="hidden h-12 items-center justify-center border-b border-hairline text-heading font-semibold tracking-wide text-ink lg:flex"
           title={`EVCS Atlas · ${manifest?.province?.province_name ?? "Hà Nội"}`}
         >
           {provinceMark(manifest?.province?.province_name)}
         </div>
 
         {/* Top Group: Primary Navigation Modes */}
-        <div className="flex flex-col items-center gap-1.5 py-3">
+        <div className="flex min-w-0 flex-1 flex-row items-center justify-around gap-1 px-2 lg:flex-none lg:flex-col lg:justify-start lg:gap-1.5 lg:px-0 lg:py-3">
           {/* Map Mode */}
           <Tooltip>
             <TooltipTrigger
@@ -90,7 +104,7 @@ export function NavRail({
             >
               <MapIcon className="h-4 w-4" />
             </TooltipTrigger>
-            <TooltipContent side="right">Bản đồ điều tra</TooltipContent>
+            <TooltipContent side={tooltipSide}>Bản đồ điều tra</TooltipContent>
           </Tooltip>
 
           {/* Story Mode */}
@@ -99,7 +113,6 @@ export function NavRail({
               aria-label="Chế độ Câu chuyện"
               aria-current={activeMode === "story" ? "page" : undefined}
               aria-disabled={!storyEnabled}
-              disabled={!storyEnabled}
               onClick={() => storyEnabled && onSelectMode("story")}
               className={`grid h-9 w-9 place-items-center rounded border transition-colors ${
                 !storyEnabled
@@ -111,7 +124,7 @@ export function NavRail({
             >
               <BookOpen className="h-4 w-4" />
             </TooltipTrigger>
-            <TooltipContent side="right">
+            <TooltipContent side={tooltipSide}>
               {storyEnabled
                 ? "Câu chuyện không gian"
                 : "Cảnh được viết cho Hà Nội và cần lớp detour_ratio"}
@@ -132,31 +145,136 @@ export function NavRail({
             >
               <Database className="h-4 w-4" />
             </TooltipTrigger>
-            <TooltipContent side="right">Bảng dữ liệu & KPI</TooltipContent>
+            <TooltipContent side={tooltipSide}>Bảng dữ liệu & KPI</TooltipContent>
           </Tooltip>
 
-          <div className="my-1 h-[1px] w-6 bg-hairline" />
-
-          {/* Toggle Workspace */}
+          {/* National Mode */}
           <Tooltip>
             <TooltipTrigger
-              aria-label="Mở Workspace điều tra"
-              aria-expanded={workspaceOpen}
-              onClick={onToggleWorkspace}
+              aria-label="Chế độ Toàn quốc"
+              aria-current={activeMode === "national" ? "page" : undefined}
+              onClick={() => onSelectMode("national")}
               className={`grid h-9 w-9 place-items-center rounded border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                workspaceOpen
-                  ? "border-ink bg-basemap text-ink"
+                activeMode === "national"
+                  ? "border-ink bg-basemap text-ink font-semibold"
                   : "border-transparent text-ink-2 hover:border-hairline hover:text-ink"
               }`}
             >
-              <Layers className="h-4 w-4" />
+              <Globe className="h-4 w-4" />
             </TooltipTrigger>
-            <TooltipContent side="right">Bảng câu hỏi & Lớp dữ liệu</TooltipContent>
+            <TooltipContent side={tooltipSide}>Toàn quốc (34 tỉnh thành)</TooltipContent>
           </Tooltip>
+
+          <div className="mx-1 h-6 w-px bg-hairline lg:my-1 lg:h-px lg:w-6" />
+
+          {/*
+            BỐI CẢNH — danh mục overlay, trong một POPOVER của thanh này (§3h).
+
+            Trước đợt 17/8/2026 nó là một tab của workspace nổi, tức một danh mục 8 lớp phải
+            đi qua một tấm che bản đồ mới tới được. Nó thuộc về đây vì §3a đã nói nav rail là
+            chỗ "bật/tắt lớp": lớp bối cảnh không trả lời câu hỏi nào, nó chỉ giúp ĐỌC câu
+            trả lời — nên nó là công cụ của ứng dụng, không phải một tiết của dòng đọc.
+
+            Popover chứ không phải panel: nó được mở, dùng, rồi đóng. Đúng luật loại bề mặt —
+            thứ chỉ đúng sau một hành động thì nổi, và tự biến mất khi bấm ra ngoài.
+          */}
+          {activeMode === "map" && <Popover>
+            <Tooltip>
+              {/* `render` để hai trigger dùng CHUNG một `<button>` — lồng hai button vào nhau
+                  là HTML không hợp lệ và hai điểm dừng tab cho một điều khiển. */}
+              <TooltipTrigger
+                render={<PopoverTrigger />}
+                aria-label="Lớp bối cảnh"
+                className="relative grid h-9 w-9 place-items-center rounded border border-transparent text-ink-2 transition-colors hover:border-hairline hover:text-ink cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <Layers className="h-4 w-4" />
+                {/* Số lớp đang bật phải đọc được KHI POPOVER ĐÓNG: đó là trạng thái duy nhất
+                    của công cụ này còn nhìn thấy từ ngoài. Không có nó, bật ba lớp rồi đóng
+                    popover là mất dấu — cùng lý do rail thu gọn cũ mang một chấm. */}
+                {layerCount > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 grid h-3.5 min-w-3.5 place-items-center rounded-full bg-cold-2 px-0.5 font-mono text-[9px] leading-none text-white">
+                    {layerCount}
+                  </span>
+                )}
+              </TooltipTrigger>
+              <TooltipContent side={tooltipSide}>Lớp bối cảnh</TooltipContent>
+            </Tooltip>
+            <PopoverContent
+              side={tooltipSide}
+              align="start"
+              /* Cao tối đa 78% khung nhìn rồi cuộn BÊN TRONG: danh mục 8 lớp có lớp mở ra
+                 kèm cả đoạn cảnh báo nguồn, nên nó dài theo thứ đang bật chứ không cố định.
+                 Không `sticky` gì bên trong — §11-13. */
+              className="z-50 max-h-[78vh] w-[340px] overflow-y-auto p-0"
+            >
+              <div className="eyebrow border-b border-hairline px-2 py-1.5">BỐI CẢNH</div>
+              {overlayControls}
+            </PopoverContent>
+          </Popover>}
+
+          {/* Cột đọc — CHỈ trên màn hẹp, nơi nó là sheet phủ thay vì một cột trong luồng.
+              Trên màn rộng cột không đóng được (§3h), nên một nút bật/tắt nó ở đây sẽ là một
+              nút không có trạng thái nào để chuyển — đúng loại nói dối bằng giao diện mà §3a
+              cấm ở chính thanh này. */}
+          {activeMode === "map" && !isDesktop && (
+            <Tooltip>
+              <TooltipTrigger
+                aria-label="Mở cột đọc"
+                aria-expanded={readColumnOpen}
+                onClick={onToggleReadColumn}
+                className={`grid h-9 w-9 place-items-center rounded border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                  readColumnOpen
+                    ? "border-ink bg-basemap text-ink"
+                    : "border-transparent text-ink-2 hover:border-hairline hover:text-ink"
+                }`}
+              >
+                <PanelLeftOpen className="h-4 w-4" />
+              </TooltipTrigger>
+              <TooltipContent side={tooltipSide}>Cột đọc bản đồ</TooltipContent>
+            </Tooltip>
+          )}
+
+          {activeMode === "map" && !isDesktop && (
+            <Popover>
+              <Tooltip>
+                <TooltipTrigger
+                  render={<PopoverTrigger />}
+                  aria-label="Công cụ bản đồ"
+                  className="grid h-9 w-9 cursor-pointer place-items-center rounded border border-transparent text-ink-2 hover:border-hairline hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                </TooltipTrigger>
+                <TooltipContent side="top">Công cụ bản đồ</TooltipContent>
+              </Tooltip>
+              <PopoverContent side="top" align="end" className="z-50 w-56 p-2">
+                <div className="eyebrow mb-2">CÔNG CỤ BẢN ĐỒ</div>
+                <div className="space-y-1">
+                  {basemapOptions.map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => onSelectBasemap(opt.id)}
+                      className={`flex w-full cursor-pointer items-center gap-2.5 rounded border px-2 py-1.5 text-left text-title ${basemapStyle === opt.id ? "border-ink bg-basemap text-ink" : "border-transparent text-ink-2 hover:bg-surface-hover"}`}
+                    >
+                      <span className={`h-3.5 w-5 rounded-xs border border-hairline ${opt.color}`} />
+                      <span className="flex-1">Nền {opt.label}</span>
+                      {basemapStyle === opt.id && <Check className="h-3.5 w-3.5" />}
+                    </button>
+                  ))}
+                  <button type="button" onClick={onResetView} className="flex w-full cursor-pointer items-center gap-2 rounded border border-transparent px-2 py-1.5 text-title text-ink-2 hover:bg-surface-hover">
+                    <Compass className="h-3.5 w-3.5" /> Về trung tâm tỉnh
+                  </button>
+                  <button type="button" onClick={onToggle2D3D} className="flex w-full cursor-pointer items-center gap-2 rounded border border-transparent px-2 py-1.5 text-title text-ink-2 hover:bg-surface-hover">
+                    <Box className="h-3.5 w-3.5" /> Chuyển sang {viewMode === "2d" ? "3D" : "2D"}
+                  </button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
         </div>
 
         {/* Bottom Group: GIS Controls & Tools */}
-        <div className="mt-auto flex flex-col items-center gap-1.5 border-t border-hairline py-3">
+        {activeMode === "map" && <div className="mt-auto hidden flex-col items-center gap-1.5 border-t border-hairline py-3 lg:flex">
           {/* Basemap Switcher Popover */}
           <Popover>
             <Tooltip>
@@ -172,9 +290,9 @@ export function NavRail({
               >
                 <Palette className="h-4 w-4" />
               </TooltipTrigger>
-              <TooltipContent side="right">Nền bản đồ</TooltipContent>
+              <TooltipContent side={tooltipSide}>Nền bản đồ</TooltipContent>
             </Tooltip>
-            <PopoverContent side="right" align="end" className="w-48 p-2 z-50">
+            <PopoverContent side={tooltipSide} align="end" className="w-48 p-2 z-50">
               <div className="text-body font-semibold tracking-wider text-ink uppercase mb-2">
                 Nền bản đồ
               </div>
@@ -207,7 +325,7 @@ export function NavRail({
             >
               <Compass className="h-4 w-4" />
             </TooltipTrigger>
-            <TooltipContent side="right">Về trung tâm tỉnh</TooltipContent>
+            <TooltipContent side={tooltipSide}>Về trung tâm tỉnh</TooltipContent>
           </Tooltip>
 
           {/* 2D / 3D Toggle */}
@@ -219,10 +337,10 @@ export function NavRail({
             >
               <Box className="h-4 w-4" />
             </TooltipTrigger>
-            <TooltipContent side="right">Góc nhìn {viewMode.toUpperCase()}</TooltipContent>
+            <TooltipContent side={tooltipSide}>Góc nhìn {viewMode.toUpperCase()}</TooltipContent>
           </Tooltip>
-        </div>
-      </aside>
+        </div>}
+      </nav>
     </TooltipProvider>
   );
 }
