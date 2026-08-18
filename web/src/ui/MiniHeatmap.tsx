@@ -20,9 +20,10 @@
  */
 
 import { DOW_LABELS, dowOf, hourOf, tOf } from "../state/types";
-import { HATCH_HEX, classOf, rampFor, type Scale } from "../viz/palette";
+import { HATCH_HEX, INK_MUTED_HEX, classOf, rampFor, type Scale } from "../viz/palette";
+import { CHART_W } from "./chart-size";
 
-const W = 296;
+const W = CHART_W;
 const LEFT = 16;
 const TOP = 9;
 const CELL_W = (W - LEFT) / 24;
@@ -31,7 +32,6 @@ const H = TOP + 7 * CELL_H;
 
 const HATCH_ID = "mini-heat-hatch";
 const INK = "#0b0b0b";
-const INK_MUTED = "#898781";
 
 export function MiniHeatmap({
   values,
@@ -61,13 +61,13 @@ export function MiniHeatmap({
 
       {/* Nhãn giờ — chỉ 0/6/12/18, đủ để định vị mà không thành một hàng số. */}
       {[0, 6, 12, 18].map((h) => (
-        <text key={h} x={LEFT + h * CELL_W} y={TOP - 2} fontSize="8" fill={INK_MUTED}>
+        <text key={h} x={LEFT + h * CELL_W} y={TOP - 2} fontSize="8" fill={INK_MUTED_HEX}>
           {h}h
         </text>
       ))}
 
       {DOW_LABELS.map((label, d) => (
-        <text key={label} x={0} y={TOP + d * CELL_H + CELL_H - 2.5} fontSize="8" fill={INK_MUTED}>
+        <text key={label} x={0} y={TOP + d * CELL_H + CELL_H - 2.5} fontSize="8" fill={INK_MUTED_HEX}>
           {label}
         </text>
       ))}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { MapView } from "./map/MapView";
 import {
@@ -35,19 +35,22 @@ import {
   type RuntimeCoverage,
 } from "./fields";
 import { keep } from "./state/brush";
-import { useStore } from "./state/store";
+import { selectionWireOf, useStore } from "./state/store";
 import { syncHash } from "./state/hash";
 import { INITIAL_VIEW } from "./state/view-config";
-import { SCENES, storyEnabled } from "./story/scenes";
+import { storyEnabled } from "./story/scenes";
 import { StoryColumn } from "./story/StoryColumn";
 import { DataMode } from "./ui/DataMode";
 import { type DockData } from "./ui/Dock";
 import { Scrubber } from "./ui/Scrubber";
 import { NavRail } from "./components/atlas/NavRail";
-import { FloatingLegend } from "./components/atlas/FloatingLegend";
-import { FloatingWorkspace } from "./components/atlas/FloatingWorkspace";
-import { AtlasInspector } from "./components/atlas/AtlasInspector";
-import { CompareDock } from "./components/atlas/CompareDock";
+import { LayersTab } from "./ui/LayersTab";
+import { AtlasReadColumn } from "./components/atlas/AtlasReadColumn";
+import { EvidenceCard } from "./components/atlas/EvidenceCard";
+import { AppShell } from "./components/atlas/AppShell";
+import { MapWorkspace, ModeSwitch, Workspace } from "./components/atlas/Workspace";
+import NationalApp from "./national/NationalApp";
+import type { AppNavMode } from "./state/types";
 import { allOccValues, cityProfile, occCountAt, occCoverage, stationOccAt } from "./viz/occ";
 import { buildScale, computeClassingByWeight, type Scale } from "./viz/palette";
 import { bivariateAxes } from "./viz/demand";
@@ -67,37 +70,47 @@ import { bivariateAxes } from "./viz/demand";
  */
 const NO_COVERAGE: Map<string, RuntimeCoverage> = new Map();
 
+interface CellSnapshot {
+  fieldId: string;
+  rows: GridCell[];
+  scale: Scale;
+}
+
+interface ScaleSnapshot {
+  fieldId: string;
+  scale: Scale;
+}
+
 export default function App() {
   const field = useStore((s) => s.field);
   const scene = useStore((s) => s.scene);
-  const enterScene = useStore((s) => s.enterScene);
   const dataMode = useStore((s) => s.dataMode);
-  const setDataMode = useStore((s) => s.setDataMode);
+  const nationalMode = useStore((s) => s.nationalMode);
+  const setAppNavMode = useStore((s) => s.setAppNavMode);
   const mode = useStore((s) => s.mode);
   const setMode = useStore((s) => s.setMode);
   const basemapStyle = useStore((s) => s.basemapStyle);
   const setBasemapStyle = useStore((s) => s.setBasemapStyle);
   const setView = useStore((s) => s.setView);
-  const workspaceOpen = useStore((s) => s.workspaceOpen);
-  const setWorkspaceOpen = useStore((s) => s.setWorkspaceOpen);
-  const cellSel = useStore((s) => s.cell);
-  const [cells, setCells] = useState<GridCell[]>([]);
+  const readColumnOpen = useStore((s) => s.readColumnOpen);
+  const setReadColumnOpen = useStore((s) => s.setReadColumnOpen);
+  const layerCount = useStore((s) => s.layers.size);
+  const cellSel = useStore(selectionWireOf);
+  const [cellSnapshot, setCellSnapshot] = useState<CellSnapshot | null>(null);
   const [communes, setCommunes] = useState<CommuneCollection | null>(null);
   const [boundary, setBoundary] = useState<CommuneCollection | null>(null);
   const [stations, setStations] = useState<StationPoint[]>([]);
   const [roads, setRoads] = useState<RoadSeg[]>([]);
   const [roadsLoading, setRoadsLoading] = useState(false);
+  const roadsRequest = useRef<Promise<void> | null>(null);
   const [routes, setRoutes] = useState<ShowcaseRoute[]>([]);
   const [poi, setPoi] = useState<PoiCollection | null>(null);
   const [occupancy, setOccupancy] = useState<StationOccupancy | null>(null);
-  const [scale, setScale] = useState<Scale | null>(null);
+  const [scaleSnapshot, setScaleSnapshot] = useState<ScaleSnapshot | null>(null);
   const [manifest, setManifest] = useState<Manifest | null>(null);
   const [derivedCov, setDerivedCov] = useState(NO_COVERAGE);
   const [roadCov, setRoadCov] = useState(NO_COVERAGE);
   const [surfaceBreaks, setSurfaceBreaks] = useState<number[]>([]);
-  // Hai trục bivariate dựng cùng chỗ, cùng lúc với `scale`: bản đồ và chú giải phải đọc
-  // đúng một bộ ngưỡng, nếu không chú giải sẽ hứa những ô màu bản đồ không bao giờ vẽ.
-  const bivariate = useMemo(() => (cells.length ? bivariateAxes(cells) : null), [cells]);
   const [error, setError] = useState<string | null>(null);
 
   const fail = (e: unknown) => setError(e instanceof Error ? e.message : String(e));
@@ -119,9 +132,11 @@ export default function App() {
             view: s.view,
             layers: [...s.layers],
             paintOn: s.paintOn,
-            cell: s.cell,
+            cell: selectionWireOf(s),
+            selection: s.selection,
             scene: s.scene,
             dataMode: s.dataMode,
+            nationalMode: s.nationalMode,
             t: s.t,
             brush: s.brush,
           };
@@ -153,6 +168,17 @@ export default function App() {
   // được vì nó đọc từ `commune.geojson`) thay vì nổ.
   const picked = FIELD_BY_ID.get(field);
   const meta = picked && fieldMapAvailable(picked) ? picked : FIELD_BY_ID.get(DEFAULT_FIELD)!;
+
+  // Chỉ công bố rows và scale khi cả hai thuộc cùng field. Trong lúc truy vấn field mới,
+  // snapshot cũ bị che thay vì ghép metadata mới với giá trị/ngưỡng cũ trong một frame.
+  const activeCellSnapshot = meta.readAs === "cell" && cellSnapshot?.fieldId === meta.id ? cellSnapshot : null;
+  const cells = meta.readAs === "cell" ? activeCellSnapshot?.rows ?? [] : cellSnapshot?.rows ?? [];
+  const scale = meta.readAs === "cell"
+    ? activeCellSnapshot?.scale ?? null
+    : scaleSnapshot?.fieldId === meta.id ? scaleSnapshot.scale : null;
+
+  // Hai trục bivariate dựng từ đúng snapshot ô đang công bố.
+  const bivariate = useMemo(() => (cells.length ? bivariateAxes(cells) : null), [cells]);
 
   // Sửa luôn STATE, không chỉ sửa lượt vẽ này: nếu chỉ thay ở đây thì hash vẫn ghi
   // `f=population` trong khi bản đồ tô một trường khác — URL nói một đằng, màn hình nói
@@ -189,7 +215,10 @@ export default function App() {
   useEffect(() => {
     if (meta.readAs !== "commune") return;
     if (!communes) return;
-    setScale(buildScale(meta.kind, communes.features.map((f: CommuneFeature) => f.properties[meta.column] ?? null), meta.diverge));
+    setScaleSnapshot({
+      fieldId: meta.id,
+      scale: buildScale(meta.kind, communes.features.map((f: CommuneFeature) => f.properties[meta.column] ?? null), meta.diverge, meta.categorical),
+    });
   }, [meta, communes]);
 
   useEffect(() => {
@@ -199,8 +228,11 @@ export default function App() {
       try {
         const rows = await fetchField(meta);
         if (cancelled) return;
-        setCells(rows);
-        setScale(buildScale(meta.kind, rows.map((r) => r.value), meta.diverge));
+        setCellSnapshot({
+          fieldId: meta.id,
+          rows,
+          scale: buildScale(meta.kind, rows.map((r) => r.value), meta.diverge, meta.categorical),
+        });
       } catch (e) {
         if (!cancelled) fail(e);
       }
@@ -216,31 +248,30 @@ export default function App() {
   // (§14b), nên không có trường hợp nào cần đường mà `readAs` không phải `road`.
   useEffect(() => {
     if (meta.readAs !== "road" && roadIdOf(cellSel) === null) return;
-    if (roads.length || roadsLoading) return;
-    let cancelled = false;
+    if (roads.length || roadsRequest.current) return;
     setRoadsLoading(true);
-    void (async () => {
-      try {
-        const [segs, showcase] = await Promise.all([fetchRoads(), fetchShowcaseRoutes()]);
-        if (cancelled) return;
+    roadsRequest.current = Promise.all([fetchRoads(), fetchShowcaseRoutes()])
+      .then(([segs, showcase]) => {
         setRoads(segs);
         setRoutes(showcase);
-        // Cold road deep-link cần feature để inspector đọc, nhưng không được thay scale/
-        // legend của measure đang xem bằng scale khoảng cách đường.
-        if (meta.readAs === "road") {
-          setScale(buildScale(meta.kind, segs.map((r) => r.dist), meta.diverge));
-          setRoadCov(new Map([[meta.id, roadCoverage(segs)]]));
-        }
-      } catch (e) {
-        if (!cancelled) fail(e);
-      } finally {
-        if (!cancelled) setRoadsLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [meta, cellSel, roads.length, roadsLoading]);
+      })
+      .catch((error) => {
+        roadsRequest.current = null;
+        fail(error);
+      })
+      .finally(() => setRoadsLoading(false));
+  }, [meta.readAs, cellSel, roads.length]);
+
+  // Scale là derivation của field đang xem, không phải side effect tình cờ của lần nạp
+  // roads. Vì vậy deep-link nạp roads trước rồi đổi sang field road vẫn dựng đúng scale.
+  useEffect(() => {
+    if (meta.readAs !== "road" || roads.length === 0) return;
+    setScaleSnapshot({
+      fieldId: meta.id,
+      scale: buildScale(meta.kind, roads.map((r) => r.dist), meta.diverge, meta.categorical),
+    });
+    setRoadCov(new Map([[meta.id, roadCoverage(roads)]]));
+  }, [meta, roads]);
 
   // POI nạp LƯỜI như roads (§5a): 3,39 MB, phần lớn phiên xem không bật nhóm POI nào.
   // Hai đường cần nó: một overlay `poi_*` bật, hoặc hash mở sẵn `c=poi:` (panel POI phải
@@ -264,34 +295,28 @@ export default function App() {
     if (meta.readAs === "cell" || cells.length > 0) return;
     const seed = FIELD_BY_ID.get("population");
     if (!seed || !fieldAvailable(seed)) return;
-    void fetchField(seed).then(setCells, fail);
-  }, [meta, cells.length]);
+    let cancelled = false;
+    void fetchField(seed).then((rows) => {
+      if (cancelled) return;
+      setCellSnapshot({
+        fieldId: seed.id,
+        rows,
+        scale: buildScale(seed.kind, rows.map((r) => r.value), seed.diverge, seed.categorical),
+      });
+    }, fail);
+    return () => {
+      cancelled = true;
+    };
+  }, [meta.readAs, cells.length]);
 
   // ── Nhịp trạm 168h — M4 ──────────────────────────────────────────────────────
   //
-  // Nạp LƯỜI như roads và POI (§5a). Hai đường cần nó: trường `station:occ` đang tô, hoặc
-  // dock đang mở (heatmap 168h là một trong ba biểu đồ của nó). 116.785 dòng là chi phí
-  // thật, và phần lớn phiên xem chỉ mở bản đồ rồi thôi.
-  const dockOpen = useStore((s) => s.dockOpen);
-  const compareView = useStore((s) => s.compareView);
-  const setDockOpen = useStore((s) => s.setDockOpen);
-  // Đường thứ ba từ M4.1: một TRẠM đang được chọn. Panel TRẠM có mini-heatmap 168h (§8a-3),
-  // nên nó cần đúng bộ hồ sơ này — kể cả khi dock đóng và trường đang tô là trường của ô.
-  // Đường thứ tư từ M4.2: chế độ DỮ LIỆU dựng small multiples từ chính hồ sơ đó (§3f-5).
+  // Nạp LƯỜI như roads và POI (§5a). Ba đường cần nó: trường `station:occ`, một trạm đang
+  // được chọn (mini-heatmap 168h), hoặc chế độ DỮ LIỆU dựng small multiples.
   const needOcc =
     meta.id === STATION_OCC_FIELD ||
-    (dockOpen && !scene) ||
     (stationIdOf(cellSel) !== null && !scene) ||
     dataMode;
-
-  // Compare là câu trả lời gắn với measure đã gọi nó. Đổi measure thì đóng compare không
-  // còn cùng nghĩa, thay vì giữ scatter/heatmap cũ cạnh một bản đồ khác rồi ngầm nói chúng
-  // vẫn được liên kết.
-  useEffect(() => {
-    if (!dockOpen) return;
-    if (compareView === "demand-access" && meta.id !== "population") setDockOpen(false);
-    if (compareView === "utilization-pattern" && meta.id !== STATION_OCC_FIELD) setDockOpen(false);
-  }, [dockOpen, compareView, meta, setDockOpen]);
   useEffect(() => {
     if (!needOcc || occupancy) return;
     void fetchOccupancy().then(setOccupancy, fail);
@@ -318,14 +343,17 @@ export default function App() {
   useEffect(() => {
     if (meta.id !== STATION_OCC_FIELD || !occupancy || !occClassing) return;
     const c = occCountAt(occupancy.profiles, t);
-    setScale({ ...occClassing, n: c.present, nNull: c.missing });
+    setScaleSnapshot({ fieldId: meta.id, scale: { ...occClassing, n: c.present, nNull: c.missing } });
   }, [meta, occupancy, occClassing, t]);
 
   // Asset supply không phụ thuộc telemetry. Cùng geometry trạm nhưng khác measure, nên
   // scale đọc trực tiếp `stations` và null là “chưa khai cổng”, không là “chưa quan sát”.
   useEffect(() => {
     if (meta.id !== STATION_PORTS_FIELD) return;
-    setScale(buildScale(meta.kind, stations.map((s) => s.nPorts), meta.diverge));
+    setScaleSnapshot({
+      fieldId: meta.id,
+      scale: buildScale(meta.kind, stations.map((s) => s.nPorts), meta.diverge, meta.categorical),
+    });
   }, [meta, stations]);
 
   /**
@@ -419,10 +447,31 @@ export default function App() {
       city,
       occScale: occClassing,
       kept: total > 0 ? { n: kept, total } : null,
+      // ReadColumn hiện chỉ dựng distribution. Các model khác không được tính ngầm.
+      access: null,
+      equity: null,
+      ranked: null,
     };
-  }, [meta, cells, communes, roads, stations, occupancy, t, brush, city, occClassing]);
+  }, [
+    meta,
+    cells,
+    communes,
+    roads,
+    stations,
+    occupancy,
+    t,
+    brush,
+    city,
+    occClassing,
+  ]);
 
-  const activeNavMode = dataMode ? "data" : scene ? "story" : "map";
+  const activeNavMode: AppNavMode = nationalMode
+    ? "national"
+    : dataMode
+    ? "data"
+    : scene
+    ? "story"
+    : "map";
   const isStoryEnabled = manifest?.story_enabled !== false && storyEnabled();
   /*
    * Scrubber chỉ có mặt khi nó ĐIỀU KHIỂN được thứ gì đó — DESIGN.md §3.3.
@@ -437,28 +486,25 @@ export default function App() {
    * chọn (panel trạm có mini-heatmap 168h đọc theo `t`).
    */
   const scrubberVisible =
+    !nationalMode &&
     !scene &&
     !dataMode &&
     layerUsable("occupancy") &&
     (meta.id === STATION_OCC_FIELD || stationIdOf(cellSel) !== null);
 
-  const handleSelectNavMode = (mode: "map" | "story" | "data") => {
-    if (mode === "data") {
-      setDataMode(true);
-    } else if (mode === "story") {
-      if (isStoryEnabled) enterScene(SCENES[0]!.id);
-    } else {
-      enterScene(null);
-      setDataMode(false);
-    }
+  const handleSelectNavMode = (targetMode: AppNavMode) => {
+    if (targetMode === "story" && !isStoryEnabled) return;
+    setAppNavMode(targetMode);
   };
 
-  // Surface Coordinator Rule: When an object/cell selection is active, close Compare Dock so Inspector has exclusive right panel space
-  useEffect(() => {
-    if (cellSel && dockOpen) {
-      setDockOpen(false);
-    }
-  }, [cellSel, dockOpen, setDockOpen]);
+  /*
+   * ĐÃ BỎ ở đợt 15/8/2026: "chọn một đối tượng ⇒ đóng compare".
+   *
+   * Luật ấy tồn tại vì inspector và compare là hai TẤM neo cùng một chỗ, và hai tấm chồng
+   * nhau là lỗi. Nhưng cái giá của nó là: bấm vào một ô để đọc bằng chứng thì biểu đồ phân
+   * bố biến mất — đúng lúc người xem có một giá trị cụ thể để tìm nó trên thang. Nay cả hai
+   * là hai TIẾT của một cột (§3g) nên không còn gì để điều phối, và cũng không còn luật.
+   */
 
   const handleResetView = () => {
     setView({
@@ -470,8 +516,58 @@ export default function App() {
     });
   };
 
+  const mapSurface = (
+    <MapWorkspace
+      readColumn={scene
+        ? <StoryColumn communes={communes} manifest={manifest} />
+        : <AtlasReadColumn
+            field={meta}
+            scale={scale}
+            manifest={manifest}
+            runtime={runtimeCov}
+            surfaceBreaks={surfaceBreaks}
+            bivariate={bivariate}
+            selectedValue={selectedValue}
+            dockData={dockData}
+            communes={communes}
+            stations={stations}
+            cells={cells}
+          />}
+      map={
+        <>
+          <MapView
+            field={meta}
+            cells={cells}
+            communes={communes}
+            boundary={boundary}
+            stations={stations}
+            scale={scale}
+            surfaceBreaks={surfaceBreaks}
+            roads={roads}
+            routes={routes}
+            poi={poi}
+            occupancy={occupancy}
+          />
+          {!scene && (
+            <EvidenceCard
+              manifest={manifest}
+              communes={communes}
+              poi={poi}
+              occupancy={occupancy}
+              occScale={occClassing}
+              roads={roads}
+              roadsLoading={roadsLoading}
+              cells={cells}
+              scale={scale}
+            />
+          )}
+        </>
+      }
+    />
+  );
+
   return (
-    <div className="flex h-full bg-panel text-ink overflow-hidden">
+    <AppShell nav={
       <NavRail
         manifest={manifest}
         activeMode={activeNavMode}
@@ -482,84 +578,21 @@ export default function App() {
         viewMode={mode}
         onToggle2D3D={() => setMode(mode === "2d" ? "3d" : "2d")}
         onResetView={handleResetView}
-        workspaceOpen={workspaceOpen}
-        onToggleWorkspace={() => setWorkspaceOpen(!workspaceOpen)}
+        readColumnOpen={readColumnOpen}
+        onToggleReadColumn={() => setReadColumnOpen(!readColumnOpen)}
+        layerCount={layerCount}
+        overlayControls={<LayersTab manifest={manifest} />}
       />
-
-      <div className="flex min-w-0 flex-1 flex-col relative overflow-hidden">
-        {error && (
-          <div className="shrink-0 border-b border-hairline bg-panel px-4 py-2 text-heading">
-            Không nạp được dữ liệu: {error}
-            <span className="text-ink-muted"> — đã chạy `make web-data` chưa?</span>
-          </div>
-        )}
-
-        {dataMode && <DataMode manifest={manifest} occupancy={occupancy} />}
-
-        {!dataMode && (
-          <div className="flex min-h-0 flex-1 relative">
-            <main className="relative min-w-0 flex-1">
-              <MapView
-                field={meta}
-                cells={cells}
-                communes={communes}
-                boundary={boundary}
-                stations={stations}
-                scale={scale}
-                surfaceBreaks={surfaceBreaks}
-                roads={roads}
-                routes={routes}
-                poi={poi}
-                occupancy={occupancy}
-              />
-
-              {/* Floating Legend Top-Left */}
-              <FloatingLegend
-                field={meta}
-                scale={scale}
-                manifest={manifest}
-                runtime={runtimeCov}
-                surfaceBreaks={surfaceBreaks}
-                bivariate={bivariate}
-                selectedValue={selectedValue}
-              />
-
-              {/* Inspector Sheet from Right */}
-              {!scene && (
-                <AtlasInspector
-                  manifest={manifest}
-                  communes={communes}
-                  poi={poi}
-                  occupancy={occupancy}
-                  occScale={occClassing}
-                  roads={roads}
-                  roadsLoading={roadsLoading}
-                />
-              )}
-
-              {/* Floating Workspace Bottom-Right */}
-              {!scene && (
-                <FloatingWorkspace
-                  manifest={manifest}
-                  runtime={runtimeCov}
-                  communes={communes}
-                  scrubberVisible={scrubberVisible}
-                />
-              )}
-            </main>
-
-            {/* Compare Dock on Right */}
-            {!scene && <CompareDock field={meta} dockData={dockData} />}
-
-            {/* Story Column in Story Mode */}
-            {scene ? (
-              <StoryColumn communes={communes} manifest={manifest} />
-            ) : null}
-          </div>
-        )}
-
-        {scrubberVisible && <Scrubber field={field} />}
-      </div>
-    </div>
+    }>
+      <Workspace error={error} bottom={scrubberVisible ? <Scrubber field={field} /> : undefined}>
+        <ModeSwitch
+          mode={activeNavMode}
+          map={mapSurface}
+          story={mapSurface}
+          data={<DataMode manifest={manifest} occupancy={occupancy} />}
+          national={<div className="relative min-h-0 flex-1 overflow-hidden"><NationalApp /></div>}
+        />
+      </Workspace>
+    </AppShell>
   );
 }

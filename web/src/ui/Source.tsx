@@ -14,15 +14,26 @@ const COMMUNE_MANIFEST_FILE = ["commune", "geojson"].join(".");
  */
 export function SourceBlock({
   manifest,
-  cell,
-  occ,
+  cell = null,
+  occ = null,
   station,
+  bare = false,
 }: {
   manifest: Manifest | null;
-  cell: CellRow | null;
-  occ: CellOccStatus | null;
+  cell?: CellRow | null;
+  occ?: CellOccStatus | null;
   /** trạm đang xem — M4.1, §8a-5. Ba biến thể của cùng một khối, không phải ba khối. */
   station?: StationDetail | null;
+  /**
+   * Bỏ vỏ (đường kẻ trên + nhãn `NGUỒN`), chỉ trả về bảng.
+   *
+   * Dùng khi khối nằm trong một `<details>` đã mang nhãn ấy ở dòng `summary` — cột đọc §3h
+   * làm thế để bốn dòng provenance không ăn 112 px chiều cao thường trực. Đo được: ở
+   * 1280 × 800 chính 112 px ấy đẩy tiết ĐI TIẾP ra ngoài vùng cuộn và khối này **sơn đè**
+   * lên hai chip của nó — `elementFromPoint` tại tâm chip trả về một `<td>` của bảng dưới
+   * đây. Cùng họ bẫy §11-13, chỉ khác là lần này nó sập ở đáy chứ không ở đỉnh.
+   */
+  bare?: boolean;
 }) {
   if (!manifest) return null;
   const s = manifest.snapshots;
@@ -58,19 +69,27 @@ export function SourceBlock({
         ["Xuất", manifest.exported_utc.slice(0, 10)],
       ];
 
+  const table = (
+    <table className="w-full">
+      <tbody>
+        {rows.map(([k, v]) => (
+          <tr key={k} className="align-top">
+            <td className="w-[68px] pr-2">{k}</td>
+            <td>{v}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+
+  if (bare) {
+    return <div className="px-2 pb-2 text-body leading-snug text-ink-muted">{table}</div>;
+  }
+
   return (
     <div className="shrink-0 border-t border-hairline px-2 py-2 text-body leading-snug text-ink-muted">
       <div className="tracking-[0.1em]">NGUỒN</div>
-      <table className="mt-1 w-full">
-        <tbody>
-          {rows.map(([k, v]) => (
-            <tr key={k} className="align-top">
-              <td className="w-[68px] pr-2">{k}</td>
-              <td>{v}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="mt-1">{table}</div>
     </div>
   );
 }

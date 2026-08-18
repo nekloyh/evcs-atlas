@@ -55,6 +55,9 @@ export type Selection =
   | { kind: "station"; id: string }
   | { kind: "road"; id: string };
 
+export * from "../state/selection";
+import type { EntitySelection } from "../state/selection";
+
 /**
  * Đọc khoá `c`. Trả `null` khi sai hình dạng — và sai hình dạng thì **bỏ đúng khoá đó**,
  * không kéo theo khoá nào khác (§9).
@@ -93,30 +96,54 @@ export function serializeSelection(s: Selection): string {
 }
 
 /** Mã xã của một lựa chọn, hoặc `null` nếu đang chọn một ô. Dùng để tra `commune.geojson`. */
-export function communeCodeOf(raw: string | null): string | null {
+export function communeCodeOf(raw: EntitySelection | Selection | string | null | undefined): string | null {
+  if (!raw) return null;
+  if (typeof raw === "object") {
+    if (raw.kind === "commune") return "code" in raw ? raw.code : raw.id;
+    return null;
+  }
   const s = parseSelection(raw);
   return s?.kind === "commune" ? s.code : null;
 }
 
 /** Mã H3 của một lựa chọn, hoặc `null` nếu đang chọn một xã. */
-export function cellIdOf(raw: string | null): string | null {
+export function cellIdOf(raw: EntitySelection | Selection | string | null | undefined): string | null {
+  if (!raw) return null;
+  if (typeof raw === "object") {
+    if (raw.kind === "h3-cell") return raw.id;
+    if ("id" in raw && (raw as { kind: string; id: string }).kind === "cell") return (raw as { kind: string; id: string }).id;
+    return null;
+  }
   const s = parseSelection(raw);
   return s?.kind === "cell" ? s.id : null;
 }
 
 /** Tham chiếu POI (`n|w|r` + osm_id) của một lựa chọn, hoặc `null`. */
-export function poiRefOf(raw: string | null): string | null {
+export function poiRefOf(raw: EntitySelection | Selection | string | null | undefined): string | null {
+  if (!raw) return null;
+  if (typeof raw === "object") {
+    return raw.kind === "poi" ? raw.ref : null;
+  }
   const s = parseSelection(raw);
   return s?.kind === "poi" ? s.ref : null;
 }
 
 /** `station_id` của một lựa chọn, hoặc `null` — M4.1. */
-export function stationIdOf(raw: string | null): string | null {
+export function stationIdOf(raw: EntitySelection | Selection | string | null | undefined): string | null {
+  if (!raw) return null;
+  if (typeof raw === "object") {
+    if (raw.kind === "station") return raw.id;
+    return null;
+  }
   const s = parseSelection(raw);
   return s?.kind === "station" ? s.id : null;
 }
 
-export function roadIdOf(raw: string | null): string | null {
+export function roadIdOf(raw: EntitySelection | Selection | string | null | undefined): string | null {
+  if (!raw) return null;
+  if (typeof raw === "object") {
+    return raw.kind === "road" ? raw.id : null;
+  }
   const s = parseSelection(raw);
   return s?.kind === "road" ? s.id : null;
 }

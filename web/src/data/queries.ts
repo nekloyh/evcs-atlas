@@ -162,7 +162,7 @@ async function registerFor(metas: FieldMeta[]): Promise<void> {
  * KHÔNG `COALESCE(..., 0)`, KHÔNG `IFNULL`. Ô không có giá trị phải về tới lớp vẽ dưới
  * dạng `null` để nó được tô gạch chéo — ràng buộc 1, DESIGN.md §10.
  */
-export async function fetchField(meta: FieldMeta): Promise<GridCell[]> {
+async function fetchFieldUncached(meta: FieldMeta): Promise<GridCell[]> {
   await registerFor([meta]);
   const table = await query(
     `SELECT g."h3_r8" AS h3, ${selectExpr(meta)} AS value, ${gcol("population")} AS pop,
@@ -204,6 +204,24 @@ export async function fetchField(meta: FieldMeta): Promise<GridCell[]> {
     };
   }
   return out;
+}
+
+/**
+ * Cache theo dataset-session + field. React render/revisit có thể gọi lại loader, nhưng
+ * chỉ lần đầu được phát truy vấn DuckDB. Promise lỗi bị bỏ để retry có chủ ý.
+ */
+const fieldRequests = new Map<string, Promise<GridCell[]>>();
+
+export function fetchField(meta: FieldMeta): Promise<GridCell[]> {
+  const key = `${GRID}:${meta.id}`;
+  const cached = fieldRequests.get(key);
+  if (cached) return cached;
+  const request = fetchFieldUncached(meta).catch((error) => {
+    fieldRequests.delete(key);
+    throw error;
+  });
+  fieldRequests.set(key, request);
+  return request;
 }
 
 /**
@@ -770,8 +788,8 @@ export const CONNECTORS = dataPath("connectors.parquet");
 /**
  * Một trạm ở dạng panel cần — DESIGN.md §8a.
  *
- * Ba bảng, một lần đọc: `stations` (tài sản) · `station_occupancy` (30 ngày, LEFT JOIN vì
- * 236/939 trạm không có hồ sơ) · `connectors` (súng theo chuẩn).
+ * Ba nguồn, tách theo độ bắt buộc: `stations` là entity lõi; `station_occupancy` và
+ * `connectors` là evidence tùy chọn. Lỗi ở evidence không được xóa asset row hợp lệ.
  *
  * `occ` là `null` khi trạm không có dòng nào trong `station_occupancy`, và panel phải NÓI
  * ra điều đó thay vì in số 0 — ràng buộc 1 ở tầng chữ, đúng cùng luật `formatValue` giữ.
@@ -780,6 +798,8 @@ export interface StationDetail {
   station: CellRow;
   occ: CellRow | null;
   connectors: { standard: string; nRows: number; nGuns: number }[];
+  occStatus: "ready" | "not-found" | "unavailable";
+  connectorsStatus: "ready" | "unavailable";
 }
 
 /**
@@ -790,51 +810,58 @@ export interface StationDetail {
  */
 export async function fetchStation(id: string): Promise<StationDetail | null> {
   if (!STATION_ID_RE.test(id)) return null;
-  await Promise.all([
-    registerParquet(STATIONS),
-    registerParquet(OCCUPANCY),
-    registerParquet(CONNECTORS),
-  ]);
-  const t = await query(
-    `SELECT s.*, o.* EXCLUDE (station_code)
-     FROM read_parquet('${STATIONS}') s
-     LEFT JOIN read_parquet('${OCCUPANCY}') o ON o.station_code = s.station_code
-     WHERE s.station_id = '${id}'`,
-  );
+  await registerParquet(STATIONS);
+  const t = await query(`SELECT s.* FROM read_parquet('${STATIONS}') s WHERE s.station_id = '${id}'`);
   if (t.numRows === 0) return null;
   const row = t.get(0)!;
-  const flat: CellRow = {};
-  for (const f of t.schema.fields) flat[f.name] = toCellValue(row[f.name]);
-
-  // Cột của bảng occupancy tách ra khỏi cột của bảng station: panel in hai khối khác nhau,
-  // và một `undefined` lọt sang khối kia sẽ ra "⟨không có cột này ở đây⟩" (xem `formatValue`).
   const station: CellRow = {};
-  const occ: CellRow = {};
-  for (const k of STATION_COLUMNS) station[k] = flat[k];
-  for (const k of OCC_COLUMNS) occ[k] = flat[k];
-  // LEFT JOIN không khớp ⇒ MỌI cột occupancy là null. Dùng `util_reportable` làm cờ thì
-  // sai (nó null cả khi trạm CÓ hồ sơ mà không đủ chuẩn); `window_start_utc` thì không —
-  // nó là cột của chính ảnh chụp, có mặt ở mọi dòng của bảng đó.
-  const hasOcc = flat["window_start_utc"] != null;
+  for (const k of STATION_COLUMNS) station[k] = toCellValue(row[k]);
 
-  const c = await query(
-    `SELECT c.connector_standard AS std, count(*) AS n_rows, sum(c.count_total) AS n_guns
-     FROM read_parquet('${CONNECTORS}') c
-     JOIN read_parquet('${STATIONS}') s ON s.station_code = c.station_code
-     WHERE s.station_id = '${id}'
-     GROUP BY 1 ORDER BY 3 DESC`,
-  );
-  const connectors: StationDetail["connectors"] = [];
-  for (let i = 0; i < c.numRows; i++) {
-    const r = c.get(i)!;
-    connectors.push({
-      standard: String(r["std"]),
-      nRows: Number(r["n_rows"]),
-      nGuns: Number(r["n_guns"]),
-    });
+  // Occupancy and connector registry are optional evidence. A failure in either must not
+  // erase the valid Station asset row that was already resolved above.
+  let occ: CellRow | null = null;
+  let occStatus: StationDetail["occStatus"] = "not-found";
+  try {
+    await registerParquet(OCCUPANCY);
+    const o = await query(
+      `SELECT o.* FROM read_parquet('${OCCUPANCY}') o
+       JOIN read_parquet('${STATIONS}') s ON s.station_code = o.station_code
+       WHERE s.station_id = '${id}'`,
+    );
+    if (o.numRows > 0) {
+      const occRow = o.get(0)!;
+      occ = {};
+      for (const k of OCC_COLUMNS) occ[k] = toCellValue(occRow[k]);
+      occStatus = "ready";
+    }
+  } catch {
+    occStatus = "unavailable";
   }
 
-  return { station, occ: hasOcc ? occ : null, connectors };
+  const connectors: StationDetail["connectors"] = [];
+  let connectorsStatus: StationDetail["connectorsStatus"] = "ready";
+  try {
+    await registerParquet(CONNECTORS);
+    const c = await query(
+      `SELECT c.connector_standard AS std, count(*) AS n_rows, sum(c.count_total) AS n_guns
+       FROM read_parquet('${CONNECTORS}') c
+       JOIN read_parquet('${STATIONS}') s ON s.station_code = c.station_code
+       WHERE s.station_id = '${id}'
+       GROUP BY 1 ORDER BY 3 DESC`,
+    );
+    for (let i = 0; i < c.numRows; i++) {
+      const r = c.get(i)!;
+      connectors.push({
+        standard: String(r["std"]),
+        nRows: Number(r["n_rows"]),
+        nGuns: Number(r["n_guns"]),
+      });
+    }
+  } catch {
+    connectorsStatus = "unavailable";
+  }
+
+  return { station, occ, connectors, occStatus, connectorsStatus };
 }
 
 /** Cột của `stations.parquet` mà panel TRẠM đọc. Khai tường minh để đừng in cả bảng ra. */
@@ -881,9 +908,11 @@ const OCC_COLUMNS = [
   "peak_dow",
   "night_share",
   "weekend_ratio",
+  "ever_active",
   "util_denominator_ports",
   "util_pctl",
   "util_pctl_peer",
   "window_start_utc",
   "window_end_utc",
+  "snapshot_id",
 ] as const;

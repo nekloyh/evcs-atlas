@@ -22,11 +22,11 @@ import type { WindowBrush } from "../state/brush";
 import { DOW_LABELS, dowOf, hourOf, tOf } from "../state/types";
 import type { CityHour } from "../viz/occ";
 import { OBSERVED_H_MIN } from "../viz/occ";
-import { BASEMAP_HEX, HATCH_HEX, classOf, rampFor, type Scale } from "../viz/palette";
+import { BASEMAP_HEX, HATCH_HEX, INK_MUTED_HEX, classOf, rampFor, type Scale } from "../viz/palette";
 import { bandIndex, useDragRect } from "./brush-overlay";
 import { Readout } from "./Readout";
+import { CHART_W } from "./chart-size";
 
-const INK_MUTED = "#898781";
 const INK = "#0b0b0b";
 
 /**
@@ -36,7 +36,7 @@ const INK = "#0b0b0b";
  * 22h của hồ sơ, nếu không thì việc đọc chéo giữa hai hình — chính là lý do hồ sơ tồn tại —
  * đòi mắt phải tự căn. Chép hai bộ lề ra hai file là cách chúng lệch nhau sau lần sửa thứ ba.
  */
-export const HEAT_W = 344;
+export const HEAT_W = CHART_W;
 export const HEAT_M = { left: 26, right: 8 };
 
 const W = HEAT_W;
@@ -102,7 +102,7 @@ export function Heatmap168({
       marginRight: M.right,
       marginTop: M.top,
       marginBottom: M.bottom,
-      style: { background: "transparent", fontSize: "9px", color: INK_MUTED },
+      style: { background: "transparent", fontSize: "9px", color: INK_MUTED_HEX },
       x: { domain: Array.from({ length: 24 }, (_, i) => i), tickFormat: (h: number) => (h % 6 === 0 ? String(h) : ""), label: null },
       y: { domain: [0, 1, 2, 3, 4, 5, 6], tickFormat: (d: number) => DOW_LABELS[d] ?? "", label: null },
       marks: [

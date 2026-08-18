@@ -1,9 +1,9 @@
 import { useStore } from "../state/store";
-import type { BasemapStyle, OverlayId } from "../state/types";
+import type { OverlayId } from "../state/types";
 import { pct, type Manifest } from "../data/manifest";
 import { overlayUnavailableIn } from "../data/overlays";
 import { POI_BLOCK_HEIGHT_M, POI_GROUPS, type PoiShape } from "../data/poi";
-import { COLD_HEX, HATCH_HEX } from "../viz/palette";
+import { BASEMAP_HEX, COLD_HEX, HATCH_HEX } from "../viz/palette";
 
 /**
  * Tab LAYER — DESIGN.md §3c và §4d.
@@ -164,7 +164,7 @@ function ShapeSwatch({ shape }: { shape: OverlayMeta["shape"] }) {
       <span className="flex w-7 shrink-0 items-center justify-center gap-1">
         <span
           className="inline-block h-2 w-2 rounded-full"
-          style={{ background: COLD_HEX[2], boxShadow: "0 0 0 1.5px #f2f3f0" }}
+          style={{ background: COLD_HEX[2], boxShadow: `0 0 0 1.5px ${BASEMAP_HEX}` }}
         />
         <span
           className="inline-block h-2 w-2 rounded-full"
@@ -191,60 +191,22 @@ function ShapeSwatch({ shape }: { shape: OverlayMeta["shape"] }) {
   );
 }
 
-const BASEMAP_OPTIONS: { id: BasemapStyle; label: string; desc: string; preview: string }[] = [
-  {
-    id: "voyager",
-    label: "CARTO Voyager ⭐",
-    desc: "Bản đồ CARTO Voyager với hồ nước xanh ngọc, công viên xanh lá dịu, công trình màu cát & đường vàng (giống ảnh mẫu).",
-    preview: "bg-[#f4ecd8] border-[#eab308]",
-  },
-  {
-    id: "positron",
-    label: "CARTO Positron",
-    desc: "Bản đồ xám nhạt sáng tối giản, tập trung tối đa vào phân tích choropleth.",
-    preview: "bg-[#f2f3f0] border-[#94a3b8]",
-  },
-  {
-    id: "dark",
-    label: "CARTO Dark",
-    desc: "Bản đồ tối hiện đại (Dark Mode), tương phản cao với dải màu telemetry.",
-    preview: "bg-[#090d12] border-[#475569]",
-  },
-];
+/*
+ * KHỐI CHỌN NỀN BẢN ĐỒ đã bỏ khỏi đây — đợt 17/8/2026.
+ *
+ * Nó là bản sao thứ hai của bộ chọn nền vốn đã nằm trong nav rail (§3a: "chuyển mode, chọn
+ * tỉnh, bật/tắt lớp, 2D/3D"), và hai bộ chọn cho cùng một state là hai chỗ phải nhớ sửa
+ * cùng lúc. Bản ở đây còn dùng ba class không tồn tại trong `@theme` (`text-ink-1`,
+ * `border-cold`, `text-cold`), nên "đang chọn" của nó rơi về không có kiểu gì — một trạng
+ * thái vô hình, kiểu lỗi mà chỉ ảnh chụp mới bắt được. Bộ chọn thật ở nav rail.
+ */
 
 export function LayersTab({ manifest }: { manifest: Manifest | null }) {
   const layers = useStore((s) => s.layers);
   const toggle = useStore((s) => s.toggleLayer);
-  const basemapStyle = useStore((s) => s.basemapStyle);
-  const setBasemapStyle = useStore((s) => s.setBasemapStyle);
 
   return (
     <div className="text-title">
-      <div className="border-b border-hairline p-2 bg-basemap/50">
-        <div className="mb-1.5 font-semibold text-ink-1 uppercase tracking-wider text-note">
-          Bản đồ nền (Basemap Style)
-        </div>
-        <div className="grid grid-cols-3 gap-1">
-          {BASEMAP_OPTIONS.map((b) => {
-            const active = basemapStyle === b.id;
-            return (
-              <button
-                key={b.id}
-                onClick={() => setBasemapStyle(b.id)}
-                title={b.desc}
-                className={`flex flex-col items-center justify-center p-1.5 rounded border text-center transition-all cursor-pointer ${
-                  active
-                    ? "border-cold bg-basemap font-semibold text-cold shadow-sm"
-                    : "border-hairline hover:bg-basemap text-ink-2"
-                }`}
-              >
-                <span className={`w-3.5 h-3.5 rounded-full border mb-1 ${b.preview}`} />
-                <span className="text-note leading-tight">{b.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
       {OVERLAYS.map((o) => {
         const on = layers.has(o.id);
         const note = manifest ? o.note?.(manifest) : null;

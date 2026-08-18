@@ -6,6 +6,7 @@ import {
   unitSentence,
   type FieldMeta,
   type RuntimeCoverage,
+  hasDemandRepresentations,
 } from "../fields";
 import { pct, type Manifest } from "../data/manifest";
 import { SURFACE_CELL_M } from "../data/queries";
@@ -120,7 +121,7 @@ export function Legend({
   );
   const surfaceLabels = formatSeries(surfaceBreaks, surfaceUnit);
 
-  const demandP1 = scene === null && field.id === "population" && field.readAs === "cell";
+  const demandP1 = scene === null && hasDemandRepresentations(field);
   if (demandP1 && (demandRepresentation === "density" || demandRepresentation === "hybrid")) {
     return (
       <div className={floating ? "flex flex-col gap-2 text-body" : "flex h-10 shrink-0 items-stretch border-b border-hairline text-body"}>
@@ -130,7 +131,7 @@ export function Legend({
             return <div key={b} className="flex min-w-20 items-center justify-center px-2 tabular-nums" style={{ background: themePalette.hex[k], color: themePalette.ink[k] }}>{surfaceLabels[i]}</div>;
           })}
         </div>
-        <div className="flex items-center px-3 text-ink-2">density định lượng · {surfaceUnit.label}/ô gộp {(SURFACE_CELL_M / 1000).toLocaleString("vi-VN")} km</div>
+        <div className="flex items-center px-3 text-ink-2">đồng mức định lượng · {surfaceUnit.label}/ô gộp {(SURFACE_CELL_M / 1000).toLocaleString("vi-VN")} km</div>
         {demandRepresentation === "hybrid" && <div className="flex items-center px-3 text-cold-2">chấm: √ số cổng, 3–15 px · vòng xám: chưa biết cổng</div>}
         <div className={floating ? "text-ink-muted" : "ml-auto flex items-center px-3 text-ink-muted"}>gộp {SURFACE_CELL_M} m · ngưỡng thật</div>
       </div>
@@ -138,7 +139,7 @@ export function Legend({
   }
 
   if (demandP1 && demandRepresentation === "intensity") {
-    return <div className={floating ? "text-body text-ink-2" : "flex h-10 shrink-0 items-center border-b border-hairline px-3 text-body text-ink-2"}>intensity hotspot · màu phụ thuộc bán kính 42 px và zoom · chỉ để khám phá pattern, <strong className="ml-1">không so sánh định lượng</strong></div>;
+    return <div className={floating ? "text-body text-ink-2" : "flex h-10 shrink-0 items-center border-b border-hairline px-3 text-body text-ink-2"}>bản đồ nhiệt · màu phụ thuộc bán kính 42 px và mức phóng · chỉ để tìm vùng nóng, <strong className="ml-1">không so sánh định lượng</strong></div>;
   }
 
   if (demandP1 && demandRepresentation === "bivariate") {
@@ -452,9 +453,22 @@ function RampRuler({
   // "bậc thứ mấy" cộng phần nội suy TRONG bậc đó — đủ để nói "gần đầu bậc" hay "sát ngưỡng
   // trên", mà không giả vờ rằng bề rộng trên màn hình tỉ lệ với khoảng giá trị (nó không).
   const markPct = markPosition(selectedValue, scale);
+  const aria = (() => {
+    if (scale.kind === "categorical") {
+      const categories = scale.categories.map((category, i) =>
+        `${constantShort(category)}: ${scale.counts[i]?.toLocaleString("vi-VN") ?? 0} ${unitNoun(field.readAs)}`,
+      );
+      return `${field.label}. Thang hạng mục, không có thứ tự liên tục. ${categories.join("; ")}.`;
+    }
+    if (scale.kind === "bool") {
+      return `${field.label}. Không: ${scale.counts[0].toLocaleString("vi-VN")}; có: ${scale.counts[1].toLocaleString("vi-VN")}.`;
+    }
+    const selected = selectedValue === null ? "" : ` Giá trị đang chọn: ${fmt(selectedValue)}.`;
+    return `${unitSentence(field, unit)}. Các ngưỡng hiển thị: ${labels.join(", ")}.${selected}`;
+  })();
 
   return (
-    <div>
+    <div role="img" aria-label={aria}>
       {/* Mốc nằm TRÊN dải, mốc giá trị nằm DƯỚI: hai hàng chữ không bao giờ tranh chỗ nhau,
           và cái đang chọn được đọc trước cái tổng quát — đúng thứ tự người xem cần. */}
       {markPct !== null && (
@@ -557,16 +571,18 @@ function LegendNulls({
 /** Chú giải phải là đúng cái mark trên bản đồ: đường → nét, trạm → chấm rỗng, còn lại → vân. */
 function NullSwatch({ readAs, angle }: { readAs: FieldMeta["readAs"]; angle: 45 | 90 }) {
   if (readAs === "road")
-    return <span className="inline-block h-0.5 w-4" style={{ background: HATCH_HEX }} />;
+    return <span aria-hidden="true" className="inline-block h-0.5 w-4" style={{ background: HATCH_HEX }} />;
   if (readAs === "station")
     return (
       <span
+        aria-hidden="true"
         className="inline-block h-2.5 w-2.5 rounded-full border-[1.5px]"
         style={{ borderColor: HATCH_HEX }}
       />
     );
   return (
     <span
+      aria-hidden="true"
       className="inline-block h-2.5 w-4 border border-hairline"
       style={{
         backgroundImage: `repeating-linear-gradient(${angle}deg, ${HATCH_HEX} 0 1px, transparent 1px 5px)`,

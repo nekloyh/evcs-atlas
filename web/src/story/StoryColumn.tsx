@@ -62,7 +62,10 @@ export function StoryColumn({
   return (
     <aside
       ref={root}
-      className="w-100 shrink-0 overflow-y-auto border-l border-hairline bg-panel"
+      /* `border-r`, không `border-l`: từ đợt 17/8/2026 cột này đứng ở khe TRÁI, đúng khe mà
+         cột đọc chiếm ngoài chế độ CÂU CHUYỆN (§3h). Một hairline vẽ sai cạnh không hỏng
+         layout — nó chỉ để cột trôi ra khỏi bản đồ, thứ mắt thấy trước khi hiểu vì sao. */
+      className="w-100 shrink-0 overflow-y-auto border-r border-hairline bg-panel"
     >
       {SCENES.map((s, i) => (
         <section

@@ -314,6 +314,7 @@ test("không lọc thì ngưỡng zoom cũ còn nguyên — §13b-2 không đư�
 
 const VIEW = { lng: 105.84, lat: 21, zoom: 9.3, pitch: 0, bearing: 0 };
 const MAP_STATE: HashState = {
+  nationalMode: false,
   field: "population",
   mode: "2d",
   view: VIEW,

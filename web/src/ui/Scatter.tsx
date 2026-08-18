@@ -23,17 +23,17 @@ import * as Plot from "@observablehq/plot";
 
 import type { Range, ScatterBrush } from "../state/brush";
 import { SCATTER_X, SCATTER_Y } from "../state/brush";
-import { HAIRLINE_HEX, RAMP_HEX, formatBreak, mutedCss } from "../viz/palette";
+import { HAIRLINE_HEX, INK_MUTED_HEX, RAMP_HEX, formatBreak, mutedCss } from "../viz/palette";
 import { toData, toPx, useDragRect, type Axis } from "./brush-overlay";
 import { Readout } from "./Readout";
+import { CHART_W } from "./chart-size";
 
 const SERIES = RAMP_HEX[4];
-const INK_MUTED = "#898781";
 // Chấm 1,3 px cần mực ĐẶC hơn cột histogram: §4d đã lập sẵn tiền lệ — "nét mảnh ở
 // alpha 0,5 thì biến mất, đó là lỗi chứ không phải nhất quán". Cùng ký hiệu, khác độ đặc.
 const MUTED_CSS = mutedCss(0.55);
 
-const W = 344;
+const W = CHART_W;
 const H = 168;
 const M = { left: 40, right: 8, top: 6, bottom: 26 };
 
@@ -99,7 +99,7 @@ export function Scatter({
       marginRight: M.right,
       marginTop: M.top,
       marginBottom: M.bottom,
-      style: { background: "transparent", fontSize: "9px", color: INK_MUTED },
+      style: { background: "transparent", fontSize: "9px", color: INK_MUTED_HEX },
       x: { type: "sqrt", domain: [0, dom.xh], ticks: 4, tickFormat: formatBreak, label: "dân số ô →", labelOffset: 22 },
       y: { domain: [0, dom.yh], ticks: 4, tickFormat: formatBreak, label: "↑ m tới trạm" },
       marks: [

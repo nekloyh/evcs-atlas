@@ -11,16 +11,16 @@ import { useEffect, useMemo, useRef } from "react";
 import * as Plot from "@observablehq/plot";
 
 import type { Range } from "../state/brush";
-import { HAIRLINE_HEX, RAMP_HEX, formatBreak, mutedCss } from "../viz/palette";
+import { HAIRLINE_HEX, INK_MUTED_HEX, RAMP_HEX, formatBreak, mutedCss } from "../viz/palette";
 import { toData, toPx, useDragRect, type Axis } from "./brush-overlay";
 import { Readout } from "./Readout";
+import { CHART_W } from "./chart-size";
 
 const SERIES = RAMP_HEX[4];
-const INK_MUTED = "#898781";
 /** Cột bị brush loại — CÙNG màu mà bản đồ dùng cho ô bị loại (§4e). */
 const MUTED_CSS = mutedCss();
 
-const W = 344;
+const W = CHART_W;
 const H = 108;
 const M = { left: 34, right: 8, top: 6, bottom: 20 };
 const N_BINS = 32;
@@ -113,7 +113,7 @@ export function Histogram({
       marginRight: M.right,
       marginTop: M.top,
       marginBottom: M.bottom,
-      style: { background: "transparent", fontSize: "9px", color: INK_MUTED },
+      style: { background: "transparent", fontSize: "9px", color: INK_MUTED_HEX },
       // CÙNG `domain` mà `axis` dùng — hai bên không thể lệch nhau, xem `brush-overlay.tsx`.
       x: { domain: [model.lo, model.hi], ticks: 4, tickFormat: formatBreak, label: null },
       y: { domain: [0, model.max], ticks: 2, label: null, tickFormat: (d: number) => formatBreak(d) },
@@ -136,7 +136,7 @@ export function Histogram({
         ...(model.median === null
           ? []
           : [
-              Plot.ruleX([model.median], { stroke: INK_MUTED, strokeWidth: 1 }),
+              Plot.ruleX([model.median], { stroke: INK_MUTED_HEX, strokeWidth: 1 }),
               Plot.text([model.median], {
                 x: (d: number) => d,
                 y: model.max,
@@ -144,7 +144,7 @@ export function Histogram({
                 dy: -1,
                 dx: 3,
                 textAnchor: "start",
-                fill: INK_MUTED,
+                fill: INK_MUTED_HEX,
                 fontSize: 9,
               }),
             ]),

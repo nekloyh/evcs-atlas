@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as Plot from "@observablehq/plot";
 
-import { RAMP_HEX, HAIRLINE_HEX, BASEMAP_HEX } from "../viz/palette";
+import { RAMP_HEX, HAIRLINE_HEX, BASEMAP_HEX, INK_2_HEX, INK_MUTED_HEX } from "../viz/palette";
 import { Readout } from "../ui/Readout";
 import { areaShareForPop, popShareForArea, thin, type Lorenz } from "./lorenz";
 
@@ -24,8 +24,7 @@ import { areaShareForPop, popShareForArea, thin, type Lorenz } from "./lorenz";
 const SERIES = RAMP_HEX[4];
 /** `c7` — điểm được gọi tên. Nhấn bằng độ đậm trong cùng ramp (§4d-2). */
 const CALLOUT = RAMP_HEX[6];
-const INK_2 = "#52514e";
-const INK_MUTED = "#898781";
+const INK_2 = INK_2_HEX;
 
 /** Ngưỡng được gọi tên trên đường cong: "bao nhiêu phần diện tích thì đủ chứa một nửa Hà Nội". */
 export const CALLOUT_POP_SHARE = 0.5;
@@ -67,7 +66,7 @@ export function LorenzChart({ data, width = 356 }: { data: Lorenz; width?: numbe
       marginBottom: 34,
       marginTop: 10,
       marginRight: MARGIN.right,
-      style: { background: "transparent", fontSize: "10px", color: INK_MUTED },
+      style: { background: "transparent", fontSize: "10px", color: INK_MUTED_HEX },
       x: {
         domain: [0, 1],
         label: "phần diện tích Hà Nội, dày dân nhất trước →",

@@ -10,7 +10,7 @@ import {
   type DetourStats,
   type ShowcaseRoute,
 } from "../data/queries";
-import { useStore } from "../state/store";
+import { selectionWireOf, useStore } from "../state/store";
 import { formatNumber } from "../ui/format";
 import { LorenzChart, CALLOUT_POP_SHARE } from "./LorenzChart";
 import { areaShareForPop, lorenz, popShareForArea, type Lorenz } from "./lorenz";
@@ -147,7 +147,7 @@ function communeFacts(fc: CommuneCollection | null): { facts: CommuneFacts[]; me
 }
 
 export function SceneCungLech({ communes }: { communes: CommuneCollection | null }) {
-  const selected = useStore((s) => s.cell);
+  const selected = useStore(selectionWireOf);
   const flyTo = useStore((s) => s.flyTo);
   const { facts, median } = communeFacts(communes);
 
@@ -207,8 +207,9 @@ export function SceneCungLech({ communes }: { communes: CommuneCollection | null
       <Para>
         Bấm vào một trong hai thẻ trên để bay tới xã đó. Bản đồ đang tô{" "}
         <strong>cổng trên 10k dân</strong> — cùng trường mở app, vì luận điểm này đã được trả
-        lời ngay ở màn hình đầu tiên và không cần tô lại. Cực tính đã đảo (M2.1-B) nên{" "}
-        <strong>đậm = thiếu cung</strong>. Chấm là 939 trạm công cộng.
+        lời ngay ở màn hình đầu tiên và không cần tô lại. Thang tuần tự giữ
+        ngữ pháp chung: <strong>nhạt = ít cổng/10k dân, đậm = nhiều</strong>. Chấm là
+        939 trạm công cộng.
       </Para>
       <Para>
         Đây là <em>tỉ số</em>, và tỉ số với mẫu số nhỏ thì vọt: một xã ít dân có vài trạm lớn

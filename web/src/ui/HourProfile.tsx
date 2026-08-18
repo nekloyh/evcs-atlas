@@ -39,13 +39,12 @@ import { useMemo, useState } from "react";
 import { HOURS_IN_WEEK } from "../state/types";
 import type { CityHour } from "../viz/occ";
 import { hourProfile, type HourBand } from "../viz/occ";
-import { HAIRLINE_HEX, RAMP_HEX } from "../viz/palette";
+import { HAIRLINE_HEX, INK_MUTED_HEX, RAMP_HEX } from "../viz/palette";
 import { HEAT_M, HEAT_W } from "./Heatmap168";
 import { Readout } from "./Readout";
 
 /** `c5` — chuỗi dữ liệu, cùng hex mà histogram và Lorenz dùng (§4d-2). */
 const SERIES = RAMP_HEX[4]!;
-const INK_MUTED = "#898781";
 
 const W = HEAT_W;
 const H = 64;
@@ -107,10 +106,10 @@ export function HourProfile({
         {/* Lưới: đúng hai mức — 0 và đỉnh. Nhiều hơn thì lưới cạnh tranh với chính dữ liệu
             trong một hình cao 44 px. */}
         <line x1={M.left} y1={y(0)} x2={W - M.right} y2={y(0)} stroke={HAIRLINE_HEX} strokeWidth="1" />
-        <text x={0} y={y(0)} fontSize="8" fill={INK_MUTED} dominantBaseline="middle">
+        <text x={0} y={y(0)} fontSize="8" fill={INK_MUTED_HEX} dominantBaseline="middle">
           0
         </text>
-        <text x={0} y={M.top + 3} fontSize="8" fill={INK_MUTED}>
+        <text x={0} y={M.top + 3} fontSize="8" fill={INK_MUTED_HEX}>
           {pctShort(top)}
         </text>
 
@@ -148,7 +147,7 @@ export function HourProfile({
         />
 
         {[0, 6, 12, 18].map((h) => (
-          <text key={h} x={x(h)} y={H - 2} fontSize="8" fill={INK_MUTED}>
+          <text key={h} x={x(h)} y={H - 2} fontSize="8" fill={INK_MUTED_HEX}>
             {h}h
           </text>
         ))}

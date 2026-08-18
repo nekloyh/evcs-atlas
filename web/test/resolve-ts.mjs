@@ -20,7 +20,11 @@ registerHooks({
       try {
         return next(`${specifier}.ts`, context);
       } catch {
-        // Không có `.ts` thì để Node báo lỗi gốc — thông báo của nó rõ hơn của ta.
+        try {
+          return next(`${specifier}.tsx`, context);
+        } catch {
+          // Không có `.ts` hay `.tsx` thì để Node báo lỗi gốc — thông báo của nó rõ hơn của ta.
+        }
       }
     }
     return next(specifier, context);
