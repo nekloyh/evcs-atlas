@@ -43,6 +43,7 @@ def _steps() -> list[Step]:
         n11_web_export,
         n12_national,
         n14_showcase,
+        n15_sim_calibration,
     )
 
     return [
@@ -61,6 +62,7 @@ def _steps() -> list[Step]:
             n11_web_export,
             n12_national,
             n14_showcase,
+            n15_sim_calibration,
         )
     ]
 

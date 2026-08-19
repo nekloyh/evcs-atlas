@@ -749,6 +749,11 @@ export interface StationPoint {
   stationCode?: string;
   /** `op_status` thô — `OPERATIONAL` · `MAINTENANCE` · `OUT_OF_SERVICE` · `UNKNOWN`. */
   opStatus: string;
+  /**
+   * `access` thô — mô phỏng P6 cần nó để bộ lọc trạm đủ điều kiện byte-identical với
+   * `n07_distance.py:66` (`access != 'RESTRICTED'`, vắng thì VẪN đủ điều kiện như pandas).
+   */
+  access: string | null;
   /** Số cổng ASSET; chỉ P1 Hybrid dùng bán kính như một encoding có legend riêng. */
   nPorts: number | null;
   currentType?: string | null;
@@ -788,7 +793,7 @@ export function fetchStations(): Promise<StationPoint[]> {
   stationCache = (async () => {
     await registerParquet(STATIONS);
     const t = await query(
-      `SELECT station_id, station_code, lat, lng, scope, op_status,
+      `SELECT station_id, station_code, lat, lng, scope, op_status, access,
               n_ports, current_type, power_kw_max_port, power_kw_site,
               name, address, operator, commune_name
        FROM read_parquet('${STATIONS}')
@@ -801,6 +806,7 @@ export function fetchStations(): Promise<StationPoint[]> {
     const lngs = t.getChild("lng")!;
     const scopes = t.getChild("scope")!;
     const ops = t.getChild("op_status")!;
+    const accesses = t.getChild("access")!;
     const ports = t.getChild("n_ports")!;
     const cTypes = t.getChild("current_type")!;
     const maxKw = t.getChild("power_kw_max_port")!;
@@ -832,6 +838,7 @@ export function fetchStations(): Promise<StationPoint[]> {
         inScope: isInScope(scopeVal),
         scope: scopeVal,
         opStatus: String(ops.get(i) ?? "UNKNOWN"),
+        access: text(accesses, i),
         nPorts: pVal,
         currentType: cTypeVal,
         powerKwMaxPort: maxPortKw,

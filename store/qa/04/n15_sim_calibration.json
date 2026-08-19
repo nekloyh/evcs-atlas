@@ -1,0 +1,70 @@
+{
+  "layer": "n15_sim_calibration",
+  "province_name": "Tỉnh Cao Bằng",
+  "method": "Hiệu chuẩn detour_ratio theo dải khoảng cách và đánh giá leave-self-out (ring >= 3 giá trị như client, band-only khi thiếu)",
+  "province_code": "04",
+  "stats": {
+    "province_code": "04",
+    "valid": true,
+    "validation": {
+      "n": 7437,
+      "within_20pct": 0.717,
+      "upper_miss": 0.074
+    },
+    "bands": {
+      "200-500": {
+        "n": 20,
+        "med": 1.774,
+        "p90": 3.262,
+        "merged": true
+      },
+      "500-1000": {
+        "n": 68,
+        "med": 1.808,
+        "p90": 3.303
+      },
+      "1000-2000": {
+        "n": 241,
+        "med": 1.633,
+        "p90": 2.856
+      },
+      "2000-3000": {
+        "n": 337,
+        "med": 1.641,
+        "p90": 2.929
+      },
+      "3000-5000": {
+        "n": 941,
+        "med": 1.726,
+        "p90": 3.275
+      },
+      "5000-inf": {
+        "n": 5830,
+        "med": 1.733,
+        "p90": 2.644
+      }
+    },
+    "near": null,
+    "merged_bands": [
+      "200-500"
+    ],
+    "elapsed_s": 0.15
+  },
+  "checks": [
+    {
+      "name": "validation_cells_sufficient",
+      "status": "PASS",
+      "detail": "7437 ratio-defined cells (min 300)"
+    },
+    {
+      "name": "upper_miss_in_bounds",
+      "status": "PASS",
+      "detail": "upper_miss 7.4% trong [5%, 15%]"
+    },
+    {
+      "name": "merged_bands_recorded",
+      "status": "PASS",
+      "detail": "dải gộp: ['200-500']"
+    }
+  ]
+}

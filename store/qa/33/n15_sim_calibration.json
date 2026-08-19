@@ -1,0 +1,71 @@
+{
+  "layer": "n15_sim_calibration",
+  "province_name": "Tỉnh Hưng Yên",
+  "method": "Hiệu chuẩn detour_ratio theo dải khoảng cách và đánh giá leave-self-out (ring >= 3 giá trị như client, band-only khi thiếu)",
+  "province_code": "33",
+  "stats": {
+    "province_code": "33",
+    "valid": true,
+    "validation": {
+      "n": 3350,
+      "within_20pct": 0.696,
+      "upper_miss": 0.094
+    },
+    "bands": {
+      "200-500": {
+        "n": 148,
+        "med": 1.868,
+        "p90": 4.984
+      },
+      "500-1000": {
+        "n": 381,
+        "med": 1.66,
+        "p90": 3.024
+      },
+      "1000-2000": {
+        "n": 981,
+        "med": 1.513,
+        "p90": 2.312
+      },
+      "2000-3000": {
+        "n": 844,
+        "med": 1.433,
+        "p90": 2.046
+      },
+      "3000-5000": {
+        "n": 781,
+        "med": 1.366,
+        "p90": 1.848
+      },
+      "5000-inf": {
+        "n": 215,
+        "med": 1.311,
+        "p90": 1.609
+      }
+    },
+    "near": {
+      "n": 31,
+      "net_p50": 304,
+      "net_p90": 578
+    },
+    "merged_bands": [],
+    "elapsed_s": 0.06
+  },
+  "checks": [
+    {
+      "name": "validation_cells_sufficient",
+      "status": "PASS",
+      "detail": "3350 ratio-defined cells (min 300)"
+    },
+    {
+      "name": "upper_miss_in_bounds",
+      "status": "PASS",
+      "detail": "upper_miss 9.4% trong [5%, 15%]"
+    },
+    {
+      "name": "merged_bands_recorded",
+      "status": "PASS",
+      "detail": "dải gộp: không có"
+    }
+  ]
+}

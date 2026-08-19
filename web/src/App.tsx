@@ -52,10 +52,14 @@ import { EvidenceCard } from "./components/atlas/EvidenceCard";
 import { AppShell } from "./components/atlas/AppShell";
 import { MapWorkspace, ModeSwitch, Workspace } from "./components/atlas/Workspace";
 import NationalApp from "./national/NationalApp";
-import type { AppNavMode } from "./state/types";
 import { allOccValues, occCountAt, occCoverage, stationOccAt } from "./viz/occ";
 import { buildScale, computeClassingByWeight, type Scale } from "./viz/palette";
 import { bivariateAxes } from "./viz/demand";
+import { useSimulationStore } from "./simulation/store";
+import { useSimulationController } from "./simulation/use-simulation";
+import type { AppNavMode, HashState } from "./state/types";
+import { readHash } from "./state/hash";
+import { currentDataset } from "./data/province";
 
 /**
  * Nav — DESIGN.md §3a.
@@ -119,34 +123,66 @@ export default function App() {
 
   // Hash là serialization HAI CHIỀU: ghi có debounce 250ms, và nghe `hashchange` để sửa
   // tay URL / bấm Back đều có tác dụng — §9.
-  useEffect(
-    () =>
-      syncHash(
-        useStore.subscribe,
-        // Store giữ `layers` là `Set` (thêm/bớt một phần tử là O(1) và không trùng lặp);
-        // hash giữ nó là MẢNG vì thứ tự trong chuỗi phải ổn định. Chuyển đổi ở đúng ranh
-        // giới giữa hai thế giới, không bắt bên nào mang kiểu của bên kia.
-        () => {
-          const s = useStore.getState();
-          return {
-            field: s.field,
-            mode: s.mode,
-            view: s.view,
-            layers: [...s.layers],
-            paintOn: s.paintOn,
-            cell: selectionWireOf(s),
-            selection: s.selection,
-            scene: s.scene,
-            dataMode: s.dataMode,
-            nationalMode: s.nationalMode,
-            t: s.t,
-            filter: s.filter.active,
-          };
-        },
-        useStore.getState().applyHash,
-      ),
-    [],
-  );
+  useEffect(() => {
+    // Khôi phục ứng viên mô phỏng từ hash lúc boot — TRỪ toàn quốc và proxy (F11): r6
+    // không có cột khoảng cách và gói proxy không có lưới; `sim=` ở đó bị bỏ qua lặng lẽ.
+    const boot = readHash();
+    const ds = currentDataset(window.location.hash);
+    if (boot.candidate && ds !== "vn" && ds !== "poi") {
+      useSimulationStore.getState().setCandidate(boot.candidate);
+    }
+
+    return syncHash(
+      (listener) => {
+        const u1 = useStore.subscribe(listener);
+        const u2 = useSimulationStore.subscribe(listener);
+        return () => {
+          u1();
+          u2();
+        };
+      },
+      // Store giữ `layers` là `Set` (thêm/bớt một phần tử là O(1) và không trùng lặp);
+      // hash giữ nó là MẢNG vì thứ tự trong chuỗi phải ổn định. Chuyển đổi ở đúng ranh
+      // giới giữa hai thế giới, không bắt bên nào mang kiểu của bên kia.
+      (): HashState => {
+        const s = useStore.getState();
+        const sim = useSimulationStore.getState();
+        return {
+          field: s.field,
+          mode: s.mode,
+          view: s.view,
+          layers: [...s.layers],
+          paintOn: s.paintOn,
+          cell: selectionWireOf(s),
+          selection: s.selection,
+          scene: s.scene,
+          dataMode: s.dataMode,
+          nationalMode: s.nationalMode,
+          t: s.t,
+          filter: s.filter.active,
+          candidate: sim.candidate,
+        };
+      },
+      (h, context) => {
+        useStore.getState().applyHash(h, context);
+        // Hash là nguồn sự thật hai chiều cho `sim=` (T22): vắng khoá là KHÔNG có ứng
+        // viên — Back/Forward về một hash không có `sim=` phải xoá nó, bất kể có selection
+        // hay không. `setCandidate` tự bỏ qua khi toạ độ không đổi nên không tính lại thừa.
+        useSimulationStore.getState().setCandidate(h.candidate ?? null);
+      },
+    );
+  }, []);
+
+  // Hook điều khiển tính toán mô phỏng trạm giả định (Phase 6). Dữ liệu ô KHÔNG đi từ
+  // snapshot trường đang tô: §2.2 quy định một truy vấn vùng riêng tại thời điểm đặt.
+  useSimulationController({
+    provinceCode: manifest?.province?.province_code,
+    boundary,
+    stations,
+    communes,
+    manifest,
+    highLoadEvaluable: layerUsable("occupancy"),
+  });
 
   useEffect(() => {
     void loadManifest().then(setManifest, fail);
@@ -621,6 +657,28 @@ export default function App() {
     />
   );
 
+  const candidate = useSimulationStore((s) => s.candidate);
+  const placementMode = useSimulationStore((s) => s.placementMode);
+  const setPlacementMode = useSimulationStore((s) => s.setPlacementMode);
+  const clearCandidate = useSimulationStore((s) => s.clearCandidate);
+  // F2/F11 — toggle chỉ TỒN TẠI khi gói đang mở có hiệu chuẩn hợp lệ (spec: "Toggle
+  // hidden", không phải "toggle báo lỗi"). Toàn quốc/proxy không bao giờ có calibration
+  // (loader không nhận mã tỉnh) nên cùng một cổng che cả F11.
+  const simFeatureOn = useSimulationStore((s) => Boolean(s.calibration?.valid));
+
+  // Esc thoát chế độ ĐẶT khi chưa có ứng viên. Khi đã có ứng viên/lỗi thì EvidenceCard
+  // sở hữu Esc (§8) — hai cổng rời nhau vì `setCandidate` đã tắt placementMode.
+  useEffect(() => {
+    if (!placementMode) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      useSimulationStore.getState().setPlacementMode(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [placementMode]);
+
   return (
     <AppShell nav={
       <NavRail
@@ -637,6 +695,22 @@ export default function App() {
         onToggleReadColumn={() => setReadColumnOpen(!readColumnOpen)}
         layerCount={layerCount}
         overlayControls={<LayersTab manifest={manifest} />}
+        placementMode={placementMode}
+        candidateActive={Boolean(candidate)}
+        onTogglePlacement={
+          simFeatureOn
+            ? () => {
+                if (placementMode) {
+                  setPlacementMode(false);
+                } else if (candidate) {
+                  clearCandidate();
+                } else {
+                  useStore.getState().selectCell(null);
+                  setPlacementMode(true);
+                }
+              }
+            : undefined
+        }
       />
     }>
       <Workspace error={error} bottom={scrubberVisible ? <Scrubber field={field} /> : undefined}>

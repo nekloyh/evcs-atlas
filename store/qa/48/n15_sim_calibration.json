@@ -1,0 +1,71 @@
+{
+  "layer": "n15_sim_calibration",
+  "province_name": "Thành phố Đà Nẵng",
+  "method": "Hiệu chuẩn detour_ratio theo dải khoảng cách và đánh giá leave-self-out (ring >= 3 giá trị như client, band-only khi thiếu)",
+  "province_code": "48",
+  "stats": {
+    "province_code": "48",
+    "valid": true,
+    "validation": {
+      "n": 9356,
+      "within_20pct": 0.727,
+      "upper_miss": 0.077
+    },
+    "bands": {
+      "200-500": {
+        "n": 105,
+        "med": 1.661,
+        "p90": 3.252
+      },
+      "500-1000": {
+        "n": 319,
+        "med": 1.559,
+        "p90": 2.701
+      },
+      "1000-2000": {
+        "n": 796,
+        "med": 1.504,
+        "p90": 2.516
+      },
+      "2000-3000": {
+        "n": 828,
+        "med": 1.465,
+        "p90": 2.28
+      },
+      "3000-5000": {
+        "n": 1400,
+        "med": 1.461,
+        "p90": 2.243
+      },
+      "5000-inf": {
+        "n": 5908,
+        "med": 1.734,
+        "p90": 2.386
+      }
+    },
+    "near": {
+      "n": 38,
+      "net_p50": 237,
+      "net_p90": 512
+    },
+    "merged_bands": [],
+    "elapsed_s": 0.19
+  },
+  "checks": [
+    {
+      "name": "validation_cells_sufficient",
+      "status": "PASS",
+      "detail": "9356 ratio-defined cells (min 300)"
+    },
+    {
+      "name": "upper_miss_in_bounds",
+      "status": "PASS",
+      "detail": "upper_miss 7.7% trong [5%, 15%]"
+    },
+    {
+      "name": "merged_bands_recorded",
+      "status": "PASS",
+      "detail": "dải gộp: không có"
+    }
+  ]
+}

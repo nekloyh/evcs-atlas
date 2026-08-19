@@ -265,6 +265,13 @@ _PROVINCE = [
         "commune.parquet",
         desc="Bảng theo xã: ranh giới, dân số, cung, mức sử dụng",
     ),
+    Dataset(
+        "sim_calibration",
+        "province",
+        "product",
+        "sim_calibration.json",
+        desc="Hiệu chuẩn mô phỏng không gian cục bộ (Phase 6)",
+    ),
 ]
 
 # ── CHẤT LƯỢNG ─────────────────────────────────────────────────────────────────

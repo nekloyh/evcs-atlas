@@ -384,6 +384,11 @@ def export_province(code: str) -> dict:
             }
         )
 
+    cal_path = src / "sim_calibration.json"
+    if cal_path.exists():
+        shutil.copy2(cal_path, d / "sim_calibration.json")
+        note("sim_calibration.json", d / "sim_calibration.json")
+
     occ_tbl = pq.read_table(
         src / "station_occupancy.parquet",
         columns=["snapshot_id", "window_start_utc", "window_end_utc"],
@@ -683,6 +688,9 @@ STEP = Step(
         "station_profile_168h",
         "roads",
         "poi_visual",
+        # n11 COPY file hiệu chuẩn P6 vào gói web — thiếu khai báo này thì topo-order có
+        # thể chạy n11 trước n15 trên pipeline sạch và gói web thiếu file một cách im lặng.
+        "sim_calibration",
     ),
     extra_writes=lambda _p: outputs(),
     desc="xuất store cho web theo tỉnh + chỉ mục toàn quốc, đo ngân sách dung lượng",

@@ -29,10 +29,15 @@ import {
 } from "../story/scenes";
 import { majorBridges } from "../story/bridges";
 import type { DemandRepresentation, Mode, OverlayId } from "../state/types";
+import { PathStyleExtension } from "@deck.gl/extensions";
+import { cellToBoundary } from "h3-js";
 import { HatchExtension } from "../viz/hatch-extension";
 import { planFor } from "../viz/render-plan";
 import { cellIdOf, communeCodeOf, poiRefOf, roadIdOf, serializeSelection, stationIdOf } from "../data/h3";
 import { dacKhuLabels, type DacKhuLabel } from "../data/dackhu";
+import { useSimulationStore } from "../simulation/store";
+import type { CandidatePoint, SimulationResult } from "../simulation/types";
+import { generateCirclePath } from "../simulation/geometry";
 import {
   STATUS_ICON_ID,
   isAbnormal,
@@ -296,7 +301,16 @@ export function MapView(props: Props) {
          * `info.picked` là cổng: bấm trúng một mark thì `onClick` của chính lớp đó đã chọn
          * đối tượng mới, và bỏ chọn ngay sau đấy sẽ huỷ đúng cú bấm vừa xảy ra.
          */
-        onClick: (info: { picked?: boolean }) => {
+        onClick: (info: { picked?: boolean; coordinate?: number[] }) => {
+          const simStore = useSimulationStore.getState();
+          if (simStore.placementMode && info.coordinate) {
+            // Chế độ đặt trạm: cú bấm KẾ TIẾP đặt P (§3.1) — kể cả khi nó trúng một mark
+            // pickable. onClick của lớp đã kịp chọn đối tượng trước khi handler này chạy,
+            // nên phải bỏ chọn lại, nếu không luật một-tiêu-điểm xoá ngay P vừa đặt.
+            useStore.getState().selectCell(null);
+            simStore.setCandidate({ lat: info.coordinate[1]!, lng: info.coordinate[0]! });
+            return;
+          }
           if (!info.picked) useStore.getState().selectCell(null);
         },
       });
@@ -416,6 +430,9 @@ export function MapView(props: Props) {
   // một đường vẽ riêng cho "lúc đang chạy" là hai đường vẽ cho cùng một bản đồ.
   const t = useStore((s) => s.t);
   const demandRepresentation = useStore((s) => s.demandRepresentation);
+  const candidate = useSimulationStore((s) => s.candidate);
+  const simulationResult = useSimulationStore((s) => s.result);
+  const placementMode = useSimulationStore((s) => s.placementMode);
   const theme = themeFor(field, demandRepresentation);
   useEffect(() => {
     const m = map.current;
@@ -437,8 +454,30 @@ export function MapView(props: Props) {
   useEffect(() => {
     const ov = overlay.current;
     if (!ov) return;
+    const built = buildLayers({
+      ...props,
+      selected,
+      layersOn,
+      zoom,
+      mode,
+      paintOn,
+      filter,
+      marks,
+      t,
+      demandRepresentation,
+      inStory: scene !== null,
+      candidate,
+      simulationResult,
+    });
     ov.setProps({
-      layers: buildLayers({ ...props, selected, layersOn, zoom, mode, paintOn, filter, marks, t, demandRepresentation, inStory: scene !== null }),
+      // Chế độ ĐẶT TRẠM (§3.1): tắt picking TOÀN stack. onClick của một lớp trả truthy
+      // là deck nuốt luôn onClick cấp Deck — lớp ô phủ kín tỉnh nên cú bấm đặt trạm
+      // không bao giờ tới lượt nếu còn lớp nào pickable.
+      layers: placementMode ? built.map((l) => l.clone({ pickable: false })) : built,
+      getCursor: placementMode
+        ? () => "crosshair"
+        : ({ isDragging, isHovering }: { isDragging: boolean; isHovering: boolean }) =>
+            isDragging ? "grabbing" : isHovering ? "pointer" : "grab",
       getTooltip: ({ object, layer }: { object?: unknown; layer?: { id: string } | null }) =>
         getMapTooltip({
           object,
@@ -455,7 +494,7 @@ export function MapView(props: Props) {
     // tên nơi chốn bên dưới. Nâng lại sau MỖI lượt dựng lớp — lớp deck mới luôn được thêm
     // lên đỉnh, nên một lần nâng lúc khởi tạo sẽ hết tác dụng ở lượt đổi trường kế tiếp.
     raiseLabels(map.current);
-  }, [props, field, cells, communes, boundary, stations, scale, surfaceBreaks, roads, routes, poi, occupancy, selected, layersOn, zoom, mode, paintOn, filter, marks, t, demandRepresentation, scene, ready]);
+  }, [props, field, cells, communes, boundary, stations, scale, surfaceBreaks, roads, routes, poi, occupancy, selected, layersOn, zoom, mode, paintOn, filter, marks, t, demandRepresentation, scene, ready, candidate, simulationResult, placementMode]);
 
   // `h-full w-full`, KHÔNG `absolute inset-0`: maplibre-gl.css đặt
   // `.maplibregl-map { position: relative }` và được import SAU tailwind, nên cùng độ ưu
@@ -511,6 +550,8 @@ interface BuildInput extends Props {
   demandRepresentation: DemandRepresentation;
   /** đang ở trong một cảnh CÂU CHUYỆN — xem `PlanInput.inStory` */
   inStory: boolean;
+  candidate?: CandidatePoint | null;
+  simulationResult?: SimulationResult | null;
 }
 
 /**
@@ -544,6 +585,8 @@ export function buildLayers({
   inStory,
   analyticalCells: analyticalCellRows,
   analyticalStations: analyticalStationRows,
+  candidate,
+  simulationResult,
 }: BuildInput): Layer[] {
   // `inStory` KHÔNG suy từ `marks`: cảnh A không có mark riêng nào, nên `marks` rỗng ở
   // đúng cảnh duy nhất mà cờ này quan trọng.
@@ -781,6 +824,118 @@ export function buildLayers({
       }
     }
   }
+
+  // ── Lớp mô phỏng TRANSIENT (Phase 6 §3.1) — cuối stack, trên mọi lớp đo đạc ─────
+  //
+  // KHÔNG hue mới: kênh hue đã đầy (M3.5), nên cả ba lớp dùng đúng idiom SELECT_PASSES
+  // (casing trắng + lõi mực). Phân biệt IMPROVES/UNCERTAIN bằng NÉT (liền/đứt), không
+  // bằng màu — cùng kênh với op_status ở §4d-3a. Số liệu sống trong panel, không trên
+  // bản đồ.
+  if (candidate) {
+    const DASH = new PathStyleExtension({ dash: true });
+    const dashed: [number, number] = [6, 4];
+
+    // Vòng 5 km — nét ĐỨT: đây là một bán kính hiệu lực, không phải một ranh giới đo được.
+    const circlePath = generateCirclePath(candidate.lat, candidate.lng, 5000);
+    for (const [suffix, color, width] of SELECT_PASSES) {
+      out.push(
+        new PathLayer({
+          id: `sim-zone-5km-${suffix}`,
+          data: [{ path: circlePath }],
+          getPath: (d: { path: [number, number][] }) => d.path,
+          getColor: color,
+          widthUnits: "pixels",
+          getWidth: width,
+          widthMinPixels: width,
+          capRounded: true,
+          jointRounded: true,
+          pickable: false,
+          extensions: [DASH],
+          getDashArray: dashed,
+          dashJustified: true,
+        }),
+      );
+    }
+
+    // Viền ô IMPROVES (liền) / UNCERTAIN (đứt) — đường bao H3 qua PathLayer vì
+    // H3HexagonLayer không vẽ được nét đứt.
+    if (simulationResult?.cells) {
+      const boundaryOf = (h3: string): [number, number][] =>
+        cellToBoundary(h3, true) as [number, number][];
+      const improves = simulationResult.cells
+        .filter((c) => c.cls === "IMPROVES")
+        .map((c) => ({ path: boundaryOf(c.h3) }));
+      const uncertain = simulationResult.cells
+        .filter((c) => c.cls === "UNCERTAIN")
+        .map((c) => ({ path: boundaryOf(c.h3) }));
+
+      for (const [suffix, color, width] of SELECT_PASSES) {
+        if (improves.length > 0) {
+          out.push(
+            new PathLayer({
+              id: `sim-cells-improves-${suffix}`,
+              data: improves,
+              getPath: (d: { path: [number, number][] }) => d.path,
+              getColor: color,
+              widthUnits: "pixels",
+              getWidth: width,
+              widthMinPixels: width,
+              jointRounded: true,
+              pickable: false,
+            }),
+          );
+        }
+        if (uncertain.length > 0) {
+          out.push(
+            new PathLayer({
+              id: `sim-cells-uncertain-${suffix}`,
+              data: uncertain,
+              getPath: (d: { path: [number, number][] }) => d.path,
+              getColor: color,
+              widthUnits: "pixels",
+              getWidth: width,
+              widthMinPixels: width,
+              jointRounded: true,
+              pickable: false,
+              extensions: [DASH],
+              getDashArray: dashed,
+              dashJustified: true,
+            }),
+          );
+        }
+      }
+    }
+
+    // Chấm P — cùng cặp màu casing/lõi, to hơn nét chọn một bậc để đọc là "điểm đang
+    // mô phỏng" chứ không phải một trạm thật (trạm thật có icon riêng).
+    out.push(
+      new ScatterplotLayer({
+        id: "sim-candidate-casing",
+        data: [candidate],
+        getPosition: (d: CandidatePoint) => [d.lng, d.lat],
+        getRadius: 8,
+        radiusUnits: "pixels",
+        radiusMinPixels: 7,
+        stroked: false,
+        filled: true,
+        getFillColor: rgba(SELECT_CASING_RGB, 235),
+        pickable: false,
+      }),
+      new ScatterplotLayer({
+        id: "sim-candidate-core",
+        data: [candidate],
+        getPosition: (d: CandidatePoint) => [d.lng, d.lat],
+        getRadius: 4.5,
+        radiusUnits: "pixels",
+        radiusMinPixels: 4,
+        stroked: false,
+        filled: true,
+        getFillColor: rgba(SELECT_RGB, 255),
+        pickable: false,
+      }),
+    );
+  }
+
   assertUniqueLayerIds(out);
   return out;
 }

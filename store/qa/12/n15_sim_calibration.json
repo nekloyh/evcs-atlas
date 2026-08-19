@@ -1,0 +1,72 @@
+{
+  "layer": "n15_sim_calibration",
+  "province_name": "Tỉnh Lai Châu",
+  "method": "Hiệu chuẩn detour_ratio theo dải khoảng cách và đánh giá leave-self-out (ring >= 3 giá trị như client, band-only khi thiếu)",
+  "province_code": "12",
+  "stats": {
+    "province_code": "12",
+    "valid": true,
+    "validation": {
+      "n": 7835,
+      "within_20pct": 0.684,
+      "upper_miss": 0.066
+    },
+    "bands": {
+      "200-500": {
+        "n": 18,
+        "med": 1.526,
+        "p90": 2.526,
+        "merged": true
+      },
+      "500-1000": {
+        "n": 46,
+        "med": 1.587,
+        "p90": 2.838,
+        "merged": true
+      },
+      "1000-2000": {
+        "n": 167,
+        "med": 1.617,
+        "p90": 2.763
+      },
+      "2000-3000": {
+        "n": 239,
+        "med": 1.606,
+        "p90": 3.034
+      },
+      "3000-5000": {
+        "n": 673,
+        "med": 1.697,
+        "p90": 3.126
+      },
+      "5000-inf": {
+        "n": 6692,
+        "med": 2.037,
+        "p90": 3.087
+      }
+    },
+    "near": null,
+    "merged_bands": [
+      "200-500",
+      "500-1000"
+    ],
+    "elapsed_s": 0.15
+  },
+  "checks": [
+    {
+      "name": "validation_cells_sufficient",
+      "status": "PASS",
+      "detail": "7835 ratio-defined cells (min 300)"
+    },
+    {
+      "name": "upper_miss_in_bounds",
+      "status": "PASS",
+      "detail": "upper_miss 6.6% trong [5%, 15%]"
+    },
+    {
+      "name": "merged_bands_recorded",
+      "status": "PASS",
+      "detail": "dải gộp: ['200-500', '500-1000']"
+    }
+  ]
+}

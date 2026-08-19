@@ -10,6 +10,7 @@ import {
   PanelLeftOpen,
   Check,
   SlidersHorizontal,
+  Crosshair,
 } from "lucide-react";
 import type { Manifest } from "../../data/manifest";
 import type { AppNavMode } from "../../state/types";
@@ -32,6 +33,9 @@ export interface NavRailProps {
   onToggleReadColumn: () => void;
   layerCount: number;
   overlayControls: React.ReactNode;
+  placementMode?: boolean;
+  candidateActive?: boolean;
+  onTogglePlacement?: () => void;
 }
 
 /**
@@ -59,6 +63,9 @@ export function NavRail({
   onToggleReadColumn,
   layerCount,
   overlayControls,
+  placementMode,
+  candidateActive,
+  onTogglePlacement,
 }: NavRailProps) {
   const isDesktop = useIsDesktop();
   const tooltipSide = isDesktop ? "right" : "top";
@@ -211,6 +218,36 @@ export function NavRail({
               {overlayControls}
             </PopoverContent>
           </Popover>}
+
+          {/* Trạm giả định (Phase 6, §3.1) */}
+          {activeMode === "map" && onTogglePlacement && (
+            <Tooltip>
+              <TooltipTrigger
+                aria-label="Trạm giả định"
+                aria-pressed={placementMode || candidateActive}
+                onClick={onTogglePlacement}
+                className={`relative grid h-9 w-9 place-items-center rounded border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                  placementMode
+                    ? "border-emerald-400 bg-emerald-950/60 text-emerald-300 font-semibold ring-2 ring-emerald-500/50"
+                    : candidateActive
+                    ? "border-emerald-500 bg-emerald-950/30 text-emerald-400"
+                    : "border-transparent text-ink-2 hover:border-hairline hover:text-ink"
+                }`}
+              >
+                <Crosshair className="h-4 w-4" />
+                {candidateActive && (
+                  <span className="absolute -right-0.5 -top-0.5 grid h-2 w-2 rounded-full bg-emerald-400" />
+                )}
+              </TooltipTrigger>
+              <TooltipContent side={tooltipSide}>
+                {placementMode
+                  ? "Bấm vào bản đồ để đặt trạm (Esc để huỷ)"
+                  : candidateActive
+                  ? "Đang xem trạm giả định (bấm để xoá)"
+                  : "Đặt trạm giả định (Mô phỏng)"}
+              </TooltipContent>
+            </Tooltip>
+          )}
 
           {/* Cột đọc — CHỈ trên màn hẹp, nơi nó là sheet phủ thay vì một cột trong luồng.
               Trên màn rộng cột không đóng được (§3h), nên một nút bật/tắt nó ở đây sẽ là một

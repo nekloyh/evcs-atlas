@@ -15,6 +15,7 @@
         "poi.geojson",
         "roads.parquet",
         "routes_showcase.geojson",
+        "sim_calibration.json",
         "station_occupancy.parquet",
         "station_occupancy_profile_168h.parquet",
         "stations.parquet"
@@ -32,7 +33,7 @@
     "tong_store_web_MB": 167.5,
     "per_province_MB": {
       "01 Thành phố Hà Nội": 7.72,
-      "04 Tỉnh Cao Bằng": 2.61,
+      "04 Tỉnh Cao Bằng": 2.62,
       "08 Tỉnh Tuyên Quang": 5.99,
       "11 Tỉnh Điện Biên": 3.18,
       "12 Tỉnh Lai Châu": 2.76,
@@ -48,7 +49,7 @@
       "37 Tỉnh Ninh Bình": 4.1,
       "38 Tỉnh Thanh Hóa": 5.68,
       "40 Tỉnh Nghệ An": 6.53,
-      "42 Tỉnh Hà Tĩnh": 3.42,
+      "42 Tỉnh Hà Tĩnh": 3.43,
       "44 Tỉnh Quảng Trị": 4.73,
       "46 Thành phố Huế": 2.09,
       "48 Thành phố Đà Nẵng": 5.34,
@@ -76,7 +77,8 @@
       "station_occupancy.parquet": 0.074,
       "admin_boundary.geojson": 0.036,
       "connectors.parquet": 0.036,
-      "manifest.json": 0.014
+      "manifest.json": 0.014,
+      "sim_calibration.json": 0.001
     }
   },
   "checks": [

@@ -179,6 +179,21 @@ export function parseHash(hash: string): Partial<HashState> {
     if (f) out.filter = f;
   }
 
+  // `sim` — trạm giả định mô phỏng (Phase 6, §3.1). `sim=<lat>,<lng>` (5 decimals).
+  // Regex trước Number(): `Number("")` là 0, nên `sim=,` mà thiếu bước này sẽ đặt trạm
+  // ở (0,0) giữa vịnh Guinea thay vì bị bỏ như F9 yêu cầu.
+  const simRaw = p.get("sim");
+  if (simRaw) {
+    const parts = simRaw.split(",");
+    if (parts.length === 2 && parts.every((v) => /^-?\d+(\.\d+)?$/.test(v))) {
+      const lat = Number(parts[0]);
+      const lng = Number(parts[1]);
+      if (lat >= -85 && lat <= 85 && lng >= -180 && lng <= 180) {
+        out.candidate = { lat, lng };
+      }
+    }
+  }
+
   return out;
 }
 
@@ -196,7 +211,7 @@ export function serializeHash(s: HashState, prev = ""): string {
     // primary surface cùng lúc.
     const national = params(prev);
     national.set(PROVINCE_KEY, NATIONAL);
-    for (const key of ["s", "d", "v", "p", "c", "t", "b"]) national.delete(key);
+    for (const key of ["s", "d", "v", "p", "c", "t", "b", "sim"]) national.delete(key);
     return national.toString().replace(/%2C/g, ",").replace(/%3A/g, ":").replace(/%7E/g, "~");
   }
   const p = new URLSearchParams();
@@ -242,6 +257,10 @@ export function serializeHash(s: HashState, prev = ""): string {
   }
   const serializedSel = s.selection ? serializeEntitySelection(s.selection) : s.cell;
   if (serializedSel) p.set("c", serializedSel);
+
+  if (s.candidate) {
+    p.set("sim", `${s.candidate.lat.toFixed(5)},${s.candidate.lng.toFixed(5)}`);
+  }
 
   // Không encode `,` và `:` — hash là thứ mentor đọc và gửi cho nhau; `%2C`/`%3A` chỉ
   // làm nó xấu đi và cả hai ký tự đều hợp lệ trong fragment. `:` cần cho `commune:` (§6b)

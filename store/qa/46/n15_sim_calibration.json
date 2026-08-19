@@ -1,0 +1,70 @@
+{
+  "layer": "n15_sim_calibration",
+  "province_name": "Thành phố Huế",
+  "method": "Hiệu chuẩn detour_ratio theo dải khoảng cách và đánh giá leave-self-out (ring >= 3 giá trị như client, band-only khi thiếu)",
+  "province_code": "46",
+  "stats": {
+    "province_code": "46",
+    "valid": true,
+    "validation": {
+      "n": 3839,
+      "within_20pct": 0.764,
+      "upper_miss": 0.073
+    },
+    "bands": {
+      "200-500": {
+        "n": 42,
+        "med": 1.642,
+        "p90": 3.438,
+        "merged": true
+      },
+      "500-1000": {
+        "n": 116,
+        "med": 1.675,
+        "p90": 3.369
+      },
+      "1000-2000": {
+        "n": 396,
+        "med": 1.464,
+        "p90": 2.467
+      },
+      "2000-3000": {
+        "n": 489,
+        "med": 1.46,
+        "p90": 2.395
+      },
+      "3000-5000": {
+        "n": 915,
+        "med": 1.485,
+        "p90": 2.192
+      },
+      "5000-inf": {
+        "n": 1881,
+        "med": 1.578,
+        "p90": 2.77
+      }
+    },
+    "near": null,
+    "merged_bands": [
+      "200-500"
+    ],
+    "elapsed_s": 0.08
+  },
+  "checks": [
+    {
+      "name": "validation_cells_sufficient",
+      "status": "PASS",
+      "detail": "3839 ratio-defined cells (min 300)"
+    },
+    {
+      "name": "upper_miss_in_bounds",
+      "status": "PASS",
+      "detail": "upper_miss 7.3% trong [5%, 15%]"
+    },
+    {
+      "name": "merged_bands_recorded",
+      "status": "PASS",
+      "detail": "dải gộp: ['200-500']"
+    }
+  ]
+}

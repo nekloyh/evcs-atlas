@@ -23,6 +23,8 @@ import type { StationOccupancy } from "../../data/occupancy";
 import type { Scale } from "../../viz/palette";
 import { FIELD_BY_ID, DEFAULT_FIELD } from "../../fields";
 import { useStore } from "../../state/store";
+import { useSimulationStore } from "../../simulation/store";
+import { SimulationPanel } from "../../ui/SimulationPanel";
 import { AtlasSurface, AtlasSurfaceHeader } from "./AtlasSurface";
 import { EvidenceSection, selectionKindLabel } from "./EvidenceSection";
 import { useInspectorLoader } from "./use-inspector-loader";
@@ -68,6 +70,18 @@ export function EvidenceCard({
   const setT = useStore((s) => s.setT);
   const isDesktop = useIsDesktop();
 
+  const candidate = useSimulationStore((s) => s.candidate);
+  const simResult = useSimulationStore((s) => s.result);
+  const simError = useSimulationStore((s) => s.error);
+  const clearCandidate = useSimulationStore((s) => s.clearCandidate);
+
+  // Single attention rule (§3.1): selecting any entity clears the candidate
+  React.useEffect(() => {
+    if (selection && candidate) {
+      clearCandidate();
+    }
+  }, [selection, candidate, clearCandidate]);
+
   const field = FIELD_BY_ID.get(fieldId) ?? FIELD_BY_ID.get(DEFAULT_FIELD)!;
 
   const route = useInspectorLoader({
@@ -92,7 +106,11 @@ export function EvidenceCard({
   const handleClose = React.useCallback(
     (reason: string = "button") => {
       const focusOrigin = focusOriginRef.current;
-      clearSelection(reason);
+      if (candidate || simError) {
+        clearCandidate();
+      } else {
+        clearSelection(reason);
+      }
       window.requestAnimationFrame(() => {
         if (focusOrigin && document.body.contains(focusOrigin)) {
           focusOrigin.focus();
@@ -102,14 +120,14 @@ export function EvidenceCard({
         }
       });
     },
-    [clearSelection],
+    [clearSelection, clearCandidate, candidate, simError],
   );
 
   // Esc key listener owned by the shell (§8)
   React.useEffect(() => {
     // Base Dialog owns mobile Escape and converges through onOpenChange below. Installing
     // this listener there as well would allow one key to clear twice.
-    if (!selection || !isDesktop) return;
+    if ((!selection && !candidate && !simError) || !isDesktop) return;
     const onKey = (e: KeyboardEvent) => {
       if (!shouldHandleInspectorEscape(e)) return;
       e.preventDefault();
@@ -117,7 +135,7 @@ export function EvidenceCard({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [selection, isDesktop, handleClose]);
+  }, [selection, candidate, simError, isDesktop, handleClose]);
 
   // Focus & Scroll management (§8)
   React.useEffect(() => {
@@ -154,6 +172,42 @@ export function EvidenceCard({
       headingRef.current?.focus();
     }
   }, [selection]);
+
+  if ((candidate || simError) && !selection) {
+    const simContent = (
+      <SimulationPanel
+        result={simResult}
+        error={simError}
+        onClose={() => handleClose("button")}
+      />
+    );
+
+    if (!isDesktop) {
+      return (
+        <Sheet open onOpenChange={(open) => !open && handleClose("sheet")}>
+          <SheetContent side="bottom" className="bg-panel p-0 text-ink">
+            <SheetHeader className="sr-only">
+              <SheetTitle>Mô phỏng trạm giả định</SheetTitle>
+            </SheetHeader>
+            <div ref={scrollRef} className="custom-scrollbar min-h-0 flex-1 overflow-y-auto max-h-[80vh]">
+              {simContent}
+            </div>
+          </SheetContent>
+        </Sheet>
+      );
+    }
+
+    return (
+      <AtlasSurface
+        className="pointer-events-auto absolute right-3 top-3 z-20 flex w-[340px] max-h-[75%] flex-col min-[1440px]:w-[380px]"
+        aria-label="Mô phỏng trạm giả định"
+      >
+        <div ref={scrollRef} className="custom-scrollbar min-h-0 flex-1 overflow-y-auto">
+          {simContent}
+        </div>
+      </AtlasSurface>
+    );
+  }
 
   if (!selection || !route) return null;
 

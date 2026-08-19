@@ -246,4 +246,6 @@ export interface HashState {
    * gian bị bỏ vì chúng không cùng nghĩa với một tập con phân tích (§2.3).
    */
   filter: AnalysisFilter | null;
+  /** Trạm giả định đang mô phỏng — khoá `sim=<lat>,<lng>` (Phase 6). */
+  candidate?: { lat: number; lng: number } | null;
 }
