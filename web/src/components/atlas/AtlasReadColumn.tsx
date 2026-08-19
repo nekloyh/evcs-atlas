@@ -14,6 +14,7 @@ import {
   type LensId,
   type RuntimeCoverage,
 } from "../../fields";
+import type { PresetStats } from "../../state/presets";
 import { selectionWireOf, useStore } from "../../state/store";
 import { scaleUnit, unitPhrase } from "../../units";
 import { Badge } from "../../ui/Badge";
@@ -21,6 +22,7 @@ import { DemandModes } from "../../ui/DemandModes";
 import { LensChartController } from "./LensChartController";
 import type { FilterCounts } from "../../ui/FilterSummary";
 import { Legend } from "../../ui/Legend";
+import { QuickPresets } from "../../ui/QuickPresets";
 import { SearchBar } from "../../ui/SearchBar";
 import { SourceBlock } from "../../ui/Source";
 import type { BivariateAxes } from "../../viz/demand";
@@ -33,6 +35,7 @@ import {
   LensSelectorSlot,
   OverlayControl,
   OverlayControlsSlot,
+  PresetsSlot,
   SearchSlot,
   TopMetricsSlot,
   type MetricItem,
@@ -53,6 +56,8 @@ export interface AtlasReadColumnProps {
   occupancy?: StationOccupancy | null;
   utilizationScale?: Scale | null;
   utilizationUnavailableReason?: string;
+  /** Thống kê một phiên cho Quick Preset — Phase 5 §2.3. Suy từ dữ liệu đã cư trú. */
+  presetStats: PresetStats;
 }
 
 function unitTag(readAs: FieldMeta["readAs"]): string {
@@ -97,6 +102,7 @@ export function AtlasReadColumn({
   occupancy = null,
   utilizationScale = null,
   utilizationUnavailableReason,
+  presetStats,
 }: AtlasReadColumnProps) {
   const paintOn = useStore((s) => s.paintOn);
   const setPaintOn = useStore((s) => s.setPaintOn);
@@ -135,6 +141,11 @@ export function AtlasReadColumn({
               onResultSelect={onResultSelect}
             />
           </SearchSlot>
+        ),
+        presets: (
+          <PresetsSlot>
+            <QuickPresets stats={presetStats} />
+          </PresetsSlot>
         ),
         topMetrics: <TopMetricsSlot items={topMetrics(manifest)} />,
         lensSelector: (

@@ -755,6 +755,24 @@ export interface StationPoint {
   powerKwMaxPort?: number | null;
   powerKwSite?: number | null;
   powerTier?: PowerTierId;
+  /**
+   * Ba cột VĂN BẢN của Q-P4-2 — chỉ thêm vào phép chiếu, không thêm lượt quét (Phase 5 §4).
+   *
+   * Trước Phase 5 snapshot này chỉ mang `station_id`, nên tìm kiếm chỉ khớp được một định
+   * danh không ai gõ (`vn-c-ac000091`). Đo trên gói đang mở: `name` có đủ 939/939 dòng và
+   * `vinhomes` chạm 112 tên, `vincom` 17, `long bien` 14, `times city` 12 — tức toàn bộ
+   * phần chuỗi người dùng thật sự nhớ đều nằm ngoài bộ nhớ cho tới lúc này.
+   */
+  name?: string | null;
+  address?: string | null;
+  operator?: string | null;
+  /**
+   * `commune_name` của trạm — null trên ĐÚNG 229/229 dòng `BUFFER` (đã đo).
+   *
+   * Trường CÓ ĐIỀU KIỆN chứ không phải trường thiếu: nó vắng khi và chỉ khi trạm nằm ngoài
+   * phạm vi, nên chỗ nào đọc nó phải hiểu "ngoài phạm vi", không phải "chưa biết".
+   */
+  communeName?: string | null;
 }
 
 let stationCache: Promise<StationPoint[]> | null = null;
@@ -771,7 +789,8 @@ export function fetchStations(): Promise<StationPoint[]> {
     await registerParquet(STATIONS);
     const t = await query(
       `SELECT station_id, station_code, lat, lng, scope, op_status,
-              n_ports, current_type, power_kw_max_port, power_kw_site
+              n_ports, current_type, power_kw_max_port, power_kw_site,
+              name, address, operator, commune_name
        FROM read_parquet('${STATIONS}')
        WHERE lat IS NOT NULL AND lng IS NOT NULL
        ORDER BY station_code`,
@@ -786,6 +805,16 @@ export function fetchStations(): Promise<StationPoint[]> {
     const cTypes = t.getChild("current_type")!;
     const maxKw = t.getChild("power_kw_max_port")!;
     const siteKw = t.getChild("power_kw_site")!;
+    const names = t.getChild("name")!;
+    const addresses = t.getChild("address")!;
+    const operators = t.getChild("operator")!;
+    const communeNames = t.getChild("commune_name")!;
+
+    /** Arrow trả `null` và `undefined` lẫn lộn; đưa cả hai về `null`, không về `""`. */
+    const text = (col: { get(i: number): unknown }, i: number): string | null => {
+      const v = col.get(i);
+      return v === null || v === undefined ? null : String(v);
+    };
 
     const out: StationPoint[] = new Array(t.numRows);
     for (let i = 0; i < t.numRows; i++) {
@@ -808,6 +837,10 @@ export function fetchStations(): Promise<StationPoint[]> {
         powerKwMaxPort: maxPortKw,
         powerKwSite: sKw,
         powerTier: powerTierOf(maxPortKw),
+        name: text(names, i),
+        address: text(addresses, i),
+        operator: text(operators, i),
+        communeName: text(communeNames, i),
       };
     }
     return out;

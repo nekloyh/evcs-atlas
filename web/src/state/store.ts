@@ -1,7 +1,13 @@
 import { create } from "zustand";
 
 import { FIELD_BY_ID, FIRST_FIELD, defaultFieldOfLens, lensOfField, type LensId } from "../fields";
-import { INITIAL_VIEW } from "./view-config";
+import {
+  CELL_MIN_ZOOM,
+  INITIAL_VIEW,
+  STATION_MIN_ZOOM,
+  zoomForFeatureBounds,
+} from "./view-config";
+import type { QuickPreset } from "./presets";
 import { SCENES, beatOf, parseScene, sceneState, type SceneId } from "../story/scenes";
 import {
   INITIAL_FILTER_STATE,
@@ -20,6 +26,22 @@ import { defaultRepresentationFor, representationFits } from "./types";
 export type { AppNavMode, BasemapStyle, Mode, OverlayId, ReadingUnit, View } from "./types";
 export type { EntitySelection, DatasetId, StationId, H3R8, CommuneCode } from "./selection";
 export type { AnalysisFilter, FilterState, PowerTierId } from "./filter";
+
+/**
+ * Đủ dữ liệu để điều hướng, không hơn — §1.8.
+ *
+ * Khai ở tầng state chứ không import `SearchResult` từ `ui/`: một action của store không
+ * được phụ thuộc vào tầng giao diện. `SearchResult` thoả kiểu này theo CẤU TRÚC, nên chỗ gọi
+ * không phải chuyển đổi gì.
+ */
+export interface SearchNavTarget {
+  /** Dạng dây của `EntitySelection` — `commune:00070` · `station:vn-c-…` · `<h3_r8>`. */
+  readonly id: string;
+  readonly kind: "commune" | "station" | "cell";
+  readonly center: readonly [number, number];
+  /** Chỉ Xã có hộp bao; Trạm và Ô suy mức phóng từ mức phóng hiện tại. */
+  readonly bbox: readonly [number, number, number, number] | null;
+}
 
 export interface AppState {
   field: string;
@@ -128,6 +150,27 @@ export interface AppState {
   /** Chuyển nhịp trong cảnh đang mở — nhịp đổi `field`, nên nó đổi mặt tô. */
   setBeat: (beatId: string) => void;
   /** Bay camera trong một cảnh mà không rời cảnh — cảnh B gọi tên từng xã. */
+  /**
+   * Phase 5 §1.8 — MỘT lần chuyển cho cả camera lẫn selection.
+   *
+   * Một action chứ không phải hai lời gọi, vì hai lời gọi cho ra một frame trung gian mà
+   * Inspector đã đổi đối tượng còn camera thì chưa (hoặc ngược lại).
+   *
+   * Nó KHÔNG đụng `field`, `filter`, `layers`, `t`, `mode`: tìm kiếm là một bộ điều hướng,
+   * không phải một bộ lọc (§0.4-1). Khi đối tượng được chọn nằm ngoài tập lọc, Inspector đã
+   * có sẵn câu `Ngoài tập lọc hiện tại` — dùng lại nó, đừng xoá filter.
+   */
+  searchNavigate: (target: SearchNavTarget) => void;
+  /**
+   * Phase 5 §2.6 — áp một Quick Preset trong ĐÚNG MỘT `set()`.
+   *
+   * Vì sao phải là một action: áp bằng API cũ thì thứ tự quyết định kết quả.
+   * `setField(f)` rồi `setFilter(x)` chạy được; `setFilter(x)` rồi `setField(f)` thì
+   * `setField` chạy `isFilterCompatible` và **xoá đúng cái filter vừa nhận**, kèm thông báo
+   * `field-incompatible`. Mã hoá thứ tự ấy vào một component chính là thứ side effect ẩn mà
+   * phase này cấm.
+   */
+  applyPreset: (preset: QuickPreset, resolved: AnalysisFilter | null) => void;
   flyTo: (v: View, select?: string | null) => void;
   /** Đặt giờ scrubber. Ngoài cửa sổ brush thì bị kéo vào — §3e. */
   setT: (t: number) => void;
@@ -380,6 +423,46 @@ export const useStore = create<AppState>((set) => ({
   // song nào. Ràng buộc 2 nguyên vẹn: vẫn một chuỗi, vẫn một trường.
   setBeat: (beatId) =>
     set((s) => (s.scene ? { beat: beatId, field: beatOf(s.scene, beatId).field } : {})),
+
+  searchNavigate: (target) =>
+    set((s) => {
+      const selection = parseEntitySelection(target.id);
+      // `pitch`/`bearing` MANG THEO nguyên vẹn. Bản cũ ghi cứng `pitch: 0`, nên chọn một kết
+      // quả trong chế độ 3D để lại `mode === "3d"` với camera phẳng và các lớp khối vẫn còn
+      // gắn — một trạng thái tự mâu thuẫn mà không có gì báo.
+      const zoom =
+        target.kind === "commune" && target.bbox
+          ? zoomForFeatureBounds(target.bbox)
+          : // Một điểm không có bề rộng để khớp, nên chỉ có SÀN: không bao giờ lùi ra xa
+            // hơn mức phóng mà người dùng đã tự chọn.
+            Math.max(s.view.zoom, target.kind === "station" ? STATION_MIN_ZOOM : CELL_MIN_ZOOM);
+      return {
+        view: {
+          lng: target.center[0],
+          lat: target.center[1],
+          zoom,
+          pitch: s.view.pitch,
+          bearing: s.view.bearing,
+        },
+        selection,
+        contextSelection: null,
+      };
+    }),
+
+  applyPreset: (preset, resolved) =>
+    set((s) => {
+      const filter = applyFilterIntent(s.filter, resolved);
+      // `demandRepresentation` chỉ đặt lại khi TRƯỜNG thật sự đổi. §2.6 yêu cầu đặt lại vì
+      // `setField` đặt lại, và một preset không được để lại cách vẽ của trường trước; nhưng
+      // khi trường không đổi thì cách vẽ ấy vẫn thuộc về đúng trường này, và đặt lại nó sẽ
+      // phá tính bất biến của lần áp thứ hai.
+      const fieldChanged = s.field !== preset.field;
+      return {
+        field: preset.field,
+        filter,
+        ...(fieldChanged ? { demandRepresentation: defaultRepresentationFor(s.mode) } : {}),
+      };
+    }),
 
   flyTo: (v, select) =>
     set(() => {

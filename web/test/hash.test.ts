@@ -262,11 +262,20 @@ test("filter hỏng không kéo theo khoá lành", () => {
   assert.deepEqual(p.layers, ["stations"]);
 });
 
-test("vòng ghi ↔ đọc filter hội tụ ở lần thứ hai", () => {
+// Tên cũ của phép kiểm này là "hội tụ ở lần thứ HAI", và nó khẳng định
+// `lo === 120.1235`, tức khẳng định chính phép làm tròn đang bóp hẹp tập con (xem docstring
+// của `fmt` trong `state/filter.ts`). Phép kiểm đó xanh trong khi link gửi đi mất một ô —
+// cùng loại lỗi với fixture bịa `district_name` ở `search.test.ts`: một khẳng định về CÁCH
+// LÀM đã che mất một khẳng định về KẾT QUẢ.
+//
+// Ghi không mất mát hội tụ ngay ở lần THỨ NHẤT, nên phép kiểm chặt hơn: `once === twice`
+// vẫn phải đúng, và biên phải đọc lại ĐÚNG BẰNG biên đã ghi.
+test("vòng ghi ↔ đọc filter hội tụ ngay lần đầu và không đổi biên", () => {
+  const lo = 120.123456;
   const state: HashState = {
     ...BASE,
     t: 75,
-    filter: { version: 1, mode: "subset", datasetId: DEFAULT_DATASET_ID, entity: "h3-cell", field: "population", op: "between", lo: 120.123456, hi: 4400, missing: "exclude", source: "demand-population-histogram" },
+    filter: { version: 1, mode: "subset", datasetId: DEFAULT_DATASET_ID, entity: "h3-cell", field: "population", op: "between", lo, hi: 4400, missing: "exclude", source: "demand-population-histogram" },
   };
   const once = serializeHash(state);
   const back = parseHash(`#${once}`);
@@ -274,7 +283,13 @@ test("vòng ghi ↔ đọc filter hội tụ ở lần thứ hai", () => {
   assert.equal(once, twice);
   assert.equal(back.t, 75);
   assert.equal(back.filter?.entity, "h3-cell");
-  assert.equal(back.filter?.entity === "h3-cell" ? back.filter.lo : undefined, 120.1235, "biên làm tròn 4 chữ số");
+  assert.equal(
+    back.filter?.entity === "h3-cell" ? back.filter.lo : undefined,
+    lo,
+    "biên phải đọc lại đúng bằng biên đã ghi, không làm tròn",
+  );
+  // Một ô nằm ĐÚNG trên biên vẫn phải thuộc tập con sau khi đi qua URL.
+  assert.ok(back.filter?.entity === "h3-cell" && lo >= back.filter.lo && lo <= back.filter.hi);
 });
 
 test("filter range giữ `..` và `-` đọc được bằng mắt", () => {

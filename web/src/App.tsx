@@ -46,6 +46,7 @@ import { Scrubber } from "./ui/Scrubber";
 import { NavRail } from "./components/atlas/NavRail";
 import { LayersTab } from "./ui/LayersTab";
 import { AtlasReadColumn } from "./components/atlas/AtlasReadColumn";
+import { presetStatsFrom } from "./state/presets";
 import { FilterChip, type FilterCounts } from "./ui/FilterSummary";
 import { EvidenceCard } from "./components/atlas/EvidenceCard";
 import { AppShell } from "./components/atlas/AppShell";
@@ -180,6 +181,22 @@ export default function App() {
 
   // Hai trục bivariate dựng từ đúng snapshot ô đang công bố.
   const bivariate = useMemo(() => (cells.length ? bivariateAxes(cells) : null), [cells]);
+
+  /**
+   * Thống kê một phiên cho Quick Preset — Phase 5 §2.3.
+   *
+   * Suy từ dữ liệu ĐÃ cư trú, không phát truy vấn nào: `cells` mang `pop` ở mọi trường của
+   * Ô (xem `GridCell.pop`), còn snapshot Trạm nạp từ boot. `manifest` cấp danh sách cột để
+   * `resolvePreset` biết preset nào gói này đỡ được.
+   *
+   * Memo trên `cells` chứ không trên `analyticalCells`: ngưỡng của một preset phải tính trên
+   * TOÀN BỘ tập, nếu không thì áp preset lần hai sẽ tính phân vị trên tập đã bị chính nó thu
+   * hẹp — một vòng phản hồi cứ mỗi lần bấm lại siết thêm.
+   */
+  const presetStats = useMemo(
+    () => presetStatsFrom({ cells, stations, manifest }),
+    [cells, stations, manifest],
+  );
 
   // Sửa luôn STATE, không chỉ sửa lượt vẽ này: nếu chỉ thay ở đây thì hash vẫn ghi
   // `f=population` trong khi bản đồ tô một trường khác — URL nói một đằng, màn hình nói
@@ -557,6 +574,7 @@ export default function App() {
             occupancy={occupancy}
             utilizationScale={occClassing}
             utilizationUnavailableReason={occupancyUnavailable?.reason}
+            presetStats={presetStats}
           />}
       map={
         <>

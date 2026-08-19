@@ -196,9 +196,11 @@ export function getMapTooltip(ctx: TooltipContext): { text: string } | null {
   if (layer.startsWith("commune")) {
     const feat = object as (CommuneFeature & { properties?: Record<string, unknown> });
     const props = feat.properties ?? {};
-    const name = String(props["commune_name"] ?? "Xã/phường");
-    const district = String(props["district_name"] ?? "");
-    const header = district ? `${name} (${district})` : name;
+    // `district_name` KHÔNG có trong `commune.geojson` (21 property, không cái nào là nó), nên
+    // nhánh `(${district})` cũ không bao giờ chạy — và niên bản địa giới VNSDI hiệu lực
+    // 16/6/2025 đã bỏ cấp huyện, nên nó cũng không có gì để chạy lại. `commune_name` đã mang
+    // sẵn phân loại (`Phường …` / `Xã …`), tức tiêu đề vẫn tự nói được nó là cấp gì.
+    const header = String(props["commune_name"] ?? "Xã/phường");
     const lines: string[] = [header];
 
     if (lens === "opportunity") {

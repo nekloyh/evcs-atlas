@@ -169,6 +169,16 @@ export function parseBrush(raw: string | null | undefined): BrushState {
  *
  * Có lý do kỹ thuật: vòng ghi ↔ đọc phải hội tụ ở lần thứ hai, nếu không listener
  * `hashchange` lặp vô hạn (§9a). Ghi số đã làm tròn thì đọc lại ra đúng số đó.
+ *
+ * ⚠ **ĐỪNG chép hàm này sang chỗ khác.** Bản sinh đôi của nó ở `state/filter.ts` đã bị bỏ
+ * đi ngày 19/8/2026: làm tròn 4 chữ số **hạ** 2.140/4.400 giá trị `population` của `p/01`,
+ * và với một phép thử đóng hai đầu (`>= lo && <= hi`) thì ô nằm trên biên rơi khỏi tập con
+ * sau một vòng ghi↔đọc — im lặng, chỉ theo chiều teo lại. Xem docstring của `fmt` ở
+ * `state/filter.ts` và các phép kiểm `P4-SER`.
+ *
+ * Ở ĐÂY nó còn sống được vì `serializeBrush` **không có chỗ gọi nào trong `src/`** (hợp đồng
+ * filter Phase 4 đã thay nó; chỉ `test/brush.test.ts` còn gọi). Ngày nào nửa serialization
+ * này được dùng lại, nó phải đổi sang cách ghi không mất mát trước đã.
  */
 function fmt(v: number): string {
   if (!Number.isFinite(v)) return "";

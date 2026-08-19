@@ -60,3 +60,47 @@ export function zoomForBbox([w, s, e, n]: [number, number, number, number]): num
   const zy = Math.log2(((mapH / 512) * 360) / Math.max((n - s) / Math.max(Math.cos(lat), .1), 1e-6));
   return Math.max(4, Math.min(12, Math.round((Math.min(zx, zy) - Math.log2(FIT_PADDING)) * 10) / 10));
 }
+
+// ── Phase 5 §1.8 — mức phóng khi ĐIỀU HƯỚNG tới một đối tượng ────────────────
+
+/**
+ * Lề quanh một đối tượng khi khớp khung nhìn vào nó. Rộng hơn `FIT_PADDING` của phép fit
+ * tỉnh vì một xã cần thấy được rìa của mình so với hàng xóm, không chỉ thấy chính nó.
+ */
+const FEATURE_FIT_PADDING = 1.15;
+
+/**
+ * Kẹp mức phóng khi đi tới một XÃ — §1.8.
+ *
+ * Trần 15 để một phường 1,93 km không phóng tới mức mất hết ngữ cảnh; sàn 10 để một xã
+ * 15,54 km vẫn còn đọc được nền.
+ */
+export const COMMUNE_ZOOM_MIN = 10;
+export const COMMUNE_ZOOM_MAX = 15;
+/** Sàn mức phóng khi đi tới một TRẠM — một điểm không có bề rộng nào để khớp. */
+export const STATION_MIN_ZOOM = 14.5;
+/** Sàn mức phóng khi đi tới một Ô H3 r8 (~0,74 km²). */
+export const CELL_MIN_ZOOM = 13.5;
+
+/**
+ * Mức phóng khớp hộp bao của MỘT đối tượng.
+ *
+ * Vì sao không dùng một hằng: bề ngang lớn nhất của hộp bao xã đo được trải từ 1,93 km
+ * (Phường Hoàn Kiếm) tới 15,54 km (Xã Đa Phúc) — **8,1 lần**. Ở `zoom: 12.5` cố định của bản
+ * cũ, tỉ lệ là 25,23 m/px tại vĩ độ 21°, nên cùng một điều khiển vẽ hai xã đó ra 77 px và
+ * 616 px bề ngang: một cái là một chấm, cái kia tràn màn hình.
+ */
+export function zoomForFeatureBounds(
+  bbox: readonly [number, number, number, number],
+): number {
+  const [w, s, e, n] = bbox;
+  const win = typeof window === "undefined" ? 1400 : window.innerWidth;
+  const chromeW = CHROME.NAV_RAIL + (win >= 1024 ? CHROME.READ_COL : 0);
+  const mapW = Math.max(320, win - chromeW);
+  const mapH = Math.max(320, (typeof window === "undefined" ? 900 : window.innerHeight) - CHROME.BOTTOM);
+  const lat = ((s + n) / 2) * (Math.PI / 180);
+  const zx = Math.log2(((mapW / 512) * 360) / Math.max(e - w, 1e-9));
+  const zy = Math.log2(((mapH / 512) * 360) / Math.max((n - s) / Math.max(Math.cos(lat), 0.1), 1e-9));
+  const z = Math.min(zx, zy) - Math.log2(FEATURE_FIT_PADDING);
+  return Math.max(COMMUNE_ZOOM_MIN, Math.min(COMMUNE_ZOOM_MAX, Math.round(z * 10) / 10));
+}

@@ -5,6 +5,14 @@ import { useIsDesktop } from "./use-desktop";
 
 export interface ReadColumnSlots {
   search: (onResultSelect?: () => void) => React.ReactNode;
+  /**
+   * Dải Quick Preset — Phase 5 §5, đặt NGAY CẠNH ô tìm kiếm.
+   *
+   * Cạnh nhau vì đó là hai lối vào của cùng một câu hỏi "bắt đầu từ đâu", nhưng chúng viết
+   * vào hai chỗ khác hẳn: tìm kiếm viết camera + selection, preset viết field + filter.
+   * Không cái nào kích hoạt cái kia (§3).
+   */
+  presets: React.ReactNode;
   topMetrics: React.ReactNode;
   lensSelector: React.ReactNode;
   question: React.ReactNode;
@@ -59,6 +67,7 @@ function ReadColumnContent({
     <>
       <div className={`shrink-0 border-b border-hairline bg-panel px-3 py-2.5 ${onSearchResultSelect ? "pr-12" : ""}`}>
         {slots.search(onSearchResultSelect)}
+        <div className="mt-2">{slots.presets}</div>
       </div>
       <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto">
         <Section title="TỔNG QUAN">{slots.topMetrics}</Section>

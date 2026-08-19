@@ -69,6 +69,7 @@ function PassThrough({ children }: { children: React.ReactNode }) {
 }
 
 export const SearchSlot = PassThrough;
+export const PresetsSlot = PassThrough;
 export const LegendSlot = PassThrough;
 export const ContextualChartSlot = PassThrough;
 

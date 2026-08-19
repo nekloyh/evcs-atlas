@@ -17,6 +17,12 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
 
 import { BEYOND_2KM_M } from "./domain-thresholds";
+import { getIssuedQueryCount } from "./data/duckdb";
+import { fetchCommunes, fetchField, fetchStations } from "./data/queries";
+import { FIELD_BY_ID } from "./fields";
+import { PRESETS, presetStatsFrom, resolvePreset } from "./state/presets";
+import { buildSearchIndex, rankSearchResults } from "./ui/search";
+import { loadManifest } from "./data/manifest";
 
 import ehWorker from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
 import mvpWorker from "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url";
@@ -210,6 +216,8 @@ async function main() {
     const d = await timed(q4);
     const e = await timed(q5);
     const f = qP44 ? await timed(qP44) : [];
+
+
     let qP44Rows: number | null = null;
     if (qP44) {
       const countConn = await db.connect();
@@ -271,4 +279,139 @@ async function main() {
   log("\nXONG — mảng kết quả ở window.BENCH");
 }
 
-void main().catch((e) => log(`HỎNG: ${String(e)}`));
+/**
+ * Phase 5 §6 — đo TÌM KIẾM và PRESET.
+ *
+ * Tìm kiếm là JavaScript thuần trong bộ nhớ, nên vòng đo DuckDB ở trên KHÔNG đo nó. Phần này
+ * dùng chung `WARMUP`/`RUNS`/`pct()` với nửa kia để hai nửa của báo cáo so được với nhau.
+ *
+ * Hai phép đo, **không bao giờ cộng lại**: `INDEX` chạy một lần mỗi phiên dữ liệu, `QUERY`
+ * chạy một lần mỗi phím gõ. Gộp thành một con số "thời gian tìm kiếm" sẽ giấu mất một hồi
+ * quy đã rơi vào nửa nào.
+ *
+ * Corpus là gói `p/01` THẬT, nạp qua đúng loader của sản phẩm — không fixture tổng hợp.
+ */
+
+/** 20 truy vấn CAM KẾT TRONG REPO, không gõ lúc chạy, để hai lần chạy so được với nhau. */
+const SEARCH_QUERIES: readonly { q: string; path: string }[] = [
+  { q: "ba dinh", path: "xã NAME_PREFIX sau khi tách phân loại" },
+  { q: "phuong", path: "truy vấn phân loại, so trên tên đầy đủ" },
+  { q: "xa", path: "phân loại, nhóm xã lớn nhất" },
+  { q: "ha", path: "xã WORD_START vs SUBSTRING" },
+  { q: "00004", path: "xã EXACT_ID" },
+  { q: "van mieu quoc tu giam", path: "gấp dấu câu (§1.2 bước 4)" },
+  { q: "vinhomes", path: "trạm, trường hợp xấu nhất" },
+  { q: "vincom", path: "trạm, trường hợp giữa" },
+  { q: "times city", path: "trạm nhiều từ" },
+  { q: "long bien", path: "trạm: tên + địa chỉ" },
+  { q: "c ac000091", path: "station_code sau khi gấp `.`" },
+  { q: "vn-c-ac000091", path: "station_id EXACT_ID" },
+  { q: "s touch", path: "operator hiếm, bậc SECONDARY" },
+  { q: "vinfast", path: "operator áp đảo, không được tràn" },
+  { q: "884143625dfffff", path: "ô EXACT_ID" },
+  { q: "884143625", path: "ô, tiền tố 9 ký tự — mức tối thiểu" },
+  { q: "884", path: "dưới mức tối thiểu, phải trả 0 ô" },
+  { q: "đống đa", path: "đủ dấu + `đ`, phải bằng kết quả của `dong da`" },
+  { q: "q", path: "dưới 2 ký tự, trạng thái Gợi ý" },
+  { q: "zzzzz", path: "trạng thái Rỗng" },
+];
+
+function timePure(fn: () => unknown): number[] {
+  for (let i = 0; i < WARMUP; i++) fn();
+  const t: number[] = [];
+  for (let i = 0; i < RUNS; i++) {
+    const t0 = performance.now();
+    fn();
+    t.push(performance.now() - t0);
+  }
+  return t.sort((a, b) => a - b);
+}
+
+async function searchBench() {
+  log("\n────────────────────────────────────────────");
+  log("Phase 5 §6 — TÌM KIẾM (JS thuần) và PRESET");
+
+  const popMeta = FIELD_BY_ID.get("population");
+  if (!popMeta) {
+    log("gói không có trường `population` — bỏ qua phần tìm kiếm.");
+    return;
+  }
+
+  const [communes, stations, cells, manifest] = await Promise.all([
+    fetchCommunes(),
+    fetchStations(),
+    fetchField(popMeta),
+    loadManifest(),
+  ]);
+  const corpus = { communes, stations, cells };
+  log(
+    `corpus: ${communes.features.length} xã · ${stations.length} trạm · ${cells.length} ô` +
+      ` — gói ${manifest.exported_utc}`,
+  );
+
+  // ── INDEX: mỗi lần lặp dựng từ một index NGUỘI ─────────────────────────────
+  const indexTimes = timePure(() => buildSearchIndex(corpus));
+  log(`INDEX  p50 ${pct(indexTimes, 0.5).toFixed(3)} ms   p95 ${pct(indexTimes, 0.95).toFixed(3)} ms`);
+
+  // ── QUERY: cổng G1 đo quanh CẢ bộ truy vấn ─────────────────────────────────
+  const index = buildSearchIndex(corpus);
+  const sqlBefore = getIssuedQueryCount();
+  const queryRows = SEARCH_QUERIES.map(({ q, path }) => {
+    const outcome = rankSearchResults(q, index);
+    const t = timePure(() => rankSearchResults(q, index));
+    return {
+      q,
+      path,
+      p50: +pct(t, 0.5).toFixed(3),
+      p95: +pct(t, 0.95).toFixed(3),
+      /** Ứng viên TRƯỚC mọi phép cắt — cổng G5 đọc nó, và §1.5 cấm cắt im lặng. */
+      candidates: outcome.matched,
+      shown: outcome.results.length,
+      truncated: outcome.truncated,
+    };
+  });
+  const g1 = getIssuedQueryCount() - sqlBefore;
+
+  for (const r of queryRows) {
+    log(
+      `QUERY  ${r.q.padEnd(24)} p50 ${String(r.p50).padStart(7)}  p95 ${String(r.p95).padStart(7)}` +
+        `  ứng viên ${String(r.candidates).padStart(4)} → hiện ${r.shown} (cắt ${r.truncated})`,
+    );
+  }
+  const maxP95 = Math.max(...queryRows.map((r) => r.p95));
+  log(`QUERY  p95 lớn nhất cả bộ: ${maxP95.toFixed(3)} ms`);
+
+  // ── Cổng cấu trúc G1 · G2 · G5 ─────────────────────────────────────────────
+  const stats = presetStatsFrom({ cells, stations, manifest });
+  const presetBefore = getIssuedQueryCount();
+  const presetRows = PRESETS.map((p) => {
+    const filter = resolvePreset(p, stats);
+    return { id: p.id, resolved: filter !== null, bound: filter && filter.entity === "h3-cell" ? [filter.lo, filter.hi] : null };
+  });
+  const g2 = getIssuedQueryCount() - presetBefore;
+  const g5 = queryRows.every((r) => r.shown <= 10);
+
+  log(`G1 gõ phím phát ${g1} câu lệnh DuckDB (phải là 0) — ${g1 === 0 ? "ĐẠT" : "TRƯỢT"}`);
+  log(`G2 giải 5 preset phát ${g2} câu lệnh (phải là 0 khi snapshot đã cư trú) — ${g2 === 0 ? "ĐẠT" : "TRƯỢT"}`);
+  log(`G5 không lượt nào trả quá 10 dòng — ${g5 ? "ĐẠT" : "TRƯỢT"}`);
+  log("G3 index dựng một lần mỗi phiên — cổng ở tầng mã, xem test/search-integration.test.ts.");
+  log("G4 Long Task — §6.5, phải chạy TRONG app, không phải ở trang này.");
+  log("KHÔNG đặt ngưỡng mili-giây ở đây: lần chạy này LÀ đường cơ sở (§6.6).");
+
+  (window as unknown as { BENCH_SEARCH: unknown }).BENCH_SEARCH = {
+    corpus: { communes: communes.features.length, stations: stations.length, cells: cells.length },
+    exported_utc: manifest.exported_utc,
+    index: { p50: +pct(indexTimes, 0.5).toFixed(3), p95: +pct(indexTimes, 0.95).toFixed(3) },
+    queries: queryRows,
+    max_query_p95: +maxP95.toFixed(3),
+    presets: presetRows,
+    gates: { g1_sql_on_typing: g1, g2_sql_on_preset: g2, g5_cap_respected: g5 },
+    warmup: WARMUP,
+    runs: RUNS,
+  };
+  log("\nXONG — kết quả tìm kiếm ở window.BENCH_SEARCH");
+}
+
+void main()
+  .then(searchBench)
+  .catch((e) => log(`HỎNG: ${String(e)}`));

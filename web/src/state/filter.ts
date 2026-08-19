@@ -296,9 +296,43 @@ export function describeFilter(filter: AnalysisFilter): string {
 const RANGE_SEP = "..";
 const TIER_SEP = ".";
 
+/**
+ * Biên khoảng ghi ra hash — **không mất mát**, không làm tròn.
+ *
+ * Bản cũ là `String(Number(v.toFixed(4)))`, và nó bóp hẹp tập con một cách im lặng. Đo trên
+ * cột `population` của `p/01` (4.400 ô): phép làm tròn **hạ** 2.140 giá trị và **nâng**
+ * 2.125 giá trị. Vì `filterKeepsCell` đóng cả hai đầu (`>= lo && <= hi`), một brush có biên
+ * trên rơi vào 2.140 giá trị kia sẽ **mất đúng ô nằm trên biên** sau một vòng ghi↔đọc:
+ * brush `[0, v]` mất một ô ở 2.140/4.400 giá trị, brush `[v, max]` mất một ô ở 2.125/4.400,
+ * và không lần nào thêm ô. Người gửi link thấy 441 ô, người mở link thấy 440, không có dấu
+ * hiệu nào — đúng loại nói dối về dữ liệu mà ràng buộc 1 cấm, chỉ khác là về LỰC LƯỢNG của
+ * tập con. Biên của brush là **giá trị thật của một ô** (§1.2: "Store actual population
+ * bounds on every bin"), nên đây không phải một trường hợp hiếm: 4.265/4.400 giá trị của
+ * cột này cần hơn 4 chữ số thập phân.
+ *
+ * `String(v)` ghi ra **chuỗi thập phân ngắn nhất đọc lại ra đúng số đó** — đó là hành vi
+ * bắt buộc của `Number::toString` trong ECMA-262, không phải một tính chất tình cờ của
+ * engine. Nên `Number(String(v)) === v` với mọi số hữu hạn, và tập con qua link bằng đúng
+ * tập con lúc kéo.
+ *
+ * **Điều kiện §9a vẫn được giữ, và giữ chặt hơn.** Lý do phép làm tròn tồn tại (ghi ở
+ * `state/brush.ts`) là vòng ghi↔đọc phải HỘI TỤ, nếu không listener `hashchange` lặp vô
+ * hạn. Làm tròn hội tụ ở lần **thứ hai**; ghi không mất mát hội tụ ở lần **thứ nhất**, vì
+ * số đọc lại đã bằng chính số đã ghi. `test/filter.test.ts` giữ cả hai tính chất.
+ *
+ * Giá phải trả là độ dài: trung bình 7,98 → 16,88 ký tự mỗi biên, tức khoảng 18 ký tự cho
+ * cả khoá `b`. Khoá `v` một mình đã mang 5 con số; 18 ký tự không phải cái đáng đổi lấy
+ * một tập con sai.
+ *
+ * *Không* dùng dạng làm tròn CÓ HƯỚNG (lo xuống, hi lên) dù nó cũng cho 0 ô mất trên bộ
+ * này và giữ được URL ngắn: bảo đảm của nó là "không mất ô **miễn là** không có hai ô cách
+ * nhau dưới 1e-4 quanh biên" — một tính chất của DỮ LIỆU HÔM NAY, không phải của hàm. Và
+ * nó cần một nhánh sửa lệch cho trường hợp `v * 1e4` tự nó đã sai số, nhánh mà bộ dữ liệu
+ * hiện tại không chạm tới lần nào — tức code chết cho tới ngày nó là lỗi.
+ */
 function fmt(v: number): string {
   if (!Number.isFinite(v)) return "";
-  return String(Number(v.toFixed(4)));
+  return String(v);
 }
 
 /**

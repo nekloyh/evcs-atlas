@@ -146,14 +146,23 @@ export function powerTierOf(maxPortKw: number | null): PowerTierId {
 }
 ```
 
-| Tier | Interval | Current IN Stations, verification only |
+| Tier | Interval | IN Stations in `p/01`, verification only |
 |---|---:|---:|
-| `le-22` | ≤22 kW | 1,056 |
-| `23-60` | >22–60 kW | 2,523 |
-| `61-120` | >60–120 kW | 1,834 |
-| `121-180` | >120–180 kW | 575 |
-| `gt-180` | >180 kW | 172 |
-| `unknown` | source did not report strongest-port power | 220 |
+| `le-22` | ≤22 kW | 173 |
+| `23-60` | >22–60 kW | 261 |
+| `61-120` | >60–120 kW | 221 |
+| `121-180` | >120–180 kW | 25 |
+| `gt-180` | >180 kW | 11 |
+| `unknown` | source did not report strongest-port power | 19 |
+| **total** | | **710** |
+
+> **Re-scoped 2026-08-19.** This column previously read 1,056 / 2,523 / 1,834 / 575 / 172 /
+> 220, total **6,380** — a different corpus from the package the app opens. The loaded
+> package (`web/public/data/p/01/`, `exported_utc = 2026-08-11T19:09:19+00:00`) has **710** IN
+> Stations and 229 BUFFER. The counts above were re-measured on `stations.parquet` with the
+> `powerTierOf` cuts as written in the code block, and they are the numbers Phase 5’s Supply
+> presets are verified against (`web/test/presets.test.ts` §7.6-34). A verification table
+> naming a corpus that is not shipped verifies nothing.
 
 These breaks are `presentation` thresholds aligned with the observed nameplate modes. They
 are not adequacy limits and must not be labeled slow, fast, rapid, or ultra-fast without a
@@ -341,7 +350,21 @@ b=f1~h3-cell~population~between~<lo>..<hi>
 b=f1~station~power-tier~in~<tier>[.<tier>...]
 ```
 
-Bounds are finite decimals normalized with the existing four-decimal formatter. Tier IDs
+Bounds are finite decimals written **losslessly**: the serializer emits the shortest decimal
+string that reads back as the identical double, so `parse(serialize(b)) === b` and the subset
+reached through a link is the subset that was brushed.
+
+> **Corrected 2026-08-19.** This paragraph previously required "the existing four-decimal
+> formatter", and that requirement was a defect. `Number(v.toFixed(4))` lowered 2 140 and
+> raised 2 125 of the 4 400 `population` values in `p/01`; because `filterKeepsCell` is
+> inclusive at both ends and brush bounds are actual cell values (§1.2), a `[0, v]` brush lost
+> its boundary cell for 2 140 of those values and a `[v, max]` brush for 2 125 — silently, and
+> only ever shrinking the subset. Rounding existed to make the `hashchange` write↔read loop
+> converge (§9a); lossless writing converges on the first pass instead of the second, so the
+> original constraint is strengthened, not traded away. Regression: `P4-SER` in
+> `web/test/filter.test.ts`.
+
+Tier IDs
 are unique and registry-ordered. `URLSearchParams` owns percent encoding; the filter parser
 does not parse raw `&`, `+`, or percent escapes itself. The parser may normalize legacy
 `h:population:<lo>..<hi>` to the Demand range. Legacy scatter/window clauses are ignored
