@@ -14,6 +14,7 @@ import {
   COLD_HEX as TOKEN_COLD_HEX,
   COLOR_BASEMAP,
   COLOR_HAIRLINE,
+  COLOR_INK,
   COLOR_INK_2,
   COLOR_INK_MUTED,
   COLOR_SELECT,
@@ -330,6 +331,7 @@ export const HAIRLINE_HEX = COLOR_HAIRLINE;
  * trên bản đồ, ΔE của nó với dải phân kỳ đã đo ở §4f trên đúng `#898781`; còn đây là CHỮ,
  * nên nó chịu cổng 4,5:1 (đo được 4,90:1 trên nền panel).
  */
+export const INK_HEX = COLOR_INK;
 export const INK_MUTED_HEX = COLOR_INK_MUTED;
 export const INK_2_HEX = COLOR_INK_2;
 

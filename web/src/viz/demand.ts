@@ -82,8 +82,8 @@ export interface BivariateAxes {
   ports: { breaks: [number, number]; reachable: boolean[] };
 }
 
-export function bivariateAxes(cells: readonly { pop: number; ports: number }[]): BivariateAxes {
-  const pop = cells.map((d) => d.pop);
+export function bivariateAxes(cells: readonly { pop: number | null; ports: number }[]): BivariateAxes {
+  const pop = cells.map((d) => d.pop ?? NaN);
   const ports = cells.map((d) => d.ports);
   const pb = tertileBreaks(pop);
   const sb = tertileBreaks(ports);

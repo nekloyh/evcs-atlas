@@ -15,7 +15,6 @@
 import { useEffect, useRef } from "react";
 
 import { STATION_OCC_FIELD } from "../fields";
-import { inWindow } from "../state/brush";
 import { useStore } from "../state/store";
 import { DOW_LABELS, HOURS_IN_WEEK, dowOf, hourOf } from "../state/types";
 import { HAIRLINE_HEX, RAMP_HEX } from "../viz/palette";
@@ -42,7 +41,6 @@ export function Scrubber({ field }: { field: string }) {
   const setPlaying = useStore((s) => s.setPlaying);
   const stepT = useStore((s) => s.stepT);
   const setField = useStore((s) => s.setField);
-  const win = useStore((s) => s.brush.win);
   const isOcc = field === STATION_OCC_FIELD;
 
   // Vòng play. `acc` cộng dồn thời gian THẬT giữa hai khung hình rồi rút ra từng giờ một,
@@ -86,11 +84,6 @@ export function Scrubber({ field }: { field: string }) {
           <span className="tabular-nums font-semibold">
             {DOW_LABELS[dowOf(t)]} {String(hourOf(t)).padStart(2, "0")}:00
           </span>
-          {win && (
-            <span className="text-ink-muted">
-              lặp trong cửa sổ {DOW_LABELS[win.dow.lo]}–{DOW_LABELS[win.dow.hi]} · {win.hour.lo}h–{win.hour.hi}h
-            </span>
-          )}
           {/* Chế độ chưa tác động phải TRÔNG như chưa tác động — cùng luật §3a. Kèm nút đi
               thẳng tới trường đó: một bước, không bắt người xem tự tìm trong 46 dòng radio. */}
           {!isOcc && (
@@ -124,7 +117,7 @@ export function Scrubber({ field }: { field: string }) {
           <span className="pl-1">heatmap/hồ sơ 24h trong dock là comparison tĩnh.</span>
         </div>
 
-        <Track t={t} onT={setT} dimOutsideWindow={(tt) => !inWindow(win, tt)} />
+        <Track t={t} onT={setT} />
       </div>
     </div>
   );
@@ -140,11 +133,9 @@ export function Scrubber({ field }: { field: string }) {
 function Track({
   t,
   onT,
-  dimOutsideWindow,
 }: {
   t: number;
   onT: (t: number) => void;
-  dimOutsideWindow: (t: number) => boolean;
 }) {
   const el = useRef<HTMLDivElement>(null);
 
@@ -175,22 +166,18 @@ function Track({
           <span className="pointer-events-none absolute left-1 top-0 text-note leading-none text-ink-muted">
             {label}
           </span>
-          {/* 24 vạch giờ. Giờ ngoài cửa sổ brush MỜ đi — cùng ký hiệu "bị loại" của bản đồ. */}
+          {/* 24 vạch giờ. Cả 168 giờ đều xem được: Phase 4 bỏ cửa sổ playback của dock. */}
           <div className="flex h-full items-end">
-            {Array.from({ length: 24 }, (_, h) => {
-              const tt = d * 24 + h;
-              return (
-                <span
-                  key={h}
-                  className="min-w-0 flex-1"
-                  style={{
-                    height: h % 6 === 0 ? "60%" : "35%",
-                    borderLeft: `1px solid ${HAIRLINE_HEX}`,
-                    opacity: dimOutsideWindow(tt) ? 0.25 : 1,
-                  }}
-                />
-              );
-            })}
+            {Array.from({ length: 24 }, (_, h) => (
+              <span
+                key={h}
+                className="min-w-0 flex-1"
+                style={{
+                  height: h % 6 === 0 ? "60%" : "35%",
+                  borderLeft: `1px solid ${HAIRLINE_HEX}`,
+                }}
+              />
+            ))}
           </div>
         </div>
       ))}

@@ -8,7 +8,7 @@
  * pitch 50, nên nó là một trạng thái THẬT. Trước đó `m=3d` bị bỏ qua như khoá hỏng vì bật
  * nó không vẽ gì khác đi — nói dối bằng UI (§3a).
  */
-import type { BrushState } from "./brush";
+import type { AnalysisFilter } from "./filter";
 import type { EntitySelection } from "./selection";
 
 export type { EntitySelection, DatasetId, StationId, H3R8, CommuneCode } from "./selection";
@@ -236,8 +236,14 @@ export interface HashState {
    * cùng luật §9a đã áp cho `f`/`v`/`l`: một cảnh luôn tô đúng một trường của nó (L3).
    */
   paintOn: boolean;
-  /** Vị trí scrubber — khoá `t`, 0–167. §3e. */
+  /** Vị trí scrubber — khoá `t`, 0–167 (§3e). `t = dow × 24 + hour`, `dow = 0` là Thứ Hai. */
   t: number;
-  /** Ba ô brush của dock — khoá `b`, §9b. Ô rỗng = brush loại đó chưa đặt. */
-  brush: BrushState;
+  /**
+   * Khoá `b` — ĐÚNG MỘT analytical SUBSET filter (PHASE4_VISUALIZATION.md §2).
+   *
+   * Thay chỗ ba ô brush của dock. Mệnh đề `b` cũ dạng `h:`/`s:`/`w:` không còn được ghi;
+   * `parseFilter` chỉ normalize lại mệnh đề histogram dân số, còn scatter và cửa sổ thời
+   * gian bị bỏ vì chúng không cùng nghĩa với một tập con phân tích (§2.3).
+   */
+  filter: AnalysisFilter | null;
 }

@@ -19,6 +19,7 @@ import {
   serializeNationalHash,
 } from "../src/national/hash.ts";
 import type { HashState } from "../src/state/types.ts";
+import { DEFAULT_DATASET_ID } from "../src/state/selection.ts";
 
 const VIEW = { lng: 105.84, lat: 21, zoom: 9.3, pitch: 0, bearing: 0 };
 const BASE: HashState = {
@@ -32,7 +33,7 @@ const BASE: HashState = {
   dataMode: false,
   nationalMode: false,
   t: 0,
-  brush: {},
+  filter: null,
 };
 
 test("field hash phân biệt khoá bị xoá với khoá có mặt nhưng sai", () => {
@@ -211,78 +212,77 @@ test("`t` hỏng không kéo theo khoá lành", () => {
 test("`t`/`b` KHÔNG đọc và KHÔNG ghi trong CÂU CHUYỆN — dock/scrubber không dựng ở đó", () => {
   const p = parseHash("#s=di-vong&t=46&b=h:population:1..2");
   assert.equal(p.t, undefined);
-  assert.equal(p.brush, undefined);
-  const s = serializeHash({ ...BASE, scene: "von-cuc", t: 46, brush: { win: { dow: { lo: 0, hi: 4 }, hour: { lo: 7, hi: 19 } } } });
+  assert.equal(p.filter, undefined);
+  const s = serializeHash({
+    ...BASE,
+    scene: "von-cuc",
+    t: 46,
+    filter: {
+      version: 1,
+      mode: "subset",
+      datasetId: DEFAULT_DATASET_ID,
+      entity: "h3-cell",
+      field: "population",
+      op: "between",
+      lo: 1,
+      hi: 2,
+      missing: "exclude",
+      source: "demand-population-histogram",
+    },
+  });
   assert.doesNotMatch(s, /[?&]t=/);
   assert.doesNotMatch(s, /[?&]b=/);
 });
 
-// ── Khoá `b` — ba loại brush (§9b) ─────────────────────────────────────────────
+// ── Khoá `b` — đúng một Phase 4 SUBSET filter ─────────────────────────────────
 
-test("`b` đọc được cả ba loại trong một chuỗi", () => {
-  const b = parseHash(
-    "#b=h:population:120..4400,s:population:120..4400:dist_station_network_m:0..2500,w:0..4:7..19",
-  ).brush!;
-  assert.deepEqual(b.hist, { field: "population", range: { lo: 120, hi: 4400 } });
-  assert.equal(b.scatter?.x, "population");
-  assert.deepEqual(b.scatter?.yr, { lo: 0, hi: 2500 });
-  assert.deepEqual(b.win, { dow: { lo: 0, hi: 4 }, hour: { lo: 7, hi: 19 } });
+test("`b` đọc filter Phase 4 và legacy histogram; scatter/window legacy không sống lại", () => {
+  const modern = parseHash("#b=f1~h3-cell~population~between~120..4400").filter;
+  assert.ok(modern && modern.entity === "h3-cell" && modern.op === "between");
+  assert.equal(modern.lo, 120);
+  assert.equal(modern.hi, 4400);
+
+  const legacy = parseHash("#b=h:population:50..99,w:0..4:7..19").filter;
+  assert.ok(legacy && legacy.entity === "h3-cell" && legacy.op === "between");
+  assert.equal(legacy.lo, 50);
+  assert.equal(legacy.hi, 99);
 });
 
-test("mệnh đề hỏng bị bỏ RIÊNG nó — hai brush kia vẫn sống", () => {
-  // Cùng luật "bỏ từng ID lạ" của khoá `l`, chỉ sâu hơn một bậc.
-  const b = parseHash("#b=h:khong_co_that:1..2,w:0..4:7..19").brush!;
-  assert.equal(b.hist, undefined);
-  assert.deepEqual(b.win, { dow: { lo: 0, hi: 4 }, hour: { lo: 7, hi: 19 } });
+test("`b` rác ⇒ như khoá filter vắng mặt", () => {
+  assert.equal(parseHash("#b=pop:120-4400").filter, undefined);
+  assert.equal(parseHash("#b=xyz").filter, undefined);
+  assert.equal(parseHash("#b=").filter, undefined);
 });
 
-test("`b` toàn rác ⇒ như khoá vắng mặt, không phải một brush rỗng", () => {
-  // "nói rác" và "không nói gì" cho ra cùng một trạng thái, nên chúng phải cho cùng kết quả.
-  assert.equal(parseHash("#b=pop:120-4400").brush, undefined, "cú pháp nháp cũ của §9");
-  assert.equal(parseHash("#b=xyz").brush, undefined);
-  assert.equal(parseHash("#b=").brush, undefined);
-});
-
-test("`b` hỏng không kéo theo khoá lành", () => {
+test("filter hỏng không kéo theo khoá lành", () => {
   const p = parseHash("#f=population&b=xyz&t=46&l=stations");
-  assert.equal(p.brush, undefined);
+  assert.equal(p.filter, undefined);
   assert.equal(p.field, "population");
   assert.equal(p.t, 46);
   assert.deepEqual(p.layers, ["stations"]);
 });
 
-test("vòng ghi ↔ đọc của `b` hội tụ ở lần thứ hai", () => {
-  // Điều kiện để listener `hashchange` không lặp vô hạn (§9a): biên đã làm tròn thì đọc
-  // lại phải ra đúng số đó.
+test("vòng ghi ↔ đọc filter hội tụ ở lần thứ hai", () => {
   const state: HashState = {
     ...BASE,
     t: 75,
-    brush: {
-      hist: { field: "population", range: { lo: 120.123456, hi: 4400 } },
-      scatter: {
-        x: "population",
-        xr: { lo: 0, hi: 9000 },
-        y: "dist_station_network_m",
-        yr: { lo: 1500, hi: 20000 },
-      },
-      win: { dow: { lo: 1, hi: 5 }, hour: { lo: 6, hi: 22 } },
-    },
+    filter: { version: 1, mode: "subset", datasetId: DEFAULT_DATASET_ID, entity: "h3-cell", field: "population", op: "between", lo: 120.123456, hi: 4400, missing: "exclude", source: "demand-population-histogram" },
   };
   const once = serializeHash(state);
   const back = parseHash(`#${once}`);
-  const twice = serializeHash({ ...state, ...back, brush: back.brush ?? {} }, `#${once}`);
+  const twice = serializeHash({ ...state, ...back, filter: back.filter ?? null }, `#${once}`);
   assert.equal(once, twice);
   assert.equal(back.t, 75);
-  assert.equal(back.brush?.hist?.range.lo, 120.1235, "biên làm tròn 4 chữ số");
+  assert.equal(back.filter?.entity, "h3-cell");
+  assert.equal(back.filter?.entity === "h3-cell" ? back.filter.lo : undefined, 120.1235, "biên làm tròn 4 chữ số");
 });
 
-test("`..` và `-` không bị percent-encode — hash phải đọc được bằng mắt", () => {
+test("filter range giữ `..` và `-` đọc được bằng mắt", () => {
   const s = serializeHash({
     ...BASE,
-    field: "screen_margin_m",
-    brush: { hist: { field: "screen_margin_m", range: { lo: -2000, hi: 500 } } },
+    filter: { version: 1, mode: "subset", datasetId: DEFAULT_DATASET_ID, entity: "h3-cell", field: "population", op: "between", lo: -2000, hi: 500, missing: "exclude", source: "demand-population-histogram" },
   });
-  assert.match(s, /b=h:screen_margin_m:-2000\.\.500/);
+  assert.match(s, /b=f1~h3-cell~population~between~-2000\.\.500/);
   assert.doesNotMatch(s, /%2E|%2D/i);
 });
 
@@ -300,8 +300,8 @@ test("ghi rồi đọc lại cho đúng state ban đầu", () => {
     dataMode: false,
     nationalMode: false,
     t: 0,
-    brush: {},
-  };
+    filter: null,
+    };
   const back = parseHash(`#${serializeHash(state)}`);
   assert.equal(back.field, state.field);
   assert.equal(back.mode, state.mode);

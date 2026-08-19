@@ -10,8 +10,12 @@ import type { AreaPop } from "../story/lorenz";
 import type { PoiCollection } from "./poi";
 import type { CellValue } from "../viz/palette";
 import { FIELDS, type FieldMeta, type RuntimeCoverage } from "../fields";
+import { powerTierOf, type PowerTierId } from "../state/filter";
+import type { OpportunityCommuneRow } from "../viz/chart-models";
+import { BEYOND_2KM_M } from "../domain-thresholds";
 
 export { H3_RE };
+export { BEYOND_2KM_M } from "../domain-thresholds";
 
 /**
  * Lớp vắng mặt ở chế độ TỈNH trả về tập rỗng — "chưa dựng" khác "hỏng" (§7a cùng họ).
@@ -34,7 +38,7 @@ export interface GridCell {
    * Dân số của ô, đi kèm mọi truy vấn trường ô. Hai chỗ cần: phủ theo DÂN của trường phái
    * sinh (§13c-1) và trọng số của mặt độ cầu (§1b). Nạp một lần thay vì hai lần.
    */
-  pop: number;
+  pop: number | null;
   /** Số cổng lắp đặt trong ô — trục cung của P1 bivariate, `0` là giá trị thật. */
   ports: number;
   lat: number;
@@ -169,7 +173,7 @@ async function fetchFieldUncached(meta: FieldMeta): Promise<GridCell[]> {
             ${gcol("n_ports")} AS ports,
             g."lat" AS lat, g."lng" AS lng,
             ${gcol("dist_station_network_m")} AS dist,
-            ${gridColumnAvailable("dist_station_network_m") ? 'g."dist_station_network_m" > 2000' : "NULL"} AS beyond2km,
+            ${gridColumnAvailable("dist_station_network_m") ? `g."dist_station_network_m" > ${BEYOND_2KM_M}` : "NULL"} AS beyond2km,
             ${gcol("network_reachable")} AS reachable
      FROM read_parquet('${GRID}') g`,
   );
@@ -186,10 +190,14 @@ async function fetchFieldUncached(meta: FieldMeta): Promise<GridCell[]> {
   for (let i = 0; i < table.numRows; i++) {
     const b = far.get(i);
     const d = dst.get(i);
+    const rawPop = pops.get(i);
+    const parsedPop = rawPop === null || rawPop === undefined ? null : Number(rawPop);
     out[i] = {
       h3: String(h3s.get(i)),
       value: toCellValue(vals.get(i)),
-      pop: Number(pops.get(i)) || 0,
+      // Population is an analytical input, not a default. Keep missing values null so
+      // the histogram/filter can exclude and disclose them rather than recoding as zero.
+      pop: parsedPop !== null && Number.isFinite(parsedPop) ? parsedPop : null,
       ports: Number(ports.get(i)) || 0,
       lat: Number(lats.get(i)),
       lng: Number(lngs.get(i)),
@@ -737,48 +745,178 @@ export interface StationPoint {
    * nào, chỉ một bản đồ nói dối.
    */
   inScope: boolean;
+  scope?: string;
+  stationCode?: string;
   /** `op_status` thô — `OPERATIONAL` · `MAINTENANCE` · `OUT_OF_SERVICE` · `UNKNOWN`. */
   opStatus: string;
   /** Số cổng ASSET; chỉ P1 Hybrid dùng bán kính như một encoding có legend riêng. */
   nPorts: number | null;
+  currentType?: string | null;
+  powerKwMaxPort?: number | null;
+  powerKwSite?: number | null;
+  powerTier?: PowerTierId;
 }
 
 let stationCache: Promise<StationPoint[]> | null = null;
 
 /**
- * 939 trạm sạc **công cộng**. Mặc định, bán kính chấm là hằng số (§4d-1). `n_ports` chỉ
- * được mang theo cho P1 Hybrid, nơi kích thước là encoding được khai rõ ở legend (§15).
+ * 939 trạm sạc **công cộng** (Q-P4-2 — PHASE4_VISUALIZATION.md §4.2).
  *
- * `op_status` thì CÓ lấy (M4.1): nó không đi vào kích thước hay hue, nó đi vào **nét**
- * (§4d-3a) — một kênh còn trống, và một kênh nhị phân, đúng cỡ của thứ nó chở.
+ * `power_kw_max_port`, `power_kw_site`, `current_type`, `scope` nạp một lần duy nhất
+ * cùng Station core snapshot và phân loại `powerTier` ngay tại loader boundary.
  */
 export function fetchStations(): Promise<StationPoint[]> {
-  stationCache ??= (async () => {
+  if (stationCache) return stationCache;
+  stationCache = (async () => {
     await registerParquet(STATIONS);
     const t = await query(
-      `SELECT station_id, lat, lng, scope, op_status, n_ports FROM read_parquet('${STATIONS}')
-       WHERE lat IS NOT NULL AND lng IS NOT NULL`,
+      `SELECT station_id, station_code, lat, lng, scope, op_status,
+              n_ports, current_type, power_kw_max_port, power_kw_site
+       FROM read_parquet('${STATIONS}')
+       WHERE lat IS NOT NULL AND lng IS NOT NULL
+       ORDER BY station_code`,
     );
     const ids = t.getChild("station_id")!;
+    const codes = t.getChild("station_code")!;
     const lats = t.getChild("lat")!;
     const lngs = t.getChild("lng")!;
     const scopes = t.getChild("scope")!;
     const ops = t.getChild("op_status")!;
     const ports = t.getChild("n_ports")!;
+    const cTypes = t.getChild("current_type")!;
+    const maxKw = t.getChild("power_kw_max_port")!;
+    const siteKw = t.getChild("power_kw_site")!;
+
     const out: StationPoint[] = new Array(t.numRows);
     for (let i = 0; i < t.numRows; i++) {
+      const scopeVal = String(scopes.get(i) ?? "");
+      const maxPortKw = maxKw.get(i) === null || maxKw.get(i) === undefined ? null : Number(maxKw.get(i));
+      const sKw = siteKw.get(i) === null || siteKw.get(i) === undefined ? null : Number(siteKw.get(i));
+      const pVal = ports.get(i) === null || ports.get(i) === undefined ? null : Number(ports.get(i));
+      const cTypeVal = cTypes.get(i) === null || cTypes.get(i) === undefined ? null : String(cTypes.get(i));
+
       out[i] = {
         id: String(ids.get(i)),
+        stationCode: String(codes.get(i) ?? ""),
         lat: Number(lats.get(i)),
         lng: Number(lngs.get(i)),
-        inScope: isInScope(String(scopes.get(i))),
+        inScope: isInScope(scopeVal),
+        scope: scopeVal,
         opStatus: String(ops.get(i) ?? "UNKNOWN"),
-        nPorts: ports.get(i) === null || ports.get(i) === undefined ? null : Number(ports.get(i)),
+        nPorts: pVal,
+        currentType: cTypeVal,
+        powerKwMaxPort: maxPortKw,
+        powerKwSite: sKw,
+        powerTier: powerTierOf(maxPortKw),
       };
     }
     return out;
-  })();
+  })().catch((error) => {
+    stationCache = null;
+    throw error;
+  });
   return stationCache;
+}
+
+let opportunityCommuneCache: Promise<readonly OpportunityCommuneRow[]> | null = null;
+
+/** Huỷ cache Q-P4-4 — chỉ `data/chart-session.ts` và test được gọi. */
+export function resetOpportunityCommuneCache(): void {
+  opportunityCommuneCache = null;
+}
+
+/**
+ * Bảo toàn cộng tính của Q-P4-4 (§4.2): với dân số KHÔNG khuyết,
+ * `total = within_2km + beyond_2km + distance_unknown`.
+ *
+ * Ba nhánh `FILTER` chia đôi trên `dist_station_network_m` phải phủ kín và không chồng
+ * nhau. Một giá trị `NaN` trong cột cự ly làm cả `<= 2000` lẫn `> 2000` sai và rơi khỏi
+ * cả ba nhóm — tổng vẫn ra một con số trông bình thường, còn thanh xếp hạng thì tụt xuống
+ * mà không có dấu hiệu nào. Kiểm ở ĐÂY, ngay chỗ hàng vừa rời khỏi SQL.
+ *
+ * Sai số cho phép là 0,5 người: `sum()` trên số thực cộng dồn theo thứ tự khác nhau giữa
+ * bốn biểu thức, nên đòi bằng nhau tuyệt đối sẽ báo động vì làm tròn dấu phẩy động.
+ */
+function assertPopulationConservation(rows: readonly OpportunityCommuneRow[]): void {
+  for (const r of rows) {
+    if (r.population_total === null || r.n_population_missing > 0) continue;
+    const parts = r.population_within_2km + r.population_beyond_2km + r.population_distance_unknown;
+    if (Math.abs(parts - r.population_total) > 0.5) {
+      throw new Error(
+        `Q-P4-4 vi phạm bảo toàn dân số ở xã ${r.commune_code}: ` +
+          `tổng ${r.population_total} ≠ ${r.population_within_2km} + ${r.population_beyond_2km} + ` +
+          `${r.population_distance_unknown} = ${parts}`,
+      );
+    }
+  }
+}
+
+/**
+ * Q-P4-4 — Opportunity grid-to-Commune aggregate (PHASE4_VISUALIZATION.md §4.2).
+ * Nạp lười một lần khi mở lens Cơ hội.
+ */
+export function fetchOpportunityCommunes(): Promise<readonly OpportunityCommuneRow[]> {
+  opportunityCommuneCache ??= (async () => {
+    await registerParquet(GRID);
+    const t = await query(
+      `SELECT
+        commune_code,
+        commune_name,
+        count(*) AS n_cells,
+        count(*) FILTER (WHERE population IS NULL) AS n_population_missing,
+        count(*) FILTER (WHERE population IS NOT NULL
+                          AND dist_station_network_m IS NULL) AS n_distance_unknown,
+        sum(population) AS population_total,
+        coalesce(sum(population) FILTER (
+          WHERE dist_station_network_m IS NOT NULL
+        ), 0) AS population_measured,
+        coalesce(sum(population) FILTER (
+          WHERE dist_station_network_m <= ${BEYOND_2KM_M}
+        ), 0) AS population_within_2km,
+        coalesce(sum(population) FILTER (
+          WHERE dist_station_network_m > ${BEYOND_2KM_M}
+        ), 0) AS population_beyond_2km,
+        coalesce(sum(population) FILTER (
+          WHERE dist_station_network_m IS NULL
+        ), 0) AS population_distance_unknown
+      FROM read_parquet('${GRID}')
+      WHERE commune_code IS NOT NULL
+      GROUP BY commune_code, commune_name`,
+    );
+    const codes = t.getChild("commune_code")!;
+    const names = t.getChild("commune_name")!;
+    const cells = t.getChild("n_cells")!;
+    const popMissing = t.getChild("n_population_missing")!;
+    const distUnknownCells = t.getChild("n_distance_unknown")!;
+    const popTotals = t.getChild("population_total")!;
+    const popMeasured = t.getChild("population_measured")!;
+    const popWithin2km = t.getChild("population_within_2km")!;
+    const popBeyond2km = t.getChild("population_beyond_2km")!;
+    const popDistUnknown = t.getChild("population_distance_unknown")!;
+
+    const out: OpportunityCommuneRow[] = new Array(t.numRows);
+    for (let i = 0; i < t.numRows; i++) {
+      const totalValue = popTotals.get(i);
+      out[i] = {
+        commune_code: String(codes.get(i)),
+        commune_name: String(names.get(i) ?? ""),
+        n_cells: Number(cells.get(i)) || 0,
+        n_population_missing: Number(popMissing.get(i)) || 0,
+        n_distance_unknown: Number(distUnknownCells.get(i)) || 0,
+        population_total: totalValue === null || totalValue === undefined ? null : Number(totalValue),
+        population_measured: Number(popMeasured.get(i)) || 0,
+        population_within_2km: Number(popWithin2km.get(i)) || 0,
+        population_beyond_2km: Number(popBeyond2km.get(i)) || 0,
+        population_distance_unknown: Number(popDistUnknown.get(i)) || 0,
+      };
+    }
+    assertPopulationConservation(out);
+    return out;
+  })().catch((error) => {
+    opportunityCommuneCache = null;
+    throw error;
+  });
+  return opportunityCommuneCache;
 }
 
 // ── Panel TRẠM — §8a, M4.1 ─────────────────────────────────────────────────────

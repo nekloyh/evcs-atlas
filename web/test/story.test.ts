@@ -24,6 +24,7 @@ import { parseHash, serializeHash } from "../src/state/hash.ts";
 import { MAJOR_BRIDGE_MIN_M, majorBridges, pathLengthM } from "../src/story/bridges.ts";
 import { renderPlan } from "../src/viz/render-plan.ts";
 import type { HashState } from "../src/state/types.ts";
+import { DEFAULT_DATASET_ID } from "../src/state/selection.ts";
 
 // ══ Đường Lorenz — phép tính, §13d-A ══════════════════════════════════════════
 
@@ -324,7 +325,7 @@ const MAP_STATE: HashState = {
   paintOn: true,
   dataMode: false,
   t: 0,
-  brush: {},
+  filter: null,
 };
 
 test("`s` có mặt và hợp lệ ⇒ chế độ CÂU CHUYỆN; vắng hoặc hỏng ⇒ BẢN ĐỒ", () => {
@@ -392,7 +393,23 @@ test("khoá `t`/`b` KHÔNG đọc và KHÔNG ghi trong CÂU CHUYỆN — M4 (§9
   // cạnh là nguồn sự thật thứ hai. Ghi trạng thái của một bộ điều khiển không tồn tại là
   // đúng lỗi mà §9a đã cấm với `f`/`v`/`l`, nên `t`/`b` đi theo cùng luật.
   const s = serializeHash(
-    { ...MAP_STATE, scene: "von-cuc", t: 48, brush: { hist: { field: "population", range: { lo: 1, hi: 2 } } } },
+    {
+      ...MAP_STATE,
+      scene: "von-cuc",
+      t: 48,
+      filter: {
+        version: 1,
+        mode: "subset",
+        datasetId: DEFAULT_DATASET_ID,
+        entity: "h3-cell",
+        field: "population",
+        op: "between",
+        lo: 1,
+        hi: 2,
+        missing: "exclude",
+        source: "demand-population-histogram",
+      },
+    },
     "#t=48&b=h:population:1..2",
   );
   assert.doesNotMatch(s, /[?&]t=/);

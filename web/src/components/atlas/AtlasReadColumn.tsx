@@ -1,6 +1,7 @@
 import { Eye, EyeOff } from "lucide-react";
 
 import type { Manifest } from "../../data/manifest";
+import type { StationOccupancy } from "../../data/occupancy";
 import type { CommuneCollection, GridCell, StationPoint } from "../../data/queries";
 import {
   LENSES,
@@ -17,7 +18,8 @@ import { selectionWireOf, useStore } from "../../state/store";
 import { scaleUnit, unitPhrase } from "../../units";
 import { Badge } from "../../ui/Badge";
 import { DemandModes } from "../../ui/DemandModes";
-import { Dock, type DockData } from "../../ui/Dock";
+import { LensChartController } from "./LensChartController";
+import type { FilterCounts } from "../../ui/FilterSummary";
 import { Legend } from "../../ui/Legend";
 import { SearchBar } from "../../ui/SearchBar";
 import { SourceBlock } from "../../ui/Source";
@@ -44,10 +46,13 @@ export interface AtlasReadColumnProps {
   surfaceBreaks: number[];
   bivariate: BivariateAxes | null;
   selectedValue: number | null;
-  dockData: DockData;
+  filterCounts?: FilterCounts | null;
   communes?: CommuneCollection | null;
   stations?: StationPoint[];
   cells?: GridCell[];
+  occupancy?: StationOccupancy | null;
+  utilizationScale?: Scale | null;
+  utilizationUnavailableReason?: string;
 }
 
 function unitTag(readAs: FieldMeta["readAs"]): string {
@@ -85,10 +90,13 @@ export function AtlasReadColumn({
   surfaceBreaks,
   bivariate,
   selectedValue,
-  dockData,
+  filterCounts,
   communes,
   stations = [],
   cells = [],
+  occupancy = null,
+  utilizationScale = null,
+  utilizationUnavailableReason,
 }: AtlasReadColumnProps) {
   const paintOn = useStore((s) => s.paintOn);
   const setPaintOn = useStore((s) => s.setPaintOn);
@@ -181,7 +189,20 @@ export function AtlasReadColumn({
             />
           </LegendSlot>
         ),
-        contextualChart: <ContextualChartSlot><Dock field={field} data={dockData} view="distribution" bare /></ContextualChartSlot>,
+        contextualChart: (
+          <ContextualChartSlot>
+            <LensChartController
+              field={field}
+              scale={scale}
+              filterCounts={filterCounts}
+              cells={cells}
+              stations={stations}
+              occupancy={occupancy}
+              utilizationScale={utilizationScale}
+              utilizationUnavailableReason={utilizationUnavailableReason}
+            />
+          </ContextualChartSlot>
+        ),
         limits: (
           <div className="space-y-2 text-body leading-snug text-ink-2">
             <p>{field.desc}</p>

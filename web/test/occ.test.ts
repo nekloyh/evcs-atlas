@@ -32,6 +32,8 @@ function make(nStations: number, ports: number[]): OccProfiles {
     occ: new Float32Array(size).fill(NaN),
     observed: new Float32Array(size).fill(NaN),
     nPorts: Float32Array.from(ports),
+    // Mọi trạm của fixture đều IN: các test này đo phép gộp, không đo luật IN/BUFFER.
+    inScope: Array.from({ length: nStations }, () => true),
     n: nStations,
   };
 }

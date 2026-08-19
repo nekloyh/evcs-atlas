@@ -47,7 +47,7 @@ if ROOT.name == "notebooks":
 import sys
 
 sys.path.insert(0, str(ROOT / "src"))
-from hanoi import aoi, paths  # noqa: E402
+from vn import admin, paths  # noqa: E402
 
 P = ROOT / "data/processed"
 grid = pq.read_table(P / "grid_h3_r8.parquet").to_pandas()
@@ -74,7 +74,7 @@ def tram_truoc_loc() -> pd.DataFrame:
                             "h3_r8", "is_primary", "coord_resolved",
                             *REN]).to_pandas())
     t = t[t.is_primary & t.coord_resolved].rename(columns=REN)
-    b = aoi.boundary()
+    b = admin.boundary("01")
     minx, miny, maxx, maxy = b.bounds
     t = t[t.lng.between(minx, maxx) & t.lat.between(miny, maxy)].copy()
     pb = prep(b)
@@ -638,7 +638,7 @@ _canon = (pads.dataset(paths.SRC_CANON_STATIONS, format="parquet", partitioning=
           .to_table(columns=["lat", "lng", "op_status", "access", "is_primary",
                              "coord_resolved", *REN]).to_pandas())
 _canon = _canon[_canon.is_primary & _canon.coord_resolved].rename(columns=REN)
-_bb = aoi.buffered(); _pbb = prep(_bb)
+_bb = admin.buffered("01"); _pbb = prep(_bb)
 _mx, _my, _Mx, _My = _bb.bounds
 _canon = _canon[_canon.lng.between(_mx, _Mx) & _canon.lat.between(_my, _My)]
 _canon = _canon[[_pbb.contains(Point(x, y)) for x, y in zip(_canon.lng, _canon.lat)]]

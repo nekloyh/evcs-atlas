@@ -13,8 +13,7 @@ import { query, registerParquet } from "./duckdb";
 import { HOURS_IN_WEEK } from "../state/types";
 import type { OccProfiles } from "../viz/occ";
 import { dataPath } from "./province";
-import { STATIONS } from "./queries";
-import { isInScope } from "./scope";
+import { fetchStations } from "./queries";
 
 export const PROFILE_168H = dataPath("station_occupancy_profile_168h.parquet");
 
@@ -48,42 +47,29 @@ let cache: Promise<StationOccupancy> | null = null;
  * nó. Dựa vào một sự tình cờ để giữ một ràng buộc là cách ràng buộc đó gãy sau này.
  */
 export function fetchOccupancy(): Promise<StationOccupancy> {
-  cache ??= (async () => {
-    await Promise.all([registerParquet(STATIONS), registerParquet(PROFILE_168H)]);
-
-    // Thứ tự trạm do truy vấn này quyết định, và nó phải ỔN ĐỊNH: chỉ số `s` là khoá liên
-    // kết giữa `stations[]` và hai mảng phẳng. `ORDER BY station_code` để hai lần chạy cho
-    // cùng một thứ tự, kể cả khi DuckDB đổi kế hoạch truy vấn.
-    const st = await query(
-      `SELECT station_code, station_id, lat, lng, scope, n_ports, op_status
-       FROM read_parquet('${STATIONS}')
-       WHERE lat IS NOT NULL AND lng IS NOT NULL
-       ORDER BY station_code`,
-    );
-    const n = st.numRows;
-    const codes = st.getChild("station_code")!;
-    const sids = st.getChild("station_id")!;
-    const lats = st.getChild("lat")!;
-    const lngs = st.getChild("lng")!;
-    const scopes = st.getChild("scope")!;
-    const ports = st.getChild("n_ports")!;
-    const ops = st.getChild("op_status")!;
+  if (cache) return cache;
+  cache = (async () => {
+    // Reuse the Station core snapshot. This removes the former second full stations scan
+    // when Utilization was opened after Supply.
+    const [coreStations] = await Promise.all([fetchStations(), registerParquet(PROFILE_168H)]);
+    const n = coreStations.length;
 
     const stations: StationRow[] = new Array(n);
     const nPorts = new Float32Array(n);
     const index = new Map<string, number>();
     for (let i = 0; i < n; i++) {
-      const code = String(codes.get(i));
+      const source = coreStations[i]!;
+      const code = source.stationCode ?? "";
       stations[i] = {
         code,
-        id: String(sids.get(i)),
-        lat: Number(lats.get(i)),
-        lng: Number(lngs.get(i)),
-        inScope: isInScope(String(scopes.get(i))),
-        opStatus: String(ops.get(i) ?? "UNKNOWN"),
+        id: source.id,
+        lat: source.lat,
+        lng: source.lng,
+        inScope: source.inScope,
+        opStatus: source.opStatus,
       };
-      index.set(code, i);
-      const p = ports.get(i);
+      if (code) index.set(code, i);
+      const p = source.nPorts;
       // KHÔNG `?? 0`: 26 trạm khuyết `n_ports`. Mẫu số bằng 0 sẽ cho `Infinity`, mẫu số
       // "coi như 0 cổng" sẽ cho một trạm không tồn tại. `NaN` = không có mẫu số (§13c-1).
       nPorts[i] = p === null || p === undefined ? NaN : Number(p);
@@ -113,7 +99,11 @@ export function fetchOccupancy(): Promise<StationOccupancy> {
       observed[i] = b === null || b === undefined ? NaN : Number(b);
     }
 
-    return { stations, profiles: { occ, observed, nPorts, n } };
-  })();
+    const inScope = stations.map((s) => s.inScope);
+    return { stations, profiles: { occ, observed, nPorts, inScope, n } };
+  })().catch((error) => {
+    cache = null;
+    throw error;
+  });
   return cache;
 }

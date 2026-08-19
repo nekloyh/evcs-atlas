@@ -32,26 +32,27 @@ import {
   fieldAvailable,
   fieldMapAvailable,
   layerUsable,
+  lensOfField,
   type RuntimeCoverage,
 } from "./fields";
-import { keep } from "./state/brush";
 import { selectionWireOf, useStore } from "./state/store";
+import { filterKeepsCell, filterKeepsStation, isKnownPopulation } from "./state/filter";
 import { syncHash } from "./state/hash";
 import { INITIAL_VIEW } from "./state/view-config";
 import { storyEnabled } from "./story/scenes";
 import { StoryColumn } from "./story/StoryColumn";
 import { DataMode } from "./ui/DataMode";
-import { type DockData } from "./ui/Dock";
 import { Scrubber } from "./ui/Scrubber";
 import { NavRail } from "./components/atlas/NavRail";
 import { LayersTab } from "./ui/LayersTab";
 import { AtlasReadColumn } from "./components/atlas/AtlasReadColumn";
+import { FilterChip, type FilterCounts } from "./ui/FilterSummary";
 import { EvidenceCard } from "./components/atlas/EvidenceCard";
 import { AppShell } from "./components/atlas/AppShell";
 import { MapWorkspace, ModeSwitch, Workspace } from "./components/atlas/Workspace";
 import NationalApp from "./national/NationalApp";
 import type { AppNavMode } from "./state/types";
-import { allOccValues, cityProfile, occCountAt, occCoverage, stationOccAt } from "./viz/occ";
+import { allOccValues, occCountAt, occCoverage, stationOccAt } from "./viz/occ";
 import { buildScale, computeClassingByWeight, type Scale } from "./viz/palette";
 import { bivariateAxes } from "./viz/demand";
 
@@ -138,7 +139,7 @@ export default function App() {
             dataMode: s.dataMode,
             nationalMode: s.nationalMode,
             t: s.t,
-            brush: s.brush,
+            filter: s.filter.active,
           };
         },
         useStore.getState().applyHash,
@@ -313,17 +314,20 @@ export default function App() {
   //
   // Nạp LƯỜI như roads và POI (§5a). Ba đường cần nó: trường `station:occ`, một trạm đang
   // được chọn (mini-heatmap 168h), hoặc chế độ DỮ LIỆU dựng small multiples.
+  const occupancyUnavailable = manifest?.unusable_layers?.find((item) => item.layer === "occupancy") ?? null;
   const needOcc =
-    meta.id === STATION_OCC_FIELD ||
+    lensOfField(meta.id) === "utilization" ||
     (stationIdOf(cellSel) !== null && !scene) ||
     dataMode;
   useEffect(() => {
-    if (!needOcc || occupancy) return;
+    // Wait for manifest capability before issuing the large profile request. A dataset
+    // that explicitly disables occupancy must render its measured reason, not a fetch error.
+    if (!manifest || occupancyUnavailable || !needOcc || occupancy) return;
     void fetchOccupancy().then(setOccupancy, fail);
-  }, [needOcc, occupancy]);
+  }, [manifest, occupancyUnavailable, needOcc, occupancy]);
 
   const t = useStore((s) => s.t);
-  const brush = useStore((s) => s.brush);
+  const analysisFilter = useStore((s) => s.filter.active);
 
   /**
    * Chia bậc của `station:occ` — tính MỘT LẦN trên cả 168 giờ, không theo từng giờ.
@@ -336,7 +340,6 @@ export default function App() {
     () => (occupancy ? buildScale("numeric", allOccValues(occupancy.profiles)) : null),
     [occupancy],
   );
-  const city = useMemo(() => (occupancy ? cityProfile(occupancy.profiles) : []), [occupancy]);
 
   // Trường trạm: NGƯỠNG lấy từ cả tuần (ở trên), còn hai SỐ ĐẾM là của giờ đang xem —
   // legend đếm cái đang vẽ. Hai thứ khác nhau và chúng phải đến từ hai chỗ khác nhau.
@@ -348,11 +351,22 @@ export default function App() {
 
   // Asset supply không phụ thuộc telemetry. Cùng geometry trạm nhưng khác measure, nên
   // scale đọc trực tiếp `stations` và null là “chưa khai cổng”, không là “chưa quan sát”.
+  //
+  // Mẫu số là trạm IN, không phải cả 939: từ Phase 4 lớp mặt tô chỉ vẽ trạm IN (§1.3), nên
+  // đếm cả BUFFER sẽ khiến legend cộng một chấm nó không hề vẽ — một trạm BUFFER thiếu
+  // `n_ports` từng làm ô "vắng số" của legend tăng lên mà bản đồ không có thêm vân nào.
+  // KHÔNG áp filter ở đây: ngưỡng chia bậc phải đứng yên khi bộ lọc bật/tắt, nếu không
+  // cùng một màu sẽ đổi nghĩa giữa hai lần bấm (§1.1).
   useEffect(() => {
     if (meta.id !== STATION_PORTS_FIELD) return;
     setScaleSnapshot({
       fieldId: meta.id,
-      scale: buildScale(meta.kind, stations.map((s) => s.nPorts), meta.diverge, meta.categorical),
+      scale: buildScale(
+        meta.kind,
+        stations.filter((s) => s.inScope).map((s) => s.nPorts),
+        meta.diverge,
+        meta.categorical,
+      ),
     });
   }, [meta, stations]);
 
@@ -393,77 +407,85 @@ export default function App() {
     return null;
   }, [cellSel, meta, communes, cells, stations, occupancy, roads, t]);
 
-  const dockData: DockData = useMemo(() => {
-    let histValues: number[] = [];
-    let total = 0;
-    let kept = 0;
-    const numeric = (v: unknown): number | null =>
-      typeof v === "number" && !Number.isNaN(v) ? v : null;
+  /**
+   * TẬP PHÂN TÍCH — dẫn xuất ĐÚNG MỘT LẦN, ở đây (§5.2, §5.4).
+   *
+   * Trước đợt sửa này phép thử của bộ lọc được viết lại ở bốn nơi (bản đồ, model biểu đồ,
+   * dòng readout, Inspector) và chúng đã lệch nhau ở đúng chỗ dễ bỏ qua nhất: một ô dân số
+   * ÂM vừa được vẽ vừa bị đếm là khuyết. Nay cả bốn gọi chung `filterKeepsCell` /
+   * `filterKeepsStation`, và MapView chỉ nhận mảng đã lọc.
+   *
+   * `filter.active` là tham chiếu BẤT BIẾN và `applyFilterIntent` giữ nguyên nó khi bộ lọc
+   * không đổi nghĩa, nên hai memo này không chạy lại vì một lượt render thừa — kể cả trong
+   * lúc scrubber chạy 4 lần/giây.
+   */
+  const analyticalCells = useMemo(
+    () => (analysisFilter ? cells.filter((c) => filterKeepsCell(analysisFilter, c)) : cells),
+    [cells, analysisFilter],
+  );
 
-    if (meta.readAs === "cell") {
-      for (const c of cells) {
-        total++;
-        const v = numeric(c.value);
-        if (v !== null) histValues.push(v);
-        if (keep(brush, { value: c.value, scatter: { x: c.pop, y: c.dist } })) kept++;
-      }
-    } else if (meta.readAs === "commune" && communes) {
-      for (const f of communes.features) {
-        total++;
-        const v = numeric(f.properties[meta.column]);
-        if (v !== null) histValues.push(v);
-        if (keep(brush, { value: f.properties[meta.column] })) kept++;
-      }
-    } else if (meta.readAs === "road") {
-      for (const r of roads) {
-        total++;
-        if (r.dist !== null) histValues.push(r.dist);
-        if (keep(brush, { value: r.dist })) kept++;
-      }
-    } else if (meta.id === STATION_OCC_FIELD && occupancy) {
-      for (let s = 0; s < occupancy.profiles.n; s++) {
-        total++;
-        const v = stationOccAt(occupancy.profiles, s, t);
-        if (v !== null) histValues.push(v);
-        if (keep(brush, { value: v })) kept++;
-      }
-    } else if (meta.id === STATION_PORTS_FIELD) {
-      for (const s of stations) {
-        total++;
-        if (s.nPorts !== null) histValues.push(s.nPorts);
-        if (keep(brush, { value: s.nPorts })) kept++;
-      }
+  // Luật IN-only (§1.3) áp KỂ CẢ khi không có bộ lọc: trạm BUFFER là bối cảnh, không bao
+  // giờ là số đo. Nó nằm ngoài `filterKeepsStation` vì nó không phải một mệnh đề lọc.
+  const analyticalStations = useMemo(
+    () =>
+      stations.filter((st) => st.inScope && filterKeepsStation(analysisFilter, st)),
+    [stations, analysisFilter],
+  );
+
+  /**
+   * kept/eligible/total của bộ lọc — tính MỘT LẦN ở đây rồi phát xuống.
+   *
+   * Trước đây controller tự `reduce` qua toàn bộ `cells` trong thân render, mà controller
+   * lại có đăng ký `t`, nên con số ấy được tính lại 4 lần mỗi giây trong lúc scrubber chạy
+   * dù không có gì liên quan tới thời gian. Ở đây nó đi cùng memo của chính tập phân tích.
+   */
+  const filterCounts = useMemo<FilterCounts | null>(() => {
+    if (!analysisFilter) return null;
+    if (analysisFilter.entity === "h3-cell") {
+      let eligible = 0;
+      for (const c of cells) if (isKnownPopulation(c.pop)) eligible++;
+      return {
+        kept: analyticalCells.length,
+        eligible,
+        total: cells.length,
+        excludedNull: cells.length - eligible,
+      };
     }
-    if (meta.kind !== "numeric") histValues = [];
-
-    const points = cells
-      .filter((c) => c.dist !== null)
-      .map((c) => ({ x: c.pop, y: c.dist as number }));
-
+    let inScope = 0;
+    for (const st of stations) if (st.inScope) inScope++;
     return {
-      histValues,
-      points,
-      nScatterMissing: cells.length - points.length,
-      city,
-      occScale: occClassing,
-      kept: total > 0 ? { n: kept, total } : null,
-      // ReadColumn hiện chỉ dựng distribution. Các model khác không được tính ngầm.
-      access: null,
-      equity: null,
-      ranked: null,
+      kept: analyticalStations.length,
+      eligible: inScope,
+      total: inScope,
+      excludedNull: 0,
     };
-  }, [
-    meta,
-    cells,
-    communes,
-    roads,
-    stations,
-    occupancy,
-    t,
-    brush,
-    city,
-    occClassing,
-  ]);
+  }, [analysisFilter, cells, stations, analyticalCells, analyticalStations]);
+
+  /**
+   * Đối tượng ĐANG CHỌN có nằm ngoài tập lọc không — tính ở ĐÂY, không để Inspector tự suy.
+   *
+   * §5.4 nói rõ Inspector NHẬN cờ này. Tự suy có một lỗ thật: khi hàng của nó không có
+   * trong snapshot đang mở, phép suy cục bộ trả `false` và Inspector khẳng định "đang trong
+   * tập lọc" trong khi bản đồ không vẽ mark nào — sai theo đúng chiều nguy hiểm.
+   *
+   * Snapshot RỖNG (đang nạp) trả `false`: lúc đó ta không biết gì cả, và một nhãn "ngoài
+   * tập lọc" nhấp nháy mỗi lần đổi trường còn tệ hơn là không nói.
+   */
+  const outsideActiveSubset = useMemo(() => {
+    if (!analysisFilter || !cellSel) return false;
+    if (analysisFilter.entity === "h3-cell") {
+      const h3 = cellIdOf(cellSel);
+      if (!h3 || cells.length === 0) return false;
+      const row = cells.find((c) => c.h3 === h3);
+      // Không tìm thấy trong snapshot ĐÃ NẠP ⇒ mark của nó không được vẽ ⇒ nó nằm ngoài.
+      return row ? !filterKeepsCell(analysisFilter, row) : true;
+    }
+    const station = stationIdOf(cellSel);
+    if (!station || stations.length === 0) return false;
+    const row = stations.find((st) => st.id === station);
+    if (!row) return true;
+    return !row.inScope || !filterKeepsStation(analysisFilter, row);
+  }, [analysisFilter, cellSel, cells, stations]);
 
   const activeNavMode: AppNavMode = nationalMode
     ? "national"
@@ -528,16 +550,21 @@ export default function App() {
             surfaceBreaks={surfaceBreaks}
             bivariate={bivariate}
             selectedValue={selectedValue}
-            dockData={dockData}
+            filterCounts={filterCounts}
             communes={communes}
             stations={stations}
             cells={cells}
+            occupancy={occupancy}
+            utilizationScale={occClassing}
+            utilizationUnavailableReason={occupancyUnavailable?.reason}
           />}
       map={
         <>
           <MapView
             field={meta}
             cells={cells}
+            analyticalCells={analyticalCells}
+            analyticalStations={analyticalStations}
             communes={communes}
             boundary={boundary}
             stations={stations}
@@ -548,6 +575,15 @@ export default function App() {
             poi={poi}
             occupancy={occupancy}
           />
+          {!scene && analysisFilter && (
+            <div className="pointer-events-none absolute left-2 top-2 z-10 flex">
+              <FilterChip
+                filter={analysisFilter}
+                counts={filterCounts}
+                onClear={() => useStore.getState().clearFilter("user")}
+              />
+            </div>
+          )}
           {!scene && (
             <EvidenceCard
               manifest={manifest}
@@ -559,6 +595,7 @@ export default function App() {
               roadsLoading={roadsLoading}
               cells={cells}
               scale={scale}
+              outsideActiveSubset={outsideActiveSubset}
             />
           )}
         </>

@@ -37,7 +37,7 @@ ROOT = Path.cwd()
 if ROOT.name == "notebooks":
     ROOT = ROOT.parent
 sys.path.insert(0, str(ROOT / "src"))
-from hanoi import paths  # noqa: E402
+from vn import paths  # noqa: E402
 
 plt.rcParams.update({"figure.dpi": 120, "font.size": 9, "axes.grid": True,
                      "grid.alpha": 0.25, "axes.spines.top": False, "axes.spines.right": False})

@@ -59,6 +59,16 @@ const registering = new Map<string, Promise<string>>();
 // các Promise chờ lẫn nhau. Queue này giữ thứ tự truy vấn; dữ liệu không đổi, chỉ tránh
 // contention lúc boot.
 let queryTail: Promise<void> = Promise.resolve();
+let issuedQueryCount = 0;
+
+/** Read-only instrumentation for interaction/performance regression tests. */
+export function getIssuedQueryCount(): number {
+  return issuedQueryCount;
+}
+
+export function resetIssuedQueryCount(): void {
+  issuedQueryCount = 0;
+}
 
 /**
  * Đăng ký một file Parquet trong `public/data/` để đọc qua HTTP range request —
@@ -90,6 +100,7 @@ export async function query(sql: string): Promise<Table> {
     const db = await getDb();
     const conn = await db.connect();
     try {
+      issuedQueryCount++;
       return await conn.query(sql);
     } finally {
       await conn.close();

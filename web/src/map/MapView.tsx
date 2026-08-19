@@ -55,8 +55,6 @@ import {
   COLD_HEX,
   COLD_RGB,
   HATCH_RGB,
-  MUTED_ALPHA,
-  MUTED_RGB,
   RAMP_RGB,
   SELECT_CASING_RGB,
   SELECT_CASING_W,
@@ -67,7 +65,6 @@ import {
   type RGB,
   type Scale,
 } from "../viz/palette";
-import { keep, type BrushState } from "../state/brush";
 import type { StationOccupancy } from "../data/occupancy";
 import { stationOccAt } from "../viz/occ";
 import { DEMAND_SUPPLY_RGB, bivariateAxes, tertileClass } from "../viz/demand";
@@ -91,10 +88,15 @@ interface Props {
   poi: PoiCollection | null;
   /** 939 trạm × 168 giờ — đơn vị đọc `station` (M4), nạp lười. `null` = chưa nạp. */
   occupancy: StationOccupancy | null;
+  /**
+   * Tập PHÂN TÍCH đã áp SUBSET, dẫn xuất ở App (§5.4).
+   *
+   * `cells`/`stations` ở trên vẫn là tập ĐẦY ĐỦ và vẫn phải như vậy: lớp bối cảnh, overlay,
+   * tooltip và ký hiệu ĐANG CHỌN đọc từ chúng, và §2.1 nói bộ lọc không đụng tới ba thứ đó.
+   */
+  analyticalCells?: GridCell[];
+  analyticalStations?: StationPoint[];
 }
-
-/** Màu của một mark bị brush loại — mờ đi, KHÔNG biến mất (§3d). */
-const MUTED = [MUTED_RGB[0], MUTED_RGB[1], MUTED_RGB[2], MUTED_ALPHA] as [number, number, number, number];
 
 /** Vân của overlay VÙNG — 135°, nghiêng ngược vân null 45°. §4d-1. */
 const OVERLAY_HATCH = new HatchExtension({ angle: 135 });
@@ -408,12 +410,11 @@ export function MapView(props: Props) {
     };
   }, [want3d, ready]);
 
-  // Scrubber và brush là hai thứ ĐỔI NHANH — `t` đổi 4 lần mỗi giây khi play. Chúng đi
+  // Scrubber là thứ ĐỔI NHANH — `t` đổi 4 lần mỗi giây khi play. Nó đi
   // thẳng vào `buildLayers` như mọi state khác: deck.gl dựng lại danh sách layer mỗi lần,
   // và với 939 chấm thì đó là việc rẻ. Không có đường tắt nào ở đây, và không nên có —
   // một đường vẽ riêng cho "lúc đang chạy" là hai đường vẽ cho cùng một bản đồ.
   const t = useStore((s) => s.t);
-  const brush = useStore((s) => s.brush);
   const demandRepresentation = useStore((s) => s.demandRepresentation);
   const theme = themeFor(field, demandRepresentation);
   useEffect(() => {
@@ -437,7 +438,7 @@ export function MapView(props: Props) {
     const ov = overlay.current;
     if (!ov) return;
     ov.setProps({
-      layers: buildLayers({ ...props, selected, layersOn, zoom, mode, paintOn, filter, marks, t, brush, demandRepresentation, inStory: scene !== null }),
+      layers: buildLayers({ ...props, selected, layersOn, zoom, mode, paintOn, filter, marks, t, demandRepresentation, inStory: scene !== null }),
       getTooltip: ({ object, layer }: { object?: unknown; layer?: { id: string } | null }) =>
         getMapTooltip({
           object,
@@ -454,7 +455,7 @@ export function MapView(props: Props) {
     // tên nơi chốn bên dưới. Nâng lại sau MỖI lượt dựng lớp — lớp deck mới luôn được thêm
     // lên đỉnh, nên một lần nâng lúc khởi tạo sẽ hết tác dụng ở lượt đổi trường kế tiếp.
     raiseLabels(map.current);
-  }, [props, field, cells, communes, boundary, stations, scale, surfaceBreaks, roads, routes, poi, occupancy, selected, layersOn, zoom, mode, paintOn, filter, marks, t, brush, demandRepresentation, scene, ready]);
+  }, [props, field, cells, communes, boundary, stations, scale, surfaceBreaks, roads, routes, poi, occupancy, selected, layersOn, zoom, mode, paintOn, filter, marks, t, demandRepresentation, scene, ready]);
 
   // `h-full w-full`, KHÔNG `absolute inset-0`: maplibre-gl.css đặt
   // `.maplibregl-map { position: relative }` và được import SAU tailwind, nên cùng độ ưu
@@ -507,8 +508,6 @@ interface BuildInput extends Props {
   marks?: SceneMark[];
   /** vị trí scrubber 0–167 — §3e */
   t: number;
-  /** ba ô brush của dock — §3d-1 */
-  brush: BrushState;
   demandRepresentation: DemandRepresentation;
   /** đang ở trong một cảnh CÂU CHUYỆN — xem `PlanInput.inStory` */
   inStory: boolean;
@@ -541,9 +540,10 @@ export function buildLayers({
   filter,
   marks,
   t,
-  brush,
   demandRepresentation,
   inStory,
+  analyticalCells: analyticalCellRows,
+  analyticalStations: analyticalStationRows,
 }: BuildInput): Layer[] {
   // `inStory` KHÔNG suy từ `marks`: cảnh A không có mark riêng nào, nên `marks` rỗng ở
   // đúng cảnh duy nhất mà cờ này quan trọng.
@@ -560,25 +560,39 @@ export function buildLayers({
 
   const activeTheme = themeFor(field, demandRepresentation);
 
+  // Tập phân tích đã DẪN XUẤT SẴN ở tầng App (§5.2, §5.4). MapView chỉ vẽ thứ nó nhận:
+  // không có phép thử filter nào chạy trong file này, nên không có bản sao predicate nào
+  // để lệch khỏi biểu đồ, readout và Inspector — cả bốn dùng chung `filterKeepsCell` /
+  // `filterKeepsStation` của `state/filter.ts`.
+  //
+  // Nhánh `??` chỉ đỡ cho lời gọi trong test dựng `BuildInput` tối thiểu; đường chạy thật
+  // luôn truyền mảng đã lọc. Mặc định của trạm là IN-only vì đó là tập phân tích của §1.3,
+  // đúng kể cả khi không có filter nào.
+  const analyticalCells = analyticalCellRows ?? cells;
+  const analyticalStations = analyticalStationRows ?? stations.filter((st) => st.inScope);
+  // Demand representations aggregate population. A missing population is neither a zero
+  // weight nor the first bivariate tertile, so it is excluded from those derived marks.
+  const populationCells = analyticalCells.filter((cell) => cell.pop !== null);
+
   // ── mặt tô — ĐÚNG MỘT, ràng buộc 2 (§6b) ───────────────────────────────────
   // Nút thứ ba cạnh Ô H3 | XÃ (thêm sau M3.5) tắt cả khối này mà KHÔNG đụng `field` —
   // trường đang chọn vẫn là chính nó, chỉ phần TÔ của nó không vẽ. Ràng buộc 2 nói "đúng
   // một trường được tô", không nói "luôn phải có một trường được tô".
   if (paintOn) {
     if (demandP1 && demandRepresentation !== "hex") {
-      if (demandRepresentation === "density") out.push(surfaceLayer(cells, surfaceBreaks));
-      if (demandRepresentation === "intensity") out.push(demandIntensityLayer(cells));
-      if (demandRepresentation === "bivariate") out.push(demandSupplyLayer(cells));
-      if (demandRepresentation === "hybrid") out.push(surfaceLayer(cells, surfaceBreaks), ...capacityStationLayers(stations));
+      if (demandRepresentation === "density") out.push(surfaceLayer(populationCells, surfaceBreaks));
+      if (demandRepresentation === "intensity") out.push(demandIntensityLayer(populationCells));
+      if (demandRepresentation === "bivariate") out.push(demandSupplyLayer(populationCells));
+      if (demandRepresentation === "hybrid") out.push(surfaceLayer(populationCells, surfaceBreaks), ...capacityStationLayers(analyticalStations));
     } else {
-      if (scale && plan.paint === "hex") out.push(...hexLayers(cells, scale, field, brush, filter, mode === "3d", activeTheme));
-      if (scale && plan.paint === "commune" && communes) out.push(...communeLayers(communes, field, scale, brush, activeTheme));
-      if (scale && plan.paint === "road") out.push(...roadLayers(roads, scale, field, zoom, brush, activeTheme));
+      if (scale && plan.paint === "hex") out.push(...hexLayers(analyticalCells, scale, field, filter, mode === "3d", activeTheme));
+      if (scale && plan.paint === "commune" && communes) out.push(...communeLayers(communes, field, scale, activeTheme));
+      if (scale && plan.paint === "road") out.push(...roadLayers(roads, scale, field, zoom, activeTheme));
       if (scale && plan.paint === "station" && field.id === STATION_PORTS_FIELD)
-        out.push(...stationPortsLayers(stations, scale, field, zoom, brush, activeTheme));
+        out.push(...stationPortsLayers(analyticalStations, scale, field, zoom, activeTheme));
       else if (scale && plan.paint === "station" && occupancy)
-        out.push(...stationFieldLayers(occupancy, scale, field, zoom, t, brush, activeTheme));
-      if (plan.paint === "surface") out.push(surfaceLayer(cells, surfaceBreaks));
+        out.push(...stationFieldLayers(occupancy, scale, field, zoom, t, activeTheme));
+      if (plan.paint === "surface") out.push(surfaceLayer(analyticalCells, surfaceBreaks));
     }
   }
 
@@ -782,17 +796,6 @@ export function assertUniqueLayerIds(layers: Layer[]): void {
 
 // ── Mặt tô: ô H3 ───────────────────────────────────────────────────────────────
 
-/**
- * Ô này có qua được brush không — §3d-1.
- *
- * Hai trục scatter đi kèm vì đơn vị `cell` là đơn vị DUY NHẤT mang cả `population` lẫn
- * `dist_station_network_m` trên cùng một hàng. Ở ba đơn vị kia, `scatter` để `undefined`
- * và brush đó **không hoạt động** — nó không trả về `false`, vì trả `false` sẽ xoá sạch bản
- * đồ và đọc thành "đã lọc rồi, không còn gì" (§13b-1 gọi đó là nói dối về phủ).
- */
-const keepCell = (b: BrushState, c: GridCell) =>
-  keep(b, { value: c.value, scatter: { x: c.pop, y: c.dist } });
-
 /** Chiều cao của H3 3D phải mã hoá measure đang chọn, không phải cột dân số phụ trợ. */
 const elevationForCell = (c: GridCell): number => {
   const value = typeof c.value === "number" && Number.isFinite(c.value) ? Math.max(0, c.value) : 0;
@@ -803,7 +806,6 @@ function hexLayers(
   cells: GridCell[],
   scale: Scale,
   field: FieldMeta,
-  brush: BrushState,
   filter?: CellFilter,
   is3d: boolean = false,
   theme?: AnalysisTheme,
@@ -840,12 +842,11 @@ function hexLayers(
         id: "grid-filtered-value",
         data: valued,
         getFillColor: (d) => {
-          if (!keepCell(brush, d)) return MUTED;
           const k = classOf(d.value, scale);
           // `valued` không chứa null; magenta chỉ là fail-visible cho mismatch scale.
           return rgba(k === null ? ([255, 0, 255] as RGB) : colors[k]!, 217);
         },
-        updateTriggers: { getFillColor: [scale, brush, theme] },
+        updateTriggers: { getFillColor: [scale, theme] },
       }),
       new H3HexagonLayer<GridCell>({
         ...common,
@@ -899,33 +900,28 @@ function hexLayers(
       id: "grid-value",
       data: valued,
       getFillColor: (d) => {
-        // Brush loại thì MỜ, không biến mất (§3d).
-        if (!keepCell(brush, d)) return MUTED;
         const k = classOf(d.value, scale);
         // classOf chỉ trả null khi không có giá trị — mà lớp này không chứa ô nào như vậy.
         // Nếu tới đây thì là bug, và nó phải nhìn thấy được.
         return rgba(k === null ? ([255, 0, 255] as RGB) : colors[k]!, 217);
       },
-      updateTriggers: { getFillColor: [scale, brush, theme] },
+      updateTriggers: { getFillColor: [scale, theme] },
     }),
-    // Ô null bị brush loại giữ nguyên VÂN của nó và chỉ đổi MỰC sang xám nhạt (§3d-1):
-    // chất liệu nói "không đo được", màu nói "không được chọn". Tô đè nó thành một ô xám
-    // trơn sẽ xoá mất câu thứ nhất, và ràng buộc 1 sống ở đúng câu đó.
+    // Ô null giữ VÂN của nó: chất liệu nói "không đo được". Một ô bị SUBSET loại không tới
+    // được đây — nó đã bị loại khỏi `data` ở tầng App (§2.1), không tô xám ở tầng vẽ.
     new H3HexagonLayer<GridCell>({
       ...common,
       id: "grid-null",
       data: missing,
-      getFillColor: (d) => (keepCell(brush, d) ? rgba(HATCH_RGB, 255) : MUTED),
+      getFillColor: () => rgba(HATCH_RGB, 255),
       extensions: [NULL_HATCH],
-      updateTriggers: { getFillColor: brush },
     }),
     new H3HexagonLayer<GridCell>({
       ...common,
       id: "grid-na",
       data: notApplicable,
-      getFillColor: (d) => (keepCell(brush, d) ? rgba(HATCH_RGB, 255) : MUTED),
+      getFillColor: () => rgba(HATCH_RGB, 255),
       extensions: [NA_HATCH],
-      updateTriggers: { getFillColor: brush },
     }),
   ];
 }
@@ -936,7 +932,6 @@ function communeLayers(
   fc: CommuneCollection,
   field: FieldMeta,
   scale: Scale,
-  brush: BrushState,
   theme?: AnalysisTheme,
 ): Layer[] {
   const { colors } = rampFor(scale, field.polarity, theme);
@@ -976,11 +971,9 @@ function communeLayers(
         const k = classOf(v, scale);
         // Xã không có giá trị: KHÔNG tô nhạt. Nó được lớp gạch chéo bên dưới lo (ràng buộc 1).
         if (k === null) return [0, 0, 0, 0];
-        // Brush scatter KHÔNG hoạt động ở đơn vị xã — hai trục của nó là cột của bảng Ô
-        // (§3d-1), nên `scatter` để `undefined` chứ không phải `{x: null, y: null}`.
-        return keep(brush, { value: v }) ? rgba(colors[k]!, 217) : MUTED;
+        return rgba(colors[k]!, 217);
       },
-      updateTriggers: { getFillColor: [scale, field.id, brush, theme] },
+      updateTriggers: { getFillColor: [scale, field.id, theme] },
     }),
     // Xã null — cùng vân 45° xám như ô null. Một chất liệu cho một khái niệm, bất kể hình học.
     new GeoJsonLayer({
@@ -995,10 +988,10 @@ function communeLayers(
       filled: true,
       stroked: false,
       pickable: false,
-      // Cùng luật với ô null của lưới: giữ vân, đổi mực khi bị brush loại (§3d-1).
-      getFillColor: () => (keep(brush, { value: null }) ? rgba(HATCH_RGB, 255) : MUTED),
+      // Cùng luật với ô null của lưới: vân giữ nguyên, không có trạng thái "bị loại".
+      getFillColor: () => rgba(HATCH_RGB, 255),
       extensions: [NULL_HATCH],
-      updateTriggers: { getFillColor: [field.id, brush] },
+      updateTriggers: { getFillColor: [field.id] },
     }),
   ];
 }
@@ -1035,7 +1028,6 @@ function roadLayers(
   scale: Scale,
   field: FieldMeta,
   zoom: number,
-  brush: BrushState,
   theme?: AnalysisTheme,
 ): Layer[] {
   const valued: RoadSeg[] = [];
@@ -1063,21 +1055,19 @@ function roadLayers(
       ...common,
       id: "road-null",
       data: missing,
-      getColor: () => (keep(brush, { value: null }) ? rgba(HATCH_RGB, 255) : MUTED),
+      getColor: () => rgba(HATCH_RGB, 255),
       getWidth: w,
-      updateTriggers: { getColor: brush },
     }),
     new PathLayer<RoadSeg>({
       ...common,
       id: "road-value",
       data: valued,
       getColor: (d) => {
-        if (!keep(brush, { value: d.dist })) return MUTED;
         const k = classOf(d.dist, scale);
         return rgba(k === null ? ([255, 0, 255] as RGB) : colors[k]!, 235);
       },
       getWidth: w,
-      updateTriggers: { getColor: [scale, field.polarity, brush, theme] },
+      updateTriggers: { getColor: [scale, field.polarity, theme] },
     }),
   ];
 }
@@ -1101,7 +1091,6 @@ function stationPortsLayers(
   scale: Scale,
   field: FieldMeta,
   zoom: number,
-  brush: BrushState,
   theme?: AnalysisTheme,
 ): Layer[] {
   const r = stationFieldRadius(zoom);
@@ -1127,9 +1116,9 @@ function stationPortsLayers(
       data: missing,
       filled: false,
       stroked: true,
-      getLineColor: () => (keep(brush, { value: null }) ? rgba(HATCH_RGB, 255) : MUTED),
+      getLineColor: () => rgba(HATCH_RGB, 255),
       getLineWidth: 1.5,
-      updateTriggers: { getLineColor: brush, getRadius: r },
+      updateTriggers: { getRadius: r },
     }),
     new ScatterplotLayer<StationPoint>({
       ...common,
@@ -1138,13 +1127,12 @@ function stationPortsLayers(
       filled: true,
       stroked: true,
       getFillColor: (d) => {
-        if (!keep(brush, { value: d.nPorts })) return MUTED;
         const k = classOf(d.nPorts, scale);
         return rgba(k === null ? ([255, 0, 255] as RGB) : colors[k]!, 235);
       },
       getLineColor: rgba(BASEMAP_RGB, 255),
       getLineWidth: 1,
-      updateTriggers: { getFillColor: [scale, brush], getRadius: r },
+      updateTriggers: { getFillColor: [scale], getRadius: r },
     }),
   ];
 }
@@ -1175,7 +1163,6 @@ function stationFieldLayers(
   field: FieldMeta,
   zoom: number,
   t: number,
-  brush: BrushState,
   theme?: AnalysisTheme,
 ): Layer[] {
   // Cùng luật co theo mức phóng với overlay trạm (§4d-1): mọi chấm co cùng nhau nên không
@@ -1194,6 +1181,7 @@ function stationFieldLayers(
   const missing: Dot[] = [];
   for (let s = 0; s < occ.profiles.n; s++) {
     const st = occ.stations[s]!;
+    if (!st.inScope) continue;
     const value = stationOccAt(occ.profiles, s, t);
     (value === null ? missing : valued).push({ lng: st.lng, lat: st.lat, value, id: st.id });
   }
@@ -1219,17 +1207,16 @@ function stationFieldLayers(
 
   return [
     // CHẤM RỖNG viền xám — "chưa biết ở giờ này". KHÔNG tô bậc nhạt: ràng buộc 1 mở rộng
-    // sang chiều thời gian (§4d-3b). Bị brush loại thì viền chuyển xám nhạt, chấm vẫn rỗng
-    // — chất liệu giữ nguyên, chỉ mực đổi (§3d-1).
+    // sang chiều thời gian (§4d-3b).
     new ScatterplotLayer<Dot>({
       ...common,
       id: "station-null",
       data: missing,
       filled: false,
       stroked: true,
-      getLineColor: () => (keep(brush, { value: null }) ? rgba(HATCH_RGB, 255) : MUTED),
+      getLineColor: () => rgba(HATCH_RGB, 255),
       getLineWidth: 1.5,
-      updateTriggers: { getLineColor: brush, getRadius: r },
+      updateTriggers: { getRadius: r },
     }),
     new ScatterplotLayer<Dot>({
       ...common,
@@ -1238,7 +1225,6 @@ function stationFieldLayers(
       filled: true,
       stroked: true,
       getFillColor: (d) => {
-        if (!keep(brush, { value: d.value })) return MUTED;
         const k = classOf(d.value, scale);
         return rgba(k === null ? ([255, 0, 255] as RGB) : colors[k]!, 235);
       },
@@ -1246,7 +1232,7 @@ function stationFieldLayers(
       // thông tin nào, đúng vai đã định ở §4d.
       getLineColor: rgba(BASEMAP_RGB, 255),
       getLineWidth: 1,
-      updateTriggers: { getFillColor: [scale, t, brush], getRadius: r },
+      updateTriggers: { getFillColor: [scale, t], getRadius: r },
     }),
   ];
 }
@@ -1329,7 +1315,7 @@ function demandIntensityLayer(cells: GridCell[]): Layer {
     id: "demand-intensity",
     data: cells,
     getPosition: (d) => [d.lng, d.lat],
-    getWeight: (d) => d.pop,
+    getWeight: (d) => d.pop ?? 0,
     radiusPixels: 42,
     intensity: 1,
     threshold: 0.06,
@@ -1356,7 +1342,7 @@ function demandSupplyLayer(cells: GridCell[]): Layer {
       return true;
     },
     getFillColor: (d) => {
-      const r = tertileClass(d.pop, popBreaks);
+      const r = tertileClass(d.pop ?? 0, popBreaks);
       const c = tertileClass(d.ports, portBreaks);
       return [...DEMAND_SUPPLY_RGB[r]![c]!, 225] as [number, number, number, number];
     },
@@ -1381,7 +1367,7 @@ function surfaceLayer(cells: GridCell[], breaks: number[]): Layer {
     // không âm thầm bỏ sót ô nào. Trường có null thì mặt sẽ trũng đúng chỗ ta không biết —
     // lý do `surface` phải khai từng trường một, xem `FieldMeta.surface`.
     getPosition: (d) => [d.lng, d.lat],
-    getWeight: (d) => d.pop,
+    getWeight: (d) => d.pop ?? 0,
     aggregation: "SUM",
     cellSize: SURFACE_CELL_M,
     contours,

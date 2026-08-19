@@ -1,15 +1,17 @@
 import { create } from "zustand";
 
-import { FIRST_FIELD, defaultFieldOfLens, type LensId } from "../fields";
+import { FIELD_BY_ID, FIRST_FIELD, defaultFieldOfLens, lensOfField, type LensId } from "../fields";
 import { INITIAL_VIEW } from "./view-config";
 import { SCENES, beatOf, parseScene, sceneState, type SceneId } from "../story/scenes";
 import {
-  NO_BRUSH,
-  clampToWindow,
-  nextT,
-  reconcileBrush,
-  type BrushState,
-} from "./brush";
+  INITIAL_FILTER_STATE,
+  applyFilterIntent,
+  canonicalFilter,
+  isFilterCompatible,
+  type AnalysisFilter,
+  type FilterClearReason,
+  type FilterState,
+} from "./filter";
 import { readHash, resolveHashField, type HashApplyContext } from "./hash";
 import { type EntitySelection, parseEntitySelection, serializeEntitySelection } from "./selection";
 import type { AppNavMode, BasemapStyle, DemandRepresentation, HashState, Mode, OverlayId, View } from "./types";
@@ -17,9 +19,12 @@ import { defaultRepresentationFor, representationFits } from "./types";
 
 export type { AppNavMode, BasemapStyle, Mode, OverlayId, ReadingUnit, View } from "./types";
 export type { EntitySelection, DatasetId, StationId, H3R8, CommuneCode } from "./selection";
+export type { AnalysisFilter, FilterState, PowerTierId } from "./filter";
 
 export interface AppState {
   field: string;
+  /** Phase 4 analytical filter (PHASE4_VISUALIZATION.md §2). */
+  filter: FilterState;
   /** P1 Demand prototype; session-only until its representations pass review (§15c). */
   demandRepresentation: DemandRepresentation;
   mode: Mode;
@@ -76,8 +81,6 @@ export interface AppState {
    * Cùng lập luận đã dùng cho `beat` ở M3.1.
    */
   playing: boolean;
-  /** Ba ô brush của dock — khoá `b`, §9b. */
-  brush: BrushState;
   /**
    * Cột ĐỌC có đang mở không — CHỈ có nghĩa dưới 1024 px (§3h).
    *
@@ -131,8 +134,9 @@ export interface AppState {
   /** Một bước play. Lặp VÔ HẠN, và lặp trong cửa sổ nếu có (§3e). */
   stepT: () => void;
   setPlaying: (on: boolean) => void;
-  /** Đặt/xoá một brush. `undefined` = xoá ô đó. */
-  setBrush: (b: BrushState) => void;
+  /** Đặt/xoá một analytical filter (Phase 4). */
+  setFilter: (filter: AnalysisFilter | null) => void;
+  clearFilter: (reason?: FilterClearReason) => void;
   setReadColumnOpen: (on: boolean) => void;
   /** Nạp snapshot hash (`hashchange`); khoá vắng về mặc định, khoá sai bị bỏ riêng. */
   applyHash: (s: Partial<HashState>, context?: Partial<HashApplyContext>) => void;
@@ -165,16 +169,25 @@ function fromScene(id: SceneId) {
     // Nút "TẮT mặt tô" thuộc rail BẢN ĐỒ; một cảnh luôn tô đúng một trường (L3) nên nó
     // ép `paintOn` về true kể cả khi người xem vừa tắt trước lúc bấm vào cảnh.
     paintOn: true,
-    // Dock và scrubber không dựng trong CÂU CHUYỆN (§3d-1), nên brush đang bật phải TẮT
-    // khi vào cảnh: để nó sống sót thì một cảnh sẽ hiện ra với một nửa số ô xám nhạt và
-    // không có gì trên màn hình giải thích được vì sao. Play cũng dừng — một cảnh không có
-    // scrubber thì không có gì đang chạy.
-    brush: NO_BRUSH,
     playing: false,
   };
 }
 
+/**
+ * Xoá filter khi vào một bề mặt KHÔNG có bộ lọc (cảnh CÂU CHUYỆN).
+ *
+ * Đi qua `applyFilterIntent` chứ không gán `INITIAL_FILTER_STATE`: `revision` là số ĐẾM
+ * TIẾN, và đặt lại nó về 0 sẽ khiến một memo khoá theo revision (§4.3) không nhận ra thay
+ * đổi khi người xem quay lại đúng bộ lọc cũ — rev 1 → 0 → 1 trông như chưa từng đổi.
+ */
+function filterClearedFor(current: FilterState, reason: FilterClearReason): FilterState {
+  return applyFilterIntent(current, null, undefined, reason);
+}
+
 const boot = readHash();
+
+/** `t` là một giờ trong tuần: 0–167, số nguyên. Ba đường vào `t` dùng chung đúng hàm này. */
+const clampT = (t: number): number => Math.max(0, Math.min(167, Math.round(t)));
 
 const DEFAULT_VIEW: View = {
   lng: INITIAL_VIEW.center[0],
@@ -191,9 +204,17 @@ const bootScene = parseScene(boot.scene);
 // cái kia là lưới an toàn khi trường không dựng được, và trộn chúng làm một đã từng cho ra
 // một cột đọc thiếu tiết CÁCH ĐỌC mà không có đường nào tới được nó.
 const bootField = boot.field ?? FIRST_FIELD;
+const bootLens = lensOfField(bootField);
+const bootReadAs = FIELD_BY_ID.get(bootField)?.readAs;
+const bootFilterCandidate = boot.filter ?? null;
+const bootFilter = isFilterCompatible(
+  bootFilterCandidate,
+  bootLens ?? undefined,
+  bootReadAs,
+)
+  ? canonicalFilter(bootFilterCandidate)
+  : null;
 
-// Brush của lúc boot, đã áp bất biến "histogram luôn nói về trường đang tô" (§9b).
-const bootBrush = reconcileBrush(boot.brush ?? NO_BRUSH, bootField);
 const bootSelection = boot.selection ?? parseEntitySelection(boot.cell);
 const bootContextSelection = bootSelection ? null : contextSelectionOf(boot.cell);
 
@@ -205,6 +226,9 @@ export const useStore = create<AppState>((set) => ({
   nationalMode: boot.nationalMode ?? false,
   beat: null,
   field: bootField,
+  // Cảnh CÂU CHUYỆN không có bộ lọc (L3), nên một link `#s=…&b=…` mở ra cảnh KHÔNG kèm
+  // filter — `fromScene` bên dưới không còn tự xoá nữa nên chỗ quyết định là ở đây.
+  filter: bootFilter && !bootScene ? { active: bootFilter, revision: 1, clearedReason: null } : INITIAL_FILTER_STATE,
   demandRepresentation: "hex",
   mode: boot.mode ?? "2d",
   // Link `#m=3d` không kèm `v` phải mở ra ĐÃ nghiêng — pitch 50 là một nửa nghĩa của
@@ -217,14 +241,8 @@ export const useStore = create<AppState>((set) => ({
 
   // Scrubber mở ở giờ 0 (Thứ Hai 0h) khi hash không nói gì. Play KHÔNG tự chạy: một link
   // là ảnh chụp, và một bản đồ tự động thay đổi ngay khi mở là thứ người nhận không yêu cầu.
-  // `clampToWindow` phải có ở ĐÂY nữa, không chỉ ở `applyHash` và `setBrush`. Bỏ sót nó ở
-  // đường boot là một lỗi thật đã bắt bằng ảnh render: `#b=…w:0..4:7..19` không kèm `t` mở
-  // ra ở T2 00:00 — một giờ mà chính cửa sổ đó loại — nên nhãn scrubber ("T2 00:00") tự mâu
-  // thuẫn với câu ngay cạnh nó ("lặp trong cửa sổ 7h–19h"). Ba đường vào `t` thì cả ba phải
-  // giữ cùng một bất biến: **`t` luôn nằm trong cửa sổ.**
-  t: clampToWindow(bootBrush.win, boot.t ?? 0),
+  t: clampT(boot.t ?? 0),
   playing: false,
-  brush: bootBrush,
   // Chỉ đọc dưới 1024 px, nơi cột là sheet phủ — xem khai báo ở trên.
   readColumnOpen: false,
   basemapStyle: "positron",
@@ -240,28 +258,37 @@ export const useStore = create<AppState>((set) => ({
 
   // Ràng buộc 2: `field` là MỘT chuỗi, không phải mảng. Không có API nào thêm trường thứ hai.
   //
-  // Brush histogram nói về MỘT trường cụ thể, nên đổi trường thì nó phải rụng — giữ lại sẽ
-  // đem khoảng giá trị của trường cũ đi so với trường mới, im lặng và ra kết quả trông hợp
-  // lý. Hai brush kia không đụng gì: scatter nói về hai cột cố định, cửa sổ nói về thời
-  // gian; cả hai độc lập với trường đang tô.
+  // Một filter nói về MỘT hình học cụ thể, nên đổi sang trường đọc trên hình học khác thì
+  // nó phải rụng — giữ lại sẽ đem khoảng giá trị của đối tượng cũ đi so với đối tượng mới,
+  // im lặng và ra kết quả trông hợp lý. Xoá ở ĐÂY, trong reducer, chứ không trong một
+  // effect của biểu đồ (§2.3): chỉ chỗ này biết cả trường cũ lẫn trường mới trong một lượt.
   setField: (f) =>
-    set((s) => ({
-      field: f,
-      brush: reconcileBrush(s.brush, f),
-      // P1 chỉ có nghĩa với `population` của Ô H3. Không để một representation cũ âm
-      // thầm đổi cách vẽ một metric khác khi người dùng chọn trường mới.
-      demandRepresentation: defaultRepresentationFor(s.mode),
-    })),
+    set((s) => {
+      const nextLens = lensOfField(f);
+      const filterCompatible = isFilterCompatible(
+        s.filter.active,
+        nextLens ?? undefined,
+        FIELD_BY_ID.get(f)?.readAs,
+      );
+      return {
+        field: f,
+        filter: filterCompatible ? s.filter : filterClearedFor(s.filter, "field-incompatible"),
+        // P1 chỉ có nghĩa với `population` của Ô H3. Không để một representation cũ âm
+        // thầm đổi cách vẽ một metric khác khi người dùng chọn trường mới.
+        demandRepresentation: defaultRepresentationFor(s.mode),
+      };
+    }),
   switchLens: (lensId) =>
     set((s) => {
       const nextField = defaultFieldOfLens(lensId);
       if (!nextField || nextField.id === s.field) return {};
       const fieldId = nextField.id;
+      const filterCompatible = isFilterCompatible(s.filter.active, lensId, nextField.readAs);
       return {
         field: fieldId,
         // Lens chỉ đổi analytical field. Selection, overlay và dataset session
         // là ngữ cảnh do người dùng sở hữu, không phải default của lens mới.
-        brush: reconcileBrush(s.brush, fieldId),
+        filter: filterCompatible ? s.filter : filterClearedFor(s.filter, "lens-incompatible"),
         demandRepresentation: defaultRepresentationFor(s.mode),
       };
     }),
@@ -316,7 +343,16 @@ export const useStore = create<AppState>((set) => ({
   // hiện ra và mọi thứ bấm được.
   // Vào một cảnh thì ĐÓNG trang dữ liệu và trang toàn quốc.
   enterScene: (id) =>
-    set(id === null ? { scene: null, beat: null, dataMode: false, nationalMode: false } : { ...fromScene(id), dataMode: false, nationalMode: false }),
+    set((s) =>
+      id === null
+        ? { scene: null, beat: null, dataMode: false, nationalMode: false }
+        : {
+            ...fromScene(id),
+            filter: filterClearedFor(s.filter, "lens-incompatible"),
+            dataMode: false,
+            nationalMode: false,
+          },
+    ),
   setDataMode: (on) => set(on ? { dataMode: true, scene: null, beat: null, nationalMode: false } : { dataMode: false }),
   setNationalMode: (on) => set(on ? { nationalMode: true, dataMode: false, scene: null, beat: null } : { nationalMode: false }),
   setAppNavMode: (navMode) => {
@@ -324,8 +360,13 @@ export const useStore = create<AppState>((set) => ({
       set({ dataMode: true, nationalMode: false, scene: null, beat: null });
     } else if (navMode === "story") {
       const first = SCENES[0];
-      set(first
-        ? { ...fromScene(first.id), dataMode: false, nationalMode: false }
+      set((s) => first
+        ? {
+            ...fromScene(first.id),
+            filter: filterClearedFor(s.filter, "lens-incompatible"),
+            dataMode: false,
+            nationalMode: false,
+          }
         : { dataMode: false, nationalMode: false, scene: null, beat: null });
     } else if (navMode === "national") {
       set({ nationalMode: true, dataMode: false, scene: null, beat: null });
@@ -347,12 +388,14 @@ export const useStore = create<AppState>((set) => ({
       return { view: v, selection, contextSelection: selection ? null : contextSelectionOf(select) };
     }),
 
-  setT: (t) => set((s) => ({ t: clampToWindow(s.brush.win, Math.max(0, Math.min(167, Math.round(t)))) })),
-  stepT: () => set((s) => ({ t: nextT(s.brush.win, s.t) })),
+  setT: (t) => set({ t: clampT(t) }),
+  // Lặp VÔ HẠN qua 168 giờ của tuần (§3e).
+  stepT: () => set((s) => ({ t: (s.t + 1) % 168 })),
   setPlaying: (on) => set({ playing: on }),
-  // Đổi cửa sổ thì KÉO `t` vào cửa sổ mới — nếu không, scrubber đứng ở một giờ mà chính
-  // brush vừa loại ra, tức bản đồ hiện một giờ mà dock nói là không xem.
-  setBrush: (b) => set((s) => ({ brush: b, t: clampToWindow(b.win, s.t) })),
+  // `FilterReplace` đổi ĐÚNG `filter` (§3.2) — không `t`, không selection, không camera.
+  setFilter: (filter) => set((s) => ({ filter: applyFilterIntent(s.filter, filter) })),
+  clearFilter: (reason = "user") =>
+    set((s) => (s.filter.active ? { filter: filterClearedFor(s.filter, reason) } : {})),
   setReadColumnOpen: (readColumnOpen) => set({ readColumnOpen }),
 
   applyHash: (h, context) =>
@@ -396,9 +439,7 @@ export const useStore = create<AppState>((set) => ({
           layers: new Set(st.layers),
           // `p` không đọc/ghi trong CÂU CHUYỆN, cùng luật đã áp cho `f`/`v`/`l` (§9a, L3).
           paintOn: true,
-          // `t`/`b` cùng nhóm đó từ M4 (§9b): dock và scrubber không dựng trong cảnh, nên
-          // brush phải tắt và play phải dừng — y như `fromScene`.
-          brush: NO_BRUSH,
+          filter: filterClearedFor(s.filter, "lens-incompatible"),
           playing: false,
           selection: sceneSel,
           contextSelection: sceneSel ? null : (contextSelection ?? contextSelectionOf(st.select)),
@@ -406,9 +447,16 @@ export const useStore = create<AppState>((set) => ({
       }
 
       const field = resolveHashField(s.field, h.field, context);
-      // Bất biến: brush histogram luôn nói về trường đang tô. Mệnh đề `h` trỏ trường khác
-      // bị bỏ RIÊNG nó, cùng luật với mọi khoá hỏng khác (§9b).
-      const brush = reconcileBrush(h.brush ?? NO_BRUSH, field);
+      const appliedLens = lensOfField(field);
+      const nextFilterCandidate = h.filter !== undefined ? h.filter : null;
+      const nextFilter = isFilterCompatible(
+        nextFilterCandidate,
+        appliedLens ?? undefined,
+        FIELD_BY_ID.get(field)?.readAs,
+      )
+        ? canonicalFilter(nextFilterCandidate)
+        : null;
+
       return {
         scene: null,
         // Khoá vắng ⇒ về mặc định của khoá đó, cùng luật với `l` và `p`.
@@ -416,15 +464,13 @@ export const useStore = create<AppState>((set) => ({
         nationalMode: false,
         beat: null,
         field,
+        filter: applyFilterIntent(s.filter, nextFilter),
         mode: h.mode ?? "2d",
         // Cùng luật với boot: `m=3d` không kèm `v` mở ra đã nghiêng 50 (§2b).
         view: h.view ?? (h.mode === "3d" ? { ...DEFAULT_VIEW, pitch: 50 } : DEFAULT_VIEW),
         layers: new Set(h.layers ?? []),
         paintOn: h.paintOn ?? true,
-        // Khoá vắng ⇒ về mặc định của khoá đó, cùng luật với `l`: người sửa tay URL xoá
-        // `b=` là có ý bỏ brush, không phải giữ nguyên.
-        brush,
-        t: clampToWindow(brush.win, h.t ?? 0),
+        t: clampT(h.t ?? 0),
         selection,
         contextSelection,
       };

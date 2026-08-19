@@ -40,6 +40,15 @@ export interface OccProfiles {
   observed: Float32Array;
   /** số cổng LẮP ĐẶT của từng trạm; `NaN` khi cột `n_ports` khuyết (26/939 trạm) */
   nPorts: Float32Array;
+  /** Mảng đánh dấu trạm thuộc phạm vi IN (trừ trạm đệm BUFFER) — PHASE4_VISUALIZATION.md §0.1, §1.5 */
+  /**
+   * Trạm nào thuộc phạm vi IN — BẮT BUỘC, không phải tuỳ chọn.
+   *
+   * Mọi số gộp toàn lens (§1.5) chỉ được đi trên mặt nạ này. Để `?` sẽ khiến một
+   * `OccProfiles` dựng thiếu mặt nạ âm thầm gộp cả trạm BUFFER vào mẫu số — đúng lỗi mà
+   * §0.2 mục 6 vừa gỡ. Kiểu bắt buộc là chỗ rẻ nhất để lỗi ấy không quay lại.
+   */
+  inScope: readonly boolean[];
   n: number;
 }
 
@@ -81,6 +90,7 @@ export function stationOccAt(p: OccProfiles, s: number, t: number): number | nul
 export function allOccValues(p: OccProfiles): number[] {
   const out: number[] = [];
   for (let s = 0; s < p.n; s++) {
+    if (!p.inScope[s]) continue;
     for (let t = 0; t < HOURS_IN_WEEK; t++) {
       const v = stationOccAt(p, s, t);
       if (v !== null) out.push(v);
@@ -103,7 +113,10 @@ export function allOccValues(p: OccProfiles): number[] {
  */
 export function occCoverage(p: OccProfiles): { present: number; total: number } {
   let present = 0;
+  let total = 0;
   for (let s = 0; s < p.n; s++) {
+    if (!p.inScope[s]) continue;
+    total++;
     for (let t = 0; t < HOURS_IN_WEEK; t++) {
       if (stationOccAt(p, s, t) !== null) {
         present++;
@@ -111,7 +124,7 @@ export function occCoverage(p: OccProfiles): { present: number; total: number } 
       }
     }
   }
-  return { present, total: p.n };
+  return { present, total };
 }
 
 /**
@@ -130,8 +143,13 @@ export function stationSeries(p: OccProfiles, s: number): (number | null)[] {
 /** Đếm trạm tô được / tổng trạm tại giờ `t` — số của legend là số của GIỜ ĐANG XEM. */
 export function occCountAt(p: OccProfiles, t: number): { present: number; missing: number } {
   let present = 0;
-  for (let s = 0; s < p.n; s++) if (stationOccAt(p, s, t) !== null) present++;
-  return { present, missing: p.n - present };
+  let total = 0;
+  for (let s = 0; s < p.n; s++) {
+    if (!p.inScope[s]) continue;
+    total++;
+    if (stationOccAt(p, s, t) !== null) present++;
+  }
+  return { present, missing: total - present };
 }
 
 /**
@@ -161,6 +179,7 @@ export interface CityHour {
 export function cityProfile(p: OccProfiles): CityHour[] {
   let portsAll = 0;
   for (let s = 0; s < p.n; s++) {
+    if (!p.inScope[s]) continue;
     const v = p.nPorts[s]!;
     if (Number.isFinite(v)) portsAll += v;
   }
@@ -172,6 +191,7 @@ export function cityProfile(p: OccProfiles): CityHour[] {
     let obsSum = 0;
     let nStations = 0;
     for (let s = 0; s < p.n; s++) {
+      if (!p.inScope[s]) continue;
       const ports = p.nPorts[s]!;
       if (!Number.isFinite(ports) || ports <= 0) continue;
       const i = s * HOURS_IN_WEEK + t;
@@ -332,7 +352,7 @@ export interface HourBand {
  * Ô `value === null` **không vào trung bình và không kéo dải xuống**: "không đo được" khác
  * "bằng 0" — ràng buộc 1, y như trên bản đồ. `n` là chỗ nói ra điều đó.
  */
-export function hourProfile(cells: CityHour[]): HourBand[] {
+export function hourProfile(cells: readonly { t: number; value: number | null }[]): HourBand[] {
   const out: HourBand[] = new Array(24);
   for (let h = 0; h < 24; h++) out[h] = { hour: h, mid: null, lo: null, hi: null, n: 0 };
   const sum = new Float64Array(24);

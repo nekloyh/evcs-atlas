@@ -34,14 +34,14 @@ export interface SupplyEquity {
 }
 
 export function supplyEquity(
-  cells: readonly { pop: number; ports: number }[],
+  cells: readonly { pop: number | null; ports: number }[],
 ): SupplyEquity {
   let portsAll = 0;
   let portsNoPop = 0;
   let popAll = 0;
   const rows: { area: number; pop: number }[] = [];
   for (const c of cells) {
-    const pop = Number.isFinite(c.pop) ? c.pop : 0;
+    const pop = typeof c.pop === "number" && Number.isFinite(c.pop) ? c.pop : 0;
     const ports = Number.isFinite(c.ports) ? c.ports : 0;
     portsAll += ports;
     if (pop <= 0) {

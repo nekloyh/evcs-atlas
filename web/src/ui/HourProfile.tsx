@@ -34,12 +34,12 @@
  *      này được dựng ra để *tránh* mắc theo chiều ngược lại.
  */
 
+import * as React from "react";
 import { useMemo, useState } from "react";
 
-import { HOURS_IN_WEEK } from "../state/types";
-import type { CityHour } from "../viz/occ";
+import { HOURS_IN_WEEK, hourOf } from "../state/types";
 import { hourProfile, type HourBand } from "../viz/occ";
-import { HAIRLINE_HEX, INK_MUTED_HEX, RAMP_HEX } from "../viz/palette";
+import { HAIRLINE_HEX, INK_HEX, INK_MUTED_HEX, RAMP_HEX } from "../viz/palette";
 import { HEAT_M, HEAT_W } from "./Heatmap168";
 import { Readout } from "./Readout";
 
@@ -58,7 +58,7 @@ export function HourProfile({
   t,
   onT,
 }: {
-  cells: CityHour[];
+  cells: readonly { t: number; value: number | null }[];
   /** giờ đang xem — cột của nó được nhấn, cùng đồng bộ hai chiều với scrubber (§3e) */
   t: number;
   onT: (t: number) => void;
@@ -83,14 +83,40 @@ export function HourProfile({
 
   const at = hoverHour === null ? null : bands[hoverHour] ?? null;
 
+  const curHour = hourOf(t);
+
+  /**
+   * Phím trái/phải đổi GIỜ trong cùng một thứ — tương đương đúng cú bấm chuột (§6.6 mục 50).
+   *
+   * Trước đây chỉ có `onClick` trên `<svg>`, tức người dùng bàn phím không có đường nào tới
+   * điều khiển này. Heatmap ngay trên có bàn phím, nhưng "có chỗ khác làm được" không phải
+   * là lý do để một điều khiển đang hiện hình lại không bấm được.
+   */
+  const onKeyDown = (e: React.KeyboardEvent<SVGSVGElement>) => {
+    let next = curHour;
+    if (e.key === "ArrowLeft") next = Math.max(0, curHour - 1);
+    else if (e.key === "ArrowRight") next = Math.min(23, curHour + 1);
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = 23;
+    else return;
+    e.preventDefault();
+    onT(Math.floor(t / 24) * 24 + next);
+  };
+
   return (
     <div>
       <svg
         width={W}
         height={H}
-        className="block cursor-pointer"
-        role="img"
-        aria-label="hồ sơ nhịp theo 24 giờ"
+        className="block cursor-pointer outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink"
+        role="slider"
+        tabIndex={0}
+        aria-label="hồ sơ nhịp theo 24 giờ — mũi tên trái/phải đổi giờ"
+        aria-valuemin={0}
+        aria-valuemax={23}
+        aria-valuenow={curHour}
+        aria-valuetext={`${curHour} giờ`}
+        onKeyDown={onKeyDown}
         onPointerMove={(e) => {
           const r = e.currentTarget.getBoundingClientRect();
           const h = Math.floor(((e.clientX - r.left - M.left) / PLOT_W) * 24);
@@ -142,7 +168,7 @@ export function HourProfile({
           width={COL_W}
           height={PLOT_H}
           fill="none"
-          stroke="#0b0b0b"
+          stroke={INK_HEX}
           strokeWidth="1"
         />
 

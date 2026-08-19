@@ -36,6 +36,7 @@ web/tsconfig.tsbuildinfo
 *.md
 !docs/PHASE2_LENS_MAP_SYSTEM.md
 !docs/PHASE3_INSPECTOR.md
+!docs/PHASE4_VISUALIZATION.md
 !web/DESIGN.md
 !docs/visual-research.md
 !store/qa/*.md

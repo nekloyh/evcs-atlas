@@ -16,6 +16,8 @@
 
 import * as duckdb from "@duckdb/duckdb-wasm";
 
+import { BEYOND_2KM_M } from "./domain-thresholds";
+
 import ehWorker from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
 import mvpWorker from "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url";
 import ehWasm from "@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url";
@@ -32,6 +34,7 @@ const RUNS = 15;
 
 const out = document.getElementById("out")!;
 const lines: string[] = [];
+let issuedQueries = 0;
 function log(s: string) {
   lines.push(s);
   out.textContent = lines.join("\n");
@@ -68,6 +71,36 @@ async function main() {
         base: `p/${f.properties.province_code}/`,
       });
 
+  /** Cột có thật trong một Parquet — hỏi chính file, không suy từ tên gói. */
+  async function columnsOf(name: string): Promise<Set<string>> {
+    const conn = await db.connect();
+    try {
+      issuedQueries++;
+      const t = await conn.query(`SELECT * FROM read_parquet('${name}') LIMIT 0`);
+      return new Set(t.schema.fields.map((f: { name: string }) => f.name));
+    } catch {
+      return new Set<string>();
+    } finally {
+      await conn.close();
+    }
+  }
+
+  /**
+   * Cỡ artifact tính bằng BYTE, đọc từ `Content-Length` của một HEAD.
+   *
+   * §4.4 đòi bản đo ghi lại "p50/p95, số truy vấn, số dòng trả về, và cỡ artifact". Bốn
+   * con số ấy đi cùng nhau vì một p95 chậm chỉ đọc được khi biết nó quét bao nhiêu byte.
+   */
+  async function bytesOf(name: string): Promise<number | null> {
+    try {
+      const r = await fetch(new URL(`data/${name}`, window.location.href).toString(), { method: "HEAD" });
+      const len = r.headers.get("content-length");
+      return len === null ? null : Number(len);
+    } catch {
+      return null;
+    }
+  }
+
   const registered = new Set<string>();
   async function reg(name: string) {
     if (registered.has(name)) return;
@@ -83,10 +116,14 @@ async function main() {
   async function timed(sql: string): Promise<number[]> {
     const conn = await db.connect();
     try {
-      for (let i = 0; i < WARMUP; i++) await conn.query(sql);
+      for (let i = 0; i < WARMUP; i++) {
+        issuedQueries++;
+        await conn.query(sql);
+      }
       const ts: number[] = [];
       for (let i = 0; i < RUNS; i++) {
         const t0 = performance.now();
+        issuedQueries++;
         await conn.query(sql);
         ts.push(performance.now() - t0);
       }
@@ -104,7 +141,9 @@ async function main() {
       "Q2 gộp".padStart(16) +
       "Q3 một ô".padStart(16) +
       "Q4 168h".padStart(16) +
-      "Q5 đường".padStart(16),
+      "Q5 đường".padStart(16) +
+      "Q-P4-4 xã".padStart(18) +
+      "queries".padStart(10),
   );
 
   const rows: Record<string, unknown>[] = [];
@@ -129,7 +168,15 @@ async function main() {
 
     // Q1 — truy vấn TRỤ CỘT của app: quét cả lưới cho một trường. Cột đi kèm dùng NULL khi
     // vắng, đúng như `gcol()` trong queries.ts, để hai bộ so được với nhau về CHI PHÍ QUÉT.
-    const hasPop = t.base === "";
+    //
+    // Cột nào CÓ THẬT thì hỏi chính file, đừng suy từ tên bộ. Bản trước khoá bằng
+    // `t.base === ""`, tức chỉ bộ Hà Nội gốc mới được đo Q-P4-4 — trong khi bộ app thật sự
+    // mở là `p/01/`. Hậu quả: cổng §4.4 ("p95 của Q-P4-4 không được vượt p95 của Q1 trên
+    // CÙNG một gói") chưa từng chạy trên bất kỳ gói nào app mở được, và mọi dòng `p/*` in
+    // ra `n/a`. Ba cột dưới đây là đúng ba cột Q-P4-4 cần.
+    const gridCols = await columnsOf(G);
+    const hasPop = gridCols.has("population");
+    const hasP44 = hasPop && gridCols.has("dist_station_network_m") && gridCols.has("commune_code");
     const q1 = `SELECT g."h3_r8" AS h3, g."n_ports" AS value, ${
       hasPop ? 'g."population"' : "NULL"
     } AS pop, g."lat" AS lat, g."lng" AS lng FROM read_parquet('${G}') g`;
@@ -138,16 +185,43 @@ async function main() {
     const q3 = `SELECT g.* FROM read_parquet('${G}') g LIMIT 1`;
     const q4 = `SELECT station_code, dow, hour, occ, observed_h FROM read_parquet('${P}')`;
     const q5 = `SELECT "coords" AS c, "road_class" AS rc FROM read_parquet('${R}')`;
+    const qP44 = hasP44
+      ? `SELECT commune_code, commune_name, count(*) AS n_cells,
+                count(*) FILTER (WHERE population IS NULL) AS n_population_missing,
+                count(*) FILTER (WHERE population IS NOT NULL
+                                  AND dist_station_network_m IS NULL) AS n_distance_unknown,
+                sum(population) AS population_total,
+                coalesce(sum(population) FILTER (WHERE dist_station_network_m IS NOT NULL), 0) AS population_measured,
+                coalesce(sum(population) FILTER (WHERE dist_station_network_m <= ${BEYOND_2KM_M}), 0) AS population_within_2km,
+                coalesce(sum(population) FILTER (WHERE dist_station_network_m > ${BEYOND_2KM_M}), 0) AS population_beyond_2km,
+                coalesce(sum(population) FILTER (WHERE dist_station_network_m IS NULL), 0) AS population_distance_unknown
+         FROM read_parquet('${G}') WHERE commune_code IS NOT NULL
+         GROUP BY commune_code, commune_name`
+      : null;
 
     // TUẦN TỰ, không `Promise.all`. DuckDB-WASM ở bundle này chạy MỘT worker: năm truy vấn
     // gửi song song sẽ xếp hàng trong worker và mỗi cái đo được tổng thời gian của cả năm.
     // Bản đo đầu tiên của lượt này mắc đúng lỗi đó — dấu hiệu nhận ra là năm cột bằng nhau
     // tới từng mili giây trong khi khối lượng việc của chúng chênh nhau hàng chục lần.
+    const queryStart = issuedQueries;
     const a = await timed(q1);
     const b = await timed(q2);
     const c = await timed(q3);
     const d = await timed(q4);
     const e = await timed(q5);
+    const f = qP44 ? await timed(qP44) : [];
+    let qP44Rows: number | null = null;
+    if (qP44) {
+      const countConn = await db.connect();
+      try {
+        issuedQueries++;
+        const result = await countConn.query(`SELECT count(*) AS n FROM (${qP44}) q`);
+        qP44Rows = Number(result.get(0)!["n"]);
+      } finally {
+        await countConn.close();
+      }
+    }
+    const targetQueryCount = issuedQueries - queryStart;
     const fmt = (x: number[]) => `${pct(x, 0.5).toFixed(0)}/${pct(x, 0.95).toFixed(0)}`;
     log(
       t.label.slice(0, 29).padEnd(30) +
@@ -156,17 +230,33 @@ async function main() {
         fmt(b).padStart(16) +
         fmt(c).padStart(16) +
         fmt(d).padStart(16) +
-        fmt(e).padStart(16),
+        fmt(e).padStart(16) +
+        (f.length ? fmt(f) : "n/a").padStart(18) +
+        String(targetQueryCount).padStart(10),
     );
+    const [gridBytes, profileBytes, roadBytes, stationBytes] = await Promise.all([
+      bytesOf(G),
+      bytesOf(P),
+      bytesOf(R),
+      bytesOf(S),
+    ]);
     rows.push({
       label: t.label,
       n_cells: nCells,
+      grid_bytes: gridBytes,
+      profile_bytes: profileBytes,
+      road_bytes: roadBytes,
+      station_bytes: stationBytes,
       q1_p50: +pct(a, 0.5).toFixed(1),
       q1_p95: +pct(a, 0.95).toFixed(1),
       q2_p95: +pct(b, 0.95).toFixed(1),
       q3_p95: +pct(c, 0.95).toFixed(1),
       q4_p95: +pct(d, 0.95).toFixed(1),
       q5_p95: +pct(e, 0.95).toFixed(1),
+      qp44_p95: f.length ? +pct(f, 0.95).toFixed(1) : null,
+      qp44_rows: qP44Rows,
+      query_count: targetQueryCount,
+      qp44_within_q1_p95: f.length ? pct(f, 0.95) <= pct(a, 0.95) : null,
     });
   }
 
@@ -174,6 +264,9 @@ async function main() {
   log("Q1 quét cả lưới cho một trường (truy vấn mỗi lần đổi trường)");
   log("Q2 gộp toàn lưới (bảng phủ)   Q3 một ô (panel Ô)");
   log("Q4 quét hồ sơ 168 giờ (scrubber)   Q5 quét mạng đường (lớp M3-R)");
+  log("Q-P4-4 gộp lưới theo xã; cổng tương đối: p95 Q-P4-4 ≤ p95 Q1. queries gồm warmup.");
+  log("Q-P4-4 chỉ bỏ qua khi gói THIẾU cột (population · dist_station_network_m · commune_code).");
+  log("cỡ artifact (byte) đi kèm từng dòng trong window.BENCH.");
   (window as unknown as { BENCH: unknown }).BENCH = rows;
   log("\nXONG — mảng kết quả ở window.BENCH");
 }

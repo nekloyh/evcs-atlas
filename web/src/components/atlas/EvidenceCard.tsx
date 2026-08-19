@@ -40,6 +40,14 @@ export interface EvidenceCardProps {
   roadsLoading?: boolean;
   cells?: GridCell[];
   scale?: Scale | null;
+  /**
+   * Đối tượng đang chọn nằm NGOÀI tập lọc đang bật hay không — §5.4.
+   *
+   * Nhận từ controller, KHÔNG tự suy: đối tượng được chọn vẫn giữ nguyên lựa chọn kể cả
+   * khi bộ lọc loại nó (§2.1), nên "có mark được vẽ hay không" không phải bằng chứng đọc
+   * được từ trong này. App tính cờ này bằng đúng predicate mà bản đồ dùng.
+   */
+  outsideActiveSubset?: boolean;
 }
 
 export function EvidenceCard({
@@ -49,6 +57,7 @@ export function EvidenceCard({
   occScale,
   cells = [],
   scale = null,
+  outsideActiveSubset = false,
 }: EvidenceCardProps) {
   const selection = useStore((s) => s.selection);
   const fieldId = useStore((s) => s.field);
@@ -156,7 +165,14 @@ export function EvidenceCard({
     <>
       <AtlasSurfaceHeader className="justify-between gap-2 px-3 py-2 pr-12 lg:pr-3">
         <div className="min-w-0">
-          <div className="eyebrow">BẰNG CHỨNG</div>
+          <div className="flex items-center gap-1.5 eyebrow">
+            <span>BẰNG CHỨNG</span>
+            {outsideActiveSubset && (
+              <span className="rounded-xs border border-hairline bg-basemap/80 px-1 text-[9px] font-mono text-ink-muted">
+                Ngoài tập lọc hiện tại
+              </span>
+            )}
+          </div>
           <h1
             ref={headingRef}
             tabIndex={-1}

@@ -44,11 +44,11 @@ const EMPTY: AccessCurve = { curve: [{ d: 0, share: 0 }], popMeasured: 0, popUnm
  * tính sinh ra, không có trong thành phố. Cùng lập luận mà `lorenz()` dùng để bỏ ô diện
  * tích 0.
  */
-export function accessCurve(cells: readonly { pop: number; dist: number | null }[]): AccessCurve {
+export function accessCurve(cells: readonly { pop: number | null; dist: number | null }[]): AccessCurve {
   const usable: { pop: number; dist: number }[] = [];
   let popUnmeasured = 0;
   for (const c of cells) {
-    const pop = Number.isFinite(c.pop) ? c.pop : 0;
+    const pop = typeof c.pop === "number" && Number.isFinite(c.pop) ? c.pop : 0;
     if (pop <= 0) continue;
     if (c.dist === null || !Number.isFinite(c.dist)) {
       popUnmeasured += pop;

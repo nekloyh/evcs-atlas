@@ -20,6 +20,9 @@ import { formatIn, scaleUnit, unitPhrase, type ScaledUnit, type UnitSpec } from 
 import { OBSERVED_H_MIN } from "./viz/occ";
 import type { Diverge, Polarity } from "./viz/palette";
 
+import type { PrimaryChartId } from "./viz/chart-contracts";
+import { BEYOND_2KM_M } from "./domain-thresholds";
+
 /** Lens là metadata của field registry, không phải một state độc lập. */
 export const LENS_IDS = ["demand", "supply", "access", "utilization", "opportunity"] as const;
 export type LensId = (typeof LENS_IDS)[number];
@@ -47,6 +50,8 @@ export interface LensMeta {
   hint: string;
   businessQuestion: string;
   defaultField: string;
+  /** Primary chart ID uniquely owned by this lens (PHASE4_VISUALIZATION.md §1). */
+  primaryChart: PrimaryChartId;
   /** Khoá registry-qualified; field ô dùng `cell:` để không đụng tên cùng cột ở xã. */
   fieldKeys: readonly string[];
   defaultOverlays: readonly OverlayId[];
@@ -767,7 +772,7 @@ const CELL_SPECS: Spec[] = [
     // `0` khi tới được trong ≤2 km: đó là "biết là không", một phát biểu đúng (§7a).
     expr:
       'CASE WHEN g."dist_station_network_m" IS NULL THEN NULL ' +
-      'WHEN g."dist_station_network_m" > 2000 THEN g."population" ELSE 0 END',
+      `WHEN g."dist_station_network_m" > ${BEYOND_2KM_M} THEN g."population" ELSE 0 END`,
     coverageNote:
       "Ô để trống là ô KHÔNG TỚI ĐƯỢC bằng đường bộ — không biết xa bao nhiêu nên không được ghi 0. Ô ghi 0 thì khác hẳn: nó nằm trong 2 km đường, tức thật sự không có ai ngoài ngưỡng. Hai trạng thái đó vẽ khác nhau: 0 là một bậc màu, trống là gạch chéo.",
   },
@@ -1032,6 +1037,7 @@ export const LENSES: readonly LensMeta[] = [
     hint: "ai cần sạc",
     businessQuestion: "Nhu cầu sạc tập trung ở đâu và mật độ dân cư khu vực nào cao nhất?",
     defaultField: "population",
+    primaryChart: "demand-population-histogram",
     fieldKeys: DEMAND_FIELDS,
     defaultOverlays: ["stations"],
     cellEvidence: ["population", "pop_density_ppkm2", "n_apartment"],
@@ -1044,6 +1050,7 @@ export const LENSES: readonly LensMeta[] = [
     hint: "đã có gì",
     businessQuestion: "Hạ tầng trạm sạc hiện hữu phân bổ ra sao và cơ cấu công suất thế nào?",
     defaultField: "station:ports",
+    primaryChart: "supply-power-tier-breakdown",
     fieldKeys: SUPPLY_FIELDS,
     defaultOverlays: ["stations", "station_status"],
     cellEvidence: ["n_stations", "n_ports", "power_kw_site"],
@@ -1056,6 +1063,7 @@ export const LENSES: readonly LensMeta[] = [
     hint: "đi xa ở đâu",
     businessQuestion: "Khu vực nào người dân phải di chuyển quá xa trên mạng đường thật để sạc xe?",
     defaultField: "road:dist_station_m",
+    primaryChart: "access-population-curve",
     fieldKeys: ACCESS_FIELDS,
     defaultOverlays: ["stations", "beyond2km"],
     cellEvidence: ["dist_station_network_m", "population", "detour_ratio"],
@@ -1068,6 +1076,7 @@ export const LENSES: readonly LensMeta[] = [
     hint: "bận lúc nào",
     businessQuestion: "Trạm sạc nào đang bị quá tải hoặc thiếu tải trong từng khung giờ tuần?",
     defaultField: "station:occ",
+    primaryChart: "utilization-week-heatmap",
     fieldKeys: UTILIZATION_FIELDS,
     defaultOverlays: ["stations", "station_status"],
     cellEvidence: ["util_cell", "n_stations_measured", "util_pctl_cell"],
@@ -1080,6 +1089,7 @@ export const LENSES: readonly LensMeta[] = [
     hint: "khoảng trống ưu tiên",
     businessQuestion: "Nơi nào có khoảng trống phục vụ hoặc vượt ngưỡng sàng lọc để xem xét đầu tư?",
     defaultField: "screen_margin_m",
+    primaryChart: "opportunity-commune-rank",
     fieldKeys: OPPORTUNITY_FIELDS,
     defaultOverlays: ["stations", "beyond2km"],
     cellEvidence: ["screen_margin_m", "pop_beyond_2km", "population"],

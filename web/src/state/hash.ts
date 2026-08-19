@@ -32,7 +32,7 @@ import { parseEntitySelection, serializeEntitySelection } from "./selection";
 import { overlayUnavailable } from "../data/overlays";
 import { NATIONAL, PROVINCE_KEY } from "../data/province";
 import { parseScene } from "../story/scenes";
-import { brushCount, parseBrush, serializeBrush } from "./brush";
+import { parseFilter, serializeFilter } from "./filter";
 import {
   HOURS_IN_WEEK,
   MODES,
@@ -171,14 +171,12 @@ export function parseHash(hash: string): Partial<HashState> {
     if (Number.isInteger(t) && t >= 0 && t < HOURS_IN_WEEK) out.t = t;
   }
 
-  // `b` — brush của dock. Bộ kiểm ở bậc MỆNH ĐỀ nằm trong `parseBrush` (§9b): mệnh đề hỏng
-  // bị bỏ riêng nó, các brush còn lại vẫn sống. Ở đây chỉ còn một quyết định: `b` mà không
-  // mệnh đề nào sống sót thì coi như khoá vắng mặt — "nói rác" và "không nói gì" cho ra
-  // cùng một trạng thái, nên chúng phải cho cùng một kết quả.
+  // `b` — đúng một analytical SUBSET filter. `parseFilter` tự normalize histogram dân số
+  // legacy; scatter/window legacy bị bỏ vì không cùng nghĩa filter Phase 4.
   const bRaw = p.get("b");
   if (bRaw !== null) {
-    const b = parseBrush(bRaw);
-    if (brushCount(b) > 0) out.brush = b;
+    const f = parseFilter(bRaw);
+    if (f) out.filter = f;
   }
 
   return out;
@@ -199,7 +197,7 @@ export function serializeHash(s: HashState, prev = ""): string {
     const national = params(prev);
     national.set(PROVINCE_KEY, NATIONAL);
     for (const key of ["s", "d", "v", "p", "c", "t", "b"]) national.delete(key);
-    return national.toString().replace(/%2C/g, ",").replace(/%3A/g, ":");
+    return national.toString().replace(/%2C/g, ",").replace(/%3A/g, ":").replace(/%7E/g, "~");
   }
   const p = new URLSearchParams();
   // Build hiện tại chỉ phát hành dataset Hà Nội (`parseDataset` canonicalize mọi `tinh`
@@ -239,8 +237,8 @@ export function serializeHash(s: HashState, prev = ""): string {
     // (§3d-1), nên trong một cảnh chúng không ghi. Ngoài cảnh thì chỉ ghi khi KHÁC mặc
     // định, cùng khuôn "không ghi trạng thái mặc định" của `l` rỗng và `p=1`.
     if (s.t !== 0) p.set("t", String(s.t));
-    const b = serializeBrush(s.brush);
-    if (b) p.set("b", b);
+    const fb = serializeFilter(s.filter);
+    if (fb) p.set("b", fb);
   }
   const serializedSel = s.selection ? serializeEntitySelection(s.selection) : s.cell;
   if (serializedSel) p.set("c", serializedSel);
@@ -249,9 +247,9 @@ export function serializeHash(s: HashState, prev = ""): string {
   // làm nó xấu đi và cả hai ký tự đều hợp lệ trong fragment. `:` cần cho `commune:` (§6b)
   // và cho phần của mệnh đề `b`; `,` cho `l` và cho phân cách mệnh đề.
   //
-  // `.` và `-` KHÔNG cần bỏ encode — chúng nằm trong tập ký tự an toàn của
-  // `URLSearchParams`, nên `..` của khoảng và số âm của biên (§9b) đi ra nguyên vẹn.
-  return p.toString().replace(/%2C/g, ",").replace(/%3A/g, ":");
+  // `.` và `-` vốn an toàn; `~` là phân cách của filter Phase 4 nên cũng được giữ nguyên
+  // để deep link còn đọc được bằng mắt.
+  return p.toString().replace(/%2C/g, ",").replace(/%3A/g, ":").replace(/%7E/g, "~");
 }
 
 /**
