@@ -15,8 +15,19 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { areaShareForPop, lorenz, popShareForArea, thin } from "../src/story/lorenz.ts";
-import { SCENES, SCENE_BY_ID, SCENE_IDS, beatOf, parseScene, sceneState } from "../src/story/scenes.ts";
+import { areaShareForPop, lorenz, popShareForArea, thin } from "../src/viz/lorenz.ts";
+import {
+  SCENES,
+  SCENE_BY_ID,
+  SCENE_IDS,
+  activeCellFilter,
+  beatHasFilter,
+  beatOf,
+  parseScene,
+  sceneState,
+} from "../src/story/scenes.ts";
+import { ASSUMPTIONS } from "../src/story/resolve.ts";
+import { DETOUR_THRESHOLD } from "../src/domain-thresholds.ts";
 import { FIELD_BY_ID } from "../src/fields.ts";
 import { OVERLAY_IDS } from "../src/state/types.ts";
 import { parseSelection } from "../src/data/h3.ts";
@@ -163,25 +174,61 @@ test("sceneState trả về BẢN SAO — một lần set bất cẩn không đ�
   assert.notEqual(b.view.zoom, 99);
 });
 
-test("chỉ nhịp kết của cảnh C có bộ lọc, và bộ lọc đó nói đúng điều nó lọc", () => {
+test("chỉ nhịp KẾT của cảnh C và hai nhịp lát cắt của cảnh A có bộ lọc", () => {
+  const withFilter = SCENES.flatMap((s) =>
+    s.beats.filter((b) => b.filter).map((b) => `${s.id}/${b.id}`),
+  );
+  assert.deepEqual(withFilter.sort(), [
+    "di-vong/hau-qua",
+    "von-cuc/nguong-p90",
+    "von-cuc/nguong-p99",
+  ]);
+});
+
+test("bộ lọc khai NGƯỠNG chứ không khai một hàm — ngưỡng phân giải lúc chạy", () => {
   for (const s of SCENES) {
     for (const b of s.beats) {
-      const expectFilter = s.id === "di-vong" && b.id === "hau-qua";
-      if (!expectFilter) {
-        assert.equal(b.filter, undefined, `${s.id}/${b.id} không được có bộ lọc`);
-        continue;
-      }
-      assert.ok(b.filter, "nhịp kết của cảnh C phải có bộ lọc");
+      if (!b.filter) continue;
       // §13b-2 ràng buộc 2: bộ lọc phải mang câu chữ, để nhịp in ra được nó lọc cái gì.
-      assert.ok(b.filter!.label.length > 0);
-      assert.equal(b.filter!.keep(3), true);
-      assert.equal(b.filter!.keep(2), false, "ngưỡng là > 2, không phải >= 2");
-      // Ô không có giá trị KHÔNG thuộc tập lọc: "không biết" không được đếm thành "thoả".
-      assert.equal(b.filter!.keep(null), false);
-      assert.equal(b.filter!.keep(undefined), false);
-      assert.equal(b.filter!.keep("2.5"), false, "chuỗi không được lọt qua");
+      assert.ok(b.filter.label.parts.length > 0, `${s.id}/${b.id}`);
+      // Bộ lọc tô đúng trường mà nhịp đang tô — nếu không, tập ô vẽ ra là tập của một câu
+      // hỏi khác với câu hỏi mà chú giải đang mô tả.
+      assert.equal(b.filter.field, b.field, `${s.id}/${b.id}`);
+      if (b.filter.value.kind === "assumption") {
+        assert.ok(ASSUMPTIONS[b.filter.value.id], `${s.id}/${b.id}: giả định phải có đăng ký`);
+      } else {
+        assert.ok(b.filter.value.q > 0 && b.filter.value.q < 1, `${s.id}/${b.id}`);
+      }
     }
   }
+});
+
+test("activeCellFilter: ngưỡng GIẢ ĐỊNH cắt đúng chiều, và null KHÔNG lọt qua", () => {
+  const f = activeCellFilter("di-vong", "hau-qua")!;
+  assert.equal(f.threshold, DETOUR_THRESHOLD);
+  assert.equal(f.keep(3), true);
+  assert.equal(f.keep(2), false, "ngưỡng là > 2, không phải >= 2");
+  // Ô không có giá trị KHÔNG thuộc tập lọc: "không biết" không được đếm thành "thoả".
+  assert.equal(f.keep(null), false);
+  assert.equal(f.keep(undefined), false);
+  assert.equal(f.keep("2.5"), false, "chuỗi không được lọt qua");
+});
+
+test("activeCellFilter: ngưỡng PHÂN VỊ phân giải trên chính dãy giá trị, bỏ qua null", () => {
+  // 10 giá trị + 2 null. Phân vị 0,9 nội suy tuyến tính trên 10 giá trị ⇒ 9,1.
+  const values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, null, null];
+  const f = activeCellFilter("von-cuc", "nguong-p90", values)!;
+  assert.ok(Math.abs(f.threshold - 9.1) < 1e-9, `ngưỡng ${f.threshold}`);
+  assert.equal(f.keep(9.1), true, "phân vị dùng >=, nên đúng ngưỡng thì GIỮ");
+  assert.equal(f.keep(9), false);
+  assert.equal(f.keep(null), false);
+});
+
+test("chưa có dãy giá trị ⇒ KHÔNG lọc, chứ không lọc bằng một ngưỡng đoán", () => {
+  assert.equal(activeCellFilter("von-cuc", "nguong-p90"), undefined);
+  // Nhưng câu hỏi BOOLEAN vẫn trả lời được — chú giải và bản đồ không được lệch nhau.
+  assert.equal(beatHasFilter("von-cuc", "nguong-p90"), true);
+  assert.equal(beatHasFilter("von-cuc", "mat-do"), false);
 });
 
 // ══ Nhịp — M3.1 ══════════════════════════════════════════════════════════════
@@ -244,7 +291,7 @@ test("chỉ cảnh C gắn lớp riêng lên basemap — §2a cấm sửa nền 
 test("mỗi cảnh có đúng MỘT câu luận điểm và một tiêu đề", () => {
   for (const s of SCENES) {
     assert.ok(s.title.length > 0 && s.kicker.length > 0, s.id);
-    assert.ok(s.claim.length > 0, `${s.id}: thiếu câu §3a`);
+    assert.ok(s.claim.parts.length > 0, `${s.id}: thiếu câu §3a`);
   }
 });
 
@@ -337,7 +384,7 @@ test("`s` có mặt và hợp lệ ⇒ chế độ CÂU CHUYỆN; vắng hoặc 
   assert.equal(parseHash("#s=A").scene, undefined, "chữ cái không phải slug");
 });
 
-test("parseScene chỉ nhận đúng bốn slug", () => {
+test("parseScene chỉ nhận đúng danh sách slug đã khai", () => {
   for (const id of SCENE_IDS) assert.equal(parseScene(id), id);
   for (const bad of ["", "a", "von cuc", "VON-CUC", null, undefined]) {
     assert.equal(parseScene(bad), null, String(bad));
@@ -416,4 +463,83 @@ test("khoá `t`/`b` KHÔNG đọc và KHÔNG ghi trong CÂU CHUYỆN — M4 (§9
   assert.doesNotMatch(s, /[?&]b=/);
   // Link tới một cảnh vẫn ngắn và đọc được — đó là cả điểm của §9a.
   assert.equal(s, "s=von-cuc&m=2d");
+});
+
+test("chuyển cảnh tuần tự giữ tính TẤT ĐỊNH: mỗi cảnh chốt đủ camera, layers, trường", () => {
+  // KHÔNG assert một danh sách cảnh cố định và KHÔNG assert một mức phóng literal: cả hai
+  // đều khoá lại đúng thứ pha này vừa mở ra (cảnh khai báo được thêm/bớt theo năng lực gói,
+  // mức phóng đến từ hình học). Thứ phải bất biến là HÌNH DẠNG của state một cảnh chốt.
+  for (const s of SCENES) {
+    const state = sceneState(s.id);
+    assert.ok(Number.isFinite(state.view.lng) && Number.isFinite(state.view.lat), s.id);
+    assert.ok(state.view.zoom > 0, s.id);
+    assert.equal(state.view.pitch, 0, `${s.id}: cảnh mở ở khung phẳng`);
+    assert.ok(Array.isArray(state.layers), s.id);
+    assert.ok(FIELD_BY_ID.has(state.field), `${s.id}: trường "${state.field}" không có thật`);
+  }
+});
+
+test("KHÔNG cảnh nào chứa literal mức phóng — khung hình đến từ hình học (tiêu chí 16)", () => {
+  for (const s of SCENES) {
+    const cams = [s.camera, ...s.beats.map((b) => b.camera)].filter((c) => c !== undefined);
+    for (const cam of cams) {
+      assert.ok(
+        cam!.kind === "fit-province" || cam!.kind === "fit-subject" || cam!.kind === "fit-marks",
+        `${s.id}: khung hình "${cam!.kind}" không phải một phép khớp`,
+      );
+    }
+  }
+});
+
+test("thoát cảnh để lại một trường HỢP LỆ — bàn giao L2 không được trả về một trường lạ", () => {
+  for (const s of SCENES) {
+    for (const b of s.beats) {
+      const st = sceneState(s.id, b.id);
+      assert.ok(FIELD_BY_ID.has(st.field), `${s.id}/${b.id}: ${st.field}`);
+    }
+  }
+});
+
+// ══ Hậu tố NHỊP trong hash — §1.7, tiêu chí 17–18 ═════════════════════════════
+
+test("`s=<cảnh>.<nhịp>` vòng ghi ↔ đọc, và nhịp ĐẦU không phát hậu tố", () => {
+  const st = (scene: string, beat: string | null): HashState => ({
+    field: "population",
+    mode: "2d",
+    view: { lng: 105, lat: 21, zoom: 10, pitch: 0, bearing: 0 },
+    layers: [],
+    paintOn: true,
+    cell: null,
+    scene,
+    beat,
+    dataMode: false,
+    nationalMode: false,
+    filter: null,
+    t: 0,
+  });
+  // Nhịp đầu = mặc định ⇒ KHÔNG vào URL. Link tới một cảnh vẫn ngắn.
+  assert.equal(serializeHash(st("di-vong", "mang-duong")), "s=di-vong&m=2d");
+  assert.equal(serializeHash(st("di-vong", null)), "s=di-vong&m=2d");
+  // Nhịp thứ hai thì có.
+  assert.equal(serializeHash(st("di-vong", "hau-qua")), "s=di-vong.hau-qua&m=2d");
+
+  const read = parseHash("#s=di-vong.hau-qua&m=2d");
+  assert.equal(read.scene, "di-vong");
+  assert.equal(read.beat, "hau-qua");
+  // Hội tụ trong MỘT bước cho mọi cảnh và mọi nhịp.
+  for (const s of SCENES) {
+    for (const b of s.beats) {
+      const once = serializeHash(st(s.id, b.id));
+      const back = parseHash(`#${once}`);
+      assert.equal(serializeHash(st(back.scene!, back.beat ?? null)), once, `${s.id}/${b.id}`);
+    }
+  }
+});
+
+test("hậu tố nhịp LẠ rơi về nhịp ĐẦU; slug lạ vẫn rơi về chế độ BẢN ĐỒ", () => {
+  const bad = parseHash("#s=di-vong.khong-co-nhip-nay&m=2d");
+  assert.equal(bad.scene, "di-vong", "cảnh vẫn mở — chỉ hậu tố hỏng");
+  assert.equal(bad.beat, null, "nhịp lạ về nhịp đầu, không phải một nhánh lỗi mới");
+  const worse = parseHash("#s=khong-phai-canh.hau-qua&m=2d");
+  assert.equal(worse.scene, undefined);
 });

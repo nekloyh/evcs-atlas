@@ -718,3 +718,166 @@ export function buildOpportunityCommuneRank(
     selectedCommuneCode,
   };
 }
+
+// ── 6. Demand: Spatial Structure Sweep ──────────────────────────────────────
+//
+// Phase 7 §1.3 — MỘT số đo mới của cả pha, và nó thuộc lớp DÙNG CHUNG chứ không thuộc
+// `story/`. Nó trả lời một câu hỏi của lens CẦU ("có mấy vùng dày tách rời, và con số ấy
+// có sống qua việc đổi ngưỡng không?"), nó ăn chính snapshot lưới mà workspace đã giữ, và
+// câu chuyện chỉ tình cờ là người gọi đầu tiên. Để nó trong `story/` là dựng đúng cái
+// "logic số đo riêng của cảnh" mà pha này cấm.
+
+/** Ô đưa vào phép quét cấu trúc: danh tính + giá trị trường + số người. */
+export interface SpatialCell {
+  h3: string;
+  value: number | null;
+  pop: number | null;
+}
+
+export interface SpatialStructureStep {
+  q: number;
+  /** giá trị THẬT của lát cắt — in ra màn hình, không in `q` trần */
+  threshold: number;
+  nCells: number;
+  nComponents: number;
+  /** thành phần từ 3 ô trở lên — tách "một vùng" khỏi "một đốm" */
+  nComponentsGe3: number;
+  largestComponentCells: number;
+  largestComponentPop: number;
+}
+
+export interface SpatialStructureModel {
+  field: string;
+  /** Moran's I trên cùng đồ thị kề; `null` khi không đủ ô phân tích được */
+  moranI: number | null;
+  nAnalysable: number;
+  nEdges: number;
+  steps: readonly SpatialStructureStep[];
+}
+
+/**
+ * Phân vị nội suy tuyến tính trên mảng ĐÃ sắp tăng dần — cùng quy ước với `numpy.quantile`.
+ *
+ * Quy ước phải nói ra: "phân vị 90" có ít nhất năm định nghĩa dùng được, và chúng lệch
+ * nhau đúng ở chỗ đắt nhất — ngưỡng của lát cắt, thứ được IN RA cạnh số thành phần. Chọn
+ * cùng quy ước với công cụ đã đo bảng đối chứng thì hai bên còn so được với nhau.
+ */
+function quantileSorted(sorted: readonly number[], q: number): number {
+  if (sorted.length === 0) return Number.NaN;
+  if (sorted.length === 1) return sorted[0]!;
+  const pos = q * (sorted.length - 1);
+  const lo = Math.floor(pos);
+  const hi = Math.ceil(pos);
+  if (lo === hi) return sorted[lo]!;
+  return sorted[lo]! + (sorted[hi]! - sorted[lo]!) * (pos - lo);
+}
+
+/**
+ * Cấu trúc không gian của một trường ô: số vùng liên thông ở nhiều lát cắt, kèm Moran's I.
+ *
+ * Kề = `gridDisk(k = 1)` giao với chính tập ô đang có (kề "queen" của lưới H3). Ô ngoài
+ * gói không tạo cạnh: một ô biên có sáu hàng xóm trên giấy nhưng chỉ có bốn trong dữ liệu,
+ * và đếm hai cái vắng mặt là khẳng định về chỗ ta không đo.
+ *
+ * Ô có `value` null bị LOẠI khỏi cả hai phép tính — không quy về 0. Với Moran's I, một
+ * `0` giả nằm giữa vùng dày là một lỗ tự chế trong cấu trúc đang đo.
+ *
+ * Hàm thuần: không DOM, không DuckDB, không `window` — chạy được dưới `node --test`.
+ */
+export function buildSpatialStructureModel(
+  cells: readonly SpatialCell[],
+  field: string,
+  quantiles: readonly number[],
+  neighboursOf: (h3: string) => string[],
+): SpatialStructureModel {
+  const idx = new Map<string, number>();
+  const values: number[] = [];
+  const pops: number[] = [];
+  for (const c of cells) {
+    if (c.value === null || !Number.isFinite(c.value)) continue;
+    idx.set(c.h3, values.length);
+    values.push(c.value);
+    pops.push(c.pop !== null && Number.isFinite(c.pop) ? c.pop : 0);
+  }
+  const n = values.length;
+  if (n === 0) {
+    return { field, moranI: null, nAnalysable: 0, nEdges: 0, steps: [] };
+  }
+
+  // Cạnh vô hướng, mỗi cặp một lần. `a < b` là bộ lọc trùng, không phải thứ tự có nghĩa.
+  const adj: number[][] = Array.from({ length: n }, () => []);
+  let nEdges = 0;
+  let moranNum = 0;
+  const mean = values.reduce((s, v) => s + v, 0) / n;
+  for (const c of cells) {
+    const a = idx.get(c.h3);
+    if (a === undefined) continue;
+    for (const nb of neighboursOf(c.h3)) {
+      const b = idx.get(nb);
+      if (b === undefined || b <= a) continue;
+      adj[a]!.push(b);
+      adj[b]!.push(a);
+      nEdges++;
+      moranNum += 2 * (values[a]! - mean) * (values[b]! - mean);
+    }
+  }
+
+  let den = 0;
+  for (const v of values) den += (v - mean) * (v - mean);
+  const W = 2 * nEdges;
+  const moranI = W > 0 && den > 0 ? (n / W) * (moranNum / den) : null;
+
+  const sorted = [...values].sort((x, y) => x - y);
+  const steps: SpatialStructureStep[] = [];
+  for (const q of quantiles) {
+    const threshold = quantileSorted(sorted, q);
+    const inCut = new Uint8Array(n);
+    const members: number[] = [];
+    for (let i = 0; i < n; i++) {
+      if (values[i]! >= threshold) {
+        inCut[i] = 1;
+        members.push(i);
+      }
+    }
+    const seen = new Uint8Array(n);
+    let nComponents = 0;
+    let nComponentsGe3 = 0;
+    let largestCells = 0;
+    let largestPop = 0;
+    for (const start of members) {
+      if (seen[start]) continue;
+      seen[start] = 1;
+      const stack = [start];
+      let size = 0;
+      let popSum = 0;
+      while (stack.length > 0) {
+        const u = stack.pop()!;
+        size++;
+        popSum += pops[u]!;
+        for (const v of adj[u]!) {
+          if (inCut[v] && !seen[v]) {
+            seen[v] = 1;
+            stack.push(v);
+          }
+        }
+      }
+      nComponents++;
+      if (size >= 3) nComponentsGe3++;
+      if (size > largestCells) {
+        largestCells = size;
+        largestPop = popSum;
+      }
+    }
+    steps.push({
+      q,
+      threshold,
+      nCells: members.length,
+      nComponents,
+      nComponentsGe3,
+      largestComponentCells: largestCells,
+      largestComponentPop: largestPop,
+    });
+  }
+
+  return { field, moranI, nAnalysable: n, nEdges, steps };
+}

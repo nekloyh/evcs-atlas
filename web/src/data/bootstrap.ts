@@ -57,18 +57,18 @@ export const UNKNOWN: DatasetFacts = {
 /**
  * Dữ liệu có ĐỠ NỔI chế độ CÂU CHUYỆN không — cổng thứ hai, hỏi một câu khác.
  *
- * Cổng thứ nhất nằm ở `n11_web_export` (`code == "01"`) và hỏi: **văn cảnh có được viết cho
- * tỉnh này không?** Cảnh C gọi tên sông Hồng và sáu cây cầu; `scenes.ts` khoá cứng hai mã xã
- * chỉ tồn tại ở Hà Nội. Cổng ấy KHÔNG được bỏ — bỏ nó là in văn cảnh Hà Nội đè lên bản đồ
- * Cà Mau, và thứ đó **không trông như lỗi**.
+ * Cổng thứ nhất nằm ở `n11_web_export` (`manifest.story_enabled`) và hỏi một câu THÔ:
+ * **gói này có lưới tính toán không?** Nó không biết cảnh nào cần gì.
  *
- * Cổng này hỏi: **dữ liệu có đỡ nổi không?** Cần thiết vì hai cổng có thể lệch nhau, và
- * hôm nay chúng ĐANG lệch: `story_enabled` bật ở `#tinh=01`, nhưng bộ `p/01` thiếu
- * `dist_station_m` (cảnh C tô mạng đường theo cột đó) và thiếu hai khoá `manifest.roads`
- * mà cột cảnh đọc. Kết quả là một cảnh mở ra được nhưng nửa trống.
+ * Cổng này hỏi câu THỨ HAI: **có cảnh nào dựng được không?** Từ Phase 7 nó không còn là
+ * một danh sách file gõ tay — `renderableScenes()` chấm từng `SceneSpec.requires` trên
+ * chính manifest đang mở, và "câu chuyện bật" nghĩa là **ít nhất một cảnh** qua được. Cảnh
+ * nào trượt thì **vắng mặt**, không bị làm mờ (§1.8), nên một gói thiếu `routes_showcase`
+ * mất đúng một nhịp chứ không mất cả câu chuyện.
  *
- * Hệ quả CỐ Ý: sau bản sửa này cảnh CÂU CHUYỆN **tắt** ở `#tinh=01`, và **tự bật lại**
- * khi lớp cặp tuyến + `dist_station_m` được dựng cho store toàn quốc.
+ * Sửa một hiểu nhầm cũ ghi ở đây: bộ `p/01` **có** `dist_station_m` và **có**
+ * `routes_showcase.geojson`; cả 34 gói đều khai cột khoảng cách theo đoạn đường. Cổng cũ
+ * tắt câu chuyện ở `#tinh=01` vì một tiền đề sai chứ không vì dữ liệu thiếu.
  */
 export function storyDataReady(m: Manifest): boolean {
   // Bộ Hà Nội cũ không khai `available_road_columns` ⇒ vắng khoá = KHÔNG BIẾT = không

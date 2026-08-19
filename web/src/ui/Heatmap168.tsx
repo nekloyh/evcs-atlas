@@ -193,7 +193,10 @@ export function Heatmap168({
         />
       </div>
 
-      <Readout hint="bấm vào một ô giờ để chuyển vị trí scrubber">
+      {/* Gợi ý phải mô tả thứ BẤM ĐƯỢC. Không có `onTimeIntent` — trong một cảnh, giờ do
+          cảnh sở hữu (§2.6) — thì ô giờ không nhận cú bấm nào, và một dòng "bấm vào…" ở đó
+          là một lời hứa giao diện không giữ. */}
+      <Readout hint={onTimeIntent ? "bấm vào một ô giờ để chuyển vị trí scrubber" : undefined}>
         {hoverCell && (
           <>
             <span className="font-semibold text-ink">

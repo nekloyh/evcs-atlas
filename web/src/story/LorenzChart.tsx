@@ -3,7 +3,7 @@ import * as Plot from "@observablehq/plot";
 
 import { RAMP_HEX, HAIRLINE_HEX, BASEMAP_HEX, INK_2_HEX, INK_MUTED_HEX } from "../viz/palette";
 import { Readout } from "../ui/Readout";
-import { areaShareForPop, popShareForArea, thin, type Lorenz } from "./lorenz";
+import { areaShareForPop, popShareForArea, thin, type Lorenz } from "../viz/lorenz";
 
 /**
  * Đường Lorenz "x% diện tích chứa y% dân" — biểu đồ ĐẦU TIÊN của app (DESIGN.md §13d-A).

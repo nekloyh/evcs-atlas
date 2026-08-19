@@ -31,7 +31,7 @@ import { parseSelection } from "../data/h3";
 import { parseEntitySelection, serializeEntitySelection } from "./selection";
 import { overlayUnavailable } from "../data/overlays";
 import { NATIONAL, PROVINCE_KEY } from "../data/province";
-import { parseScene } from "../story/scenes";
+import { parseSceneRef, serializeSceneRef } from "../story/scenes";
 import { parseFilter, serializeFilter } from "./filter";
 import {
   HOURS_IN_WEEK,
@@ -85,8 +85,14 @@ export function parseHash(hash: string): Partial<HashState> {
 
   // Khoá `s` đọc TRƯỚC, vì nó quyết định `f`/`v`/`l` có được đọc hay không (§9a). Slug lạ
   // bị bỏ như mọi khoá hỏng, và bỏ nó chính là về chế độ BẢN ĐỒ — không cần nhánh lỗi riêng.
-  const scene = parseScene(p.get("s"));
-  if (scene) out.scene = scene;
+  // `s=<cảnh>` hoặc `s=<cảnh>.<nhịp>`. Hậu tố nhịp lạ rơi về nhịp ĐẦU, đúng cùng luật mà
+  // slug lạ rơi về chế độ BẢN ĐỒ — không phải một nhánh lỗi mới.
+  const ref = parseSceneRef(p.get("s"));
+  const scene = ref.scene;
+  if (scene) {
+    out.scene = scene;
+    out.beat = ref.beat;
+  }
 
   // `d` — chế độ DỮ LIỆU (M4.2, §3f). Đọc SAU `s` và chỉ khi không có cảnh: hai chế độ
   // cùng lúc không tồn tại được trong state, nên một hash gõ tay mang cả hai phải cho một
@@ -218,8 +224,9 @@ export function serializeHash(s: HashState, prev = ""): string {
   // Build hiện tại chỉ phát hành dataset Hà Nội (`parseDataset` canonicalize mọi `tinh`
   // về cùng dataset). Không ghi lại một khoá không còn điều khiển state: sync đầu tiên sẽ
   // chuẩn hoá deep-link cũ, trong khi parser vẫn đọc tương thích các khoá còn lại.
-  const scene = parseScene(s.scene);
-  if (scene) p.set("s", scene);
+  const ref = parseSceneRef(s.scene);
+  const scene = ref.scene;
+  if (scene) p.set("s", serializeSceneRef(scene, s.beat ?? null));
   // Không bao giờ ghi cả `s` lẫn `d` — xem `HashState.dataMode`. Đây là chỗ bất biến "đúng
   // một chế độ" được thực thi ở chiều RA; `parseHash` giữ nó ở chiều VÀO.
   else if (s.dataMode) p.set("d", "1");

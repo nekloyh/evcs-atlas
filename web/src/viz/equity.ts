@@ -14,7 +14,7 @@
  * hướng vồng, không cần đảo gì.
  */
 
-import { lorenz, type Lorenz } from "../story/lorenz";
+import { lorenz, type Lorenz } from "./lorenz";
 
 export interface SupplyEquity {
   l: Lorenz;

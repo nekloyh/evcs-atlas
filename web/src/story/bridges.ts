@@ -1,34 +1,39 @@
 /**
  * Chọn CẦU đáng kẻ đậm trong cảnh C — M3.1.
  *
- * Bài toán có thật, tìm ra khi render lần đầu: dữ liệu có **4.154 đoạn `bridge = true`**,
- * và kẻ đậm tất cả thì ở zoom toàn thành phố chúng thành một lớp chấm đen phủ khắp tỉnh,
- * nuốt mất chính cái ramp mà cảnh đang muốn cho xem. Trung vị một đoạn cầu là **16 m** —
- * phần lớn là cống, cầu vượt bộ hành, lối chui. Chúng đúng là cầu, nhưng chúng không chở
- * luận điểm nào: cầu đáng nói ở đây là cầu **bắc qua một con sông đủ rộng để bắt xe đi
- * vòng**.
+ * Bài toán có thật, tìm ra khi render lần đầu: kẻ đậm mọi đoạn `bridge = true` thì ở zoom
+ * toàn thành phố chúng thành một lớp chấm đen phủ khắp tỉnh, nuốt mất chính cái ramp mà
+ * cảnh đang muốn cho xem. Phần lớn là cống, cầu vượt bộ hành, lối chui. Chúng đúng là cầu,
+ * nhưng chúng không chở luận điểm nào: cầu đáng nói ở đây là cầu **bắc qua một con sông đủ
+ * rộng để bắt xe đi vòng**.
  *
  * Bộ dữ liệu không có cờ "qua sông Hồng" — nên ta không được vẽ như thể có. Cái đo được là
- * **chiều dài**, và nó tách hai nhóm rất sạch:
+ * **chiều dài**, và nó tách hai nhóm rất sạch. Đo trên `roads.parquet` đã ship,
+ * `exported_utc = 2026-08-19T10:16:16Z` (bảng này là ẢNH CHỤP để đọc, KHÔNG phải nguồn của
+ * bất kỳ con số nào trên màn hình — `majorBridges()` đếm lại lúc chạy):
  *
  * | phân vị | chiều dài |
  * |---|---:|
- * | trung vị | 16 m |
- * | p90 | 90 m |
- * | p99 | 1.146 m |
- * | max | 4.475 m |
+ * | trung vị | 16,5 m |
+ * | p90 | 102,2 m |
+ * | p99 | 1.372,4 m |
+ * | max | 4.474,5 m |
  *
- * `> 1.000 m` giữ lại 48 đoạn, và toạ độ của chúng rơi đúng vào các nút vượt sông
- * (105,823/21,10 · 105,888/21,017 · 105,819/20,974 …).
+ * `n` = 3.027 đoạn mang cờ `bridge` trong 115.931 đoạn đã ship; `> 1.000 m` giữ lại 45.
+ *
+ * Lưu ý một cái bẫy đã bắt được: `manifest.roads.bridge_ways_shipped` đếm **trước** bộ lọc
+ * class/access, nên nó nói 3.319 trong khi file có 3.027. Cảnh đọc số đếm LÚC CHẠY của
+ * chính mảng nó vẽ, không đọc khoá manifest ấy.
  *
  * **Ngưỡng này là GIẢ ĐỊNH KHAI BÁO, không phải số đo** — cùng hạng với `cellSize` của
  * mặt độ cầu (§1b ràng buộc 1), nên nó phải hiện ra trong câu chữ của cảnh. Và câu chữ đó
  * nói đúng thứ ngưỡng này chọn: **"cầu dài hơn 1 km"**, KHÔNG phải "cầu qua sông Hồng" —
- * đoạn dài nhất (4.475 m) nằm ở phía tây, không bắc qua sông Hồng. Nói "qua sông Hồng" là
- * gán cho bộ lọc một ý nghĩa nó không có.
+ * đoạn dài nhất nằm ở phía tây và không bắc qua sông Hồng. Nói "qua sông Hồng" là gán cho
+ * bộ lọc một ý nghĩa nó không có.
  */
 
-export const MAJOR_BRIDGE_MIN_M = 1000;
+export { MAJOR_BRIDGE_MIN_M } from "../domain-thresholds";
+import { MAJOR_BRIDGE_MIN_M } from "../domain-thresholds";
 
 const M_PER_DEG_LAT = 110_574;
 /** Ở vĩ độ 21° — cùng hằng số mà `queries.ts` dùng cho lưới gộp của mặt độ cầu. */

@@ -26,7 +26,7 @@
 
 import type { ReactNode } from "react";
 
-export function Readout({ children, hint }: { children: ReactNode; hint: string }) {
+export function Readout({ children, hint }: { children: ReactNode; hint?: string }) {
   return (
     // `h-4` + `overflow-hidden` + `whitespace-nowrap`: chiều cao KHÔNG đổi giữa trạng thái
     // rỗng và trạng thái có số, và một câu dài không được đẩy khối chữ bên dưới xuống. Ảnh
@@ -39,7 +39,7 @@ export function Readout({ children, hint }: { children: ReactNode; hint: string 
         thì biểu thức ra `false` chứ không ra `null` — mà `false ?? hint` là `false`, nên
         dòng gợi ý **không bao giờ hiện**. Không lỗi nào, chỉ một dải trống.
       */}
-      {children ? children : <span className="text-ink-muted">{hint}</span>}
+      {children ? children : hint ? <span className="text-ink-muted">{hint}</span> : null}
     </div>
   );
 }

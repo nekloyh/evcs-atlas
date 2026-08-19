@@ -205,6 +205,15 @@ export interface HashState {
    */
   scene: string | null;
   /**
+   * NHỊP đang mở trong cảnh — hậu tố của khoá `s`: `s=<cảnh>.<nhịp>`, Phase 7 §1.7.
+   *
+   * Không phải một khoá riêng, và vì đúng cái lý do đã giữ `s` là một khoá: một nhịp không
+   * tồn tại ngoài cảnh của nó, nên "nhịp mà không có cảnh" không được biểu diễn được.
+   * `null` = nhịp ĐẦU, và nhịp đầu KHÔNG bao giờ vào hash — ghi mặc định ra URL làm link
+   * dài thêm mà không mang thêm thông tin nào.
+   */
+  beat?: string | null;
+  /**
    * Chế độ DỮ LIỆU đang mở hay không — khoá `d`, M4.2 (§3f).
    *
    * **Vì sao một khoá thứ hai chứ không phải một giá trị của `s`.** §9a chọn một-khoá cho

@@ -13,6 +13,21 @@ export interface AreaPop {
   pop: number;
 }
 
+/**
+ * `AreaPop` cộng thêm **danh tính** và **mật độ đã ship** — đầu vào của lớp CẦU.
+ *
+ * `lorenz()` không đọc hai trường thêm; chúng ở đây vì cùng MỘT lần quét lưới nuôi cả
+ * đường Lorenz lẫn `buildSpatialStructureModel`, và quét hai lần cùng một bảng để lấy hai
+ * nửa của cùng một câu hỏi là chỗ hai câu trả lời bắt đầu trôi khỏi nhau.
+ */
+export interface DemandCell extends AreaPop {
+  h3: string;
+  /** cột `pop_density_ppkm2` đã ship; `null` khi bộ dữ liệu đang mở không khai cột đó */
+  density: number | null;
+  /** cổng lắp đặt trong ô — trục CUNG của `supplyEquity()`. `0` là một giá trị thật. */
+  ports: number;
+}
+
 export interface LorenzPoint {
   /** tỉ lệ diện tích tích luỹ, 0–1 */
   a: number;

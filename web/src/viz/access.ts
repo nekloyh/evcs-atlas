@@ -10,7 +10,7 @@
  * hai cách vẽ cùng một thứ. Đây là lý do trường `commune:dist_station_m_pop_weighted` tồn
  * tại ở tầng xã; đường này là cùng ý ở tầng ô, dạng tích luỹ.
  *
- * Hàm thuần, không đụng DOM lẫn dữ liệu — cùng lý do đã ghi ở `story/lorenz.ts`: đây là một
+ * Hàm thuần, không đụng DOM lẫn dữ liệu — cùng lý do đã ghi ở `viz/lorenz.ts`: đây là một
  * **phép tính**, và ảnh chụp chứng minh được một phân bố chứ không chứng minh được phép tính.
  */
 
@@ -90,7 +90,7 @@ export function shareWithin(c: AccessCurve, d: number): number {
 
 /**
  * Chiều ngược lại: bán kính nhỏ nhất phủ được `share` dân. Trả điểm ĐẦU TIÊN đạt ngưỡng,
- * cùng luật (và cùng lý do) với `areaShareForPop` của `story/lorenz.ts`.
+ * cùng luật (và cùng lý do) với `areaShareForPop` của `viz/lorenz.ts`.
  */
 export function distForShare(c: AccessCurve, share: number): number | null {
   for (const p of c.curve) if (p.share >= share) return p.d;
@@ -101,7 +101,7 @@ export function distForShare(c: AccessCurve, share: number): number | null {
  * Giảm số điểm cho SVG, giữ nguyên hai đầu — 4.400 điểm trên một đường 2 px thì phần lớn
  * rơi vào cùng một pixel.
  *
- * Bản sao của `thin()` trong `story/lorenz.ts` và **cố ý** không dùng chung: hàm kia mang
+ * Bản sao của `thin()` trong `viz/lorenz.ts` và **cố ý** không dùng chung: hàm kia mang
  * kiểu `LorenzPoint` và một hợp đồng đã có test riêng; gộp hai bên bằng generic sẽ bắt một
  * hàm đang đúng phải đổi chữ ký để phục vụ chỗ thứ hai (§12 — thay đổi tối thiểu).
  */

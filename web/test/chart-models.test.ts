@@ -7,6 +7,7 @@ import {
   buildAccessPopulationCurve,
   buildUtilizationWeekHeatmap,
   buildOpportunityCommuneRank,
+  buildSpatialStructureModel,
   type OpportunityCommuneRow,
 } from "../src/viz/chart-models";
 import type { GridCell, StationPoint } from "../src/data/queries";
@@ -264,4 +265,87 @@ test("buildOpportunityCommuneRank ranks by lower bound and handles competition t
   assert.equal(model.topRanks[3]!.rank, 4); // competition rank after tie is 4!
   assert.equal(model.topRanks[3]!.isSelected, true);
   assert.equal(model.pinnedItem, null); // C04 is in top 10 so not pinned
+});
+
+// ── 6. Demand: Spatial Structure Sweep (Phase 7 §1.3) ───────────────────────
+
+/**
+ * Đồ thị kề GIẢ LẬP thay cho `gridDisk` thật.
+ *
+ * Test một thuật toán liên thông trên lưới H3 thật là test hai thứ cùng lúc — hình học của
+ * H3 và phép duyệt — và khi nó đỏ thì không biết bên nào sai. Ở đây tiêm hàm kề, nên phép
+ * duyệt đứng một mình. Số của gói thật thì `story-claims.test.ts` gác, và nó gác bằng cách
+ * chạy `gridDisk` thật.
+ */
+const chain = (ids: readonly string[]) => (h: string) => {
+  const i = ids.indexOf(h);
+  return i < 0 ? [] : [ids[i - 1], ids[i + 1]].filter((x): x is string => x !== undefined);
+};
+
+test("buildSpatialStructureModel: đếm đúng số vùng RỜI NHAU, không đếm số ô", () => {
+  // Chuỗi 7 ô, giá trị tạo ra ba cụm ở lát cắt cao: [9,9] _ [9] _ [9,9]
+  const ids = ["a", "b", "c", "d", "e", "f", "g"];
+  const cells = [9, 9, 1, 9, 1, 9, 9].map((v, i) => ({ h3: ids[i]!, value: v, pop: 10 }));
+  const m = buildSpatialStructureModel(cells, "x", [0.5], chain(ids));
+  const s = m.steps[0]!;
+  assert.equal(s.nCells, 5, "5 ô đạt ngưỡng");
+  assert.equal(s.nComponents, 3, "nhưng chúng nằm trong BA vùng rời nhau");
+  assert.equal(s.nComponentsGe3, 0, "không vùng nào có từ ba ô");
+  assert.equal(s.largestComponentCells, 2);
+  assert.equal(s.largestComponentPop, 20);
+});
+
+test("buildSpatialStructureModel: số vùng ĐỔI theo lát cắt — đó chính là luận điểm", () => {
+  const ids = Array.from({ length: 9 }, (_, i) => `c${i}`);
+  // Cao–thấp xen kẽ: ở lát cắt giữa, mọi ô cao đều bị ô thấp tách khỏi nhau.
+  const vals = [5, 1, 5, 1, 9, 1, 5, 1, 5];
+  const cells = vals.map((v, i) => ({ h3: ids[i]!, value: v, pop: 1 }));
+  const m = buildSpatialStructureModel(cells, "x", [0.5, 0.99], chain(ids));
+  assert.ok(
+    m.steps[0]!.nComponents > m.steps[1]!.nComponents,
+    "lát cắt thấp cho nhiều vùng hơn lát cắt cao trên CÙNG một trường",
+  );
+  assert.equal(m.steps[0]!.nComponents, 5, "năm đốm rời nhau ở lát cắt giữa");
+  assert.equal(m.steps[1]!.nComponents, 1, "một lõi duy nhất ở lát cắt đỉnh");
+});
+
+test("buildSpatialStructureModel: ô `null` bị LOẠI, không quy về 0", () => {
+  const ids = ["a", "b", "c"];
+  const cells = [
+    { h3: "a", value: 10, pop: 1 },
+    { h3: "b", value: null, pop: 1 },
+    { h3: "c", value: 10, pop: 1 },
+  ];
+  const m = buildSpatialStructureModel(cells, "x", [0.5], chain(ids));
+  assert.equal(m.nAnalysable, 2, "ô không đo được không vào phép tính");
+  // Và nó không nối hai ô hai bên: một số 0 giả ở giữa sẽ tạo ra một lỗ, còn ở đây `b`
+  // đơn giản không tồn tại nên `a` và `c` KHÔNG kề nhau.
+  assert.equal(m.nEdges, 0);
+  assert.equal(m.steps[0]!.nComponents, 2);
+});
+
+test("buildSpatialStructureModel: Moran's I âm trên bàn cờ, dương trên dốc", () => {
+  const ids = Array.from({ length: 20 }, (_, i) => `c${i}`);
+  const board = ids.map((h, i) => ({ h3: h, value: i % 2 === 0 ? 1 : -1, pop: 1 }));
+  const ramp = ids.map((h, i) => ({ h3: h, value: i, pop: 1 }));
+  const mb = buildSpatialStructureModel(board, "x", [0.5], chain(ids));
+  const mr = buildSpatialStructureModel(ramp, "x", [0.5], chain(ids));
+  assert.ok(mb.moranI! < -0.9, `bàn cờ phải gần −1, ra ${mb.moranI}`);
+  assert.ok(mr.moranI! > 0.5, `dốc phải dương mạnh, ra ${mr.moranI}`);
+});
+
+test("buildSpatialStructureModel: ngưỡng in ra là GIÁ TRỊ THẬT của lát cắt", () => {
+  const ids = Array.from({ length: 11 }, (_, i) => `c${i}`);
+  const cells = ids.map((h, i) => ({ h3: h, value: i, pop: 1 })); // 0..10
+  const m = buildSpatialStructureModel(cells, "x", [0.9], chain(ids));
+  // Nội suy tuyến tính trên 11 giá trị: pos = 0,9 × 10 = 9 ⇒ đúng giá trị 9.
+  assert.equal(m.steps[0]!.threshold, 9);
+  assert.equal(m.steps[0]!.nCells, 2, "chỉ 9 và 10 đạt ngưỡng (>=)");
+});
+
+test("buildSpatialStructureModel: lưới rỗng thì trả mô hình rỗng, không ném", () => {
+  const m = buildSpatialStructureModel([], "x", [0.9], () => []);
+  assert.equal(m.moranI, null);
+  assert.equal(m.nAnalysable, 0);
+  assert.deepEqual(m.steps, []);
 });

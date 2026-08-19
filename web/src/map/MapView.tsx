@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import { H3HexagonLayer } from "@deck.gl/geo-layers";
@@ -23,11 +23,13 @@ import { selectionWireOf, useStore } from "../state/store";
 import {
   SCENE_BY_ID,
   activeCellFilter,
+  beatHasFilter,
   beatOf,
   type CellFilter,
   type SceneMark,
 } from "../story/scenes";
 import { majorBridges } from "../story/bridges";
+import { formatNumber } from "../ui/format";
 import type { DemandRepresentation, Mode, OverlayId } from "../state/types";
 import { PathStyleExtension } from "@deck.gl/extensions";
 import { cellToBoundary } from "h3-js";
@@ -248,7 +250,12 @@ export function MapView(props: Props) {
   const beatId = useStore((s) => s.beat);
   const sceneDef = scene ? SCENE_BY_ID.get(scene) : undefined;
   const beat = scene ? beatOf(scene, beatId) : undefined;
-  const filter = activeCellFilter(scene, beatId);
+  // Ngưỡng phân vị phân giải trên CHÍNH dãy giá trị đang được vẽ — nhịp lọc luôn tô đúng
+  // trường mà nó lọc, nên `cells` ở đây mang đúng cột cần thiết.
+  const filter = useMemo(
+    () => activeCellFilter(scene, beatId, cells.map((c) => (typeof c.value === "number" ? c.value : null))),
+    [scene, beatId, cells],
+  );
   const marks = beat?.marks;
   const wantRiver = sceneDef?.basemapLayer === "river";
 
@@ -375,11 +382,11 @@ export function MapView(props: Props) {
       Math.abs(m.getPitch() - view.pitch) < 0.5;
     if (same) return;
     const to = { center: [view.lng, view.lat] as [number, number], zoom: view.zoom, pitch: view.pitch, bearing: view.bearing };
-    // Trong một cảnh thì BAY, ngoài cảnh thì NHẢY. Không phải chuyện thẩm mỹ: chuyển cảnh
-    // là một phát biểu ("chỗ này liên quan tới chỗ vừa rồi") và chuyến bay mang chính phát
-    // biểu đó — nhảy cóc thì mentor mất luôn mối liên hệ giữa hai khung hình. Ngược lại,
-    // sửa tay URL ở chế độ BẢN ĐỒ là một lệnh, và một lệnh thì phải thi hành ngay.
-    if (scene) m.flyTo({ ...to, duration: 1200, essential: true });
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Trong một cảnh thì BAY (trừ khi có reduced-motion), ngoài cảnh thì NHẢY.
+    if (scene && !prefersReducedMotion) m.flyTo({ ...to, duration: 1200, essential: true });
     else m.jumpTo(to);
   }, [view, scene, ready]);
 
@@ -462,6 +469,7 @@ export function MapView(props: Props) {
       mode,
       paintOn,
       filter,
+      hasFilter: beatHasFilter(scene, beatId),
       marks,
       t,
       demandRepresentation,
@@ -502,6 +510,18 @@ export function MapView(props: Props) {
   return (
     <div className="relative h-full w-full">
       <div ref={container} className="h-full w-full" />
+      {scene && sceneDef && (
+        <div className="pointer-events-none absolute left-3 top-3 z-10 hidden sm:flex flex-col gap-0.5 rounded-md border border-hairline bg-panel/90 px-3 py-1.5 shadow-sm backdrop-blur">
+          <div className="flex items-center gap-2">
+            <span className="text-note font-semibold tracking-wider text-cold-3">{sceneDef.kicker}</span>
+            <span className="text-note text-ink-muted">·</span>
+            <span className="text-body font-semibold text-ink">{sceneDef.title}</span>
+          </div>
+          {beat && sceneDef.beats.length > 1 && (
+            <span className="text-note text-ink-muted">Nhịp: {beat.label}</span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -543,8 +563,16 @@ interface BuildInput extends Props {
   paintOn: boolean;
   /** bộ lọc ô của nhịp đang mở, nếu có — §13b-2 */
   filter?: CellFilter;
+  /**
+   * Nhịp này CÓ thu hẹp tập ô không — câu hỏi tách khỏi `filter`.
+   *
+   * `filter` vắng có hai nghĩa ("nhịp không lọc" và "ngưỡng chưa phân giải xong"), và
+   * render plan cần đúng nghĩa thứ nhất. Suy từ `Boolean(filter)` sẽ làm chú giải và bản
+   * đồ nói khác nhau trong đúng khoảnh khắc dữ liệu đang về.
+   */
+  hasFilter?: boolean;
   /** lớp riêng của nhịp — cầu, cặp tuyến minh hoạ (§11 M3-R) */
-  marks?: SceneMark[];
+  marks?: readonly SceneMark[];
   /** vị trí scrubber 0–167 — §3e */
   t: number;
   demandRepresentation: DemandRepresentation;
@@ -579,6 +607,7 @@ export function buildLayers({
   mode,
   paintOn,
   filter,
+  hasFilter,
   marks,
   t,
   demandRepresentation,
@@ -594,7 +623,7 @@ export function buildLayers({
     readAs: field.readAs,
     hasSurface: Boolean(field.surface),
     zoom,
-    filtered: Boolean(filter),
+    filtered: hasFilter ?? false,
     inStory,
   });
   const out: Layer[] = [];
@@ -1405,7 +1434,7 @@ function stationFieldLayers(
  * ramp sẽ là nói rằng cầu có một giá trị khoảng cách đáng đọc riêng; cho nó màu lạnh sẽ
  * là gọi nó là overlay. Nó không phải cả hai.
  *
- * **Không dán nhãn tên cầu lên bản đồ** — xem `RED_RIVER_BRIDGES`: bản trích OSM không có
+ * **Không dán nhãn tên cầu lên bản đồ**: bản trích OSM không có
  * cột `name`, nên một nhãn đặt trên bản đồ là khẳng định một toạ độ ta không neo được vào
  * đâu. Tên nằm trong panel dưới dạng câu.
  */
@@ -1423,6 +1452,7 @@ function bridgeLayer(roads: RoadSeg[], zoom: number): Layer {
     pickable: false,
   });
 }
+
 
 /**
  * Ba cặp tuyến minh hoạ — mark của nhịp `mang-duong`.
@@ -1443,23 +1473,63 @@ function routeLayers(routes: ShowcaseRoute[]): Layer[] {
     jointRounded: true,
     pickable: false,
   };
-  return [
+  const euclid = routes.filter((r) => r.kind === "euclid");
+  const network = routes.filter((r) => r.kind === "network");
+  const out: Layer[] = [
     // Chim bay dưới, đường thật trên: đường thật là thứ đang được chứng minh.
     new PathLayer<ShowcaseRoute>({
       ...common,
       id: "route-euclid",
-      data: routes.filter((r) => r.kind === "euclid"),
+      data: euclid,
       getColor: rgba(COLD_RGB[0]!, 255),
       getWidth: 2,
     }),
     new PathLayer<ShowcaseRoute>({
       ...common,
       id: "route-network",
-      data: routes.filter((r) => r.kind === "network"),
+      data: network,
       getColor: rgba(COLD_RGB[2]!, 255),
       getWidth: 4,
     }),
   ];
+
+  if (network.length > 0) {
+    out.push(
+      new ScatterplotLayer<ShowcaseRoute>({
+        id: "route-network-endpoints",
+        data: network,
+        getPosition: (d) => d.path[0] ?? [0, 0],
+        getRadius: 5,
+        radiusUnits: "pixels",
+        filled: true,
+        stroked: true,
+        getFillColor: rgba(COLD_RGB[2]!, 255),
+        getLineColor: [255, 255, 255, 255],
+        getLineWidth: 1.5,
+        lineWidthUnits: "pixels",
+        pickable: false,
+      }),
+      new TextLayer<ShowcaseRoute>({
+        id: "route-network-labels",
+        data: network,
+        getPosition: (d) => d.path[0] ?? [0, 0],
+        getText: (d) => `${d.communeName}: ${formatNumber(d.detour)}×`,
+        getSize: 10,
+        getColor: [11, 11, 11, 240],
+        backgroundColor: [249, 249, 247, 220],
+        backgroundPadding: [4, 2, 4, 2],
+        characterSet: "auto",
+        fontFamily: '"Be Vietnam Pro", sans-serif',
+        fontWeight: 600,
+        getTextAnchor: "start",
+        getAlignmentBaseline: "center",
+        getPixelOffset: [10, 0],
+        pickable: false,
+      }),
+    );
+  }
+
+  return out;
 }
 
 // ── Mặt tô: mặt độ cầu liên tục (§1b, §13d-A) ──────────────────────────────────

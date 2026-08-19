@@ -859,13 +859,43 @@ null. Gộp chúng vào một vân xám là để hai nhóm ngược nhau đeo c
 **14a.** **Một store, không phải hai.** Cảnh câu chuyện ghi vào cùng state mà chế độ bản đồ
 dùng; không dựng một bản sao state riêng cho story.
 
-**14b.** **Bốn** cảnh cho **ba** luận điểm — và sự lệch ấy là có chủ ý. Ba cảnh đầu
-(`von-cuc` · `cung-lech` · `di-vong`) mỗi cảnh chứng minh đúng một luận điểm của §13d, khai
-sẵn trường và mark của nó. Cảnh thứ tư (`chua-biet`, *"Ba điều ta không biết"*) không chứng
-minh gì — nó nói **giới hạn**. Bỏ nó đi thì câu chuyện kết thúc bằng ba khẳng định mà không
-có chỗ nào nói ta tin được tới đâu.
+**14b.** **Bảy** cảnh, và thứ tự của chúng là thứ tự của lập luận: *cầu trông thế nào →
+cung ở đâu → được phép đo khoảng cách bằng gì → ai bị bỏ ngoài bán kính → mạng bận lúc nào
+→ ta đã chọn loại bỏ cái gì → ta vẫn chưa nói được gì.*
 
-Một cảnh có thể có nhiều **nhịp** (`beat`), mỗi nhịp là một khung hình.
+| cảnh | lens | nói gì |
+|---|---|---|
+| `von-cuc` | CẦU | cầu dồn lại, và **số vùng dày là thuộc tính của lát cắt** chứ không của thành phố |
+| `cung-lech` | CUNG | cung dồn chặt hơn cầu, và dồn ở **chỗ khác** |
+| `di-vong` | TIẾP CẬN | đường chim bay sai **về một phía duy nhất**, và có nguyên nhân hình học |
+| `ngoai-2km` | CƠ HỘI | ai ở ngoài bán kính phục vụ, và khoảng trống ấy **không có chủ** |
+| `nhip-tuan` | VẬN HÀNH | phụ tải không phẳng — và mọi câu ở đó là của **một nhà vận hành** |
+| `mot-quyet-dinh` | CUNG | con số lớn nhất trong kho **là một luật ta viết**, không phải một số đo |
+| `chua-biet` | — | ba giới hạn: cảnh này không chứng minh gì, nó nói ta tin được tới đâu |
+
+Cảnh cuối không chứng minh gì và đó là chỗ của nó: bỏ nó đi thì câu chuyện kết thúc bằng
+sáu khẳng định mà không có chỗ nào nói ta tin được tới đâu.
+
+Một cảnh có thể có nhiều **nhịp** (`beat`), mỗi nhịp là một khung hình. Nhịp vào hash dưới
+dạng hậu tố: `#s=di-vong.hau-qua` (Phase 7 §1.7). Nhịp ĐẦU không phát hậu tố.
+
+**14b-1. Một cảnh là CẤU HÌNH, không phải mã.** Từ Phase 7, một cảnh là một `SceneSpec`
+khai báo (`story/spec.ts`) và một trình dựng chung đi qua nó (`story/StorySurface.tsx`).
+Ba luật đi kèm, cả ba đều có test gác:
+
+* **Không literal số nào trong `story/` chạm tới màn hình.** Mỗi con số là một `MetricRef`
+  trỏ vào một builder mà Map Workspace **cũng** gọi được. Ngoại lệ duy nhất là hằng số
+  chính sách đã đăng ký (`domain-thresholds.ts`), và mỗi cái render kèm chữ *giả định*.
+* **Không mã xã nào viết vào mã nguồn.** Cảnh khai một `SubjectSpec` ("xã đông dân nhất mà
+  không có cổng nào") và nó phân giải trên gói đang mở — một câu về một LUẬT, đúng ở mọi
+  tỉnh và mọi niên bản địa giới.
+* **Khe không phân giải được thì CÂU BIẾN MẤT.** Không `?? 0`, không dấu "—" đứng chỗ một
+  luận điểm. Đó là cách hai luận điểm còn thiếu dữ liệu (nhãn đồng hồ của nhịp tuần, phản
+  thực của luật loại trừ) vắng mặt thay vì được đoán.
+
+**14b-2. Cảnh nào MỞ ĐƯỢC là câu hỏi về NĂNG LỰC, không về mã tỉnh.** Mỗi cảnh khai
+`requires`; cảnh trượt điều kiện thì **vắng mặt**, không bị làm mờ — một bước chết trong
+một chuỗi là một ngõ cụt. Slug của nó cũng rơi khỏi `parseScene`, đúng như một slug lạ.
 
 **14c.** Cột cảnh **THAY** workspace, không đứng cạnh nó. Story mode cũng ẩn inspector nổi và
 compare dock: cảnh sở hữu câu hỏi, khung nhìn và selection, nên hai mặt nổi ấy sẽ tranh

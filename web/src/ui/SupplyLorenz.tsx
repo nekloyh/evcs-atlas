@@ -13,7 +13,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as Plot from "@observablehq/plot";
 
-import { areaShareForPop, popShareForArea, thin } from "../story/lorenz";
+import { areaShareForPop, popShareForArea, thin } from "../viz/lorenz";
 import type { SupplyEquity } from "../viz/equity";
 import { BASEMAP_HEX, HAIRLINE_HEX, INK_2_HEX, INK_MUTED_HEX, RAMP_HEX } from "../viz/palette";
 import { Readout } from "./Readout";

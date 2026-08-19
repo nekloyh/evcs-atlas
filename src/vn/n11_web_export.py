@@ -188,9 +188,13 @@ def _roads_parquet(code: str, dst) -> dict:
             (in_scope & excluded_class).sum()
         ),
         "ways_dropped_access_blocked": int((in_scope & ~excluded_class & excluded_access).sum()),
-        "bridge_ways_shipped": int(df[df.in_province].bridge.sum()),
-        # Cùng tên khoá với bộ Hà Nội — `story/bodies.tsx` đọc đúng hai khoá này, và thiếu
-        # chúng là chỗ `formatNumber(undefined)` từng ném TypeError.
+        # `ship`, KHÔNG phải `df[df.in_province]`. Đếm trước bộ lọc class/access thì khoá
+        # này nói về một tập KHÁC với tập nằm trong file, và hai con số ấy được in cạnh
+        # nhau trong cùng một panel: gói 01 báo 3.319 trong khi parquet có 3.027 — vênh
+        # 292 đoạn (9,6%) mà không có gì trên màn hình nói ra là chúng khác mẫu số.
+        "bridge_ways_shipped": int(ship.bridge.sum()),
+        # Cùng tên khoá với bộ Hà Nội — cột cảnh đọc đúng hai khoá này, và thiếu chúng là
+        # chỗ `formatNumber(undefined)` từng ném TypeError.
         "ways_unreachable_null_dist": n_null,
     }
 
@@ -237,6 +241,36 @@ def _coverage(grid: pd.DataFrame) -> dict:
         out["util_cell"]["share_measured_among_cells_with_station"] = round(
             float(grid.loc[has_st, "util_cell"].notna().mean()) if has_st.any() else 0.0, 6
         )
+    return out
+
+
+def _source_metrics(grid: pd.DataFrame) -> dict:
+    """Số đo về NGUỒN THƯỢNG NGUỒN — badge ⚠ nguồn của web (§7).
+
+    Khối này từng phát rỗng ở mọi tỉnh, nên `coverageNote` của trường ``n_poi_1km`` mất câu
+    dẫn của nó và cảnh "ba điều ta không biết" không có số cho giới hạn POI. Cả hai chỗ đọc
+    đều đã xử lý đúng khi vắng khoá (không hiện gì, thay vì đoán) — nên thêm khoá vào là
+    một phép **mở rộng**, không phải một phép sửa hành vi.
+
+    Ý nghĩa phải nói cho đúng: số 0 ở ``n_poi_1km`` phần lớn KHÔNG có nghĩa "không có hoạt
+    động" mà có nghĩa "OpenStreetMap chưa vẽ tới". Vì thế nó là một số đo về **nguồn**, và
+    nó nằm ở đây chứ không nằm trong ``coverage`` — ``coverage`` trả lời "cột này có giá
+    trị ở bao nhiêu ô", còn đây trả lời "giá trị ấy đáng tin tới đâu".
+    """
+    out: dict = {}
+    if "n_poi_1km" not in grid.columns:
+        return out
+    zero = grid.n_poi_1km.fillna(0) == 0
+    rec = {
+        "n_cells": len(grid),
+        "n_cells_zero": int(zero.sum()),
+        "share_cells": round(float(zero.mean()), 6),
+    }
+    if "population" in grid.columns:
+        total = float(grid.population.sum())
+        if total > 0:
+            rec["share_pop"] = round(float(grid.loc[zero, "population"].sum() / total), 6)
+    out["poi_empty_1km"] = rec
     return out
 
 
@@ -456,7 +490,7 @@ def export_province(code: str) -> dict:
         # ném Binder Error, và màn hình trắng.
         #
         # ĐO, không gõ tay: đọc thẳng schema của chính hai file vừa ghi.
-        "source_metrics": {},
+        "source_metrics": _source_metrics(grid),
         "available_road_columns": road_cols,
         "available_station_columns": station_cols,
         # ĐO, không gõ tay: cột nào bộ Hà Nội có mà tỉnh này không có. Danh sách gõ tay sẽ
@@ -489,7 +523,12 @@ def export_province(code: str) -> dict:
             if qrow.empty
             else json.loads(qrow.iloc[0].to_json(orient="index", force_ascii=False))
         ),
-        "story_enabled": code == "01",
+        # Cổng THÔ: gói này có lớp TÍNH TOÁN không? Chỉ hỏi được ngần ấy ở đây, và đó là
+        # có chủ ý — TypeScript sở hữu bảng `requires` của từng cảnh (`story/spec.ts`), nên
+        # chép bảng ấy sang Python là dựng đúng cái "một định nghĩa ở hai chỗ" mà cả pha
+        # này đang gỡ. Web tự chấm từng cảnh trên chính manifest này và giấu cảnh nào không
+        # dựng được (`renderableScenes`), nên khoá này KHÔNG còn là một phép so mã tỉnh.
+        "story_enabled": bool({"population", "dist_station_network_m"} <= set(grid.columns)),
         # Lớp CÓ cột nhưng KHÔNG đọc được — khác `missing_layers` (cột không tồn tại).
         # Quyết định 2026-08-07 (chủ dự án): giữ tỉnh, TẮT lớp. Loại cả tỉnh là vứt lớp
         # cung/POI/đường vẫn đúng của nó vì một lớp hỏng — Sơn La vẫn có 64 trạm / 540 cổng

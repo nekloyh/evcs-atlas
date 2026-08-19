@@ -196,14 +196,16 @@ function contextSelectionOf(raw: string | null | undefined): string | null {
   return /^road:\d+$/.test(raw) || /^poi:[nwr]\d+$/.test(raw) ? raw : null;
 }
 
-/** State của một cảnh, đổ vào hình dạng của store. */
-function fromScene(id: SceneId) {
-  const s = sceneState(id);
+/** State của một cảnh, đổ vào hình dạng của store. Một `set()` duy nhất — §5. */
+function fromScene(id: SceneId, beatId: string | null = null) {
+  const s = sceneState(id, beatId);
   const selectSel = parseEntitySelection(s.select);
   return {
     scene: id,
-    // Vào cảnh là vào từ NHỊP ĐẦU, kể cả khi tới bằng link giữa chừng.
-    beat: null,
+    // Bấm vào một cảnh là vào từ NHỊP ĐẦU. Một link mang hậu tố nhịp thì `beatId` đi vào
+    // đây, và cả cảnh lẫn nhịp được áp trong CÙNG một `set()` — không phải hai lần, vì
+    // hai lần là một frame trung gian có cảnh mới và nhịp cũ.
+    beat: beatId,
     field: s.field,
     view: s.view,
     layers: new Set(s.layers),
@@ -213,6 +215,8 @@ function fromScene(id: SceneId) {
     // ép `paintOn` về true kể cả khi người xem vừa tắt trước lúc bấm vào cảnh.
     paintOn: true,
     playing: false,
+    // Cảnh có thể SỞ HỮU `t` (§2.6). `null` = không đụng vào giờ mà người xem đang giữ.
+    ...(s.t === null ? {} : { t: s.t }),
   };
 }
 
@@ -294,7 +298,7 @@ export const useStore = create<AppState>((set) => ({
   // vào từng dòng: §9a nói khi có `s` thì `f`/`v`/`l` không được đọc, nên `boot` không
   // mang chúng, nên chúng không có gì để tranh chấp — trừ `c`, thứ vẫn đọc được ở cả hai
   // chế độ, nên nó thắng lại lựa chọn mặc định của cảnh ngay dưới đây.
-  ...(bootScene ? fromScene(bootScene) : {}),
+  ...(bootScene ? fromScene(bootScene, boot.beat ?? null) : {}),
   ...(bootScene && boot.cell
     ? { selection: bootSelection, contextSelection: bootContextSelection }
     : {}),
@@ -382,7 +386,7 @@ export const useStore = create<AppState>((set) => ({
   // Luật L1 và L2 của §14a, cả hai trong một hàm — vì chúng là hai chiều của cùng một
   // quyết định. Vào cảnh: cảnh ghi đè state dùng chung. Ra khỏi cảnh (`null`): CHỈ bỏ
   // `scene`, không đặt lại gì cả. Cái thứ hai trông như thiếu sót nên nó phải được viết ra
-  // — nó là bàn giao: mentor xem xong cảnh C thì đứng nguyên ở 672 ô đó, chỉ khác là rail
+  // — nó là bàn giao: mentor xem xong cảnh C thì đứng nguyên ở đúng tập ô đó, chỉ khác là rail
   // hiện ra và mọi thứ bấm được.
   // Vào một cảnh thì ĐÓNG trang dữ liệu và trang toàn quốc.
   enterScene: (id) =>
@@ -507,7 +511,8 @@ export const useStore = create<AppState>((set) => ({
       // nhầm. `c` vẫn thắng lựa chọn mặc định của cảnh: nó là lựa chọn của người xem.
       const scene = parseScene(h.scene);
       if (scene) {
-        const st = sceneState(scene);
+        const beat = h.beat ?? null;
+        const st = sceneState(scene, beat);
         const sceneSel = selection ?? parseEntitySelection(st.select);
         return {
           scene,
@@ -515,7 +520,7 @@ export const useStore = create<AppState>((set) => ({
           // đủ đưa app ra khỏi trang dữ liệu, không cần ai gọi thêm hàm thứ hai.
           dataMode: false,
           nationalMode: false,
-          beat: null,
+          beat,
           field: st.field,
           mode: h.mode ?? "2d",
           view: st.view,
@@ -524,6 +529,7 @@ export const useStore = create<AppState>((set) => ({
           paintOn: true,
           filter: filterClearedFor(s.filter, "lens-incompatible"),
           playing: false,
+          ...(st.t === null ? {} : { t: st.t }),
           selection: sceneSel,
           contextSelection: sceneSel ? null : (contextSelection ?? contextSelectionOf(st.select)),
         };

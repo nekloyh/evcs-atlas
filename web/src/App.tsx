@@ -4,10 +4,13 @@ import { MapView } from "./map/MapView";
 import {
   communeCoverage,
   roadCoverage,
+  fetchAreaPop,
   fetchBoundary,
   fetchCommunes,
   fetchDerivedCoverage,
+  fetchDetourStats,
   fetchField,
+  fetchOpportunityCommunes,
   fetchPoi,
   fetchRoads,
   fetchShowcaseRoutes,
@@ -15,6 +18,7 @@ import {
   fetchSurfaceBins,
   type CommuneCollection,
   type CommuneFeature,
+  type DetourStats,
   type GridCell,
   type RoadSeg,
   type ShowcaseRoute,
@@ -39,7 +43,11 @@ import { selectionWireOf, useStore } from "./state/store";
 import { filterKeepsCell, filterKeepsStation, isKnownPopulation } from "./state/filter";
 import { syncHash } from "./state/hash";
 import { INITIAL_VIEW } from "./state/view-config";
-import { storyEnabled } from "./story/scenes";
+import { setStoryContext, storyEnabled } from "./story/scenes";
+import { DETOUR_THRESHOLD, EUCLID_COVERAGE_RADIUS_M } from "./domain-thresholds";
+import type { DemandCell } from "./viz/lorenz";
+import type { OpportunityCommuneRow } from "./viz/chart-models";
+import { buildStoryModels, type StoryPackage } from "./story/resolve";
 import { StoryColumn } from "./story/StoryColumn";
 import { DataMode } from "./ui/DataMode";
 import { Scrubber } from "./ui/Scrubber";
@@ -156,6 +164,7 @@ export default function App() {
           cell: selectionWireOf(s),
           selection: s.selection,
           scene: s.scene,
+          beat: s.beat,
           dataMode: s.dataMode,
           nationalMode: s.nationalMode,
           t: s.t,
@@ -200,6 +209,33 @@ export default function App() {
     );
   }, []);
 
+  // ── Gói dữ liệu của chế độ CÂU CHUYỆN — App SỞ HỮU, cảnh chỉ đọc ────────────
+  //
+  // Nạp LƯỜI: bốn mảnh riêng của câu chuyện (`fetchAreaPop`, `fetchDetourStats`,
+  // `fetchOpportunityCommunes`, hồ sơ 168 giờ) chỉ chạy khi có một cảnh đang mở. Nạp chúng
+  // lúc boot là bắt mọi phiên xem bản đồ trả tiền cho một chế độ phần lớn phiên không mở.
+  const [storyDemand, setStoryDemand] = useState<DemandCell[] | null>(null);
+  const [storyDetour, setStoryDetour] = useState<DetourStats | null>(null);
+  const [storyOpportunity, setStoryOpportunity] = useState<readonly OpportunityCommuneRow[] | null>(null);
+
+  useEffect(() => {
+    if (!scene) return;
+    let cancelled = false;
+    const set = <T,>(f: (v: T) => void) => (v: T) => !cancelled && f(v);
+    void fetchAreaPop().then(set(setStoryDemand), fail);
+    void fetchDetourStats(DETOUR_THRESHOLD, EUCLID_COVERAGE_RADIUS_M).then(set(setStoryDetour), fail);
+    void fetchOpportunityCommunes().then(set(setStoryOpportunity), fail);
+    return () => {
+      cancelled = true;
+    };
+  }, [scene !== null]);
+
+  // Mạng đường và hồ sơ giờ đã có cơ chế nạp lười riêng ở workspace; cảnh 3 và cảnh 5 chỉ
+  // cần KÍCH nó, không cần một đường nạp thứ hai.
+  useEffect(() => {
+    if (scene === "nhip-tuan" && !occupancy) void fetchOccupancy().then(setOccupancy, fail);
+  }, [scene, occupancy]);
+
   // Trường từ hash phải vừa TỒN TẠI vừa DỰNG ĐƯỢC trên bộ dữ liệu đang mở. `#f=population`
   // là một id hợp lệ ở mọi tỉnh, nhưng cột `population` chỉ có ở bộ Hà Nội — mở nó ở tỉnh
   // khác sẽ là một `SELECT` cột không tồn tại. Rơi về mặc định (trường của XÃ, luôn dựng
@@ -214,6 +250,29 @@ export default function App() {
   const scale = meta.readAs === "cell"
     ? activeCellSnapshot?.scale ?? null
     : scaleSnapshot?.fieldId === meta.id ? scaleSnapshot.scale : null;
+
+  const storyPkg: StoryPackage = useMemo(
+    () => ({
+      manifest,
+      demand: storyDemand,
+      communes,
+      stations,
+      roads: roads.length > 0 ? roads : null,
+      routes: routes.length > 0 ? routes : null,
+      detour: storyDetour,
+      cells: cells.length > 0 ? cells : null,
+      opportunity: storyOpportunity,
+      occupancy,
+    }),
+    [manifest, storyDemand, communes, stations, roads, routes, storyDetour, cells, storyOpportunity, occupancy],
+  );
+
+  // Công bố gói cho `sceneState()` / `parseScene()` — chúng chạy trong store, nơi không có
+  // props. Cùng khuôn với `setAvailableColumns`, và cùng lý do: store đọc hash lúc NẠP
+  // MODULE, trước lần render đầu tiên.
+  useEffect(() => {
+    setStoryContext(storyPkg, buildStoryModels(storyPkg));
+  }, [storyPkg]);
 
   // Hai trục bivariate dựng từ đúng snapshot ô đang công bố.
   const bivariate = useMemo(() => (cells.length ? bivariateAxes(cells) : null), [cells]);
@@ -594,7 +653,7 @@ export default function App() {
   const mapSurface = (
     <MapWorkspace
       readColumn={scene
-        ? <StoryColumn communes={communes} manifest={manifest} />
+        ? <StoryColumn pkg={storyPkg} />
         : <AtlasReadColumn
             field={meta}
             scale={scale}

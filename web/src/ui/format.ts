@@ -43,3 +43,15 @@ export function formatValue(v: CellValue, f?: FieldMeta): string {
   if (typeof v === "number") return formatNumber(v);
   return constantShort(v);
 }
+
+/**
+ * Phần trăm với **một** chữ số thập phân, ở mọi độ lớn.
+ *
+ * Khác `pct()` của `manifest.ts`, thứ bỏ phần lẻ trong khoảng giữa: ở chế độ CÂU CHUYỆN
+ * phần lẻ là thông tin trên toàn dải, vì các con số ở đó được **so với nhau** trong cùng
+ * một câu (28,9% và 71,0% phải cộng lại thành 100 trước mắt người đọc; "29%" và "71%" thì
+ * không nói được rằng phần còn lại đã được kể ở đâu).
+ */
+export function pctOne(share: number): string {
+  return share.toLocaleString("vi-VN", { style: "percent", maximumFractionDigits: 1 });
+}

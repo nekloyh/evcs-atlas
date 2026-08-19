@@ -200,12 +200,55 @@ export interface Manifest {
    * rồi bản đồ gần trống bị đọc thành "giá trị thấp". Dạng hỏng thứ hai im lặng hơn.
    */
   unusable_layers?: { layer: string; reason: string; measured: string }[];
+  /**
+   * Số đo tổng hợp cấp TỈNH — `n10_quality`. Optional vì bộ Hà Nội gốc không phát khối này.
+   *
+   * Chỉ khai những khoá thật sự có chỗ đọc. Khai cả bảng "cho đủ" là mời người viết sau
+   * đọc một khoá chưa ai kiểm là có tồn tại — cùng cái bẫy đã làm trắng màn hình ở
+   * `source_metrics`.
+   */
+  quality?: {
+    util_median?: number;
+    share_stations_measured?: number;
+    n_stations_with_occ?: number;
+    pop_beyond_2km_network?: number;
+    share_pop_beyond_2km?: number;
+    dist_station_network_median_m?: number;
+    detour_ratio_median?: number;
+    poi_bias_phuong_vs_xa?: number;
+    private_ac_share_stations?: number;
+    private_ac_share_power?: number;
+    n_private_ac_dropped?: number;
+  };
   snapshots: {
     occupancy_snapshot_id: string;
     occupancy_window: [string, string];
     vnsdi_valid_from: string;
     osm_pbf: string;
     stations_canonical: string;
+    /**
+     * Múi giờ của trục `dow`/`hour` trong hồ sơ 168 giờ — **CHƯA PHÁT** (§10 U1).
+     *
+     * Vắng khoá này thì cảnh `nhip-tuan` nói được HÌNH DẠNG ("giờ bận nhất gấp 3,3 lần giờ
+     * vắng nhất") nhưng KHÔNG được nói NHÃN ĐỒNG HỒ ("23:00"): dưới cách đọc giờ địa
+     * phương đường cong hợp lý, dưới UTC thì đỉnh rơi vào 06:00 sáng. Hai câu chuyện khác
+     * hẳn nhau, và không có gì trong kho nói được cái nào đúng.
+     */
+    occupancy_hour_tz?: string;
+  };
+  /**
+   * Phản thực của luật loại điểm sạc cá nhân — **CHƯA PHÁT** (§10 U2).
+   *
+   * Con số này tồn tại trong `data/qa/critique/a14.json`, thứ KHÔNG ship ra web, và bản
+   * "sau" của file đó đã lệch khỏi lưới đang ship. Chép nó vào UI bị từ chối dứt khoát:
+   * chính chỗ lệch ấy là lý do luật cần được nói ra.
+   */
+  counterfactual?: {
+    ac_filter?: {
+      dist_median_before_m: number;
+      dist_median_after_m: number;
+      pop_moved_beyond_2km: number;
+    };
   };
 }
 

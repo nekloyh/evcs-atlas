@@ -11,7 +11,7 @@ import {
 import { pct, type Manifest } from "../data/manifest";
 import { SURFACE_CELL_M } from "../data/queries";
 import { useStore } from "../state/store";
-import { activeCellFilter } from "../story/scenes";
+import { beatHasFilter } from "../story/scenes";
 import { HEX_MIN_ZOOM, hexPixelWidth, planFor } from "../viz/render-plan";
 import { themeFor } from "../viz/theme";
 import {
@@ -87,7 +87,7 @@ export function Legend({
     readAs: field.readAs,
     hasSurface: Boolean(field.surface),
     zoom,
-    filtered: Boolean(activeCellFilter(scene, beatId)),
+    filtered: beatHasFilter(scene, beatId),
     inStory: scene !== null,
   });
 

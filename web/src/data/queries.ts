@@ -6,7 +6,7 @@ import { H3_RE, STATION_ID_RE } from "./h3";
 // logic thuần ở đây KHÔNG test được bằng `node --test` — cùng lý do đã tách `h3.ts` (§12).
 import { isInScope } from "./scope";
 export { isInScope } from "./scope";
-import type { AreaPop } from "../story/lorenz";
+import type { DemandCell } from "../viz/lorenz";
 import type { PoiCollection } from "./poi";
 import type { CellValue } from "../viz/palette";
 import { FIELDS, type FieldMeta, type RuntimeCoverage } from "../fields";
@@ -355,16 +355,39 @@ export async function fetchSurfaceBins(): Promise<number[]> {
  * *Đối chứng:* tổng theo cách này ra 3.363,9 km², lệch **0,12%** so với 3.359,77 km² diện
  * tích công bố của 126 xã (`commune.area_km2`). Cách tính bằng `area_km2` trần ra 3.556,4
  * km², lệch 5,9% — chênh lệch đó chính là phần lưới nằm ngoài thành phố.
+ *
+ * Kèm `h3_r8` và `pop_density_ppkm2` vì `buildSpatialStructureModel` (§1.3 của Phase 7)
+ * cần **kề nhau** và cần **đúng cột đã ship**. `pop / (area_km2 × area_frac)` KHÔNG thay
+ * được cột đó: hai cách tính lệch nhau ở phân vị 90 (5.552 so với 5.501 người/km²), nên
+ * dùng cái nào ra kết quả cấu trúc khác nhau. Một câu hỏi thì một định nghĩa.
  */
-export async function fetchAreaPop(): Promise<AreaPop[]> {
+export async function fetchAreaPop(): Promise<DemandCell[]> {
   await registerParquet(GRID);
   const t = await query(
-    `SELECT "area_km2" * "area_frac" AS a, "population" AS p FROM read_parquet('${GRID}')`,
+    // Bí danh `g` là BẮT BUỘC: `gcol()` sinh ra `g."cột"` — nó được viết cho các truy vấn
+    // trường ô, và mọi truy vấn ấy đặt bí danh. Thiếu bí danh ở đây thì DuckDB ném Binder
+    // Error và cả hai cảnh đầu đứng mãi ở "đang đo" mà không có lỗi nào trên console.
+    `SELECT g."h3_r8" AS h, g."area_km2" * g."area_frac" AS a, g."population" AS p,
+            ${gcol("pop_density_ppkm2")} AS d, ${gcol("n_ports")} AS np
+     FROM read_parquet('${GRID}') g`,
   );
+  const hs = t.getChild("h")!;
   const as = t.getChild("a")!;
   const ps = t.getChild("p")!;
-  const out: AreaPop[] = new Array(t.numRows);
-  for (let i = 0; i < t.numRows; i++) out[i] = { area: Number(as.get(i)), pop: Number(ps.get(i)) };
+  const ds = t.getChild("d")!;
+  const nps = t.getChild("np")!;
+  const out: DemandCell[] = new Array(t.numRows);
+  for (let i = 0; i < t.numRows; i++) {
+    const d = ds.get(i);
+    const np = nps.get(i);
+    out[i] = {
+      h3: String(hs.get(i)),
+      area: Number(as.get(i)),
+      pop: Number(ps.get(i)),
+      density: d === null || d === undefined ? null : Number(d),
+      ports: np === null || np === undefined ? 0 : Number(np),
+    };
+  }
   return out;
 }
 
@@ -409,7 +432,7 @@ export async function fetchDetourStats(threshold: number, radiusM: number): Prom
 export const ROADS = dataPath("roads.parquet");
 export const ROUTES_GEOJSON = dataPath("routes_showcase.geojson");
 
-/** Một đoạn đường. `dist` có thể null — 396/160.823 đoạn không tới được. */
+/** Một đoạn đường. `dist` có thể null — 222/115.931 đoạn không tới được (gói 01, 19/8/2026). */
 export interface RoadSeg {
   /** OSM way id — selection/deep-link identity, không phải graph edge. */
   id: string;
@@ -423,8 +446,9 @@ export interface RoadSeg {
 let roadCache: Promise<RoadSeg[]> | null = null;
 
 /**
- * 160.823 đoạn đường từ LOCAL trở lên (SERVICE đã bỏ ở export — 77.375 đoạn lối nội bộ
- * không chở luận điểm nào).
+ * Đoạn đường từ LOCAL trở lên (SERVICE bỏ ở export — lối nội bộ không chở luận điểm nào).
+ * Gói 01 ngày 19/8/2026 ship 115.931 đoạn; số THẬT của gói đang mở nằm ở
+ * `manifest.roads.ways_shipped`, và mọi câu chữ đọc từ đó chứ không từ dòng này.
  *
  * Cache ở module: 3,2 MB và ~427 nghìn điểm, không đọc lại mỗi lần đổi cảnh.
  *
@@ -456,7 +480,7 @@ export function fetchRoads(): Promise<RoadSeg[]> {
         id: String(ids.get(i)),
         roadClass: String(rcs.get(i) ?? "UNKNOWN"),
         path: raw ? Array.from(raw.toArray()) : [],
-        // KHÔNG `?? 0`: 396 đoạn không tới được phải về tới lớp vẽ dưới dạng null để chúng
+        // KHÔNG `?? 0`: đoạn không tới được phải về tới lớp vẽ dưới dạng null để chúng
         // được vẽ bằng mực xám của vân null, không phải bậc "gần trạm" (ràng buộc 1).
         dist: d === null || d === undefined ? null : Number(d),
         bridge: Boolean(bs.get(i)),
@@ -501,6 +525,14 @@ export interface ShowcaseRoute {
   communeName: string;
   population: number;
   path: [number, number][];
+  /**
+   * Trạm mà THƯỚC ĐO NÀY chỉ tới — khác nhau giữa `network` và `euclid` ở cả ba cặp.
+   *
+   * Đây là bằng chứng ở tầng trường cho `detour_ratio`: hai cột khoảng cách không đo tới
+   * cùng một đích rồi khác nhau ở đường đi — chúng chọn **hai trạm khác nhau**. Thiếu cột
+   * này thì panel chỉ nói được "đường dài hơn", tức nói thiếu nửa luận điểm.
+   */
+  stationName: string | null;
 }
 
 let routeCache: Promise<ShowcaseRoute[]> | null = null;
@@ -537,6 +569,9 @@ export function fetchShowcaseRoutes(): Promise<ShowcaseRoute[]> {
           communeName: String(p["commune_name"]),
           population: Number(p["population"]),
           path: f.geometry.coordinates,
+          // KHÔNG `?? ""`: tên trạm vắng phải về tới panel dưới dạng `null` để dòng ấy
+          // biến mất, chứ không thành một nhãn rỗng trông như một trạm không tên.
+          stationName: typeof p["station_name"] === "string" ? p["station_name"] : null,
         };
       }),
     );
