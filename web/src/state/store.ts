@@ -8,7 +8,7 @@ import {
   zoomForFeatureBounds,
 } from "./view-config";
 import type { QuickPreset } from "./presets";
-import { SCENES, beatOf, parseScene, sceneState, type SceneId } from "../story/scenes";
+import { SCENES, SCENE_BY_ID, beatOf, parseScene, sceneState, type SceneId } from "../story/scenes";
 import {
   INITIAL_FILTER_STATE,
   applyFilterIntent,
@@ -194,6 +194,29 @@ export function selectionWireOf(
   return state.selection ? serializeEntitySelection(state.selection) : state.contextSelection;
 }
 
+/**
+ * Chế độ thang mà bề mặt đang mở PHẢI vẽ — RF-1.
+ *
+ * Hai câu hỏi khác nhau, và trước bản vá này chúng dùng chung một ô nhớ:
+ *
+ *  · `store.scaleMode` — *người xem thích đọc kiểu gì.* Sống qua một trường không gradient
+ *    được, sống qua một chuyến vào câu chuyện, và chỉ đổi khi người xem bấm hoặc khi hash
+ *    của một bề mặt BẢN ĐỒ nói khác.
+ *  · giá trị hàm này trả — *bề mặt này được phép vẽ kiểu gì.* Trong một cảnh, câu trả lời
+ *    là ghim khai báo ở `SceneSpec.scaleMode`, vì mọi claim của cảnh đã thẩm định trên lớp
+ *    bậc (CR 2.1 §6).
+ *
+ * Gộp hai câu ấy vào một ô nhớ nghĩa là cảnh phải GHI để áp ghim, và cái ghi ấy không có
+ * đường lùi: Cầu(gradient) → CÂU CHUYỆN → BẢN ĐỒ trả về thang bậc mà không ai bấm gì.
+ * Tách ra thì ghim là một phép ĐỌC, và phép đọc không bao giờ mất thông tin.
+ */
+export function effectiveScaleModeOf(s: Pick<AppState, "scene" | "scaleMode">): ScaleMode {
+  if (!s.scene) return s.scaleMode;
+  // Cảnh lạ (danh sách dựng được đổi dưới chân) rơi về ghim an toàn, không về sở thích:
+  // "không biết cảnh này" không phải một giấy phép vẽ dải liên tục.
+  return SCENE_BY_ID.get(s.scene)?.scaleMode ?? "binned";
+}
+
 function contextSelectionOf(raw: string | null | undefined): string | null {
   if (!raw) return null;
   return /^road:\d+$/.test(raw) || /^poi:[nwr]\d+$/.test(raw) ? raw : null;
@@ -210,7 +233,8 @@ function fromScene(id: SceneId, beatId: string | null = null) {
     // hai lần là một frame trung gian có cảnh mới và nhịp cũ.
     beat: beatId,
     field: s.field,
-    scaleMode: s.scaleMode,
+    // KHÔNG `scaleMode` — xem `effectiveScaleModeOf`. Cảnh ghim thang bậc, nhưng nó ghim
+    // cách VẼ của chính nó chứ không sửa ô nhớ giữ sở thích của người xem (RF-1).
     view: s.view,
     layers: new Set(s.layers),
     selection: selectSel,
@@ -528,7 +552,7 @@ export const useStore = create<AppState>((set) => ({
           nationalMode: false,
           beat,
           field: st.field,
-          scaleMode: st.scaleMode,
+          // Cùng luật với `fromScene`: ghim của cảnh không đi vào store.
           mode: h.mode ?? "2d",
           view: st.view,
           layers: new Set(st.layers),

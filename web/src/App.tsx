@@ -41,7 +41,7 @@ import {
   type FieldMeta,
   type RuntimeCoverage,
 } from "./fields";
-import { selectionWireOf, useStore } from "./state/store";
+import { effectiveScaleModeOf, selectionWireOf, useStore } from "./state/store";
 import { filterKeepsCell, filterKeepsStation, isKnownPopulation } from "./state/filter";
 import { syncHash } from "./state/hash";
 import { INITIAL_VIEW } from "./state/view-config";
@@ -61,7 +61,6 @@ import { FilterChip, type FilterCounts } from "./ui/FilterSummary";
 import { EvidenceCard } from "./components/atlas/EvidenceCard";
 import { AppShell } from "./components/atlas/AppShell";
 import { MapWorkspace, ModeSwitch, Workspace } from "./components/atlas/Workspace";
-import NationalApp from "./national/NationalApp";
 import { allOccValues, occCountAt, occCoverage, stationOccAt } from "./viz/occ";
 import {
   applyScaleMode,
@@ -78,7 +77,7 @@ import { useSimulationStore } from "./simulation/store";
 import { useSimulationController } from "./simulation/use-simulation";
 import type { AppNavMode, HashState } from "./state/types";
 import { readHash } from "./state/hash";
-import { currentDataset } from "./data/province";
+import { currentDataset, NATIONAL, switchDataset } from "./data/province";
 
 /**
  * Nav — DESIGN.md §3a.
@@ -114,7 +113,10 @@ function buildFieldScale(meta: FieldMeta, values: CellValue[]): Scale {
 
 export default function App() {
   const field = useStore((s) => s.field);
-  const requestedScaleMode = useStore((s) => s.scaleMode);
+  // Chế độ thang mà BỀ MẶT ĐANG MỞ phải vẽ — không phải sở thích thô của người xem. Trong
+  // một cảnh nó là ghim khai báo của cảnh; ngoài cảnh nó chính là sở thích. Xem
+  // `effectiveScaleModeOf` (RF-1).
+  const requestedScaleMode = useStore(effectiveScaleModeOf);
   const demandRepresentation = useStore((s) => s.demandRepresentation);
   const scene = useStore((s) => s.scene);
   const dataMode = useStore((s) => s.dataMode);
@@ -712,6 +714,10 @@ export default function App() {
 
   const handleSelectNavMode = (targetMode: AppNavMode) => {
     if (targetMode === "story" && !isStoryEnabled) return;
+    if (targetMode === "national") {
+      switchDataset(NATIONAL);
+      return;
+    }
     setAppNavMode(targetMode);
   };
 
@@ -737,7 +743,7 @@ export default function App() {
   const mapSurface = (
     <MapWorkspace
       readColumn={scene
-        ? <StoryColumn pkg={storyPkg} />
+        ? <StoryColumn pkg={storyPkg} occScale={utilizationScale} />
         : <AtlasReadColumn
             field={meta}
             scale={scale}
@@ -859,11 +865,10 @@ export default function App() {
     }>
       <Workspace error={error} bottom={scrubberVisible ? <Scrubber field={field} /> : undefined}>
         <ModeSwitch
-          mode={activeNavMode}
+          mode={activeNavMode === "national" ? "map" : activeNavMode}
           map={mapSurface}
           story={mapSurface}
           data={<DataMode manifest={manifest} occupancy={occupancy} />}
-          national={<div className="relative min-h-0 flex-1 overflow-hidden"><NationalApp /></div>}
         />
       </Workspace>
     </AppShell>

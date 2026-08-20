@@ -70,6 +70,11 @@ export function resetIssuedQueryCount(): void {
   issuedQueryCount = 0;
 }
 
+/** Snapshot chỉ-đọc cho cổng bộ nhớ Phase 9; caller không thể sửa Set nội bộ. */
+export function getRegisteredParquetNames(): string[] {
+  return [...registered].sort();
+}
+
 /**
  * Đăng ký một file Parquet trong `public/data/` để đọc qua HTTP range request —
  * không tải hết file vào RAM. Quan trọng với file 168h (363.518 dòng).

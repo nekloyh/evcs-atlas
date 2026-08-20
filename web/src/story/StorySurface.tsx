@@ -9,6 +9,7 @@ import { RoutePairs } from "../ui/RoutePairs";
 import { StructureSweep } from "../ui/StructureSweep";
 import { SupplyLorenz } from "../ui/SupplyLorenz";
 import { themeOfLens } from "../viz/theme";
+import type { Scale } from "../viz/palette";
 import { LorenzChart } from "./LorenzChart";
 import { Figure, Para, Pending, SoWhat, Stat } from "./parts";
 import { ASSUMPTIONS, resolveMetric, type ResolveContext } from "./resolve";
@@ -129,7 +130,7 @@ const STORY_REPRESENTATION = "hex" as const;
  * được thì khe **trống**, không phải một khung rỗng có trục — một biểu đồ rỗng đọc thành
  * "đo rồi, không có gì", mà sự thật là "chưa đo".
  */
-function FigureSlot({ id, ctx }: { id: SharedFigureId; ctx: ResolveContext }) {
+function FigureSlot({ id, ctx, occScale }: { id: SharedFigureId; ctx: ResolveContext; occScale: Scale | null }) {
   const models = ctx.models;
   switch (id) {
     case "lorenz-area-pop": {
@@ -161,10 +162,19 @@ function FigureSlot({ id, ctx }: { id: SharedFigureId; ctx: ResolveContext }) {
       if (!m) return null;
       const heat = m["model"] as { cells: never[] } | undefined;
       const t = m["peakT"];
-      return heat && heat.cells.length > 0 ? (
+      // `scale` là ĐIỀU KIỆN VẼ của `Heatmap168`, không phải một tuỳ chọn: thiếu nó thì
+      // effect thoát sớm và tấm nhiệt đồ ra một khung có nhãn trục mà KHÔNG một ô nào được
+      // tô (RF-2 — cảnh 5 đã ở trạng thái đó từ Phase 7, và witness của CR 4.1 đã ghi nhận
+      // `heatmapPainted: false`). Một khung rỗng có trục đọc thành "đo rồi, không có gì",
+      // đúng cái nghĩa mà luật khe trống của `FigureSlot` tồn tại để cấm.
+      //
+      // Nên: chưa có thang ⇒ **khe trống hẳn**, cùng luật với chưa có model. Có thang ⇒ vẽ
+      // bằng chính object mà bản đồ đang dùng, nên "cùng giá trị thì cùng màu" là một tính
+      // chất của mã chứ không phải một lời hứa.
+      return heat && heat.cells.length > 0 && occScale ? (
         <Heatmap168
           cells={heat.cells}
-          scale={null}
+          scale={occScale}
           theme={themeOfLens("utilization", STORY_REPRESENTATION)}
           t={typeof t === "number" ? t : 0}
         />
@@ -220,7 +230,7 @@ function SubjectCard({
 
 // ── Khối ────────────────────────────────────────────────────────────────────
 
-function Block({ block, ctx, k }: { block: BlockSpec; ctx: ResolveContext; k: string }) {
+function Block({ block, ctx, occScale, k }: { block: BlockSpec; ctx: ResolveContext; occScale: Scale | null; k: string }) {
   switch (block.kind) {
     case "figure": {
       const v = resolveMetric(block.value, ctx);
@@ -290,7 +300,7 @@ function Block({ block, ctx, k }: { block: BlockSpec; ctx: ResolveContext; k: st
         <SubjectCard which={block.which} why={block.why} rows={block.rows} ctx={ctx} />
       );
     case "figure-slot":
-      return <FigureSlot id={block.id} ctx={ctx} />;
+      return <FigureSlot id={block.id} ctx={ctx} occScale={occScale} />;
     case "heading":
       return (
         <h3 className="border-y border-hairline bg-basemap px-4 py-1 text-body tracking-[0.1em] text-ink-2">
@@ -305,10 +315,13 @@ function Block({ block, ctx, k }: { block: BlockSpec; ctx: ResolveContext; k: st
 export function BeatBody({
   beat,
   ctx,
+  occScale,
   loading,
 }: {
   beat: BeatSpec;
   ctx: ResolveContext | null;
+  /** Xem `StoryColumn` — thang của `station:occ`, đi kèm props chứ không nằm trong gói. */
+  occScale: Scale | null;
   loading: string | null;
 }) {
   // Chưa có bối cảnh = chưa có gói. Không khối nào render, và dòng "đang đo" là toàn bộ
@@ -321,7 +334,7 @@ export function BeatBody({
           thành một cảnh đầy đủ. Dòng này biến mất ngay khi dữ liệu của nhịp về đủ. */}
       {loading && <Pending label={loading} />}
       {beat.blocks.map((b, i) => (
-        <Block key={`${beat.id}-${i}`} block={b} ctx={ctx} k={`${beat.id}-${i}`} />
+        <Block key={`${beat.id}-${i}`} block={b} ctx={ctx} occScale={occScale} k={`${beat.id}-${i}`} />
       ))}
     </>
   );

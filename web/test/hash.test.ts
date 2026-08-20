@@ -43,8 +43,10 @@ test("field hash phân biệt khoá bị xoá với khoá có mặt nhưng sai",
   assert.equal(resolveHashField("built_frac", "n_ports", { fieldPresent: true }), "n_ports");
 });
 
-test("hash Hà Nội canonicalize khoá dataset cũ thay vì giữ state giả", () => {
+test("serializer tỉnh giữ dataset đã khoá lúc boot", () => {
   const serialized = serializeHash(BASE, "#tinh=79&f=population");
+  // Test runner boot module không có window nên dataset mặc định là Hà Nội. Regression
+  // cho tỉnh khác được kiểm bằng process con ở province-hash-roundtrip.test.ts.
   assert.doesNotMatch(serialized, /(?:^|&)tinh=/);
   assert.match(serialized, /(?:^|&)f=population/);
 });
@@ -115,8 +117,14 @@ test("`sc` round-trip gradient; absent và giá trị lạ đều về binned", 
   assert.doesNotMatch(serializeHash(BASE), /(?:^|&)sc=/);
 });
 
-test("story pin binned và preset/hash mặc định không tự phát `sc`", () => {
-  assert.equal(parseHash("#s=von-cuc&sc=g").scaleMode, "binned");
+test("hash của một CẢNH không phát `sc` — cả `g` lẫn mặc định (RF-1)", () => {
+  // Trước bản vá dòng này đọc `=== "binned"`, và chính cái "binned" ấy chảy vào
+  // `store.scaleMode` rồi ở lại đó sau khi người xem rời câu chuyện. Cảnh không nói gì về
+  // sở thích thang của người xem, nên hash của cảnh không được phát một câu nào về nó.
+  assert.equal(parseHash("#s=von-cuc&sc=g").scaleMode, undefined);
+  assert.equal(parseHash("#s=von-cuc").scaleMode, undefined);
+  // Ngoài cảnh, khoá vẫn đọc như cũ.
+  assert.equal(parseHash("#f=population&sc=g").scaleMode, "gradient");
   assert.doesNotMatch(serializeHash(BASE), /(?:^|&)sc=/);
 });
 

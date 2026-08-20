@@ -11,8 +11,9 @@
  * bundle, và hai đường đọc cùng một định dạng là hai chỗ để lệch nhau.
  */
 
-import { query, registerParquet } from "../data/duckdb";
+import { getRegisteredParquetNames, query, registerParquet } from "../data/duckdb";
 import type { PoiShape } from "../data/poi";
+import { PROVINCE_FIELDS } from "./fields";
 
 /** Một bậc lưới đã xuất — `n12_national._grid_agg`. */
 export interface GridMeta {
@@ -109,8 +110,38 @@ async function json<T>(name: string): Promise<T> {
   return (await r.json()) as T;
 }
 
-export const loadNationalManifest = () => json<NationalManifest>("vn/manifest.json");
-export const loadProvinceRows = () => json<Record<string, ProvinceRow>>("vn/provinces.json");
+let manifestCache: Promise<NationalManifest> | null = null;
+let rowsCache: Promise<Record<string, ProvinceRow>> | null = null;
+let shapesCache: Promise<ProvinceFeature[]> | null = null;
+const cellsCache = new Map<string, Promise<NationalCell[]>>();
+let stationsCache: Promise<NationalStation[]> | null = null;
+let poiCache: Promise<NationalPoi[]> | null = null;
+
+export const loadNationalManifest = () =>
+  (manifestCache ??= json<NationalManifest>("vn/manifest.json"));
+export function validateProvinceRows(rows: Record<string, ProvinceRow>): Record<string, ProvinceRow> {
+  const required = new Set(PROVINCE_FIELDS.map((field) => field.column));
+  for (const [code, row] of Object.entries(rows)) {
+    const suffixed = Object.keys(row).find((key) => /_[xy]$/.test(key));
+    if (suffixed) throw new Error(`Schema tỉnh ${code} còn cột merge ${suffixed}`);
+    for (const column of required) {
+      if (!(column in row)) throw new Error(`Schema tỉnh ${code} thiếu cột ${column}`);
+    }
+  }
+  return rows;
+}
+
+export const loadProvinceRows = () =>
+  (rowsCache ??= json<Record<string, ProvinceRow>>("vn/provinces.json").then(validateProvinceRows));
+
+async function registerNationalParquet(name: string): Promise<string> {
+  if (!name.startsWith("vn/")) throw new Error(`Tên parquet national sai namespace: ${name}`);
+  const registeredName = await registerParquet(name);
+  const invalid = getRegisteredParquetNames().filter((item) => !item.startsWith("vn/"));
+  if (invalid.length) throw new Error(`National mode đã đăng ký file ngoài vn/*: ${invalid.join(", ")}`);
+  if (getRegisteredParquetNames().length > 4) throw new Error("National mode vượt ngân sách 4 parquet");
+  return registeredName;
+}
 
 /**
  * 34 đa giác tỉnh — dùng LẠI file mà bộ chọn tỉnh đã tải, không xuất bản thứ hai.
@@ -119,8 +150,8 @@ export const loadProvinceRows = () => json<Record<string, ProvinceRow>>("vn/prov
  * đầy đủ đến từ `vn/provinces.json` và ghép theo `province_code` — xem `_provinces_json`.
  */
 export async function loadProvinceShapes(): Promise<ProvinceFeature[]> {
-  const fc = await json<{ features: ProvinceFeature[] }>("provinces.geojson");
-  return fc.features;
+  shapesCache ??= json<{ features: ProvinceFeature[] }>("provinces.geojson").then((fc) => fc.features);
+  return shapesCache;
 }
 
 /** Số Arrow về JS: `bigint` của cột int64 phải đổi, và `NaN` phải thành `null`. */
@@ -143,26 +174,36 @@ function str(v: unknown): string | null {
  * biết nó đang vẽ r6 hay r7, `H3HexagonLayer` nhận một mã H3 và tự suy ra bậc từ chính mã.
  */
 export async function loadCells(columns: string[], grid: GridMeta): Promise<NationalCell[]> {
-  const f = await registerParquet(`vn/${grid.file}`);
-  const cols = [grid.key, "province_code", "lat", "lng", ...columns]
-    .map((c) => `"${c}"`)
-    .join(", ");
-  const t = await query(`SELECT ${cols} FROM "${f}"`);
-  return t.toArray().map((r) => {
-    const o = r.toJSON() as Record<string, unknown>;
-    const cell: NationalCell = {
-      h3: String(o[grid.key]),
-      province_code: String(o.province_code),
-      lat: num(o.lat) ?? 0,
-      lng: num(o.lng) ?? 0,
-    };
-    for (const c of columns) cell[c] = num(o[c]);
-    return cell;
-  });
+  const key = `${grid.file}:${columns.join(",")}`;
+  let cached = cellsCache.get(key);
+  if (!cached) {
+    cached = (async () => {
+      const f = await registerNationalParquet(`vn/${grid.file}`);
+      const cols = [grid.key, "province_code", "lat", "lng", ...columns]
+        .map((c) => `"${c}"`)
+        .join(", ");
+      const t = await query(`SELECT ${cols} FROM "${f}"`);
+      return t.toArray().map((r) => {
+        const o = r.toJSON() as Record<string, unknown>;
+        const cell: NationalCell = {
+          h3: String(o[grid.key]),
+          province_code: String(o.province_code),
+          lat: num(o.lat) ?? 0,
+          lng: num(o.lng) ?? 0,
+        };
+        for (const c of columns) cell[c] = num(o[c]);
+        return cell;
+      });
+    })();
+    cellsCache.set(key, cached);
+  }
+  return cached;
 }
 
 export async function loadStations(): Promise<NationalStation[]> {
-  const f = await registerParquet("vn/stations.parquet");
+  if (stationsCache) return stationsCache;
+  stationsCache = (async () => {
+  const f = await registerNationalParquet("vn/stations.parquet");
   const t = await query(`SELECT * FROM "${f}"`);
   return t.toArray().map((r) => {
     const o = r.toJSON() as Record<string, unknown>;
@@ -179,6 +220,8 @@ export async function loadStations(): Promise<NationalStation[]> {
       province_code: String(o.province_code),
     };
   });
+  })();
+  return stationsCache;
 }
 
 /**
@@ -190,7 +233,9 @@ export async function loadStations(): Promise<NationalStation[]> {
  * khác ở chỗ file nào trả lời được câu hỏi nào.
  */
 export async function loadPoi(shapeOf: (group: string) => PoiShape): Promise<NationalPoi[]> {
-  const f = await registerParquet("vn/poi.parquet");
+  if (poiCache) return poiCache;
+  poiCache = (async () => {
+  const f = await registerNationalParquet("vn/poi.parquet");
   const t = await query(`SELECT "group", tag, name, lat, lng, province_code FROM "${f}"`);
   return t.toArray().map((r) => {
     const o = r.toJSON() as Record<string, unknown>;
@@ -205,4 +250,6 @@ export async function loadPoi(shapeOf: (group: string) => PoiShape): Promise<Nat
       province_code: String(o.province_code),
     };
   });
+  })();
+  return poiCache;
 }

@@ -30,7 +30,7 @@ import { FIELD_BY_ID, FIRST_FIELD } from "../fields";
 import { parseSelection } from "../data/h3";
 import { parseEntitySelection, serializeEntitySelection } from "./selection";
 import { overlayUnavailable } from "../data/overlays";
-import { NATIONAL, PROVINCE_KEY } from "../data/province";
+import { NATIONAL, PROVINCE, PROVINCE_KEY } from "../data/province";
 import { parseSceneRef, serializeSceneRef } from "../story/scenes";
 import { parseFilter, serializeFilter } from "./filter";
 import {
@@ -105,7 +105,13 @@ export function parseHash(hash: string): Partial<HashState> {
 
   // `sc`: only the exact compact value `g` enables the continuous ramp. Missing and
   // unknown values both preserve the QA'd binned default.
-  out.scaleMode = scene ? "binned" : p.get("sc") === "g" ? "gradient" : "binned";
+  //
+  // Có CẢNH ⇒ **không phát khoá này**, thay vì phát `"binned"`. Cảnh ghim thang bậc, nhưng
+  // ghim ấy là một ràng buộc THẨM ĐỊNH của cảnh, không phải một lựa chọn của người xem — và
+  // `store.scaleMode` là ô nhớ giữ lựa chọn của người xem. Phát `"binned"` ở đây là để một
+  // link tới cảnh ghi đè vĩnh viễn sở thích ấy: vào câu chuyện rồi ra bản đồ thì dải liên tục
+  // biến mất mà không ai bấm gì (RF-1). Chỗ áp ghim là `effectiveScaleModeOf`, đọc chứ không ghi.
+  if (!scene) out.scaleMode = p.get("sc") === "g" ? "gradient" : "binned";
 
   // Khoá `c` mang MỘT đối tượng: ô (`h3_r8`), trạm (`station:<id>`), hoặc xã (`commune:<mã 5 số>`).
   // Chỉ kiểm HÌNH DẠNG; đối tượng không có thật bị bỏ khi truy vấn trả rỗng.
@@ -225,9 +231,9 @@ export function serializeHash(s: HashState, prev = ""): string {
     return national.toString().replace(/%2C/g, ",").replace(/%3A/g, ":").replace(/%7E/g, "~");
   }
   const p = new URLSearchParams();
-  // Build hiện tại chỉ phát hành dataset Hà Nội (`parseDataset` canonicalize mọi `tinh`
-  // về cùng dataset). Không ghi lại một khoá không còn điều khiển state: sync đầu tiên sẽ
-  // chuẩn hoá deep-link cũ, trong khi parser vẫn đọc tương thích các khoá còn lại.
+  // Dataset bị khoá lúc boot cùng manifest/DuckDB. Giữ mã đó ở chiều RA để lần sync hash
+  // đầu tiên không biến deep-link của một tỉnh thành bộ Hà Nội mặc định.
+  if (PROVINCE !== null) p.set(PROVINCE_KEY, PROVINCE);
   const ref = parseSceneRef(s.scene);
   const scene = ref.scene;
   if (scene) p.set("s", serializeSceneRef(scene, s.beat ?? null));

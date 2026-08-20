@@ -23,7 +23,10 @@ import type { NationalMode } from "./hash";
 import { HATCH_RGB, colorFor, type RGB, type Scale } from "../viz/palette";
 import { EXTRUSION_MATERIAL, NATIONAL_LIGHTING } from "../viz/lighting";
 import { buildPoiIconAtlas, iconId, type IconEntry } from "../viz/poi-icons";
-import type { NationalField } from "./fields";
+import { HatchExtension } from "../viz/hatch-extension";
+import { formatValue, type NationalField } from "./fields";
+import { provinceMetric, type ProvinceMetricState } from "./metrics";
+import { NOT_COMPARABLE_RGB } from "./visual-states";
 import type {
   NationalCell,
   NationalPoi,
@@ -81,6 +84,7 @@ const numericValue = (value: unknown): number | null =>
 /** Mực của ranh giới tỉnh — nét mảnh, không phải một lớp mang dữ liệu. */
 const BORDER_RGB: RGB = [120, 118, 112];
 const STATION_RGB: RGB = [24, 24, 24];
+const MISSING_HATCH = new HatchExtension({ angle: 45 });
 
 export interface NationalMapProps {
   view: { lng: number; lat: number; zoom: number };
@@ -99,6 +103,8 @@ export interface NationalMapProps {
   /** bậc H3 của thảm ô đang vẽ — trần chiều cao co theo bậc, xem `maxElevFor`. */
   res: number;
   hovered: string | null;
+  selected: string | null;
+  provinceStates: Record<string, ProvinceMetricState>;
   onHoverProvince: (code: string | null) => void;
   onPickProvince: (code: string) => void;
 }
@@ -209,6 +215,8 @@ export function NationalMap(props: NationalMapProps) {
     mode,
     res,
     hovered,
+    selected,
+    provinceStates,
     onHoverProvince,
     onPickProvince,
   } = props;
@@ -246,18 +254,20 @@ export function NationalMap(props: NationalMapProps) {
           // của `MapView`: kiểu feature của deck.gl là `Feature<Geometry>` cố định, nên
           // khai tham số hẹp hơn sẽ không khớp chữ ký của layer.
           getFillColor: (f: unknown) => {
-            const row = rows[(f as ProvinceFeature).properties.province_code];
+            const code = (f as ProvinceFeature).properties.province_code;
+            const row = rows[code];
+            if (provinceStates[code] === "not-comparable") return rgba(NOT_COMPARABLE_RGB, 230);
             const c = colorOf(row?.[field.column] ?? null);
             // Không có màu ⇒ ô VÂN xám của bậc tỉnh: "không đo được", không phải "bằng 0".
             // Tỉnh chưa dựng trong store rơi vào đúng nhánh này và đó là câu đúng cho nó.
-            return c ? ([c[0], c[1], c[2], 220] as RGBA) : rgba(HATCH_RGB, 90);
+            return c ? ([c[0], c[1], c[2], 220] as RGBA) : ([0, 0, 0, 0] as RGBA);
           },
           getLineColor: (f: unknown) =>
-            (f as ProvinceFeature).properties.province_code === hovered
+            [hovered, selected].includes((f as ProvinceFeature).properties.province_code)
               ? ([20, 20, 20, 255] as RGBA)
               : rgba(BORDER_RGB, 190),
           getLineWidth: (f: unknown): number =>
-            (f as ProvinceFeature).properties.province_code === hovered ? 2.2 : 0.8,
+            [hovered, selected].includes((f as ProvinceFeature).properties.province_code) ? 2.2 : 0.8,
           lineWidthUnits: "pixels",
           onHover: (i: { object?: unknown }) =>
             onHoverProvince(
@@ -267,7 +277,30 @@ export function NationalMap(props: NationalMapProps) {
             const f = i.object as ProvinceFeature | undefined;
             if (f?.properties.in_store) onPickProvince(f.properties.province_code);
           },
-          updateTriggers: { getFillColor: [field.id, scale], getLineColor: hovered, getLineWidth: hovered },
+          updateTriggers: {
+            getFillColor: [field.id, scale, provinceStates],
+            getLineColor: [hovered, selected],
+            getLineWidth: [hovered, selected],
+          },
+        }),
+      );
+      // Missing là vân 45°; NOT COMPARABLE ở lớp trên là mảng đặc. Tách layer để extension
+      // không ăn mất nét biên và để hai trạng thái còn phân biệt khi không đọc được màu.
+      out.push(
+        new GeoJsonLayer({
+          id: "vn-provinces-missing-hatch",
+          data: provinces,
+          filled: true,
+          stroked: false,
+          pickable: false,
+          getFillColor: (f: unknown) => {
+            const code = (f as ProvinceFeature).properties.province_code;
+            return provinceStates[code] === "missing" || !rows[code]
+              ? rgba(HATCH_RGB, 255)
+              : ([0, 0, 0, 0] as RGBA);
+          },
+          extensions: [MISSING_HATCH],
+          updateTriggers: { getFillColor: [field.id, provinceStates, rows] },
         }),
       );
     } else {
@@ -399,6 +432,8 @@ export function NationalMap(props: NationalMapProps) {
     mode,
     res,
     hovered,
+    selected,
+    provinceStates,
     zoom,
     atlas,
     ready,
@@ -451,7 +486,7 @@ function fmt(v: unknown): string {
   return typeof v === "number" ? v.toLocaleString("vi-VN", { maximumFractionDigits: 2 }) : "—";
 }
 
-function tooltip(
+export function tooltip(
   object: unknown,
   layerId: string | undefined,
   field: NationalField,
@@ -490,8 +525,16 @@ function tooltip(
   const row = rows[f.properties.province_code];
   const head = row?.province_name ?? f.properties.province_code;
   if (field.unit !== "province") return { text: `${head}\nbấm để mở bộ dữ liệu của tỉnh` };
+  if (!row) return { text: `${head}\nThiếu dòng dữ liệu tỉnh` };
+  const metric = provinceMetric(row, field);
+  if (metric.state === "not-comparable") {
+    return { text: `${head}\nKHÔNG SO SÁNH ĐƯỢC · ${metric.reason ?? "không đủ dữ liệu"}\nbấm để mở bộ dữ liệu của tỉnh` };
+  }
+  if (metric.state === "missing") {
+    return { text: `${head}\n${field.label}: không đo được\nbấm để mở bộ dữ liệu của tỉnh` };
+  }
   return {
-    text: `${head}\n${field.label}: ${fmt(row?.[field.column])} ${field.unit_label}\n${
+    text: `${head}\n${field.label}: ${formatValue(field, metric.value)} ${field.unit_label}\n${
       row?.in_store ? "bấm để mở bộ dữ liệu của tỉnh" : "chưa dựng trong store"
     }`,
   };

@@ -30,15 +30,13 @@ export function ModeSwitch({
   map,
   story,
   data,
-  national,
 }: {
-  mode: AppNavMode;
+  mode: Exclude<AppNavMode, "national">;
   map: React.ReactNode;
   story: React.ReactNode;
   data: React.ReactNode;
-  national: React.ReactNode;
 }) {
-  return <>{({ map, story, data, national } as const)[mode]}</>;
+  return <>{({ map, story, data } as const)[mode]}</>;
 }
 
 export function MapWorkspace({

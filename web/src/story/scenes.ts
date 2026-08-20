@@ -18,6 +18,7 @@ import type { Manifest } from "../data/manifest";
 import type { RoadSeg } from "../data/queries";
 import type { View } from "../state/types";
 import type { CellValue } from "../viz/palette";
+import type { ScaleControlModel } from "../fields";
 import {
   ASSUMPTIONS,
   resolveSubject,
@@ -1478,7 +1479,36 @@ export function sceneState(id: SceneId, beatId?: string | null): SceneState {
     t = typeof argmax === "number" && Number.isFinite(argmax) ? argmax : null;
   }
 
-  return { field: beat.field, scaleMode: s.scaleMode, view, layers: [...s.layers], select, t };
+  // Không `scaleMode` ở đây — xem `SceneState`. Ghim của cảnh đọc từ `SceneSpec.scaleMode`.
+  return { field: beat.field, view, layers: [...s.layers], select, t };
+}
+
+/**
+ * Câu khai CÁCH ĐỌC của một cảnh — CG-1(B), badge cảnh trên bản đồ.
+ *
+ * Cảnh ghim thang bậc, và cho tới bản này màn hình KHÔNG nói ra điều đó ở đâu cả: cột đọc
+ * bị `StoryColumn` thay nên không có legend, không có toggle, không có câu nào. Người xem
+ * vừa bấm Gradient rồi bước vào câu chuyện chỉ thấy lớp bậc quay lại mà không biết vì sao —
+ * và im lặng ở đúng chỗ ấy là thứ đã sinh ra RF-1.
+ *
+ * Đây là một câu KHAI, không phải một bộ điều khiển. Một toggle bị vô hiệu hoá đứng cạnh
+ * một cảnh đang áp đặt cách đọc là hai thứ tranh nhau cùng một state ngay trên màn hình —
+ * đúng lý do §14c đã bỏ rail trường khỏi cột cảnh.
+ *
+ * **Ba nguyên nhân, ba câu khác nhau.** Bản đồ vẽ lớp bậc có thể vì cảnh ghim, vì trường
+ * không dựng được dải liên tục, hoặc vì bảng màu chưa qua cổng gradient. Chỉ trường hợp
+ * ĐẦU mới là quyết định của cảnh; hai trường hợp sau là câu trả lời của registry, và ghi
+ * công chúng cho cảnh là để một câu chữ mang hai nghĩa (luật R3). Hai câu sau vì thế đọc
+ * thẳng lý do của `scaleControlFor` — cùng chuỗi mà cột đọc in ở workspace, một nguồn.
+ */
+export function scenePinDisclosure(spec: SceneSpec, control: ScaleControlModel): string {
+  if (control.gradientDisabled) {
+    return control.reason ? `lớp bậc · ${control.reason}` : "lớp bậc";
+  }
+  // Trường DỰNG ĐƯỢC dải liên tục mà bản đồ vẫn vẽ bậc ⇒ ghim của cảnh là thứ đang chặn.
+  return spec.scaleMode === "binned"
+    ? "lớp bậc · cảnh ghim cách đọc để khớp số đã thẩm định"
+    : "dải liên tục · cảnh khai và đã thẩm định lại số của mình";
 }
 
 // ── Bộ lọc ô của nhịp ───────────────────────────────────────────────────────

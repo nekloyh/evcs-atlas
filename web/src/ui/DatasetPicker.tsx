@@ -49,7 +49,7 @@ import {
  * Chiều TỈNH vẫn không được mã hoá bằng kênh thị giác nào: xem
  * `docs/adr/0004-chieu-tinh-khong-ma-hoa-bang-kenh-thi-giac.md`.
  */
-export function DatasetPicker() {
+export function DatasetPicker({ readProxyCount = true }: { readProxyCount?: boolean }) {
   const [list, setList] = useState<ProvinceIndexEntry[] | null>(null);
   const [nProxy, setNProxy] = useState<number | null>(null);
 
@@ -63,8 +63,8 @@ export function DatasetPicker() {
           : null,
       ),
     );
-    void countProxySets().then(setNProxy);
-  }, []);
+    if (readProxyCount) void countProxySets().then(setNProxy);
+  }, [readProxyCount]);
 
   // `currentDataset` đọc hash MỘT lần lúc render đầu và không cần theo dõi: đổi bộ là tải
   // lại trang (xem `switchDataset`), nên giá trị này là hằng trong cả vòng đời của trang.

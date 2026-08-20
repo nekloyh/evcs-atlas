@@ -1,0 +1,61 @@
+{
+  "browser": "Chrome/151.0.7922.137",
+  "viewport": "1680x1050",
+  "at11": {
+    "status": "PASS_BY_GATE",
+    "note": "Rendered light screenshot plus deterministic composite ΔE gate; app has no dark theme (DESIGN §2), future-dark background is checked by unit test.",
+    "delta_e": {
+      "light": {
+        "solid_hatch": 38.79,
+        "solid_bin1": 27.31,
+        "hatch_bin1": 15.37
+      },
+      "future_dark": {
+        "solid_hatch": 15.89,
+        "solid_bin1": 25.73,
+        "hatch_bin1": 41.13
+      }
+    },
+    "texture": "solid token vs repeating-linear-gradient token"
+  },
+  "at12": {
+    "registered": [
+      "vn/grid_h3_r6.parquet",
+      "vn/grid_h3_r7.parquet",
+      "vn/poi.parquet",
+      "vn/stations.parquet"
+    ],
+    "memory_ok": true,
+    "network_ok": true,
+    "first_paint_payload_bytes": 817876,
+    "first_paint_budget_bytes": 817876,
+    "first_paint_ok": true,
+    "data_urls": [
+      "http://127.0.0.1:5173/data/provinces.geojson",
+      "http://127.0.0.1:5173/data/vn/manifest.json",
+      "http://127.0.0.1:5173/data/vn/provinces.json",
+      "http://127.0.0.1:5173/src/data/bootstrap.ts",
+      "http://127.0.0.1:5173/src/data/duckdb.ts",
+      "http://127.0.0.1:5173/src/data/manifest.ts",
+      "http://127.0.0.1:5173/src/data/overlays.ts",
+      "http://127.0.0.1:5173/src/data/poi.ts",
+      "http://127.0.0.1:5173/src/data/province.ts"
+    ]
+  },
+  "at13": {
+    "status": "PASS",
+    "interaction": "canvas polygon",
+    "transition_hash": "",
+    "synced_hash": "#tinh=08",
+    "title": "EVCS · Tỉnh Tuyên Quang",
+    "canvas_click_ok": true,
+    "back_transition_hash": "",
+    "back_synced_hash": "#tinh=vn&f=p:ports_per_10k",
+    "back_control": "nav Chế độ Toàn quốc (province shell không dựng DatasetPicker)"
+  },
+  "at14": {
+    "legend_no_double_count": true,
+    "province_picker_controls": 15,
+    "power_lower_bound_rows": 2
+  }
+}

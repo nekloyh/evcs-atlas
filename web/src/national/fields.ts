@@ -20,6 +20,28 @@ import type { ScaleContract } from "../viz/palette";
 
 export type NationalUnit = "province" | "cell";
 
+export interface NationalKpiOperand {
+  column: string;
+  aggregation: "sum" | "published" | "derived";
+  source: string;
+}
+
+export interface NationalKpiContract {
+  numerator: NationalKpiOperand;
+  denominator: NationalKpiOperand;
+  nullRule: "null-propagates";
+  /** Hệ số nhân sau phép chia, ví dụ 10.000 dân. */
+  factor: number;
+  disclosure?: string;
+}
+
+export interface ComparabilityContract {
+  sourceLayer?: string;
+  requiredFlagAbsence?: string;
+  /** Cột nguồn vắng/null nghĩa là không thể áp cùng phương pháp, không phải chỉ thiếu UI. */
+  requiredValueColumn?: string;
+}
+
 const SQRT_COUNT_SCALE: ScaleContract = {
   color: "fixed-binned",
   transform: "sqrt",
@@ -49,7 +71,13 @@ export interface NationalField {
   /** cao = chỗ cần chú ý (mặc định), hay cao = tốt */
   polarity?: "high-bad" | "high-good";
   scaleContract: ScaleContract;
+  /** Có mặt trên mọi KPI đã chuẩn hoá; không được suy mẫu số từ tên cột. */
+  kpi?: NationalKpiContract;
+  comparability?: ComparabilityContract;
 }
+
+const POPULATION_DISCLOSURE =
+  "Mẫu số là dân số công bố VNSDI; bề mặt độc lập chênh ×0,95–×1,61 theo tỉnh. Số cổng là chặn dưới khi trạm thiếu cấu hình cổng.";
 
 /**
  * Trường của TỈNH — 34 giá trị, đọc từ `vn/provinces.json`.
@@ -119,6 +147,69 @@ export const PROVINCE_FIELDS: readonly NationalField[] = [
     decimals: 2,
     polarity: "high-good",
     desc: "Số cổng chia dân số — phép chia của hai số đo, KHÔNG phải một chỉ số nhu cầu: nó không biết gì về số xe điện thật ở tỉnh đó.",
+    kpi: {
+      numerator: { column: "n_ports", aggregation: "sum", source: "trạm IN sau loại 1 súng AC" },
+      denominator: { column: "population", aggregation: "published", source: "VNSDI 16/6/2025" },
+      nullRule: "null-propagates",
+      factor: 10_000,
+      disclosure: POPULATION_DISCLOSURE,
+    },
+  },
+  {
+    id: "p:power_per_urban_km2",
+    unit: "province",
+    column: "power_kw_per_urban_km2",
+    label: "Công suất trên km² đô thị",
+    scaleContract: SQRT_COUNT_SCALE,
+    unit_label: "kW/km² đô thị",
+    decimals: 1,
+    polarity: "high-good",
+    desc: "Công suất đặt chia diện tích xây dựng trong tỉnh; diện tích đô thị dùng built_frac × area_km2 × area_frac, không cộng trọn ô biên.",
+    kpi: {
+      numerator: { column: "power_kw_site", aggregation: "sum", source: "trạm IN" },
+      denominator: { column: "urban_km2", aggregation: "derived", source: "WorldCover 2021 × diện tích hiệu dụng" },
+      nullRule: "null-propagates",
+      factor: 1,
+      disclosure: "Bề mặt xây dựng là WorldCover 2021, cung là ảnh chụp 2026. Tổng công suất là chặn dưới khi trạm thiếu công suất danh định.",
+    },
+  },
+  {
+    id: "p:access_within_2km",
+    unit: "province",
+    column: "population_access_within_2km",
+    label: "Dân tiếp cận trong 2 km",
+    scaleContract: LINEAR_RATIO_SCALE,
+    unit_label: "dân số",
+    decimals: 1,
+    percent: true,
+    polarity: "high-good",
+    desc: "Phần dân số lưới ở ô tới được trạm trong 2 km theo mạng đường; dân không tới được vẫn nằm trong mẫu số và không vào tử số.",
+    kpi: {
+      numerator: { column: "population_within_2km", aggregation: "sum", source: "lưới r8, reachable và khoảng cách ≤ BEYOND_2KM_M" },
+      denominator: { column: "population_grid", aggregation: "sum", source: "cùng lưới r8" },
+      nullRule: "null-propagates",
+      factor: 1,
+      disclosure: "Tử và mẫu cùng dùng dân số dasymetric; dân không tới được bằng đường vẫn ở mẫu số.",
+    },
+    comparability: {
+      sourceLayer: "distance",
+      requiredValueColumn: "population_within_2km",
+    },
+  },
+  {
+    id: "p:utilization",
+    unit: "province",
+    column: "util_median",
+    label: "Mức sử dụng trung vị",
+    scaleContract: LINEAR_RATIO_SCALE,
+    unit_label: "cổng-giờ bận",
+    percent: true,
+    polarity: "high-good",
+    desc: "Trung vị mức sử dụng tại trạm đo được; tỉnh dưới ngưỡng 50% trạm đo được không được so hạng.",
+    comparability: {
+      sourceLayer: "occupancy",
+      requiredFlagAbsence: "KHONG_DO_DUOC_SU_DUNG",
+    },
   },
   {
     id: "p:private_ac_stations",
@@ -368,7 +459,16 @@ export const CELL_FIELDS: readonly NationalField[] = [
 
 export const NATIONAL_FIELDS = [...PROVINCE_FIELDS, ...CELL_FIELDS];
 export const FIELD_BY_ID = new Map(NATIONAL_FIELDS.map((f) => [f.id, f]));
-export const DEFAULT_NATIONAL_FIELD = "c:population";
+/** Selector KPI chỉ được phép đưa ra các phép chuẩn hoá có contract đầy đủ. */
+export const NORMALIZED_PROVINCE_FIELDS = PROVINCE_FIELDS.filter(
+  (f): f is NationalField & { kpi: NationalKpiContract; polarity: "high-bad" | "high-good" } =>
+    Boolean(f.kpi && f.polarity),
+);
+/** Phần còn lại vẫn phải có đường vào UI; không KPI nào được chỉ mở bằng cách gõ hash. */
+export const OTHER_PROVINCE_FIELDS = PROVINCE_FIELDS.filter(
+  (field) => !NORMALIZED_PROVINCE_FIELDS.includes(field as never),
+);
+export const DEFAULT_NATIONAL_FIELD = "p:ports_per_10k";
 
 export function formatValue(f: NationalField, v: number | null | undefined): string {
   if (v === null || v === undefined || Number.isNaN(v)) return "—";

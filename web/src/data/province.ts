@@ -53,6 +53,7 @@ export const PROXY = "poi";
 
 /** Thư mục của chế độ proxy — `vn.proxy_poi` ghi vào đây, không đụng bộ nào khác. */
 export const PROXY_DIR = "proxy";
+const CODE_RE = /^\d{2}$/;
 
 /**
  * Bộ dữ liệu nào đang mở, suy từ MỘT chuỗi hash. Hàm THUẦN.
@@ -67,9 +68,10 @@ export function parseDataset(hash: string): {
   national: boolean;
   proxy: boolean;
 } {
-  // `tinh` từng chọn toàn quốc, POI proxy hoặc các tỉnh khác. Bản phát hành này cố ý chỉ
-  // có Hà Nội, nên mọi giá trị cũ đều rơi về bundle mặc định thay vì mở một layout khác.
-  void hash;
+  const value = new URLSearchParams(hash.replace(/^#/, "")).get(PROVINCE_KEY);
+  if (value === NATIONAL) return { province: null, national: true, proxy: false };
+  if (value === PROXY) return { province: null, national: false, proxy: true };
+  if (value && CODE_RE.test(value)) return { province: value, national: false, proxy: false };
   return { province: null, national: false, proxy: false };
 }
 
@@ -84,14 +86,17 @@ export function pathIn(province: string | null, name: string): string {
 }
 
 function readProvince(): string | null {
-  return null;
+  if (typeof window === "undefined") return null;
+  return parseDataset(window.location.hash).province;
 }
 
 /** Đang xem lớp gộp TOÀN QUỐC (34 tỉnh một màn hình) chứ không phải một bộ dữ liệu tỉnh. */
-export const isNationalMode = false;
+export const isNationalMode =
+  typeof window !== "undefined" && parseDataset(window.location.hash).national;
 
 /** Đang ở chế độ PROXY POI — xem `PROXY`. */
-export const isProxyMode = false;
+export const isProxyMode =
+  typeof window !== "undefined" && parseDataset(window.location.hash).proxy;
 
 /**
  * Mã tỉnh đang xem, hoặc `null` = **bộ Hà Nội gốc** ở đường dẫn không tiền tố.

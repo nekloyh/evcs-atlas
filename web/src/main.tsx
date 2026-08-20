@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 
 import { UNKNOWN, apply, factsFrom } from "./data/bootstrap";
 import { loadManifest } from "./data/manifest";
+import { isNationalMode, isProxyMode } from "./data/province";
 import "./index.css";
 
 /**
@@ -21,9 +22,24 @@ import "./index.css";
  * một trang lỗi.
  */
 async function boot() {
-  // Ứng dụng hiện chỉ phát hành bộ Hà Nội. Các hash cũ `tinh=…`, kể cả `vn` và `poi`,
-  // được tầng dữ liệu quy về bundle 01 trước khi khởi động; không còn nhánh nào tải layout
-  // toàn quốc, POI proxy, hay tỉnh khác.
+  // National/proxy là bundle riêng và phải rẽ TRƯỚC khi nạp manifest tỉnh. Đây là ranh
+  // giới bộ nhớ: một vòng đời trang không đăng ký đồng thời `vn/*` và `p/<code>/*`.
+  if (isNationalMode) {
+    document.title = "EVCS · Toàn quốc";
+    const { default: NationalApp } = await import("./national/NationalApp");
+    createRoot(document.getElementById("root")!).render(
+      <StrictMode><NationalApp /></StrictMode>,
+    );
+    return;
+  }
+  if (isProxyMode) {
+    document.title = "EVCS · POI";
+    const { default: ProxyApp } = await import("./proxy/ProxyApp");
+    createRoot(document.getElementById("root")!).render(
+      <StrictMode><ProxyApp /></StrictMode>,
+    );
+    return;
+  }
   // Năm biến module-level phải được ghi TRƯỚC `import("./App")`. Chúng đi cùng nhau trong
   // `bootstrap.apply` — xem docstring ở đó để biết vì sao đây là một hàm chứ không phải
   // năm dòng kèm một comment.

@@ -272,7 +272,14 @@ export type SceneChartBinding =
 
 export interface SceneSpec {
   id: SceneId;
-  /** Approved scenes pin the QA-verified binned encoding. */
+  /**
+   * Approved scenes pin the QA-verified binned encoding.
+   *
+   * Ghim này là một KHAI BÁO, không phải một state được ghi vào store: nó được ĐỌC ở
+   * `effectiveScaleModeOf()` mỗi lượt render, nên nó không chạm tới `store.scaleMode` —
+   * ô nhớ giữ lựa chọn của người xem. Đấy là ranh giới RF-1: cảnh ghim cách VẼ của chính
+   * nó, cảnh không được sửa sở thích của người xem để đạt điều đó.
+   */
   scaleMode: "binned";
   /** nhãn nhỏ phía trên tiêu đề — nối cảnh với luận điểm của §13d */
   kicker: string;
@@ -294,10 +301,16 @@ export interface SceneSpec {
   basemapLayer?: "river";
 }
 
-/** State mà một cảnh GHI ĐÈ lên store dùng chung — luật L1 của §14a. Mọi khoá bắt buộc. */
+/**
+ * State mà một cảnh GHI ĐÈ lên store dùng chung — luật L1 của §14a. Mọi khoá bắt buộc.
+ *
+ * `scaleMode` KHÔNG có mặt ở đây, dù cảnh có ghim nó. Cái gì nằm trong hình dạng này thì bị
+ * `set()` vào store, và ghi ghim của cảnh vào `store.scaleMode` đúng là RF-1: sở thích của
+ * người xem bị nuốt và không có đường trả lại. Ghim sống ở `SceneSpec.scaleMode` và được áp
+ * lúc ĐỌC qua `effectiveScaleModeOf()`.
+ */
 export interface SceneState {
   field: string;
-  scaleMode: "binned";
   view: View;
   layers: OverlayId[];
   select: string | null;

@@ -74,7 +74,7 @@ from . import admin, paths, qa
 from .n11_web_export import WEB_DATA, _fc, _round_coords
 from .runner import Step
 
-VERSION = "4"  # 4: thêm lưới r7 cho LOD của chế độ 3D · 3: khung nhìn theo 99,5% dân · 2: thêm 4 file GeoJSON theo nhóm POI (chung cư · TTTM · công cộng · y tế-giáo dục)
+VERSION = "5"  # 5: schema tỉnh sạch suffix + KPI chuẩn hoá Phase 9
 
 WEB_VN = WEB_DATA / "vn"
 
@@ -295,9 +295,35 @@ def _provinces_json() -> dict:
     """
     pv = pq.read_table(paths.ADMIN / "provinces.parquet").to_pandas()
     qp = pq.read_table(paths.QA / "provinces.parquet").to_pandas()
-    idx = pv.merge(qp.drop(columns=["province_name"], errors="ignore"), on="province_code")
+    # QA là chủ của các cột tính lại. Admin chỉ bổ sung cột chưa có trong QA; merge cả hai
+    # bảng bằng mặc định pandas từng làm rò `_x/_y` và biến ba metric live thành all-null.
+    shared = (set(pv.columns) & set(qp.columns)) - {"province_code", "province_name"}
+    for column in shared:
+        left = pv.set_index("province_code")[column]
+        right = qp.set_index("province_code")[column]
+        both = left.notna() & right.notna()
+        if pd.api.types.is_numeric_dtype(left) and pd.api.types.is_numeric_dtype(right):
+            assert np.allclose(left[both], right[both], rtol=0, atol=0.11), column
+        else:
+            assert bool((left[both].astype(str) == right[both].astype(str)).all()), column
+    admin_only = [c for c in pv.columns if c not in qp.columns or c == "province_code"]
+    idx = qp.merge(pv[admin_only], on="province_code", how="left", validate="one_to_one")
     idx["in_store"] = idx.n_stations.notna()
     recs = json.loads(idx.to_json(orient="records", force_ascii=False))
+    for row in recs:
+        flags = set((row.get("quality_flags") or "").split("|"))
+        row["unusable_layers"] = (
+            [
+                {
+                    "layer": "occupancy",
+                    "reason": "dưới nửa số trạm có mức sử dụng đọc được",
+                    "measured": row.get("share_stations_measured"),
+                }
+            ]
+            if "KHONG_DO_DUOC_SU_DUNG" in flags
+            else []
+        )
+        assert not any(str(key).endswith(("_x", "_y")) for key in row), row["province_code"]
     return {r["province_code"]: r for r in recs}
 
 

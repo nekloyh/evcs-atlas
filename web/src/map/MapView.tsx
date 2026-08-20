@@ -18,13 +18,14 @@ import type {
   StationPoint,
 } from "../data/queries";
 import { SURFACE_CELL_M } from "../data/queries";
-import { STATION_PORTS_FIELD, hasDemandRepresentations, type FieldMeta } from "../fields";
+import { STATION_PORTS_FIELD, hasDemandRepresentations, scaleControlFor, unitNoun, type FieldMeta } from "../fields";
 import { selectionWireOf, useStore } from "../state/store";
 import {
   SCENE_BY_ID,
   activeCellFilter,
   beatHasFilter,
   beatOf,
+  scenePinDisclosure,
   type CellFilter,
   type SceneMark,
 } from "../story/scenes";
@@ -69,6 +70,7 @@ import {
   SELECT_CORE_W,
   SELECT_RGB,
   colorFor,
+  gradientAvailability,
   type RGB,
   type Scale,
 } from "../viz/palette";
@@ -78,6 +80,7 @@ import type { StationOccupancy } from "../data/occupancy";
 import { stationOccAt } from "../viz/occ";
 import { DEMAND_SUPPLY_RGB, bivariateAxes, tertileClass } from "../viz/demand";
 import { themeFor, type AnalysisTheme } from "../viz/theme";
+import { clipDisclosure } from "../viz/scale-readout";
 
 interface Props {
   field: FieldMeta;
@@ -467,6 +470,26 @@ export function MapView(props: Props) {
   const simulationResult = useSimulationStore((s) => s.result);
   const placementMode = useSimulationStore((s) => s.placementMode);
   const theme = themeFor(field, demandRepresentation);
+  // Cùng đường mà cột đọc dùng để dựng nút Bậc/Gradient (`scaleControlFor` + cổng bảng màu),
+  // nên câu khai của cảnh không thể lệch khỏi câu mà workspace in cho cùng trường ấy.
+  const scalePin = sceneDef
+    ? scenePinDisclosure(sceneDef, scaleControlFor(field, gradientAvailability(theme, Boolean(field.diverge))))
+    : null;
+  /**
+   * CG-2(B) — câu khai cắt trần trong cảnh.
+   *
+   * CR 2.1 §Phase 9 mục 5 (bản sửa của re-QA Phase 7) buộc khai ở MỌI bề mặt tô một trường
+   * bị cắt, "whether or not that surface builds a legend" — và cảnh đúng là bề mặt không có
+   * legend. Cảnh 1 tô `pop_density_ppkm2` với 44 ô kẹp ở trần p99 mà trước bản này không
+   * một chữ nào nói ra.
+   *
+   * Cùng `clipDisclosure` mà legend gọi, nên hai bề mặt không thể nói hai câu khác nhau về
+   * cùng một thang.
+   */
+  const sceneClip =
+    sceneDef && scale && scale.kind === "numeric"
+      ? clipDisclosure(field, scale, unitNoun(field.readAs))
+      : null;
   useEffect(() => {
     const m = map.current;
     if (!m) return;
@@ -546,6 +569,17 @@ export function MapView(props: Props) {
           </div>
           {beat && sceneDef.beats.length > 1 && (
             <span className="text-note text-ink-muted">Nhịp: {beat.label}</span>
+          )}
+          {/* CG-1(B) — xem `scenePinDisclosure`. Cảnh không dựng legend, nên đây là chỗ DUY
+              NHẤT màn hình nói ra cách đọc mà cảnh đang áp. */}
+          <span className="text-note text-ink-muted">{scalePin}</span>
+          {/* CG-2(B) — xem `sceneClip`. Không có gì bị kẹp thì KHÔNG có dòng nào: một câu
+              "0 ô vượt trần" dạy người đọc lướt qua đúng dòng sẽ mang số thật lần sau. */}
+          {sceneClip?.over && (
+            <span className="tabular-nums text-note text-ink-2">{sceneClip.over}</span>
+          )}
+          {sceneClip?.under && (
+            <span className="tabular-nums text-note text-ink-2">{sceneClip.under}</span>
           )}
         </div>
       )}

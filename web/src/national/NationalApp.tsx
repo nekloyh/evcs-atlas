@@ -55,11 +55,14 @@ import {
   DEFAULT_NATIONAL_FIELD,
   FIELD_BY_ID,
   NATIONAL_FIELDS,
-  PROVINCE_FIELDS,
+  NORMALIZED_PROVINCE_FIELDS,
+  OTHER_PROVINCE_FIELDS,
   formatValue,
   type NationalField,
 } from "./fields";
 import { NationalMap } from "./NationalMap";
+import { comparableValues, provinceMetric, rankProvinces } from "./metrics";
+import { MISSING_HATCH_CSS, NOT_COMPARABLE_HEX } from "./visual-states";
 
 const numericValue = (value: unknown): number | null =>
   typeof value === "number" && Number.isFinite(value) ? value : null;
@@ -135,6 +138,7 @@ export default function NationalApp() {
   const [stations, setStations] = useState<NationalStation[] | null>(null);
   const [poi, setPoi] = useState<NationalPoi[] | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
   const [view, setView] = useState({ lng: 108.2, lat: 15.5, zoom: 5 });
   const [error, setError] = useState<string | null>(null);
 
@@ -218,7 +222,7 @@ export default function NationalApp() {
       if (!provinces.length || !Object.keys(rows).length) return null;
       return buildScale(
         "numeric",
-        provinces.map((f) => numericValue(rows[f.properties.province_code]?.[field.column])),
+        comparableValues(Object.values(rows), field),
         null,
         undefined,
         { contract: field.scaleContract },
@@ -230,6 +234,17 @@ export default function NationalApp() {
     });
   }, [field, provinces, rows, cells]);
 
+  const ranking = useMemo(() => rankProvinces(Object.values(rows), field), [rows, field]);
+  const provinceStates = useMemo(
+    () => Object.fromEntries(Object.values(rows).map((row) => [row.province_code, provinceMetric(row, field).state])),
+    [rows, field],
+  );
+  const comparableCount = field.unit === "province" ? ranking.filter((item) => item.rank !== null).length : 0;
+  const notComparableCount = field.unit === "province" ? ranking.filter((item) => item.state === "not-comparable").length : 0;
+  const missingCount = field.unit === "province" ? provinces.filter(
+    (feature) => provinceStates[feature.properties.province_code] === "missing" || !rows[feature.properties.province_code],
+  ).length : 0;
+
   const toggle = (id: string) =>
     setLayers((prev) => {
       const next = new Set(prev);
@@ -238,7 +253,9 @@ export default function NationalApp() {
       return next;
     });
 
-  const hoveredRow = hovered ? rows[hovered] : null;
+  const activeCode = selected ?? hovered;
+  const activeRow = activeCode ? rows[activeCode] : null;
+  const activeMetric = activeRow ? provinceMetric(activeRow, field) : null;
 
   return (
     <div className="flex h-full flex-col bg-panel text-ink">
@@ -255,7 +272,7 @@ export default function NationalApp() {
         {/* Cùng một bộ chọn với hai màn hình kia. Bản cũ ở đây là một `<select>` riêng
             nhãn "MỞ MỘT TỈNH", và nó thiếu đúng hai đường: về Hà Nội và sang POI. */}
         <div className="ml-auto">
-          <DatasetPicker />
+          <DatasetPicker readProxyCount={false} />
         </div>
         <div className="flex items-center gap-2 tracking-[0.1em]">
           <ViewButton label="2D" on={mode === "2d"} ready go={() => setMode("2d")} />
@@ -276,7 +293,7 @@ export default function NationalApp() {
         </div>
       </nav>
 
-      <Legend field={field} scale={scale} grid={grid} mode={can3d ? mode : "2d"} />
+      <Legend field={field} scale={scale} grid={grid} mode={can3d ? mode : "2d"} notComparableCount={notComparableCount} missingCount={missingCount} />
 
       <div className="flex min-h-0 flex-1">
         <main className="relative min-w-0 flex-1">
@@ -295,6 +312,8 @@ export default function NationalApp() {
             mode={can3d ? mode : "2d"}
             res={shownRes}
             hovered={hovered}
+            selected={selected}
+            provinceStates={provinceStates}
             onHoverProvince={setHovered}
             onPickProvince={(code) => switchDataset(code)}
           />
@@ -305,29 +324,63 @@ export default function NationalApp() {
           )}
           {/* Bảng đọc của tỉnh đang rê chuột. Đặt TRÊN bản đồ chứ không trong rail: nó đổi
               theo con trỏ, và mắt không rời khỏi chỗ đang chỉ để đọc một ô ở mép màn hình. */}
-          {hoveredRow && (
-            <div className="pointer-events-none absolute bottom-3 left-3 max-w-xs border border-hairline bg-panel/95 px-3 py-2 text-body">
-              <div className="text-title font-semibold">{hoveredRow.province_name}</div>
-              <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-3 tabular-nums">
-                {PROVINCE_FIELDS.slice(0, 6).map((f) => (
-                  <Row key={f.id} k={f.label} v={`${formatValue(f, hoveredRow[f.column] as number)} ${f.unit_label}`} />
-                ))}
-              </dl>
-              {typeof hoveredRow.quality_flags === "string" && hoveredRow.quality_flags && (
-                <div className="mt-1 border-t border-hairline pt-1 text-ink-muted">
-                  cờ chất lượng: {hoveredRow.quality_flags.split("|").join(" · ")}
-                </div>
+          {activeRow && activeMetric && (
+            <div className="absolute bottom-3 left-3 max-w-sm border border-hairline bg-panel/95 px-3 py-2 text-body">
+              <div className="text-title font-semibold">{activeRow.province_name}</div>
+              <div className="mt-1 tabular-nums">
+                {activeMetric.state === "value"
+                  ? `${field.label}: ${formatValue(field, activeMetric.value)} ${field.unit_label}`
+                  : activeMetric.state === "not-comparable"
+                    ? `KHÔNG SO SÁNH ĐƯỢC · ${activeMetric.reason}`
+                    : `${field.label}: không đo được`}
+              </div>
+              {selected && activeRow.in_store && (
+                <button className="mt-2 border border-hairline px-2 py-1 font-semibold hover:bg-basemap" onClick={() => switchDataset(selected)}>
+                  Mở bản đồ tỉnh →
+                </button>
               )}
             </div>
           )}
         </main>
 
         <aside className="w-72 shrink-0 overflow-y-auto border-l border-hairline text-body">
-          <Group title="CẦU · TỈNH">
-            {PROVINCE_FIELDS.map((f) => (
+          <Group title="CHỈ SỐ ĐÃ CHUẨN HOÁ">
+            {NORMALIZED_PROVINCE_FIELDS.map((f) => (
+              <FieldRow key={f.id} f={f} on={f.id === fieldId} pick={setFieldId} />
+            ))}
+            {field.kpi?.disclosure && <p className="px-3 py-2 leading-relaxed text-ink-muted">{field.kpi.disclosure}</p>}
+          </Group>
+          <Group title="CHỈ SỐ TỈNH · ĐO / MÔ TẢ">
+            {OTHER_PROVINCE_FIELDS.map((f) => (
               <FieldRow key={f.id} f={f} on={f.id === fieldId} pick={setFieldId} />
             ))}
           </Group>
+          {field.unit === "province" && (
+            <Group title="XẾP HẠNG TỈNH">
+              <p className="px-3 pb-2 text-ink-muted">
+                hạng trên {comparableCount} tỉnh so sánh được · {notComparableCount} tỉnh không so được{missingCount ? ` · ${missingCount} thiếu dữ liệu` : ""}
+              </p>
+              <ol aria-label={`Xếp hạng ${field.label}`}>
+                {ranking.map((item) => (
+                  <li key={item.row.province_code}>
+                    <button
+                      className={`grid w-full grid-cols-[2rem_1fr_auto] gap-2 px-3 py-1 text-left hover:bg-basemap ${selected === item.row.province_code ? "bg-basemap font-semibold" : ""}`}
+                      onClick={() => setSelected(item.row.province_code)}
+                      onMouseEnter={() => setHovered(item.row.province_code)}
+                      onMouseLeave={() => setHovered(null)}
+                    >
+                      <span className="tabular-nums text-ink-muted">{item.rank ?? "—"}</span>
+                      <span className="truncate" title={item.row.province_name}>{item.row.province_name}</span>
+                      <span className="tabular-nums">
+                        {item.state === "value" ? formatValue(field, item.value) : item.state === "not-comparable" ? "không so được" : "thiếu"}
+                        {field.id === "p:power_per_urban_km2" && typeof item.row.share_power_missing === "number" && item.row.share_power_missing > 0.1 ? " · chặn dưới" : ""}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </Group>
+          )}
           <Group
             title={`Ô GỘP H3 r${shownRes} · ~${(grid?.cell_km2_median ?? 36).toLocaleString("vi-VN", { maximumFractionDigits: 1 })} km²/ô`}
           >
@@ -427,15 +480,6 @@ function ViewButton({
   );
 }
 
-function Row({ k, v }: { k: string; v: string }) {
-  return (
-    <>
-      <dt className="text-ink-muted">{k}</dt>
-      <dd className="text-right">{v}</dd>
-    </>
-  );
-}
-
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="border-b border-hairline">
@@ -475,12 +519,16 @@ function Legend({
   scale,
   grid,
   mode,
+  notComparableCount,
+  missingCount,
 }: {
   field: NationalField;
   scale: Scale | null;
   /** bậc lưới ĐANG VẼ — đơn vị đọc của mọi con số ở dải này đến từ đây, không từ TS */
   grid: GridMeta | null;
   mode: NationalMode;
+  notComparableCount: number;
+  missingCount: number;
 }) {
   const { colors, inks } = scale ? rampFor(scale, field.polarity) : { colors: [], inks: [] };
   // Nhãn là CẬN DƯỚI của từng bậc, in nguyên văn — cùng hàm và cùng luật với `labelsFor`
@@ -511,16 +559,27 @@ function Legend({
             </span>
           </div>
         )}
-        {scale && scale.nNull > 0 && (
+        {scale && field.unit === "cell" && scale.nNull > 0 && (
           <div className="flex items-center gap-2 border-l border-hairline px-2 text-ink-2">
             <span
               className="h-4 w-4"
               style={{
-                backgroundImage:
-                  "repeating-linear-gradient(45deg, #898781 0 1px, transparent 1px 6px)",
+                backgroundImage: MISSING_HATCH_CSS,
               }}
             />
             không đo được ({scale.nNull.toLocaleString("vi-VN")} {noun})
+          </div>
+        )}
+        {notComparableCount > 0 && (
+          <div className="flex items-center gap-2 border-l border-hairline px-2 text-ink-2">
+            <span className="h-4 w-4" style={{ background: NOT_COMPARABLE_HEX }} />
+            không so sánh được ({notComparableCount} tỉnh)
+          </div>
+        )}
+        {missingCount > 0 && (
+          <div className="flex items-center gap-2 border-l border-hairline px-2 text-ink-2">
+            <span className="h-4 w-4" style={{ backgroundImage: MISSING_HATCH_CSS }} />
+            thiếu dữ liệu ({missingCount} tỉnh)
           </div>
         )}
       </div>

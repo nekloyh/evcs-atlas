@@ -47,7 +47,10 @@ from scipy.spatial import cKDTree
 from . import admin, paths, qa
 from .runner import Step
 
-VERSION = "5"
+VERSION = "7"
+
+# Cùng ngưỡng phục vụ đã đăng ký ở web/src/domain-thresholds.ts.
+BEYOND_2KM_M = 2_000.0
 
 # --- ngưỡng loại trừ ------------------------------------------------------
 # Đặt ở đây, có tên, có lý do — không nằm rải rác trong điều kiện if.
@@ -83,6 +86,13 @@ def _flagset(v) -> set[str]:
         if v is None or (isinstance(v, float) and pd.isna(v))
         else set(str(v).split("|")) - {""}
     )
+
+
+def _ratio(numerator: float, denominator: float, factor: float = 1.0, ndigits: int = 4):
+    """Phép chuẩn hoá tỉnh: mẫu số null/0 không bao giờ được vá thành 1."""
+    if pd.isna(denominator) or float(denominator) <= 0:
+        return None
+    return round(factor * float(numerator) / float(denominator), ndigits)
 
 
 def _national_pool() -> set[str]:
@@ -153,7 +163,7 @@ def _secondary_gap() -> dict[str, dict]:
         out[str(code)] = {
             "n_secondary": int(len(g)),
             "n_only_in_secondary": int(len(u)),
-            "share_only_in_secondary": round(float(len(u) / max(len(g), 1)), 4),
+            "share_only_in_secondary": _ratio(len(u), len(g)),
             "operators_missing": {
                 str(k): int(v) for k, v in u.operator.value_counts().head(6).items()
             },
@@ -301,7 +311,7 @@ def run() -> None:
         meas = (
             occ[occ.util_reportable & (occ.grade == "GOOD") & occ.util.notna()] if len(occ) else occ
         )
-        share_meas = float(len(meas) / max(n_st, 1))
+        share_meas = _ratio(len(meas), n_st)
 
         # --- chỉ số độ phủ POI ------------------------------------------
         if len(pc):
@@ -312,13 +322,18 @@ def run() -> None:
             )
             zero = pcx.n_poi_total == 0
             share_zero = float(zero.mean())
-            pop_zero = float(pcx.loc[zero, "population"].sum() / max(pcx.population.sum(), 1))
+            pop_zero = _ratio(
+                pcx.loc[zero, "population"].sum(),
+                pcx.population.sum(),
+            )
             share_zero_market = float((pcx.n_market == 0).mean())
             den = pcx.groupby("commune_kind").apply(
-                lambda g: g.n_poi_total.sum() / max(g.area_km2_geom.sum(), 1e-9),
+                lambda g: _ratio(g.n_poi_total.sum(), g.area_km2_geom.sum()),
                 include_groups=False,
             )
-            d_ph, d_xa = float(den.get("PHUONG", np.nan)), float(den.get("XA", np.nan))
+            raw_ph, raw_xa = den.get("PHUONG"), den.get("XA")
+            d_ph = float(raw_ph) if raw_ph is not None else np.nan
+            d_xa = float(raw_xa) if raw_xa is not None else np.nan
             bias = d_ph / d_xa if d_xa and np.isfinite(d_xa) and d_xa > 0 else np.nan
             n_poi = int(pcx.n_poi_total.sum())
         else:
@@ -331,16 +346,20 @@ def run() -> None:
             flags.append("KHONG_CO_TRAM")
         elif n_st < MIN_STATIONS:
             flags.append("QUA_IT_TRAM")
-        if share_meas < MIN_OCC_MEASURED_SHARE:
+        if share_meas is None or share_meas < MIN_OCC_MEASURED_SHARE:
             flags.append("KHONG_DO_DUOC_SU_DUNG")
         if np.isfinite(share_zero) and share_zero > POI_ZERO_COMMUNE_MAX:
             flags.append("POI_KHONG_DIEN_GIAI_DUOC")
-        pop_unreach = (
-            float(gc.loc[~gc.network_reachable, "population"].sum() / max(gc.population.sum(), 1))
-            if has_calc
-            else 0.0
+        has_distance = has_calc and {
+            "network_reachable",
+            "dist_station_network_m",
+        }.issubset(gc.columns)
+        population_grid = float(gc.population.sum()) if has_calc else np.nan
+        pop_unreachable = (
+            float(gc.loc[~gc.network_reachable, "population"].sum()) if has_distance else np.nan
         )
-        if pop_unreach > MAX_POP_UNREACHABLE:
+        pop_unreach = _ratio(pop_unreachable, population_grid) if has_distance else None
+        if pop_unreach is not None and pop_unreach > MAX_POP_UNREACHABLE:
             flags.append("DAN_KHONG_TOI_DUOC_BANG_DUONG")
         if ccm.quality_flag.notna().any():
             flags.append("DIA_GIOI_CO_SO_CONG_BO_HONG")
@@ -362,11 +381,14 @@ def run() -> None:
                 "n_stations_buffer": int((st.scope == "BUFFER").sum()),
                 "n_ports": int(ports),
                 "power_kw_site": round(kw, 1),
-                "power_kw_per_station": round(kw / max(n_st, 1), 1),
-                "ports_per_station": round(ports / max(n_st, 1), 2),
-                "stations_per_100k_pop": round(1e5 * n_st / max(int(prow.population), 1), 2),
-                "ports_per_10k_pop": round(1e4 * ports / max(int(prow.population), 1), 2),
-                "kw_per_1k_pop": round(1e3 * kw / max(int(prow.population), 1), 1),
+                "power_kw_per_station": _ratio(kw, n_st, ndigits=1),
+                "ports_per_station": _ratio(ports, n_st, ndigits=2),
+                "stations_per_100k_pop": _ratio(n_st, prow.population, 1e5, 2),
+                "ports_per_10k_pop": _ratio(ports, prow.population, 1e4, 2),
+                "kw_per_1k_pop": _ratio(kw, prow.population, 1e3, 1),
+                "n_ports_missing": int(ins.n_ports.isna().sum()),
+                "power_missing": int(ins.power_kw_site.isna().sum()),
+                "share_power_missing": _ratio(ins.power_kw_site.isna().sum(), n_st),
                 # điểm sạc cá nhân — TÍNH LẠI cho tỉnh này
                 "private_ac_share_stations": drop["share_of_stations_before"],
                 "private_ac_share_ports": drop["share_of_ports_before"],
@@ -374,7 +396,7 @@ def run() -> None:
                 "n_private_ac_dropped": drop["n_dropped_in"],
                 # đo mức sử dụng
                 "n_stations_with_occ": int(len(occ)),
-                "share_stations_measured": round(share_meas, 4),
+                "share_stations_measured": share_meas,
                 "util_median": round(float(meas.util.median()), 4) if len(meas) else None,
                 # POI
                 "n_poi_demand": n_poi,
@@ -382,12 +404,12 @@ def run() -> None:
                 "poi_visual_share_polygon": round(float(vis.geometry_wkb.notna().mean()), 4)
                 if len(vis)
                 else None,
-                "poi_per_100k_pop": round(1e5 * n_poi / max(int(prow.population), 1), 1),
+                "poi_per_100k_pop": _ratio(n_poi, prow.population, 1e5, 1),
                 "share_communes_zero_poi": round(share_zero, 4)
                 if np.isfinite(share_zero)
                 else None,
                 "pop_share_communes_zero_poi": round(pop_zero, 4)
-                if np.isfinite(pop_zero)
+                if pop_zero is not None and np.isfinite(pop_zero)
                 else None,
                 "share_communes_zero_market": round(share_zero_market, 4)
                 if np.isfinite(share_zero_market)
@@ -400,20 +422,44 @@ def run() -> None:
                 "n_only_in_secondary": sec.get("n_only_in_secondary"),
                 "share_only_in_secondary": sec.get("share_only_in_secondary"),
                 # lớp TÍNH TOÁN — vắng thì để None, không để 0 ("chưa tính" ≠ "bằng không")
-                "population_grid": round(float(gc.population.sum()), 1) if has_calc else None,
-                "pop_beyond_2km_network": int(
-                    gc.loc[gc.dist_station_network_m > 2000, "population"].sum()
+                "population_grid": round(population_grid, 1) if has_calc else None,
+                "population_within_2km": int(
+                    gc.loc[
+                        gc.network_reachable
+                        & (gc.dist_station_network_m <= BEYOND_2KM_M),
+                        "population",
+                    ].sum()
                 )
-                if has_calc
+                if has_distance
                 else None,
-                "share_pop_beyond_2km": round(
-                    float(
-                        gc.loc[gc.dist_station_network_m > 2000, "population"].sum()
-                        / max(gc.population.sum(), 1)
-                    ),
-                    4,
+                "population_access_within_2km": _ratio(
+                    gc.loc[
+                        gc.network_reachable
+                        & (gc.dist_station_network_m <= BEYOND_2KM_M),
+                        "population",
+                    ].sum(),
+                    population_grid,
                 )
-                if has_calc
+                if has_distance
+                else None,
+                "pop_beyond_2km_network": int(
+                    gc.loc[
+                        ~gc.network_reachable
+                        | (gc.dist_station_network_m > BEYOND_2KM_M),
+                        "population",
+                    ].sum()
+                )
+                if has_distance
+                else None,
+                "share_pop_beyond_2km": _ratio(
+                    gc.loc[
+                        ~gc.network_reachable
+                        | (gc.dist_station_network_m > BEYOND_2KM_M),
+                        "population",
+                    ].sum(),
+                    population_grid,
+                )
+                if has_distance
                 else None,
                 "dist_station_network_median_m": round(
                     float(gc.dist_station_network_m.median()), 1
@@ -424,11 +470,23 @@ def run() -> None:
                 if has_calc and gc.detour_ratio.notna().any()
                 else None,
                 "built_frac_mean": round(float(gc.built_frac.mean()), 4) if has_calc else None,
+                "urban_km2": round(
+                    float((gc.built_frac * gc.area_km2 * gc.area_frac).sum()), 4
+                )
+                if has_calc and {"built_frac", "area_km2", "area_frac"}.issubset(gc.columns)
+                else None,
+                "power_kw_per_urban_km2": _ratio(
+                    kw,
+                    float((gc.built_frac * gc.area_km2 * gc.area_frac).sum()),
+                    ndigits=2,
+                )
+                if has_calc and {"built_frac", "area_km2", "area_frac"}.issubset(gc.columns)
+                else None,
                 # BỐI CẢNH, không phải cờ: thấp = biển/đảo/núi trong đa giác tỉnh.
                 "share_cells_reachable": round(float(gc.network_reachable.mean()), 4)
                 if has_calc
                 else None,
-                "share_pop_unreachable": round(pop_unreach, 4) if has_calc else None,
+                "share_pop_unreachable": pop_unreach if has_distance else None,
                 "share_cells_de_xuat": round(
                     float((gc.screen_decision == "DE_XUAT").mean()), 4
                 )
@@ -587,9 +645,10 @@ def run() -> None:
         dup == 0,
         f"{dup} trạm xuất hiện với scope=IN ở nhiều hơn một tỉnh",
     )
+    missing_share = _ratio(len(missing), len(nat))
     r.check(
         "station_partitions_lose_nothing_silently",
-        len(missing) == 0 or len(missing) / max(len(nat), 1) < 0.005,
+        len(missing) == 0 or (missing_share is not None and missing_share < 0.005),
         f"Σ(IN) = {len(ids):,} / {len(nat):,} toàn quốc · "
         f"{len(missing)} trạm không thuộc đa giác tỉnh nào (đã khai báo, không im lặng)",
     )

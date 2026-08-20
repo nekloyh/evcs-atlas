@@ -21,13 +21,13 @@ test("vắng khoá `tinh` là bộ Hà Nội gốc, đường dẫn không tiề
   assert.equal(pathIn(null, "grid_h3_r8.parquet"), "grid_h3_r8.parquet");
 });
 
-test("mọi hash `tinh` đều quay về Hà Nội", () => {
-  for (const value of ["01", "79", "vn", "poi", "xx", "999", "01;drop"]) {
-    assert.deepEqual(parseDataset(`#tinh=${encodeURIComponent(value)}`), {
-      province: null,
-      national: false,
-      proxy: false,
-    });
+test("bốn nhánh dataset loại trừ nhau", () => {
+  assert.deepEqual(parseDataset("#tinh=01"), { province: "01", national: false, proxy: false });
+  assert.deepEqual(parseDataset("#tinh=79"), { province: "79", national: false, proxy: false });
+  assert.deepEqual(parseDataset("#tinh=vn"), { province: null, national: true, proxy: false });
+  assert.deepEqual(parseDataset("#tinh=poi"), { province: null, national: false, proxy: true });
+  for (const value of ["xx", "999", "01;drop"]) {
+    assert.deepEqual(parseDataset(`#tinh=${encodeURIComponent(value)}`), { province: null, national: false, proxy: false });
   }
 });
 
@@ -46,9 +46,9 @@ test("đổi tỉnh là đổi ĐƯỜNG DẪN, không phải đổi tên file",
   }
 });
 
-test("khoá khác trong hash không làm thay đổi bộ Hà Nội", () => {
+test("khoá khác trong hash không làm thay đổi tỉnh", () => {
   assert.deepEqual(parseDataset("#f=population&tinh=48&c=8a65&m=3d"), {
-    province: null,
+    province: "48",
     national: false,
     proxy: false,
   });
@@ -59,12 +59,12 @@ test("khoá khác trong hash không làm thay đổi bộ Hà Nội", () => {
 // Nó có test riêng vì lỗi ở đây KHÔNG nổ: bộ chọn chỉ đứng sai chỗ. Một ô ghi "Hà Nội"
 // trong khi màn hình là POI thì thứ duy nhất nói ta đang ở đâu lại đang nói sai.
 
-test("currentDataset luôn là bộ Hà Nội", () => {
+test("currentDataset phản chiếu đúng route", () => {
   assert.equal(currentDataset(""), "");
   assert.equal(currentDataset("#f=population&m=3d"), "");
-  assert.equal(currentDataset("#tinh=79"), "");
-  assert.equal(currentDataset("#tinh=vn"), "");
-  assert.equal(currentDataset("#tinh=poi&tap=poi_chungcu"), "");
+  assert.equal(currentDataset("#tinh=79"), "79");
+  assert.equal(currentDataset("#tinh=vn"), "vn");
+  assert.equal(currentDataset("#tinh=poi&tap=poi_chungcu"), "poi");
 });
 
 test("mã hỏng cho cùng một giá trị với bộ mặc định — bộ chọn không được đứng ở một dòng ma", () => {

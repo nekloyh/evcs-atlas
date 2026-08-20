@@ -5,6 +5,7 @@ import { BeatBody, renderClaim } from "./StorySurface";
 import { beatOf, renderableScenes, storyContext, type SceneId } from "./scenes";
 import type { ResolveContext, StoryPackage } from "./resolve";
 import type { ClaimTemplate } from "./spec";
+import type { Scale } from "../viz/palette";
 import { Para } from "./parts";
 
 /**
@@ -20,7 +21,22 @@ import { Para } from "./parts";
  * hỏng im lặng (danh sách cặp tuyến biến mất hẳn vì state cục bộ được gieo từ một prop
  * không bao giờ nullish).
  */
-export function StoryColumn({ pkg }: { pkg: StoryPackage }) {
+export function StoryColumn({
+  pkg,
+  occScale,
+}: {
+  pkg: StoryPackage;
+  /**
+   * Thang của `station:occ` — CHÍNH object mà `App` dựng cho bản đồ, dock và panel (CR 4.1
+   * §"exact scale object identity"). Cảnh là người dùng thứ TƯ của nó, không phải chủ của
+   * một bản thứ hai.
+   *
+   * Nó đi kèm props chứ không nằm trong `StoryPackage`: gói là DỮ LIỆU cảnh đọc, thang là
+   * một quyết định MÃ HOÁ. Trộn hai thứ thì `resolve.ts` — nơi được viết để không biết gì
+   * về màu — sẽ phải mang một kiểu của `viz/`.
+   */
+  occScale: Scale | null;
+}) {
   const scene = useStore((s) => s.scene);
   const beatId = useStore((s) => s.beat);
   const enterScene = useStore((s) => s.enterScene);
@@ -272,7 +288,7 @@ export function StoryColumn({ pkg }: { pkg: StoryPackage }) {
                 </div>
               )}
 
-              <BeatBody beat={beat} ctx={storyContext(s.id)} loading={pendingLabel(s.id, pkg)} />
+              <BeatBody beat={beat} ctx={storyContext(s.id)} occScale={occScale} loading={pendingLabel(s.id, pkg)} />
             </div>
           </section>
         );

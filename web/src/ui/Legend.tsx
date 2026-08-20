@@ -28,27 +28,8 @@ import {
   type Scale,
 } from "../viz/palette";
 import { formatIn, formatSeries, scaleUnit, withDigits, type ScaledUnit } from "../units";
+import { clipDisclosure, scaleOf, type ClipDisclosure } from "../viz/scale-readout";
 import { DEMAND_SUPPLY_RGB, type BivariateAxes } from "../viz/demand";
-
-/**
- * Thang đơn vị của ramp đang hiện — chọn MỘT lần theo giá trị lớn nhất của thang.
- *
- * Gọi `scaleUnit` riêng cho từng ngưỡng sẽ cho ra một dải hai đơn vị (`0 · 320 · 850 ·
- * 1,4 km`), tức là bắt mắt quy đổi ngay giữa hai swatch cạnh nhau. Ngưỡng cuối là một
- * khoảng MỞ nên độ lớn thật nằm ở `max`, không ở `breaks` cuối — dùng `breaks` cuối sẽ
- * chọn thang mét cho một dải chạy tới 12 km.
- */
-function scaleOf(field: FieldMeta, s: Scale | null): ScaledUnit {
-  if (!s || s.kind !== "numeric") return scaleUnit(field.unit, 0);
-  // `max` quyết định ĐƠN VỊ (một dải chạy tới 21 km thì phải là km), nhưng KHÔNG được
-  // quyết định số chữ số: nó là giá trị của một bậc MỞ, thường vượt xa mọi ngưỡng —
-  // `dist_station_network_m` có ngưỡng cao nhất 4,3 km còn `max` là 21,2. Cho nó vào phép
-  // chọn chữ số thì cả dải bị kéo về số nguyên, rồi từng ngưỡng phải nâng lẻ tẻ để khỏi
-  // trùng nhau: `0 · 1 · 1,6 · 2,04 · 2,6 · 3,3 · 4`. Chọn theo NGƯỠNG cho `0 · 1 · 1,6 ·
-  // 2 · 2,6 · 3,3 · 4,3`, và `max` vẫn in được trong cùng thang ấy.
-  const magnitude = s.max ?? s.breaks[s.breaks.length - 1] ?? 0;
-  return withDigits(scaleUnit(field.unit, magnitude), s.breaks);
-}
 
 /**
  * Dải legend ngang — DESIGN.md §3b: swatch dán sát nhau không gap, giá trị in ĐÈ LÊN
@@ -221,6 +202,12 @@ export function Legend({
   const { colors, inks } = scale ? rampFor(scale, field.polarity, theme) : { colors: [], inks: [] };
   const labels = scale ? labelsFor(scale, field) : [];
   const noun = unitNoun(field.readAs);
+  // Danh từ GIỮ NGUYÊN `"ô"`, kể cả khi trường đọc theo xã/đoạn/trạm — đây là chữ đã QA và
+  // bản này không đổi nó. Badge cảnh truyền danh từ thật (`unitNoun`), nên hai bề mặt lệch
+  // nhau đúng MỘT từ, có chủ ý và có test gác. Đổi ở đây là đổi một bề mặt đã chốt.
+  const clip = scale && scale.kind === "numeric"
+    ? clipDisclosure(field, scale, "ô")
+    : { over: null, under: null };
   const cov = coverageOf(field, manifest, runtime);
   // Tổng null tách làm hai. `n_not_applicable` đo lúc chạy (§7c: không gõ tay con số nào);
   // thiếu nó thì tất cả về nhóm "không biết" — thà nói ít hơn là nói sai.
@@ -266,16 +253,7 @@ export function Legend({
             {scale.diverge && " · cao = xa mốc"}
           </div>
         )}
-        {scale.domain.nClippedHigh > 0 && (
-          <div className="w-full tabular-nums text-note text-ink-2">
-            ▲ {scale.domain.nClippedHigh.toLocaleString("vi-VN")} ô vượt trần · lớn nhất {formatIn(scale.domain.max, scaleOf(field, scale))}
-          </div>
-        )}
-        {scale.domain.nClippedLow > 0 && (
-          <div className="w-full tabular-nums text-note text-ink-2">
-            ▼ {scale.domain.nClippedLow.toLocaleString("vi-VN")} ô dưới sàn · nhỏ nhất {formatIn(scale.domain.min, scaleOf(field, scale))}
-          </div>
-        )}
+        <ClipLines clip={clip} className="w-full" />
         {plan.coarse && (
           <button
             onClick={() => setView({ ...view, zoom: HEX_MIN_ZOOM })}
@@ -341,6 +319,7 @@ export function Legend({
         {mode === "3d" && field.readAs === "cell" && scale?.kind === "numeric" && (
           <ElevationDisclosure field={field} scale={scale} />
         )}
+        <ClipLines clip={clip} />
         {plan.coarse && (
           <button
             onClick={() => setView({ ...view, zoom: HEX_MIN_ZOOM })}
@@ -461,6 +440,7 @@ export function Legend({
       {mode === "3d" && field.readAs === "cell" && scale?.kind === "numeric" && (
         <div className="flex items-center px-3"><ElevationDisclosure field={field} scale={scale} /></div>
       )}
+      <ClipLines clip={clip} className="justify-center px-3" />
       <div className="flex items-center gap-2 px-3 text-ink-2">
         {/* Ô nhỏ hơn mức đọc được từng bậc màu — §13a-1 vẫn đúng, chỉ hình phạt là đổi
             (M5.1): trước đây không vẽ gì, giờ vẫn vẽ nhưng NÓI RA rằng đang đọc thô. Bấm
@@ -500,6 +480,25 @@ export function Legend({
             ` · ${pct(cov.pop_share)} dân`}
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * Hai dòng khai cắt trần/cắt sàn — MỘT chỗ dựng, ba nhánh render cùng gọi.
+ *
+ * Trước bản này chúng nằm trong nhánh return sớm của chế độ GRADIENT, nên bản đồ BẬC — chế
+ * độ mặc định của app — không khai gì, dù nó bị cắt y hệt: `applyScaleMode` chỉ lật `mode`,
+ * `domain` giữ nguyên, nên `nClippedHigh` ở hai chế độ là một số. Đó đúng là điều mà CR 2.1
+ * §Phase 9 mục 5 (bản sửa của re-QA Phase 7) cấm: khai gắn vào việc TÔ, không gắn vào việc
+ * bề mặt ấy dựng loại legend nào.
+ */
+function ClipLines({ clip, className }: { clip: ClipDisclosure; className?: string }) {
+  if (!clip.over && !clip.under) return null;
+  return (
+    <div className={`flex flex-col gap-0.5 tabular-nums text-note text-ink-2 ${className ?? ""}`}>
+      {clip.over && <span>{clip.over}</span>}
+      {clip.under && <span>{clip.under}</span>}
     </div>
   );
 }

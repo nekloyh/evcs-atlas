@@ -70,14 +70,14 @@
       "hanoi": 0.9519
     },
     "do_tan_share_pop_beyond_2km": {
-      "min": 0.1816,
+      "min": 0.1825,
       "min_province": "Thành phố Hồ Chí Minh",
-      "p25": 0.6149,
-      "median": 0.6809,
-      "p75": 0.7566,
-      "max": 0.8302,
+      "p25": 0.6152,
+      "median": 0.6856,
+      "p75": 0.7883,
+      "max": 0.8689,
       "max_province": "Tỉnh Tuyên Quang",
-      "hanoi": 0.2885
+      "hanoi": 0.2896
     },
     "do_tan_dist_station_network_median_m": {
       "min": 2322.1,
