@@ -15,12 +15,13 @@ import maplibregl from "maplibre-gl";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import { H3HexagonLayer } from "@deck.gl/geo-layers";
 import { GeoJsonLayer, IconLayer, ScatterplotLayer } from "@deck.gl/layers";
-import { AmbientLight, DirectionalLight, LightingEffect, type Layer } from "@deck.gl/core";
+import type { Layer } from "@deck.gl/core";
 
 import { loadStyle } from "../map/positron";
 import { elevationFor, maxElevFor } from "./elevation";
 import type { NationalMode } from "./hash";
-import { HATCH_RGB, classOf, rampFor, type RGB, type Scale } from "../viz/palette";
+import { HATCH_RGB, colorFor, type RGB, type Scale } from "../viz/palette";
+import { EXTRUSION_MATERIAL, NATIONAL_LIGHTING } from "../viz/lighting";
 import { buildPoiIconAtlas, iconId, type IconEntry } from "../viz/poi-icons";
 import type { NationalField } from "./fields";
 import type {
@@ -33,6 +34,8 @@ import type {
 
 type RGBA = [number, number, number, number];
 const rgba = (c: RGB, a: number): RGBA => [c[0], c[1], c[2], a];
+const numericValue = (value: unknown): number | null =>
+  typeof value === "number" && Number.isFinite(value) ? value : null;
 
 /**
  * Ánh sáng của chế độ 3D — MỘT nguồn hướng dốc + nền sáng mạnh, đổ bóng NHẸ.
@@ -75,17 +78,6 @@ const rgba = (c: RGB, a: number): RGBA => [c[0], c[1], c[2], a];
  * Hằng số ở module chứ không dựng lại mỗi lần render: `LightingEffect` mang theo shadow map,
  * dựng lại nó mỗi frame là dựng lại texture đó.
  */
-const LIGHTING = new LightingEffect({
-  ambient: new AmbientLight({ color: [255, 255, 255], intensity: 1.26 }),
-  sun: new DirectionalLight({
-    color: [255, 255, 255],
-    intensity: 0.25,
-    direction: [-0.45, 0.6, -1.15],
-    _shadow: true,
-  }),
-});
-LIGHTING.shadowColor = [0, 0, 0, 0.14];
-
 /** Mực của ranh giới tỉnh — nét mảnh, không phải một lớp mang dữ liệu. */
 const BORDER_RGB: RGB = [120, 118, 112];
 const STATION_RGB: RGB = [24, 24, 24];
@@ -232,18 +224,13 @@ export function NationalMap(props: NationalMapProps) {
     // ở hash, nhưng lớp vẽ cũng phải tự chặn — hai chỗ đọc cùng một luật thì chỗ nào cũng
     // phải đúng một mình.
     const is3d = mode === "3d" && !paintProvince;
-    // Màu ĐÃ áp cực tính — cùng một hàm mà legend gọi, nên bản đồ không thể lệch với chú
-    // giải của chính nó.
-    //
-    // Bản đầu dùng `colorFor()`, và đó là một lỗi im lặng: `colorFor` đi thẳng qua
-    // `scaleColors` và **không biết gì về cực tính**. Với trường `high-good` (cổng trên 10
-    // nghìn dân, số trạm, trạm đo được mức sử dụng) legend đảo thang còn bản đồ thì không —
-    // hai thứ nói ngược nhau về cùng một tỉnh, và không có lỗi nào để nhìn thấy.
-    const ramp = scale ? rampFor(scale, field.polarity).colors : [];
+    // Cùng một `colorFor` mà legend dùng; giá trị không hữu hạn đi vào nhánh null thay vì
+    // bị ép thành một đầu của thang.
     const colorOf = (v: unknown): RGBA | null => {
       if (!scale) return null;
-      const k = classOf(v as number, scale);
-      return k === null ? null : rgba(ramp[k] ?? ramp[ramp.length - 1]!, 255);
+      const value = numericValue(v);
+      const color = value === null ? null : colorFor(value, scale);
+      return color ? rgba(color, 255) : null;
     };
 
     // ── mặt tô — ĐÚNG MỘT, cùng ràng buộc 2 của bậc tỉnh (§6b) ────────────────
@@ -293,12 +280,12 @@ export function NationalMap(props: NationalMapProps) {
           // không lệch thấy được, còn 9,8 nghìn ô dựng chính xác từng đỉnh là chi phí thật.
           extruded: is3d,
           getElevation: (d: NationalCell) =>
-            elevationFor(d[field.column] as number, scale, maxElevFor(res)),
+            elevationFor(numericValue(d[field.column]), scale, maxElevFor(res)),
           // Vật liệu MỜ: tắt hẳn đốm bóng loáng (`specularColor` đen, `shininess` 1). Một
           // vệt sáng chạy trên nóc khối là thứ mắt đọc thành *dữ liệu* — nó nhấn đúng những
           // ô nằm về phía nguồn sáng, mà hướng nguồn sáng thì không có trong legend. Vẫn
           // giữ `diffuse` để mặt bên tối hơn mặt trên: đó mới là thứ làm khối đọc ra khối.
-          material: { ambient: 0.7, diffuse: 0.55, shininess: 1, specularColor: [0, 0, 0] },
+          material: EXTRUSION_MATERIAL,
           filled: true,
           stroked: false,
           pickable: true,
@@ -307,10 +294,10 @@ export function NationalMap(props: NationalMapProps) {
             // Ô không đo được: VÂN xám và **cao 0** (xem `elevationFor`). Hai kênh nói cùng
             // một câu, và ở 3D câu đó phải là "không có gì để dựng lên", không phải "dựng
             // lên bằng 0" — nên nó nằm phẳng dưới chân mọi ô có đo.
-            return c ? ([c[0], c[1], c[2], 225] as RGBA) : rgba(HATCH_RGB, 70);
+            return c ? ([c[0], c[1], c[2], is3d ? 255 : 225] as RGBA) : rgba(HATCH_RGB, 70);
           },
           updateTriggers: {
-            getFillColor: [field.id, scale],
+            getFillColor: [field.id, scale, is3d],
             // `mode` phải có mặt: `extruded` đổi nhưng `getElevation` thì deck.gl không tự
             // biết là đã đổi, và một layer đùn với chiều cao cũ là một bản đồ nói dối.
             getElevation: [field.id, scale, mode, res],
@@ -395,7 +382,7 @@ export function NationalMap(props: NationalMapProps) {
       layers: out,
       // Ánh sáng chỉ bật ở 3D. Ở 2D không có mặt bên nào để chiếu, và một `LightingEffect`
       // treo sẵn vẫn tốn một lượt dựng shadow map mỗi frame.
-      effects: is3d ? [LIGHTING] : [],
+      effects: is3d ? [NATIONAL_LIGHTING] : [],
       getTooltip: ({ object, layer }: { object?: unknown; layer?: { id: string } | null }) =>
         tooltip(object, layer?.id, field, rows),
     });

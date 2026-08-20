@@ -68,11 +68,12 @@ import {
   SELECT_CASING_W,
   SELECT_CORE_W,
   SELECT_RGB,
-  classOf,
-  rampFor,
+  colorFor,
   type RGB,
   type Scale,
 } from "../viz/palette";
+import { elevationFor, MAX_ELEV_R8_M } from "../national/elevation";
+import { EXTRUSION_MATERIAL, PROVINCE_LIGHTING } from "../viz/lighting";
 import type { StationOccupancy } from "../data/occupancy";
 import { stationOccAt } from "../viz/occ";
 import { DEMAND_SUPPLY_RGB, bivariateAxes, tertileClass } from "../viz/demand";
@@ -136,6 +137,7 @@ function splitStateOf(field: FieldMeta, c: { reachable?: boolean | null }): Null
 }
 
 const rgba = (c: RGB, a: number) => [c[0], c[1], c[2], a] as [number, number, number, number];
+const FAIL_VISIBLE_RGB: RGB = [255, 0, 255];
 
 /**
  * Lớp SÔNG HỒNG của cảnh C — DESIGN.md §2a (lời hẹn từ M1.1) và §14b.
@@ -506,6 +508,7 @@ export function MapView(props: Props) {
       // là deck nuốt luôn onClick cấp Deck — lớp ô phủ kín tỉnh nên cú bấm đặt trạm
       // không bao giờ tới lượt nếu còn lớp nào pickable.
       layers: placementMode ? built.map((l) => l.clone({ pickable: false })) : built,
+      effects: mode === "3d" ? [PROVINCE_LIGHTING] : [],
       getCursor: placementMode
         ? () => "crosshair"
         : ({ isDragging, isHovering }: { isDragging: boolean; isHovering: boolean }) =>
@@ -1004,12 +1007,6 @@ export function assertUniqueLayerIds(layers: Layer[]): void {
 
 // ── Mặt tô: ô H3 ───────────────────────────────────────────────────────────────
 
-/** Chiều cao của H3 3D phải mã hoá measure đang chọn, không phải cột dân số phụ trợ. */
-const elevationForCell = (c: GridCell): number => {
-  const value = typeof c.value === "number" && Number.isFinite(c.value) ? Math.max(0, c.value) : 0;
-  return Math.min(2500, Math.sqrt(value) * 35 + (value > 0 ? 20 : 0));
-};
-
 function hexLayers(
   cells: GridCell[],
   scale: Scale,
@@ -1034,12 +1031,12 @@ function hexLayers(
     const missing = kept.filter(
       (c) => blank(c) && !["NOT_APPLICABLE", "FILTERED"].includes(splitStateOf(field, c)),
     );
-    const { colors } = rampFor(scale, field.polarity, theme);
     const common = {
       getHexagon: (d: GridCell) => d.h3,
       extruded: is3d,
-      getElevation: elevationForCell,
+      getElevation: (d: GridCell) => elevationFor(d.value, scale, MAX_ELEV_R8_M),
       elevationScale: is3d ? 1 : 0,
+      material: EXTRUSION_MATERIAL,
       stroked: false,
       filled: true,
       pickable: true,
@@ -1054,11 +1051,10 @@ function hexLayers(
         id: "grid-filtered-value",
         data: valued,
         getFillColor: (d) => {
-          const k = classOf(d.value, scale);
-          // `valued` không chứa null; magenta chỉ là fail-visible cho mismatch scale.
-          return rgba(k === null ? ([255, 0, 255] as RGB) : colors[k]!, 217);
+          const color = colorFor(d.value, scale, theme);
+          return rgba(color ?? FAIL_VISIBLE_RGB, is3d ? 255 : 217);
         },
-        updateTriggers: { getFillColor: [scale, theme] },
+        updateTriggers: { getFillColor: [scale, theme, is3d], getElevation: [scale] },
       }),
       new H3HexagonLayer<GridCell>({
         ...common,
@@ -1104,12 +1100,12 @@ function hexLayers(
     }
   }
 
-  const { colors } = rampFor(scale, field.polarity, theme);
   const common = {
     getHexagon: (d: GridCell) => d.h3,
     extruded: is3d,
-    getElevation: elevationForCell, // xem ghi chú ở `grid-filtered` — `undefined` giết lớp
+    getElevation: (d: GridCell) => elevationFor(d.value, scale, MAX_ELEV_R8_M),
     elevationScale: is3d ? 1 : 0,
+    material: EXTRUSION_MATERIAL,
     stroked: false,
     filled: true,
     pickable: true,
@@ -1125,12 +1121,10 @@ function hexLayers(
       id: "grid-value",
       data: valued,
       getFillColor: (d) => {
-        const k = classOf(d.value, scale);
-        // classOf chỉ trả null khi không có giá trị — mà lớp này không chứa ô nào như vậy.
-        // Nếu tới đây thì là bug, và nó phải nhìn thấy được.
-        return rgba(k === null ? ([255, 0, 255] as RGB) : colors[k]!, 217);
+        const color = colorFor(d.value, scale, theme);
+        return rgba(color ?? FAIL_VISIBLE_RGB, is3d ? 255 : 217);
       },
-      updateTriggers: { getFillColor: [scale, theme] },
+      updateTriggers: { getFillColor: [scale, theme, is3d], getElevation: [scale] },
     }),
     // Ô null giữ VÂN của nó: chất liệu nói "không đo được". Một ô bị SUBSET loại không tới
     // được đây — nó đã bị loại khỏi `data` ở tầng App (§2.1), không tô xám ở tầng vẽ.
@@ -1166,7 +1160,6 @@ function communeLayers(
   scale: Scale,
   theme?: AnalysisTheme,
 ): Layer[] {
-  const { colors } = rampFor(scale, field.polarity, theme);
   const valueOf = (f: { properties: Record<string, unknown> }) =>
     f.properties[field.column] as number | string | boolean | null;
 
@@ -1200,10 +1193,10 @@ function communeLayers(
       lineWidthMinPixels: 0.5,
       getFillColor: (f: unknown) => {
         const v = valueOf(f as { properties: Record<string, unknown> });
-        const k = classOf(v, scale);
+        const color = colorFor(v, scale, theme);
         // Xã không có giá trị: KHÔNG tô nhạt. Nó được lớp gạch chéo bên dưới lo (ràng buộc 1).
-        if (k === null) return [0, 0, 0, 0];
-        return rgba(colors[k]!, 217);
+        if (color === null) return [0, 0, 0, 0];
+        return rgba(color, 217);
       },
       updateTriggers: { getFillColor: [scale, field.id, theme] },
     }),
@@ -1266,7 +1259,6 @@ function roadLayers(
   const missing: RoadSeg[] = [];
   for (const r of roads) (r.dist === null ? missing : valued).push(r);
 
-  const { colors } = rampFor(scale, field.polarity, theme);
   const w = roadWidth(zoom);
   const common = {
     getPath: (d: RoadSeg) => d.path,
@@ -1295,11 +1287,11 @@ function roadLayers(
       id: "road-value",
       data: valued,
       getColor: (d) => {
-        const k = classOf(d.dist, scale);
-        return rgba(k === null ? ([255, 0, 255] as RGB) : colors[k]!, 235);
+        const color = colorFor(d.dist, scale, theme);
+        return rgba(color ?? FAIL_VISIBLE_RGB, 235);
       },
       getWidth: w,
-      updateTriggers: { getColor: [scale, field.polarity, theme] },
+      updateTriggers: { getColor: [scale, field.id, theme] },
     }),
   ];
 }
@@ -1326,7 +1318,6 @@ function stationPortsLayers(
   theme?: AnalysisTheme,
 ): Layer[] {
   const r = stationFieldRadius(zoom);
-  const { colors } = rampFor(scale, field.polarity, theme);
   const known = stations.filter((s) => s.nPorts !== null);
   const missing = stations.filter((s) => s.nPorts === null);
   const common = {
@@ -1359,12 +1350,12 @@ function stationPortsLayers(
       filled: true,
       stroked: true,
       getFillColor: (d) => {
-        const k = classOf(d.nPorts, scale);
-        return rgba(k === null ? ([255, 0, 255] as RGB) : colors[k]!, 235);
+        const color = colorFor(d.nPorts, scale, theme);
+        return rgba(color ?? FAIL_VISIBLE_RGB, 235);
       },
       getLineColor: rgba(BASEMAP_RGB, 255),
       getLineWidth: 1,
-      updateTriggers: { getFillColor: [scale], getRadius: r },
+      updateTriggers: { getFillColor: [scale, field.id, theme], getRadius: r },
     }),
   ];
 }
@@ -1400,7 +1391,6 @@ function stationFieldLayers(
   // Cùng luật co theo mức phóng với overlay trạm (§4d-1): mọi chấm co cùng nhau nên không
   // chấm nào nói gì khác chấm nào.
   const r = stationFieldRadius(zoom);
-  const { colors } = rampFor(scale, field.polarity, theme);
 
   interface Dot {
     lng: number;
@@ -1457,14 +1447,14 @@ function stationFieldLayers(
       filled: true,
       stroked: true,
       getFillColor: (d) => {
-        const k = classOf(d.value, scale);
-        return rgba(k === null ? ([255, 0, 255] as RGB) : colors[k]!, 235);
+        const color = colorFor(d.value, scale, theme);
+        return rgba(color ?? FAIL_VISIBLE_RGB, 235);
       },
       // Vòng viền màu SURFACE để tách chấm khỏi chấm bên cạnh ở nội đô — nó không mang
       // thông tin nào, đúng vai đã định ở §4d.
       getLineColor: rgba(BASEMAP_RGB, 255),
       getLineWidth: 1,
-      updateTriggers: { getFillColor: [scale, t], getRadius: r },
+      updateTriggers: { getFillColor: [scale, t, field.id, theme], getRadius: r },
     }),
   ];
 }

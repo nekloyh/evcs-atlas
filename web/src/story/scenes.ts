@@ -38,6 +38,7 @@ export const SCENES: readonly SceneSpec[] = [
   // ── 1 ─────────────────────────────────────────────────────────────────────
   {
     id: "von-cuc",
+    scaleMode: "binned",
     kicker: "LUẬN ĐIỂM A",
     title: "Cầu không trải đều",
     lens: "demand",
@@ -277,6 +278,7 @@ export const SCENES: readonly SceneSpec[] = [
   // ── 2 ─────────────────────────────────────────────────────────────────────
   {
     id: "cung-lech",
+    scaleMode: "binned",
     kicker: "LUẬN ĐIỂM B",
     title: "Cung không đi theo cầu",
     lens: "supply",
@@ -467,6 +469,7 @@ export const SCENES: readonly SceneSpec[] = [
   // ── 3 ─────────────────────────────────────────────────────────────────────
   {
     id: "di-vong",
+    scaleMode: "binned",
     kicker: "LUẬN ĐIỂM C",
     title: "Thước đo phải theo mạng đường",
     lens: "access",
@@ -659,6 +662,7 @@ export const SCENES: readonly SceneSpec[] = [
   // ── 4 ─────────────────────────────────────────────────────────────────────
   {
     id: "ngoai-2km",
+    scaleMode: "binned",
     kicker: "LUẬN ĐIỂM D",
     title: "Những người ngoài bán kính",
     lens: "opportunity",
@@ -822,6 +826,7 @@ export const SCENES: readonly SceneSpec[] = [
   // ── 5 ─────────────────────────────────────────────────────────────────────
   {
     id: "nhip-tuan",
+    scaleMode: "binned",
     kicker: "LUẬN ĐIỂM E",
     title: "Nhịp của một tuần",
     lens: "utilization",
@@ -957,6 +962,7 @@ export const SCENES: readonly SceneSpec[] = [
   // ── 6 ─────────────────────────────────────────────────────────────────────
   {
     id: "mot-quyet-dinh",
+    scaleMode: "binned",
     kicker: "LUẬN ĐIỂM F",
     title: "Con số lớn nhất là một quyết định",
     lens: "supply",
@@ -1101,6 +1107,7 @@ export const SCENES: readonly SceneSpec[] = [
   // ── 7 ─────────────────────────────────────────────────────────────────────
   {
     id: "chua-biet",
+    scaleMode: "binned",
     kicker: "CẢNH KẾT",
     title: "Ba điều ta không biết",
     lens: "supply",
@@ -1471,7 +1478,7 @@ export function sceneState(id: SceneId, beatId?: string | null): SceneState {
     t = typeof argmax === "number" && Number.isFinite(argmax) ? argmax : null;
   }
 
-  return { field: beat.field, view, layers: [...s.layers], select, t };
+  return { field: beat.field, scaleMode: s.scaleMode, view, layers: [...s.layers], select, t };
 }
 
 // ── Bộ lọc ô của nhịp ───────────────────────────────────────────────────────

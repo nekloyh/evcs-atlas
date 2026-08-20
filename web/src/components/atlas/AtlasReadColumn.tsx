@@ -9,6 +9,7 @@ import {
   hasDemandRepresentations,
   lensOfField,
   mapFieldsOfLens,
+  scaleControlFor,
   unitNoun,
   type FieldMeta,
   type LensId,
@@ -26,7 +27,8 @@ import { QuickPresets } from "../../ui/QuickPresets";
 import { SearchBar } from "../../ui/SearchBar";
 import { SourceBlock } from "../../ui/Source";
 import type { BivariateAxes } from "../../viz/demand";
-import type { Scale } from "../../viz/palette";
+import { gradientAvailability, type Scale } from "../../viz/palette";
+import { themeFor } from "../../viz/theme";
 import { selectionKindLabel } from "./EvidenceSection";
 import { ReadColumn } from "./ReadColumn";
 import {
@@ -110,6 +112,9 @@ export function AtlasReadColumn({
   const layers = useStore((s) => s.layers);
   const toggleLayer = useStore((s) => s.toggleLayer);
   const switchLens = useStore((s) => s.switchLens);
+  const scaleMode = useStore((s) => s.scaleMode);
+  const setScaleMode = useStore((s) => s.setScaleMode);
+  const demandRepresentation = useStore((s) => s.demandRepresentation);
   const open = useStore((s) => s.readColumnOpen);
   const setOpen = useStore((s) => s.setReadColumnOpen);
 
@@ -126,6 +131,11 @@ export function AtlasReadColumn({
         : `${nNull.toLocaleString("vi-VN")}/${nTotal.toLocaleString("vi-VN")} ${noun} không có giá trị: chúng vẽ vân chéo xám, không tô bậc nhạt. Vắng số ≠ bằng 0.`;
   const selectedKind = selectionKindLabel(cell);
   const activeLens = lensOfField(field.id);
+  const scaleControl = scaleControlFor(
+    field,
+    gradientAvailability(themeFor(field, demandRepresentation), Boolean(field.diverge)),
+  );
+  const effectiveScaleMode = scaleControl.gradientDisabled ? "binned" : scaleMode;
 
   return (
     <ReadColumn
@@ -183,6 +193,29 @@ export function AtlasReadColumn({
               </span>
             </div>
             {phrase && <p className="mt-0.5 text-note text-ink-muted">{phrase}</p>}
+            <div className="mt-2 flex items-center gap-1" role="radiogroup" aria-label="Kiểu thang màu">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={effectiveScaleMode === "binned"}
+                onClick={() => setScaleMode("binned")}
+                className={`rounded-xs border px-1.5 py-0.5 text-note ${effectiveScaleMode === "binned" ? "border-ink bg-basemap font-semibold text-ink" : "border-hairline text-ink-2"}`}
+              >
+                Bậc
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={effectiveScaleMode === "gradient"}
+                disabled={scaleControl.gradientDisabled}
+                title={scaleControl.reason ?? "Dải màu liên tục từ cùng bảng màu"}
+                onClick={() => setScaleMode("gradient")}
+                className={`rounded-xs border px-1.5 py-0.5 text-note ${effectiveScaleMode === "gradient" ? "border-ink bg-basemap font-semibold text-ink" : "border-hairline text-ink-2"} disabled:cursor-not-allowed disabled:opacity-40`}
+              >
+                Gradient
+              </button>
+              {scaleControl.reason && <span className="truncate text-note text-ink-muted" title={scaleControl.reason}>· {scaleControl.reason}</span>}
+            </div>
             {paintOn && hasDemandRepresentations(field) && <div className="mt-3"><DemandModes /></div>}
           </>
         ),

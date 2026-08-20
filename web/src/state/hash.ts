@@ -103,6 +103,10 @@ export function parseHash(hash: string): Partial<HashState> {
   const m = p.get("m");
   if (m && MODES.includes(m)) out.mode = m as Mode;
 
+  // `sc`: only the exact compact value `g` enables the continuous ramp. Missing and
+  // unknown values both preserve the QA'd binned default.
+  out.scaleMode = scene ? "binned" : p.get("sc") === "g" ? "gradient" : "binned";
+
   // Khoá `c` mang MỘT đối tượng: ô (`h3_r8`), trạm (`station:<id>`), hoặc xã (`commune:<mã 5 số>`).
   // Chỉ kiểm HÌNH DẠNG; đối tượng không có thật bị bỏ khi truy vấn trả rỗng.
   const c = p.get("c");
@@ -217,7 +221,7 @@ export function serializeHash(s: HashState, prev = ""): string {
     // primary surface cùng lúc.
     const national = params(prev);
     national.set(PROVINCE_KEY, NATIONAL);
-    for (const key of ["s", "d", "v", "p", "c", "t", "b", "sim"]) national.delete(key);
+    for (const key of ["s", "d", "v", "p", "c", "t", "b", "sim", "sc"]) national.delete(key);
     return national.toString().replace(/%2C/g, ",").replace(/%3A/g, ":").replace(/%7E/g, "~");
   }
   const p = new URLSearchParams();
@@ -237,6 +241,7 @@ export function serializeHash(s: HashState, prev = ""): string {
   // `#s=di-vong&m=2d`. Riêng `c` vẫn ghi: nó là lựa chọn của người xem trong cảnh.
   if (!scene) {
     p.set("f", s.field);
+    if (s.scaleMode === "gradient") p.set("sc", "g");
     const v = s.view;
     p.set(
       "v",

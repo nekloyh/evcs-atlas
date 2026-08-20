@@ -37,6 +37,8 @@ import {
   fieldMapAvailable,
   layerUsable,
   lensOfField,
+  scaleContractOf,
+  type FieldMeta,
   type RuntimeCoverage,
 } from "./fields";
 import { selectionWireOf, useStore } from "./state/store";
@@ -61,8 +63,16 @@ import { AppShell } from "./components/atlas/AppShell";
 import { MapWorkspace, ModeSwitch, Workspace } from "./components/atlas/Workspace";
 import NationalApp from "./national/NationalApp";
 import { allOccValues, occCountAt, occCoverage, stationOccAt } from "./viz/occ";
-import { buildScale, computeClassingByWeight, type Scale } from "./viz/palette";
+import {
+  applyScaleMode,
+  buildScale,
+  computeClassingByWeight,
+  gradientAvailability,
+  type CellValue,
+  type Scale,
+} from "./viz/palette";
 import { bivariateAxes } from "./viz/demand";
+import { themeFor } from "./viz/theme";
 import { useSimulationStore } from "./simulation/store";
 import { useSimulationController } from "./simulation/use-simulation";
 import type { AppNavMode, HashState } from "./state/types";
@@ -95,8 +105,16 @@ interface ScaleSnapshot {
   scale: Scale;
 }
 
+function buildFieldScale(meta: FieldMeta, values: CellValue[]): Scale {
+  return buildScale(meta.kind, values, meta.diverge, meta.categorical, {
+    contract: scaleContractOf(meta),
+  });
+}
+
 export default function App() {
   const field = useStore((s) => s.field);
+  const requestedScaleMode = useStore((s) => s.scaleMode);
+  const demandRepresentation = useStore((s) => s.demandRepresentation);
   const scene = useStore((s) => s.scene);
   const dataMode = useStore((s) => s.dataMode);
   const nationalMode = useStore((s) => s.nationalMode);
@@ -157,6 +175,7 @@ export default function App() {
         const sim = useSimulationStore.getState();
         return {
           field: s.field,
+          scaleMode: s.scaleMode,
           mode: s.mode,
           view: s.view,
           layers: [...s.layers],
@@ -247,9 +266,17 @@ export default function App() {
   // snapshot cũ bị che thay vì ghép metadata mới với giá trị/ngưỡng cũ trong một frame.
   const activeCellSnapshot = meta.readAs === "cell" && cellSnapshot?.fieldId === meta.id ? cellSnapshot : null;
   const cells = meta.readAs === "cell" ? activeCellSnapshot?.rows ?? [] : cellSnapshot?.rows ?? [];
-  const scale = meta.readAs === "cell"
+  const baseScale = meta.readAs === "cell"
     ? activeCellSnapshot?.scale ?? null
     : scaleSnapshot?.fieldId === meta.id ? scaleSnapshot.scale : null;
+  const activeTheme = themeFor(meta, demandRepresentation);
+  const gradientGate = gradientAvailability(activeTheme, Boolean(meta.diverge));
+  const scale = useMemo(
+    () => baseScale
+      ? applyScaleMode(baseScale, scaleContractOf(meta), requestedScaleMode, gradientGate.allowed)
+      : null,
+    [baseScale, meta, requestedScaleMode, gradientGate.allowed],
+  );
 
   const storyPkg: StoryPackage = useMemo(
     () => ({
@@ -330,7 +357,7 @@ export default function App() {
     if (!communes) return;
     setScaleSnapshot({
       fieldId: meta.id,
-      scale: buildScale(meta.kind, communes.features.map((f: CommuneFeature) => f.properties[meta.column] ?? null), meta.diverge, meta.categorical),
+      scale: buildFieldScale(meta, communes.features.map((f: CommuneFeature) => f.properties[meta.column] ?? null)),
     });
   }, [meta, communes]);
 
@@ -344,7 +371,7 @@ export default function App() {
         setCellSnapshot({
           fieldId: meta.id,
           rows,
-          scale: buildScale(meta.kind, rows.map((r) => r.value), meta.diverge, meta.categorical),
+          scale: buildFieldScale(meta, rows.map((r) => r.value)),
         });
       } catch (e) {
         if (!cancelled) fail(e);
@@ -381,7 +408,7 @@ export default function App() {
     if (meta.readAs !== "road" || roads.length === 0) return;
     setScaleSnapshot({
       fieldId: meta.id,
-      scale: buildScale(meta.kind, roads.map((r) => r.dist), meta.diverge, meta.categorical),
+      scale: buildFieldScale(meta, roads.map((r) => r.dist)),
     });
     setRoadCov(new Map([[meta.id, roadCoverage(roads)]]));
   }, [meta, roads]);
@@ -414,7 +441,7 @@ export default function App() {
       setCellSnapshot({
         fieldId: seed.id,
         rows,
-        scale: buildScale(seed.kind, rows.map((r) => r.value), seed.diverge, seed.categorical),
+        scale: buildFieldScale(seed, rows.map((r) => r.value)),
       });
     }, fail);
     return () => {
@@ -449,7 +476,10 @@ export default function App() {
    * nhau. Cùng lý do §1b loại `HeatmapLayer`, chỉ khác trục.
    */
   const occClassing = useMemo(
-    () => (occupancy ? buildScale("numeric", allOccValues(occupancy.profiles)) : null),
+    () => {
+      const occ = FIELD_BY_ID.get(STATION_OCC_FIELD);
+      return occupancy && occ ? buildFieldScale(occ, allOccValues(occupancy.profiles)) : null;
+    },
     [occupancy],
   );
 
@@ -473,12 +503,7 @@ export default function App() {
     if (meta.id !== STATION_PORTS_FIELD) return;
     setScaleSnapshot({
       fieldId: meta.id,
-      scale: buildScale(
-        meta.kind,
-        stations.filter((s) => s.inScope).map((s) => s.nPorts),
-        meta.diverge,
-        meta.categorical,
-      ),
+      scale: buildFieldScale(meta, stations.filter((s) => s.inScope).map((s) => s.nPorts)),
     });
   }, [meta, stations]);
 

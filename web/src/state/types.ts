@@ -10,6 +10,7 @@
  */
 import type { AnalysisFilter } from "./filter";
 import type { EntitySelection } from "./selection";
+import type { ScaleMode } from "../viz/palette";
 
 export type { EntitySelection, DatasetId, StationId, H3R8, CommuneCode } from "./selection";
 
@@ -189,6 +190,8 @@ export const DOW_FULL = [
 /** Phần state được serialize ra hash — §9 khoá f · m · v · l · c · s · p · t · b. */
 export interface HashState {
   field: string;
+  /** Color encoding mode — `sc` in the URL hash; absent/unknown means binned. */
+  scaleMode: ScaleMode;
   mode: Mode;
   view: View;
   layers: OverlayId[];

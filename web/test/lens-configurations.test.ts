@@ -22,6 +22,9 @@ const { selectionWireOf, useStore } = await import("../src/state/store.ts");
 
 const dummyScale: Scale = {
   kind: "numeric",
+  mode: "binned",
+  transform: "linear",
+  domain: { lo: 10, hi: 120, median: 50, min: 10, max: 120, nClippedLow: 0, nClippedHigh: 0 },
   breaks: [10, 50, 100],
   counts: [5, 5, 5],
   n: 15,

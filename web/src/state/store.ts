@@ -21,6 +21,7 @@ import {
 import { readHash, resolveHashField, type HashApplyContext } from "./hash";
 import { type EntitySelection, parseEntitySelection, serializeEntitySelection } from "./selection";
 import type { AppNavMode, BasemapStyle, DemandRepresentation, HashState, Mode, OverlayId, View } from "./types";
+import type { ScaleMode } from "../viz/palette";
 import { defaultRepresentationFor, representationFits } from "./types";
 
 export type { AppNavMode, BasemapStyle, Mode, OverlayId, ReadingUnit, View } from "./types";
@@ -45,6 +46,7 @@ export interface SearchNavTarget {
 
 export interface AppState {
   field: string;
+  scaleMode: ScaleMode;
   /** Phase 4 analytical filter (PHASE4_VISUALIZATION.md §2). */
   filter: FilterState;
   /** P1 Demand prototype; session-only until its representations pass review (§15c). */
@@ -119,6 +121,7 @@ export interface AppState {
   basemapStyle: BasemapStyle;
 
   setField: (f: string) => void;
+  setScaleMode: (mode: ScaleMode) => void;
   /** Chuyển sang Lens phân tích mới: đổi trường mặc định và overlay mặc định, giữ nguyên đối tượng đang chọn. */
   switchLens: (lensId: LensId) => void;
   setDemandRepresentation: (representation: DemandRepresentation) => void;
@@ -207,6 +210,7 @@ function fromScene(id: SceneId, beatId: string | null = null) {
     // hai lần là một frame trung gian có cảnh mới và nhịp cũ.
     beat: beatId,
     field: s.field,
+    scaleMode: s.scaleMode,
     view: s.view,
     layers: new Set(s.layers),
     selection: selectSel,
@@ -273,6 +277,7 @@ export const useStore = create<AppState>((set) => ({
   nationalMode: boot.nationalMode ?? false,
   beat: null,
   field: bootField,
+  scaleMode: boot.scaleMode ?? "binned",
   // Cảnh CÂU CHUYỆN không có bộ lọc (L3), nên một link `#s=…&b=…` mở ra cảnh KHÔNG kèm
   // filter — `fromScene` bên dưới không còn tự xoá nữa nên chỗ quyết định là ở đây.
   filter: bootFilter && !bootScene ? { active: bootFilter, revision: 1, clearedReason: null } : INITIAL_FILTER_STATE,
@@ -325,6 +330,7 @@ export const useStore = create<AppState>((set) => ({
         demandRepresentation: defaultRepresentationFor(s.mode),
       };
     }),
+  setScaleMode: (scaleMode) => set({ scaleMode }),
   switchLens: (lensId) =>
     set((s) => {
       const nextField = defaultFieldOfLens(lensId);
@@ -522,6 +528,7 @@ export const useStore = create<AppState>((set) => ({
           nationalMode: false,
           beat,
           field: st.field,
+          scaleMode: st.scaleMode,
           mode: h.mode ?? "2d",
           view: st.view,
           layers: new Set(st.layers),
@@ -553,6 +560,7 @@ export const useStore = create<AppState>((set) => ({
         nationalMode: false,
         beat: null,
         field,
+        scaleMode: h.scaleMode ?? "binned",
         filter: applyFilterIntent(s.filter, nextFilter),
         mode: h.mode ?? "2d",
         // Cùng luật với boot: `m=3d` không kèm `v` mở ra đã nghiêng 50 (§2b).

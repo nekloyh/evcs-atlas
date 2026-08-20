@@ -13,8 +13,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { MAX_ELEV_M, can3D, elevationFor, maxElevFor } from "../src/national/elevation";
-import { buildScale, classCount, classOf, computeClassing } from "../src/viz/palette";
+import { ELEVATION_FLOOR, MAX_ELEV_M, can3D, elevationFor, maxElevFor } from "../src/national/elevation";
+import { buildScale, computeClassing } from "../src/viz/palette";
 
 /** Một thang thật, dựng từ số liệu chứ không bịa `breaks` bằng tay. */
 const VALUES = [0, 0, 0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987];
@@ -30,13 +30,13 @@ test("chưa có thang (dữ liệu chưa về) ⇒ 0, không đoán", () => {
   assert.equal(elevationFor(100, null), 0);
 });
 
-test("bậc THẤP NHẤT vẫn nhô lên — sàn của quyết định 4", () => {
+test("giá trị ở SÀN MIỀN vẫn nhô lên — sàn của hợp đồng liên tục", () => {
   // Đây là phép kiểm quan trọng nhất của file: nếu bậc 1 cao 0 m thì nó không phân biệt
   // được với ô không đo được, và cả hai kênh (màu vân + cao 0) cùng nói sai một câu.
   const thap = Math.min(...VALUES.filter((v) => v > 0));
   assert.ok(elevationFor(0, SCALE) > 0, "bậc {0} phải nhô");
   assert.ok(elevationFor(thap, SCALE) > 0, "giá trị nhỏ nhất > 0 phải nhô");
-  assert.equal(elevationFor(0, SCALE), MAX_ELEV_M / classCount(SCALE));
+  assert.equal(elevationFor(0, SCALE), MAX_ELEV_M * ELEVATION_FLOOR);
 });
 
 test("đơn điệu KHÔNG GIẢM theo bậc, và bị chặn trên bởi MAX_ELEV_M", () => {
@@ -51,12 +51,8 @@ test("đơn điệu KHÔNG GIẢM theo bậc, và bị chặn trên bởi MAX_EL
   assert.equal(elevationFor(Math.max(...VALUES), SCALE), MAX_ELEV_M);
 });
 
-test("chiều cao đọc từ BẬC, không từ giá trị thô — hai ô cùng bậc cao bằng nhau", () => {
-  // Mấu chốt của quyết định 3. Bậc cuối là một khoảng MỞ: 610 và 987 chung một bậc, nên
-  // chúng phải chung một chiều cao. Nếu lấy giá trị thô thì 987 vọt lên trong khi vẫn mang
-  // đúng màu của 610 — bản đồ có hai thang mà legend chỉ in một.
-  assert.equal(classOf(610, SCALE), classOf(987, SCALE));
-  assert.equal(elevationFor(610, SCALE), elevationFor(987, SCALE));
+test("chiều cao giữ độ lớn liên tục bên trong cùng bậc và chặn ở trần miền", () => {
+  assert.ok(elevationFor(610, SCALE) < elevationFor(987, SCALE));
   // và một giá trị NGOÀI dải dữ liệu cũng không vượt trần
   assert.equal(elevationFor(1e9, SCALE), MAX_ELEV_M);
 });
@@ -68,16 +64,16 @@ test("cùng giá trị + cùng thang ⇒ cùng chiều cao, không tham số th�
   assert.equal(elevationFor.length, 2);
 });
 
-test("thang BOOL và HẠNG MỤC cũng dựng được — hai bậc, cả hai đều nhô", () => {
+test("thang BOOL không được suy thành chiều cao số", () => {
   const b = buildScale("bool", [true, false, true, null]);
-  assert.equal(elevationFor(false, b), MAX_ELEV_M / 2);
-  assert.equal(elevationFor(true, b), MAX_ELEV_M);
+  assert.equal(elevationFor(false, b), 0);
+  assert.equal(elevationFor(true, b), 0);
   assert.equal(elevationFor(null, b), 0);
 });
 
 test("thang RỖNG (không giá trị nào) ⇒ mọi ô phẳng, không chia cho 0", () => {
   const trong = computeClassing([null, null]);
-  assert.equal(classCount(trong), 0);
+  assert.equal(trong.breaks.length, 0);
   assert.equal(elevationFor(5, trong), 0);
   assert.ok(Number.isFinite(elevationFor(5, trong)));
 });

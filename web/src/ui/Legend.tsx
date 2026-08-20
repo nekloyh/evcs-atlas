@@ -9,6 +9,7 @@ import {
   type FieldMeta,
   type RuntimeCoverage,
   hasDemandRepresentations,
+  scaleContractOf,
 } from "../fields";
 import { pct, type Manifest } from "../data/manifest";
 import { NULL_STATE_HATCH_DEG, type NullState } from "../data/null-states";
@@ -19,8 +20,11 @@ import { HEX_MIN_ZOOM, hexPixelWidth, planFor } from "../viz/render-plan";
 import { themeFor } from "../viz/theme";
 import {
   HATCH_HEX,
+  colorPosition,
   getThemePalette,
+  gradientStops,
   rampFor,
+  type NumericScale,
   type Scale,
 } from "../viz/palette";
 import { formatIn, formatSeries, scaleUnit, withDigits, type ScaledUnit } from "../units";
@@ -83,6 +87,7 @@ export function Legend({
   const scene = useStore((s) => s.scene);
   const beatId = useStore((s) => s.beat);
   const demandRepresentation = useStore((s) => s.demandRepresentation);
+  const mode = useStore((s) => s.mode);
   // Legend mô tả CHÍNH mặt tô đang vẽ, nên nó phải đi qua đúng một cửa với `MapView` —
   // xem `planFor`. Trước đây hai bên tự gọi `renderPlan` và bỏ sót `filtered`, cho ra một
   // dải chú giải "không vẽ vì zoom" trên một bản đồ đang vẽ ô H3.
@@ -218,6 +223,79 @@ export function Legend({
   // đây là gọi 87 ô sát trạm — nhóm được phục vụ tốt nhất thành phố — là "không đo được".
   const nUnknown = Math.max((scale?.nNull ?? 0) - nNotApplicable - nFiltered, 0);
 
+  if (scale?.kind === "numeric" && scale.mode === "gradient") {
+    const contract = scaleContractOf(field);
+    const transformName = contract.transform === "sqrt" ? "căn bậc hai" : "tuyến tính";
+    const ceilingName = contract.clip.hi === "p99" ? "trần p99" : "không cắt trần";
+    return (
+      <div className={floating
+        ? "flex max-w-full flex-col gap-2 text-body"
+        : "flex min-h-10 shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-hairline px-3 py-2 text-body"}
+      >
+        <div className={floating ? "w-full" : "min-w-80 max-w-xl flex-1"}>
+          <GradientRuler
+            field={field}
+            scale={scale}
+            theme={theme}
+            selectedValue={selectedValue}
+            clippedAtP99={contract.clip.hi === "p99"}
+          />
+        </div>
+        <LegendNulls
+          field={field}
+          noun={noun}
+          nUnknown={nUnknown}
+          nNotApplicable={nNotApplicable}
+          nFiltered={nFiltered}
+        />
+        {mode === "3d" && field.readAs === "cell" && (
+          <div className="text-note text-ink-2">
+            chiều cao = cùng trường · thang {transformName} · {ceilingName} · không đo bằng thước
+            {scale.diverge && " · cao = xa mốc"}
+          </div>
+        )}
+        {scale.domain.nClippedHigh > 0 && (
+          <div className="w-full tabular-nums text-note text-ink-2">
+            ▲ {scale.domain.nClippedHigh.toLocaleString("vi-VN")} ô vượt trần · lớn nhất {formatIn(scale.domain.max, scaleOf(field, scale))}
+          </div>
+        )}
+        {scale.domain.nClippedLow > 0 && (
+          <div className="w-full tabular-nums text-note text-ink-2">
+            ▼ {scale.domain.nClippedLow.toLocaleString("vi-VN")} ô dưới sàn · nhỏ nhất {formatIn(scale.domain.min, scaleOf(field, scale))}
+          </div>
+        )}
+        {plan.coarse && (
+          <button
+            onClick={() => setView({ ...view, zoom: HEX_MIN_ZOOM })}
+            className="cursor-pointer border border-hairline px-1 text-note text-ink-muted hover:bg-basemap"
+          >
+            đọc thô · ô ~{Math.round(hexPixelWidth(zoom))} px
+          </button>
+        )}
+        <details className={floating ? "group" : "group ml-auto"}>
+          <summary className="cursor-pointer list-none text-note text-ink-muted hover:text-ink-2">
+            <span className="group-open:hidden">Đơn vị và phép biến đổi ▸</span>
+            <span className="hidden group-open:inline">Đơn vị và phép biến đổi ▾</span>
+          </summary>
+          <div className="mt-1.5 flex flex-col gap-1 text-note text-ink-2">
+            <span>{unitSentence(field, scaleOf(field, scale))}</span>
+            <span className="text-ink-muted">
+              thang {transformName} trên miền {contract.clip.hi === "p99" ? "cắt p99" : "không cắt"}
+            </span>
+            {polarityNote(field) && <span className="self-start border border-hairline px-1 text-ink-muted">{polarityNote(field)}</span>}
+            {cov && (
+              <span className="tabular-nums text-ink-muted">
+                {cov.n_present.toLocaleString("vi-VN")}/{cov.n_total.toLocaleString("vi-VN")} {noun}
+                {field.id === STATION_OCC_FIELD && " có nhịp đọc được"}
+                {cov.share < 1 && cov.pop_share !== undefined && ` · ${pct(cov.pop_share)} dân`}
+              </span>
+            )}
+          </div>
+        </details>
+      </div>
+    );
+  }
+
   /*
    * Dải nổi ở góc trên-trái là một THANG MÀU, không phải một tờ chú thích.
    *
@@ -248,6 +326,9 @@ export function Legend({
           nNotApplicable={nNotApplicable}
           nFiltered={nFiltered}
         />
+        {mode === "3d" && field.readAs === "cell" && scale?.kind === "numeric" && (
+          <ElevationDisclosure field={field} scale={scale} />
+        )}
         {plan.coarse && (
           <button
             onClick={() => setView({ ...view, zoom: HEX_MIN_ZOOM })}
@@ -287,7 +368,9 @@ export function Legend({
   }
 
   return (
-    <div className="flex h-10 shrink-0 items-stretch border-b border-hairline text-body">
+    <div className={`flex shrink-0 items-stretch border-b border-hairline text-body ${
+      mode === "3d" && field.readAs === "cell" && scale?.kind === "numeric" ? "min-h-10" : "h-10"
+    }`}>
       <div className="flex">
         {labels.map((label, i) => (
           <div
@@ -363,6 +446,9 @@ export function Legend({
             </Fragment>
           ))}
       </div>
+      {mode === "3d" && field.readAs === "cell" && scale?.kind === "numeric" && (
+        <div className="flex items-center px-3"><ElevationDisclosure field={field} scale={scale} /></div>
+      )}
       <div className="flex items-center gap-2 px-3 text-ink-2">
         {/* Ô nhỏ hơn mức đọc được từng bậc màu — §13a-1 vẫn đúng, chỉ hình phạt là đổi
             (M5.1): trước đây không vẽ gì, giờ vẫn vẽ nhưng NÓI RA rằng đang đọc thô. Bấm
@@ -400,6 +486,106 @@ export function Legend({
               vẽ khi ĐÃ có `cov`, tức đã qua cùng phép chặn đó. */}
           {cov.share < 1 && cov.pop_share !== undefined &&
             ` · ${pct(cov.pop_share)} dân`}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ElevationDisclosure({ field, scale }: { field: FieldMeta; scale: NumericScale }) {
+  const contract = scaleContractOf(field);
+  const transformName = contract.transform === "sqrt" ? "căn bậc hai" : "tuyến tính";
+  const ceilingName = contract.clip.hi === "p99" ? "trần p99" : "không cắt trần";
+  const unit = scaleOf(field, scale);
+  return (
+    <div className="flex flex-col gap-0.5 text-note text-ink-2">
+      <span>
+        chiều cao = cùng trường · thang {transformName} · {ceilingName} · không đo bằng thước
+        {scale.diverge && " · cao = xa mốc"}
+      </span>
+      {scale.domain.nClippedHigh > 0 && (
+        <span className="tabular-nums">
+          ▲ {scale.domain.nClippedHigh.toLocaleString("vi-VN")} ô vượt trần cao độ · lớn nhất {formatIn(scale.domain.max, unit)}
+        </span>
+      )}
+      {scale.domain.nClippedLow > 0 && (
+        <span className="tabular-nums">
+          ▼ {scale.domain.nClippedLow.toLocaleString("vi-VN")} ô dưới sàn cao độ · nhỏ nhất {formatIn(scale.domain.min, unit)}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function GradientRuler({
+  field,
+  scale,
+  theme,
+  selectedValue,
+  clippedAtP99,
+}: {
+  field: FieldMeta;
+  scale: NumericScale;
+  theme: ReturnType<typeof themeFor>;
+  selectedValue: number | null;
+  clippedAtP99: boolean;
+}) {
+  const stops = gradientStops(scale, theme, 32);
+  const gradient = `linear-gradient(to right, ${stops
+    .map((stop) => `${rgbCss(stop.color)} ${(stop.position * 100).toFixed(3)}%`)
+    .join(", ")})`;
+  const unit = scaleOf(field, scale);
+  const tickValues = [scale.domain.lo, scale.domain.median, scale.domain.hi];
+  const tickLabels = formatSeries(tickValues, unit);
+  const tickPositions = tickValues.map((value) => colorPosition(value, scale) * 100);
+  const selectedPosition = selectedValue !== null && Number.isFinite(selectedValue)
+    ? colorPosition(selectedValue, scale) * 100
+    : null;
+  const fmt = (value: number) => formatIn(value, unit);
+  const aria = `${unitSentence(field, unit)}. Miền từ ${fmt(scale.domain.lo)} đến ${fmt(scale.domain.hi)}; trung vị ${fmt(scale.domain.median)}.${clippedAtP99 ? ` ${scale.domain.nClippedHigh} ô vượt trần.` : ""}${selectedValue === null ? "" : ` Giá trị đang chọn: ${fmt(selectedValue)}.`}`;
+
+  return (
+    <div role="img" aria-label={aria}>
+      {scale.diverge && field.diverge && (
+        <div className="mb-0.5 grid grid-cols-2 text-note leading-none text-ink-2">
+          <span>{field.diverge.ends[0]}</span>
+          <span className="text-right">{field.diverge.ends[1]}</span>
+        </div>
+      )}
+      {selectedPosition !== null && (
+        <div className="relative mb-0.5 h-3.5">
+          <span
+            className="absolute bottom-0 -translate-x-1/2 whitespace-nowrap text-note font-semibold leading-none tabular-nums text-ink"
+            style={{ left: `${selectedPosition}%` }}
+            title="giá trị của đối tượng đang chọn"
+          >
+            {fmt(selectedValue!)}
+            <span className="mx-auto block h-1 w-px bg-ink" />
+          </span>
+        </div>
+      )}
+      <div className="relative h-2.5 rounded-xs" style={{ backgroundImage: gradient }}>
+        {scale.diverge && (
+          <span
+            aria-hidden="true"
+            className="absolute -top-0.5 bottom-[-2px] left-1/2 w-px bg-ink"
+          />
+        )}
+      </div>
+      <div className="relative mt-1 h-3.5 text-note leading-none tabular-nums text-ink-muted">
+        {tickLabels.map((label, i) => (
+          <span
+            key={`${label}-${i}`}
+            className={`absolute whitespace-nowrap ${i === 0 ? "" : i === 2 ? "-translate-x-full" : "-translate-x-1/2"}`}
+            style={{ left: `${tickPositions[i]}%` }}
+          >
+            {i === 2 && clippedAtP99 ? "≥ " : ""}{label}{i === 2 && unit.label ? ` ${unit.label}` : ""}
+          </span>
+        ))}
+      </div>
+      {scale.diverge && field.diverge && (
+        <div className="relative h-3 text-note leading-none text-ink-muted">
+          <span className="absolute left-1/2 -translate-x-1/2">{fmt(field.diverge.at)}</span>
         </div>
       )}
     </div>

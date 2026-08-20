@@ -19,7 +19,7 @@ import { dataPath } from "./data/province";
 import type { CompareView, OverlayId, ReadingUnit } from "./state/types";
 import { formatIn, scaleUnit, unitPhrase, type ScaledUnit, type UnitSpec } from "./units";
 import { OBSERVED_H_MIN } from "./viz/occ";
-import type { Diverge, Polarity } from "./viz/palette";
+import type { Diverge, Polarity, ScaleContract } from "./viz/palette";
 
 import type { PrimaryChartId } from "./viz/chart-contracts";
 import { BEYOND_2KM_M } from "./domain-thresholds";
@@ -99,7 +99,7 @@ export const STATION_PORTS_FIELD = `${STATION_PREFIX}ports`;
  * diễn không nói hộ được câu "trường này chịu được cách vẽ nào", và tới lúc cần thì phải
  * bóc ngược cả lớp suy diễn ra mới khai lại được.
  */
-export interface VisualContract {
+interface VisualContractBase {
   /**
    * Đơn vị đo + vế bổ nghĩa — xem `units.ts`. `null` với bool và hạng mục.
    *
@@ -138,14 +138,35 @@ export interface VisualContract {
    * phải khai từng trường một chứ không suy ra từ `kind: "numeric"`.
    */
   surface?: boolean;
-  /**
-   * `false` = có giá trị để inspect hoặc làm input mô hình, nhưng không đủ hợp đồng thị
-   * giác để trở thành analytical field trên bản đồ. Mặc định là `true`.
-   */
-  map?: boolean;
 }
 
-export interface FieldMeta extends VisualContract {
+/**
+ * Nhánh `map`/`scaleContract` là một UNION PHÂN BIỆT chứ không phải hai member optional —
+ * và đó chính là điều QA 2.1-003 đòi: trường lên được bản đồ (`map` vắng mặt = `true`)
+ * PHẢI khai `scaleContract` ngay ở literal, để trình biên dịch liệt kê trường còn thiếu
+ * thay vì đợi `scaleContractOf()` nổ lúc chạy. Chỉ trường tự khai `map: false` (bối
+ * cảnh/bằng chứng — POI, phủ đất, cột inspect) mới được phép không có hợp đồng thang.
+ * `scaleContractOf()` vẫn giữ assertion lúc chạy làm phòng tuyến thứ hai.
+ */
+export type VisualContract = VisualContractBase &
+  (
+    | {
+        /** Vắng mặt (hoặc `true`) = analytical field trên bản đồ ⇒ bắt buộc có hợp đồng thang. */
+        map?: true;
+        /** Domain/transform/color-mode declaration shared by gradient color and elevation. */
+        scaleContract: ScaleContract;
+      }
+    | {
+        /**
+         * `false` = có giá trị để inspect hoặc làm input mô hình, nhưng không đủ hợp đồng
+         * thị giác để trở thành analytical field trên bản đồ.
+         */
+        map: false;
+        scaleContract?: ScaleContract;
+      }
+  );
+
+export type FieldMeta = VisualContract & {
   /**
    * Định danh dùng ở state và ở khoá `f` của hash. Trường của xã mang tiền tố
    * `commune:` (§6b); trường của ô là tên trần.
@@ -216,12 +237,45 @@ export interface FieldMeta extends VisualContract {
   sourceBadge?: (m: Manifest) => { text: string; explain: string } | null;
   /** cảnh báo riêng, không phải chuyện phủ */
   caveat?: (m: Manifest) => string | null;
-}
+};
 
 const FRAC: UnitSpec = { kind: "ratio", note: "diện tích ô" };
 
+const TOGGLE_SQRT_ZERO_P99: ScaleContract = {
+  color: "toggle", transform: "sqrt", clip: { lo: 0, hi: "p99" },
+};
+const TOGGLE_SQRT_MIN_P99: ScaleContract = {
+  color: "toggle", transform: "sqrt", clip: { lo: "min", hi: "p99" },
+};
+const TOGGLE_LINEAR_ZERO_NONE: ScaleContract = {
+  color: "toggle", transform: "linear", clip: { lo: 0, hi: "none" },
+};
+const TOGGLE_LINEAR_MIN_P99: ScaleContract = {
+  color: "toggle", transform: "linear", clip: { lo: "min", hi: "p99" },
+};
+const SUPPLY_FIXED: ScaleContract = {
+  color: "fixed-binned", transform: "sqrt", clip: { lo: 0, hi: "p99" },
+  reason: "Cung có quá nhiều giá trị 0; gradient sẽ dồn gần toàn bộ dải vào một khối không phân biệt được.",
+};
+const POP_BEYOND_FIXED: ScaleContract = {
+  color: "fixed-binned", transform: "sqrt", clip: { lo: 0, hi: "p99" },
+  reason: "Trường này có nhiều số 0 và đuôi lệch mạnh; giữ lớp 0 riêng cùng các bậc phân vị.",
+};
+const CATEGORICAL_FIXED: ScaleContract = {
+  color: "fixed-binned", transform: "linear", clip: { lo: "min", hi: "none" },
+  reason: "Trường hạng mục không có trật tự liên tục để nội suy gradient.",
+};
+const BOOL_FIXED: ScaleContract = {
+  color: "fixed-binned", transform: "linear", clip: { lo: "min", hi: "none" },
+  reason: "Trường đúng/sai chỉ có hai trạng thái, không có miền liên tục.",
+};
+
 /** Khai báo một trường trước khi gắn đơn vị đọc — `unit`/`column` do bảng dưới suy ra. */
-type Spec = Omit<FieldMeta, "readAs" | "column" | "lens"> & { column?: string };
+/** `Omit` thường GỘP union về các khoá chung — nó sẽ xoá mất union phân biệt map/scaleContract
+ *  vừa dựng ở trên. Bản phân phối giữ từng nhánh riêng, nên spec thiếu hợp đồng vẫn bị bắt. */
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
+type Spec = DistributiveOmit<FieldMeta, "readAs" | "column" | "lens"> & { column?: string };
 
 // ── Trường của Ô (bảng grid_h3_r8.parquet) ─────────────────────────────────────
 
@@ -234,6 +288,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Phân bổ dasymetric: bề mặt WorldPop 2025 neo theo số dân công bố của từng xã VNSDI.",
     unit: { kind: "person", note: "trên ô ~0,74 km²" },
     kind: "numeric",
+    scaleContract: TOGGLE_SQRT_ZERO_P99,
     // Trường DUY NHẤT có mặt liên tục ở M2 (§13d-A: "cầu vón cục, không đều" là luận điểm
     // A, và mặt độ là mark của nó). Dân số cộng được, và nó không có ô null nào — nên phép
     // cộng không âm thầm bỏ sót ô. Trường có null mà đem cộng thì mặt sẽ trũng xuống ở
@@ -247,6 +302,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Dân số chia cho diện tích ô.",
     unit: { kind: "ppkm2" },
     kind: "numeric",
+    scaleContract: TOGGLE_SQRT_ZERO_P99,
   },
   {
     id: "n_apartment",
@@ -255,6 +311,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Số toà chung cư OSM nằm trong ô.",
     unit: { kind: "building" },
     kind: "numeric",
+    scaleContract: TOGGLE_SQRT_ZERO_P99,
   },
   {
     id: "apartment_levels_sum",
@@ -263,6 +320,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Cộng số tầng của các toà chung cư trong ô — chặn dưới, vì phần lớn toà không có tag số tầng trong OSM.",
     unit: { kind: "floor" },
     kind: "numeric",
+    scaleContract: TOGGLE_SQRT_ZERO_P99,
     sourceBadge: (m) => {
       const a = m.source_metrics?.apartment_levels_tagged;
       if (!a) return null;
@@ -276,6 +334,8 @@ const CELL_SPECS: Spec[] = [
   },
   {
     id: "n_poi_1km",
+    // Bối cảnh/bằng chứng — không phải analytical field, nên không có hợp đồng thang.
+    map: false,
     group: "cau",
     label: "Điểm quan tâm trong 1 km",
     desc: "Số POI trong bán kính 1 km quanh tâm ô — PHƠI NHIỄM, khác với “có gì trong ô”.",
@@ -300,6 +360,7 @@ const CELL_SPECS: Spec[] = [
   },
   {
     id: "n_poi_total",
+    map: false,
     group: "cau",
     label: "Tổng điểm quan tâm",
     desc: "Cộng 8 loại POI: chung cư, bãi đỗ, đỗ lòng đường, cây xăng, siêu thị, chợ, trung tâm thương mại, bách hoá.",
@@ -308,6 +369,7 @@ const CELL_SPECS: Spec[] = [
   },
   {
     id: "n_mall",
+    map: false,
     group: "cau",
     label: "Trung tâm thương mại",
     desc: "Số trung tâm thương mại OSM trong ô.",
@@ -316,6 +378,7 @@ const CELL_SPECS: Spec[] = [
   },
   {
     id: "n_dept_store",
+    map: false,
     group: "cau",
     label: "Cửa hàng bách hoá",
     desc: "Số cửa hàng bách hoá OSM trong ô.",
@@ -324,6 +387,7 @@ const CELL_SPECS: Spec[] = [
   },
   {
     id: "n_supermarket",
+    map: false,
     group: "cau",
     label: "Siêu thị",
     desc: "Số siêu thị OSM trong ô.",
@@ -332,6 +396,7 @@ const CELL_SPECS: Spec[] = [
   },
   {
     id: "n_market",
+    map: false,
     group: "cau",
     label: "Chợ",
     desc: "Số chợ OSM trong ô.",
@@ -340,6 +405,7 @@ const CELL_SPECS: Spec[] = [
   },
   {
     id: "n_parking_off",
+    map: false,
     group: "cau",
     label: "Bãi đỗ xe",
     desc: "Số bãi đỗ xe tách khỏi lòng đường.",
@@ -348,6 +414,7 @@ const CELL_SPECS: Spec[] = [
   },
   {
     id: "n_parking_street",
+    map: false,
     group: "cau",
     label: "Chỗ đỗ lòng đường",
     desc: "Số chỗ đỗ xe dọc lòng đường.",
@@ -356,6 +423,7 @@ const CELL_SPECS: Spec[] = [
   },
   {
     id: "n_fuel",
+    map: false,
     group: "cau",
     label: "Cây xăng",
     desc: "Số cây xăng OSM trong ô.",
@@ -378,6 +446,7 @@ const CELL_SPECS: Spec[] = [
   // ── 2. ĐẤT — đặt được không (12) ──────────────────────────────────────────
   {
     id: "built_frac",
+    map: false,
     group: "dat",
     label: "Đã xây dựng",
     desc: "Phần diện tích ô là mặt bằng đã xây dựng, lớp phủ ESA WorldCover.",
@@ -386,6 +455,7 @@ const CELL_SPECS: Spec[] = [
   },
   {
     id: "water_frac",
+    map: false,
     group: "dat",
     label: "Mặt nước",
     desc: "Phần diện tích ô là mặt nước.",
@@ -394,6 +464,7 @@ const CELL_SPECS: Spec[] = [
   },
   {
     id: "crop_frac",
+    map: false,
     group: "dat",
     label: "Đất trồng trọt",
     desc: "Phần diện tích ô là đất canh tác.",
@@ -402,6 +473,7 @@ const CELL_SPECS: Spec[] = [
   },
   {
     id: "tree_frac",
+    map: false,
     group: "dat",
     label: "Cây gỗ",
     desc: "Phần diện tích ô có tán cây gỗ.",
@@ -410,6 +482,7 @@ const CELL_SPECS: Spec[] = [
   },
   {
     id: "grass_frac",
+    map: false,
     group: "dat",
     label: "Cỏ",
     desc: "Phần diện tích ô là thảm cỏ.",
@@ -418,6 +491,7 @@ const CELL_SPECS: Spec[] = [
   },
   {
     id: "shrub_frac",
+    map: false,
     group: "dat",
     label: "Cây bụi",
     desc: "Phần diện tích ô là cây bụi.",
@@ -426,6 +500,7 @@ const CELL_SPECS: Spec[] = [
   },
   {
     id: "bare_frac",
+    map: false,
     group: "dat",
     label: "Đất trống",
     desc: "Phần diện tích ô là đất trống hoặc thưa thực vật.",
@@ -434,6 +509,7 @@ const CELL_SPECS: Spec[] = [
   },
   {
     id: "wetland_frac",
+    map: false,
     group: "dat",
     label: "Đất ngập nước",
     desc: "Phần diện tích ô là đất ngập nước.",
@@ -567,6 +643,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Số trạm sạc trong ô theo ảnh chụp canonical evcs.vn.",
     unit: { kind: "station" },
     kind: "numeric",
+    scaleContract: SUPPLY_FIXED,
   },
   {
     id: "n_stations_operational",
@@ -575,6 +652,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Trong số đó, những trạm có trạng thái vận hành là OPERATIONAL.",
     unit: { kind: "station" },
     kind: "numeric",
+    scaleContract: SUPPLY_FIXED,
   },
   {
     id: "n_ports",
@@ -583,6 +661,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Số súng LẮP ĐẶT (tầng tài sản), không phải số súng đang báo cáo — hai con số này khác nhau và không nên bằng nhau.",
     unit: { kind: "port" },
     kind: "numeric",
+    scaleContract: SUPPLY_FIXED,
   },
   {
     id: "power_kw_site",
@@ -591,6 +670,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Tổng công suất các tủ sạc trong ô, cộng theo tủ chứ không cộng nameplate từng súng.",
     unit: { kind: "kw" },
     kind: "numeric",
+    scaleContract: SUPPLY_FIXED,
   },
   {
     id: "dist_station_network_m",
@@ -599,6 +679,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Khoảng cách theo mạng đường từ tâm ô tới trạm gần nhất, Dijkstra đa nguồn, tôn trọng đường một chiều.",
     unit: { kind: "m", note: "theo mạng đường" },
     kind: "numeric",
+    scaleContract: TOGGLE_SQRT_MIN_P99,
     polarity: "high-bad",
     coverageNote:
       "Ô không tới được để trống, không điền một giá trị lớn tuỳ tiện. Trường này KHÔNG phụ thuộc bảng tốc độ giả định — cần số cứng thì dùng nó chứ không dùng phút.",
@@ -610,6 +691,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Khoảng cách đường thẳng từ tâm ô tới trạm gần nhất. Đây KHÔNG phải bản dự phòng của trường theo đường — nó là một khái niệm riêng, dùng cho câu hỏi về BỐ TRÍ không gian (hai trạm có gần nhau quá không), không dùng để trả lời “ô này đã được phủ chưa”.",
     unit: { kind: "m", note: "đường chim bay" },
     kind: "numeric",
+    scaleContract: TOGGLE_SQRT_MIN_P99,
     caveat: () =>
       "Đừng dùng bán kính chim bay để kết luận độ phủ: ở bán kính 3 km nó báo phủ nhầm khoảng một phần tư số ô nó nói là đã phủ, và sai LUÔN VỀ MỘT PHÍA (đường đi thật không bao giờ ngắn hơn chim bay). Xem trường Hệ số đi vòng.",
   },
@@ -626,6 +708,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Đường thật dài gấp mấy lần đường chim bay: khoảng cách theo mạng đường chia cho khoảng cách thẳng tới trạm gần nhất.",
     unit: { kind: "times", note: "mạng ÷ chim bay" },
     kind: "numeric",
+    scaleContract: TOGGLE_SQRT_MIN_P99,
     polarity: "high-bad",
     // Hai loại null, không một — xem `nullSplit`. `s08` từ chối tính tỉ số khi khoảng cách
     // chim bay < 200 m (`DETOUR_MIN_EUCLID_M`), vì ở cỡ đó `dist_station_network_m` bị
@@ -651,6 +734,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Quãng đường tới trạm khác quãng đường từ trạm về bao nhiêu mét, do đường một chiều.",
     unit: { kind: "m", note: "|đi − về|" },
     kind: "numeric",
+    scaleContract: TOGGLE_SQRT_ZERO_P99,
     polarity: "high-bad",
     // Trường này KHÔNG phải cột khoảng cách thứ hai — nó là phần thông tin duy nhất mà chiều
     // về có mà chiều đi không có. Phát cả `dist_from` sẽ cho hai cột trùng nhau 95,7%, và
@@ -668,6 +752,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Khoảng cách đường thẳng từ tâm ô ra điểm vào mạng đường; đã cộng vào hai trường trên.",
     unit: { kind: "m" },
     kind: "numeric",
+    scaleContract: TOGGLE_SQRT_ZERO_P99,
   },
   {
     id: "util_cell",
@@ -711,6 +796,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Có đường đi hợp lệ từ tâm ô tới một trạm sạc không.",
     unit: null,
     kind: "bool",
+    scaleContract: BOOL_FIXED,
   },
   {
     id: "evidence_grade_distance",
@@ -719,6 +805,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Con số khoảng cách được tạo ra bằng cách nào, hoặc vì sao không có.",
     unit: null,
     kind: "categorical",
+    scaleContract: CATEGORICAL_FIXED,
     categorical: {
       order: ["OSM_NETWORK", "UNREACHABLE_NO_ROAD_ACCESS", "UNREACHABLE_NO_PATH"],
       colors: ["#2f7d68", "#8d4e49", "#6b5b95"],
@@ -736,6 +823,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Nếu có đơn xin đặt trạm ở ô này, engine quy hoạch trả về gì — ĐỀ XUẤT, ĐỀ XUẤT NẾU CÓ DC, hay TỪ CHỐI.",
     unit: null,
     kind: "categorical",
+    scaleContract: CATEGORICAL_FIXED,
     categorical: {
       order: ["TU_CHOI", "DE_XUAT_NEU_CO_DC", "DE_XUAT"],
       colors: ["#8d4e49", "#b7791f", "#2f7d68"],
@@ -755,6 +843,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Khoảng cách chim bay tới trạm gần nhất TRỪ đi ngưỡng của loại đơn vị (Phường 500 m, Xã 2.000 m). Dương = đủ xa.",
     unit: { kind: "m", note: "âm = chưa đủ xa" },
     kind: "numeric",
+    scaleContract: TOGGLE_LINEAR_MIN_P99,
     nullLabel: "không đủ dữ liệu tính biên rule",
     // Trường PHÂN KỲ duy nhất của atlas, và nó là trường duy nhất CÓ giá trị âm: quét cả
     // `grid_h3_r8` / `commune` / `stations` / `provinces` thì chỉ cột này có `min < 0`.
@@ -775,6 +864,7 @@ const CELL_SPECS: Spec[] = [
     desc: "Số người trong ô mà trạm gần nhất ở xa hơn 2 km TÍNH THEO ĐƯỜNG ĐI. Đây là CẦU CHƯA ĐƯỢC PHỤC VỤ — chính là đối tượng của bài toán đặt trạm.",
     unit: { kind: "person", note: "ngưỡng 2 km theo mạng đường" },
     kind: "numeric",
+    scaleContract: POP_BEYOND_FIXED,
     // Ngưỡng bằng MÉT chứ không bằng PHÚT là có chủ đích: bộ dữ liệu không còn phát trường
     // thời gian nào, vì con số phút hoàn toàn do một bảng tốc độ giả định quyết định.
     // Mét thì đo trên chính hình học đường — ngưỡng vẫn là lựa chọn, nhưng ĐẠI LƯỢNG thì không.
@@ -847,6 +937,7 @@ const COMMUNE_SPECS: Spec[] = [
     desc: "Số dân của xã/phường: số công bố VNSDI, trừ 2 xã có số hỏng đã thay bằng WorldPop có khai báo.",
     unit: { kind: "person", note: "trên toàn xã" },
     kind: "numeric",
+    scaleContract: TOGGLE_SQRT_ZERO_P99,
   },
   {
     id: "pop_density_ppkm2",
@@ -855,6 +946,7 @@ const COMMUNE_SPECS: Spec[] = [
     desc: "Dân số xã chia cho diện tích xã. So sánh được giữa các xã, khác với mật độ theo ô.",
     unit: { kind: "ppkm2" },
     kind: "numeric",
+    scaleContract: TOGGLE_SQRT_ZERO_P99,
   },
   {
     id: "n_stations",
@@ -891,6 +983,7 @@ const COMMUNE_SPECS: Spec[] = [
     desc: "Trung bình khoảng cách theo đường tới trạm gần nhất, có trọng số DÂN SỐ — nên nó nói về người dân của xã chứ không về diện tích xã.",
     unit: { kind: "m", note: "theo mạng đường, trọng số dân" },
     kind: "numeric",
+    scaleContract: TOGGLE_SQRT_MIN_P99,
     polarity: "high-bad",
   },
   {
@@ -914,6 +1007,7 @@ const COMMUNE_SPECS: Spec[] = [
     desc: "Số súng sạc trên mỗi 10.000 dân của xã — cung và cầu gộp vào MỘT con số, nên đọc được ngay là xã nào đang lệch.",
     unit: { kind: "port", note: "trên 10.000 dân" },
     kind: "numeric",
+    scaleContract: SUPPLY_FIXED,
     coverageNote:
       "Đây là tỉ số, không phải số đếm: một xã ít dân có vài trạm lớn sẽ vọt lên rất cao mà không có nghĩa là nó được phục vụ tốt hơn. Đọc kèm dân số xã.",
   },
@@ -936,6 +1030,7 @@ const ROAD_SPECS: Spec[] = [
     desc: "Khoảng cách theo mạng đường từ ĐOẠN ĐƯỜNG này tới trạm gần nhất, lấy từ chính phép Dijkstra đa nguồn đã tính khoảng cách cho ô (s08). Đơn vị đọc là đoạn đường, không phải ô — nó cho thấy khoảng cách CHẢY thế nào dọc phố và khựng lại ở đâu.",
     unit: { kind: "m", note: "theo mạng đường · đo trên đoạn đường" },
     kind: "numeric",
+    scaleContract: TOGGLE_SQRT_MIN_P99,
     polarity: "high-bad",
     // 396/160.823 đoạn không tới được mang null. Ràng buộc 1 áp cho cả đường: chúng không
     // được rơi vào bậc ramp nào, và cũng không được vẽ thành "gần trạm".
@@ -963,6 +1058,7 @@ const STATION_SPECS: Spec[] = [
     desc: "Số cổng sạc công cộng đã lắp tại từng trạm. Màu mã hoá quy mô tài sản; bán kính chấm cố định để không thêm encoding thứ hai.",
     unit: { kind: "port", note: "đã lắp tại trạm" },
     kind: "numeric",
+    scaleContract: SUPPLY_FIXED,
   },
   {
     id: "occ",
@@ -971,6 +1067,7 @@ const STATION_SPECS: Spec[] = [
     desc: "Tỉ lệ cổng đang bận của từng trạm tại một ô giờ của tuần (7 thứ × 24 giờ). Kéo scrubber ở đáy để đổi giờ. Trạm chưa quan sát đủ ở giờ đó vẽ CHẤM RỖNG, không tô bậc nhạt — “chưa biết” không được đọc thành “vắng khách”.",
     unit: { kind: "ratio", note: `cổng bận ÷ cổng lắp đặt tại giờ đang xem · dưới ${OBSERVED_H_MIN} h quan sát thì không tô` },
     kind: "numeric",
+    scaleContract: TOGGLE_LINEAR_ZERO_NONE,
     // Không phải một cột — §13c-1. Công thức KHÔNG chạy trong SQL như các trường phái sinh
     // khác: nó phụ thuộc `t`, thứ đổi 4 lần mỗi giây khi play. Một truy vấn DuckDB mỗi
     // khung hình là sai kiến trúc, nên hồ sơ 168h nạp một lần vào `Float32Array` và công
@@ -1123,15 +1220,12 @@ function declaredLens(id: string, readAs: ReadingUnit): LensId | null {
 const withUnit = (specs: Spec[], readAs: ReadingUnit): FieldMeta[] =>
   specs.map((s) => {
     const lens = declaredLens(s.id, readAs);
-    return {
-      ...s,
-      readAs,
-      column: s.column ?? s.id,
-      id: PREFIX[readAs] + s.id,
-      lens,
-      // Context/evidence không được lách thành analytical ramp thứ sáu.
-      map: lens === null ? false : s.map,
-    };
+    const shared = { readAs, column: s.column ?? s.id, id: PREFIX[readAs] + s.id, lens };
+    // Context/evidence không được lách thành analytical ramp thứ sáu. Hai nhánh return để
+    // union phân biệt map/scaleContract sống sót qua spread — gộp một object literal là
+    // TypeScript mất dấu "map-enabled thì đã có hợp đồng".
+    if (s.map === false || lens === null) return { ...s, ...shared, map: false as const };
+    return { ...s, ...shared };
   });
 
 export const FIELDS: FieldMeta[] = [
@@ -1142,6 +1236,32 @@ export const FIELDS: FieldMeta[] = [
 ];
 
 export const FIELD_BY_ID = new Map(FIELDS.map((f) => [f.id, f]));
+
+/** Map fields must never reach a scale builder without an explicit registry declaration. */
+export function scaleContractOf(field: FieldMeta): ScaleContract {
+  if (!field.scaleContract) {
+    throw new Error(`Map field ${field.id} is missing scaleContract`);
+  }
+  return field.scaleContract;
+}
+
+export interface ScaleControlModel {
+  gradientDisabled: boolean;
+  reason: string | null;
+}
+
+export function scaleControlFor(
+  field: FieldMeta,
+  paletteGate: { allowed: boolean; reason?: string } = { allowed: true },
+): ScaleControlModel {
+  const contract = scaleContractOf(field);
+  if (contract.color === "fixed-binned") {
+    return { gradientDisabled: true, reason: contract.reason };
+  }
+  return paletteGate.allowed
+    ? { gradientDisabled: false, reason: null }
+    : { gradientDisabled: true, reason: paletteGate.reason ?? "Bảng màu chưa qua cổng gradient." };
+}
 
 /**
  * Cột của LƯỚI mà danh mục này mô tả — đầu vào của cổng ETL→viz (`columns.test.ts`).

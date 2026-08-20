@@ -27,14 +27,14 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { parseNationalHash, serializeNationalHash, type NationalMode } from "./hash";
-import { can3D } from "./elevation";
+import { can3D, elevationButtonNote, elevationDisclosure } from "./elevation";
 import { RES_BASE, resolutionForZoom } from "./lod";
 
 import { POI_GROUPS, POI_GROUP_BY_KEY, type PoiShape } from "../data/poi";
 import { switchDataset } from "../data/province";
 import { DatasetPicker } from "../ui/DatasetPicker";
 import { zoomForBbox } from "../map/positron";
-import { RAMP_HEX, buildScale, classCount, formatBreak, rampFor, type Scale } from "../viz/palette";
+import { RAMP_HEX, buildScale, formatBreak, rampFor, type Scale } from "../viz/palette";
 import {
   loadCells,
   loadNationalManifest,
@@ -60,6 +60,9 @@ import {
   type NationalField,
 } from "./fields";
 import { NationalMap } from "./NationalMap";
+
+const numericValue = (value: unknown): number | null =>
+  typeof value === "number" && Number.isFinite(value) ? value : null;
 
 /** Mọi cột của lưới r6 mà danh mục trường có nhắc tới — nạp một lần, đổi trường không nạp lại. */
 const CELL_COLUMNS = [...new Set(CELL_FIELDS.map((f) => f.column))];
@@ -215,11 +218,16 @@ export default function NationalApp() {
       if (!provinces.length || !Object.keys(rows).length) return null;
       return buildScale(
         "numeric",
-        provinces.map((f) => (rows[f.properties.province_code]?.[field.column] as number) ?? null),
+        provinces.map((f) => numericValue(rows[f.properties.province_code]?.[field.column])),
+        null,
+        undefined,
+        { contract: field.scaleContract },
       );
     }
     if (!cells.length) return null;
-    return buildScale("numeric", cells.map((c) => c[field.column] as number));
+    return buildScale("numeric", cells.map((c) => numericValue(c[field.column])), null, undefined, {
+      contract: field.scaleContract,
+    });
   }, [field, provinces, rows, cells]);
 
   const toggle = (id: string) =>
@@ -260,7 +268,7 @@ export default function NationalApp() {
             // mờ thì đọc thành "hỏng". Xem quyết định 1 ở `elevation.ts`.
             note={
               can3d
-                ? "đùn ô gộp r6 theo BẬC của trường đang tô, pitch 50°"
+                ? elevationButtonNote(field.scaleContract)
                 : "34 khối tỉnh là biểu đồ cột méo theo phối cảnh, không phải bản đồ — chọn một trường của Ô GỘP để bật 3D"
             }
             go={() => setMode("3d")}
@@ -532,12 +540,13 @@ function Legend({
           bậc theo phân vị của {field.unit === "province" ? "34 tỉnh" : `${grid ? Math.round(grid.n_cells / 1000) : "?"} nghìn ô r${grid?.key.slice(-1) ?? "6"}`} — không so được với bậc của một tỉnh, cũng không so được giữa hai bậc lưới
         </span>
         {/* Chỉ hiện Ở 3D, và đó là điều đúng: ở 2D không có kênh chiều cao nào để mà mô tả,
-            một câu mô tả kênh không tồn tại là nhiễu. Con số bậc đến từ `classCount` (tính
-            trên chính dữ liệu đang xem), không gõ tay — ràng buộc 4. */}
-        {mode === "3d" && scale && (
+            một câu mô tả kênh không tồn tại là nhiễu. Câu này đến từ `elevationDisclosure`
+            — nó đọc đúng {transform, clip} mà `elevationFor` đang chạy và số ô vượt trần đo
+            trên chính thang đang vẽ (QA 2.1-002: màu vẫn theo BẬC, chiều cao thì LIÊN TỤC,
+            và legend phải nói câu của kênh chiều cao chứ không mượn câu của kênh màu). */}
+        {mode === "3d" && scale && scale.kind === "numeric" && (
           <span className="border border-hairline px-1 text-note text-ink-muted">
-            chiều cao = cùng trường đang tô, {classCount(scale)} bậc (mã hoá trùng) · ô không
-            đo được giữ phẳng
+            {elevationDisclosure(field.scaleContract, scale.domain)}
           </span>
         )}
       </div>

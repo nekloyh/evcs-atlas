@@ -24,6 +24,24 @@ import {
 
 export type RGB = [number, number, number];
 
+export type ScaleMode = "binned" | "gradient";
+export type ScaleTransform = "linear" | "sqrt";
+export type ScaleClip = { lo: "min" | 0; hi: "p99" | "none" };
+
+export type ScaleContract =
+  | { color: "toggle"; transform: ScaleTransform; clip: ScaleClip }
+  | { color: "fixed-binned"; transform: ScaleTransform; clip: ScaleClip; reason: string };
+
+export interface NumericDomain {
+  lo: number;
+  hi: number;
+  median: number;
+  min: number;
+  max: number;
+  nClippedLow: number;
+  nClippedHigh: number;
+}
+
 export interface ThemePalette {
   hex: readonly [string, string, string, string, string, string, string];
   ink: readonly [string, string, string, string, string, string, string];
@@ -298,6 +316,307 @@ export const THEME_PALETTES: Record<AnalysisTheme, ThemePalette> = {
 export const DIVERGE_NEUTRAL_HEX = ["#86acd3", "#6b95c1", "#527fae"] as const;
 export const DIVERGE_NEUTRAL_INK = ["#0b0b0b", "#0b0b0b", "#0b0b0b"] as const;
 
+interface Oklch {
+  l: number;
+  c: number;
+  h: number;
+}
+
+interface Oklab {
+  l: number;
+  a: number;
+  b: number;
+}
+
+const LUT_SIZE = 256;
+
+function srgbToLinear(v: number): number {
+  const x = v / 255;
+  return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
+}
+
+function linearToSrgb(v: number): number {
+  const x = v <= 0.0031308 ? 12.92 * v : 1.055 * Math.max(v, 0) ** (1 / 2.4) - 0.055;
+  return x * 255;
+}
+
+function rgbToOklab(rgb: RGB): Oklab {
+  const r = srgbToLinear(rgb[0]);
+  const g = srgbToLinear(rgb[1]);
+  const b = srgbToLinear(rgb[2]);
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  return {
+    l: 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+    a: 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+    b: 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+  };
+}
+
+function oklabToRgbRaw(lab: Oklab): RGB {
+  const l = (lab.l + 0.3963377774 * lab.a + 0.2158037573 * lab.b) ** 3;
+  const m = (lab.l - 0.1055613458 * lab.a - 0.0638541728 * lab.b) ** 3;
+  const s = (lab.l - 0.0894841775 * lab.a - 1.291485548 * lab.b) ** 3;
+  return [
+    linearToSrgb(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
+    linearToSrgb(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
+    linearToSrgb(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s),
+  ];
+}
+
+function labToLch(lab: Oklab): Oklch {
+  return { l: lab.l, c: Math.hypot(lab.a, lab.b), h: Math.atan2(lab.b, lab.a) };
+}
+
+function lchToLab(lch: Oklch): Oklab {
+  return { l: lch.l, a: lch.c * Math.cos(lch.h), b: lch.c * Math.sin(lch.h) };
+}
+
+function inGamut(rgb: RGB): boolean {
+  return rgb.every((v) => Number.isFinite(v) && v >= 0 && v <= 255);
+}
+
+/** Preserve OKLCH lightness and hue; reduce only chroma until the color is in sRGB gamut. */
+function lchToRgb(lch: Oklch): RGB {
+  let rgb = oklabToRgbRaw(lchToLab(lch));
+  if (!inGamut(rgb)) {
+    let lo = 0;
+    let hi = lch.c;
+    for (let i = 0; i < 20; i++) {
+      const c = (lo + hi) / 2;
+      const candidate = oklabToRgbRaw(lchToLab({ ...lch, c }));
+      if (inGamut(candidate)) {
+        lo = c;
+        rgb = candidate;
+      } else hi = c;
+    }
+  }
+  // Keep sub-channel precision in the LUT. Rounding 256 samples to 8-bit creates repeated
+  // lightness steps even when the OKLCH path is strictly monotonic; Deck.gl and CSS both
+  // accept fractional sRGB channels and quantize only at the final framebuffer.
+  return [
+    Math.min(255, Math.max(0, rgb[0])),
+    Math.min(255, Math.max(0, rgb[1])),
+    Math.min(255, Math.max(0, rgb[2])),
+  ];
+}
+
+function shorterHue(a: number, b: number, t: number): number {
+  let d = b - a;
+  if (d > Math.PI) d -= 2 * Math.PI;
+  if (d < -Math.PI) d += 2 * Math.PI;
+  return a + d * t;
+}
+
+function interpolateLch(a: Oklch, b: Oklch, t: number): Oklch {
+  return { l: a.l + (b.l - a.l) * t, c: a.c + (b.c - a.c) * t, h: shorterHue(a.h, b.h, t) };
+}
+
+function labDistance(a: Oklab, b: Oklab): number {
+  return Math.hypot(a.l - b.l, a.a - b.a, a.b - b.b);
+}
+
+function relativeLuminance(rgb: RGB): number {
+  const r = srgbToLinear(rgb[0]);
+  const g = srgbToLinear(rgb[1]);
+  const b = srgbToLinear(rgb[2]);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+const BASEMAP_LUMINANCE = relativeLuminance(hexToRgb(COLOR_BASEMAP));
+
+export function contrastAgainstBasemap(rgb: RGB): number {
+  const l = relativeLuminance(rgb);
+  return (Math.max(l, BASEMAP_LUMINANCE) + 0.05) / (Math.min(l, BASEMAP_LUMINANCE) + 0.05);
+}
+
+/**
+ * Interpolate every declared anchor in OKLCH, then re-sample by perceptual arc length.
+ *
+ * KHÔNG có bước cắt/sửa nào ở đây: LUT[0] chính là anchor đầu và LUT[255] là anchor cuối
+ * của danh sách được khai. Bản đầu tiên từng âm thầm cắt đầu nhạt cho tới điểm tương phản
+ * 2:1 — QA 2.1-001 bác cách đó vì nó tạo một endpoint không nằm trong registry và làm cổng
+ * kiểm chạy trên output đã sửa. Việc "đầu nhạt phải đạt 2:1" nay là chuyện của DANH SÁCH
+ * ANCHOR NGUỒN (`SEQUENTIAL_GRADIENT_ANCHORS` + `gradientAvailability`), không phải của
+ * hàm nội suy.
+ */
+function buildLut(anchors: readonly string[]): RGB[] {
+  const lch = anchors.map((h) => labToLch(rgbToOklab(hexToRgb(h))));
+  const path: RGB[] = [];
+  for (let segment = 0; segment < lch.length - 1; segment++) {
+    for (let i = 0; i < 64; i++) {
+      if (segment > 0 && i === 0) continue;
+      path.push(lchToRgb(interpolateLch(lch[segment]!, lch[segment + 1]!, i / 63)));
+    }
+  }
+  const labs = path.map(rgbToOklab);
+  const distance = [0];
+  for (let i = 1; i < labs.length; i++) {
+    distance.push(distance[i - 1]! + labDistance(labs[i - 1]!, labs[i]!));
+  }
+  const total = distance[distance.length - 1] ?? 0;
+  if (total === 0) return Array.from({ length: LUT_SIZE }, () => path[0] ?? [0, 0, 0]);
+  return Array.from({ length: LUT_SIZE }, (_, i) => {
+    const target = (i / (LUT_SIZE - 1)) * total;
+    let hi = 1;
+    while (hi < distance.length && distance[hi]! < target) hi++;
+    const lo = Math.max(0, hi - 1);
+    const span = (distance[hi] ?? total) - distance[lo]!;
+    const t = span > 0 ? (target - distance[lo]!) / span : 0;
+    return lchToRgb(interpolateLch(
+      labToLch(labs[lo]!),
+      labToLch(labs[Math.min(hi, labs.length - 1)]!),
+      t,
+    ));
+  });
+}
+
+/**
+ * Anchor NGUỒN của gradient TUẦN TỰ — bảng khai thứ hai bên cạnh `THEME_PALETTES`, và nó
+ * tồn tại vì hai chế độ chịu hai cổng khác nhau trên cùng một đầu nhạt:
+ *
+ *   · Ở chế độ BẬC, bậc c1 là một Ô legend có chữ đè lên (cổng là mực ≥ 4,5:1) — bản thân
+ *     màu nhạt không cần 2:1 với nền, và mọi hex của `THEME_PALETTES` giữ nguyên byte để
+ *     không đụng vào một pixel nào của Phase 2/4 đã QA.
+ *   · Ở chế độ GRADIENT, đầu nhạt là một ĐIỂM DỮ LIỆU trên bản đồ, và điểm dưới 2:1 với nền
+ *     `#f2f3f0` là điểm vô hình. Đo trên anchor gốc: demand 1,05 · supply 1,60 ·
+ *     utilization 1,56 · accessibility 1,70 · urban-context 1,40 — CẢ NĂM đều rớt sàn,
+ *     không chỉ screening (1,11) như spec §3 dự đoán.
+ *
+ * Nên đầu nhạt được TÁI NEO CÓ KHAI BÁO: mỗi hex đầu dưới đây là giao điểm 2,0:1 đo trên
+ * chính đường cong OKLCH của theme đó (Viénot/WCAG, cùng công thức `contrastAgainstBasemap`),
+ * làm tròn về phía đậm để hex 8-bit vẫn ≥ 2,0. Các anchor gốc còn nằm DƯỚI giao điểm bị
+ * thay bằng giao điểm (demand và urban-context mất anchor thứ hai vì cả nó cũng dưới sàn —
+ * vì thế hai theme đó còn 6 anchor). Đuôi đậm giữ nguyên từng byte của `THEME_PALETTES`.
+ *
+ * `screening` là `null` CÓ CHỦ Ý — spec §3/§8-3 ghim nó là nợ đã biết, bị CHẶN gradient
+ * tuần tự cho tới khi được tái neo qua cổng validate_palette; test mã hoá kỳ vọng đó.
+ */
+export const SEQUENTIAL_GRADIENT_ANCHORS: Record<AnalysisTheme, readonly string[] | null> = {
+  demand: ["#fb942f", ...THEME_PALETTES.demand.hex.slice(2)], // giao điểm 2,0103:1
+  supply: ["#69bcac", ...THEME_PALETTES.supply.hex.slice(1)], // 2,0079:1
+  utilization: ["#d39adc", ...THEME_PALETTES.utilization.hex.slice(1)], // 2,0003:1
+  accessibility: ["#8cb0e0", ...THEME_PALETTES.accessibility.hex.slice(1)], // 2,0054:1
+  "urban-context": ["#73bf6d", ...THEME_PALETTES["urban-context"].hex.slice(2)], // 2,0053:1
+  screening: null,
+  exploration: THEME_PALETTES.exploration.hex, // anchor gốc đã 2,037:1 — không cần tái neo
+};
+
+export interface ThemeLuts {
+  sequential: readonly RGB[] | null;
+  intervention: readonly RGB[] | null;
+  neutral: readonly RGB[];
+}
+
+function lutsFor(theme: AnalysisTheme): ThemeLuts {
+  const palette = THEME_PALETTES[theme];
+  const anchors = SEQUENTIAL_GRADIENT_ANCHORS[theme];
+  return {
+    sequential: anchors ? buildLut(anchors) : null,
+    intervention: palette.diverge ? buildLut(palette.diverge.hex) : null,
+    neutral: buildLut(DIVERGE_NEUTRAL_HEX),
+  };
+}
+
+export const THEME_LUTS: Record<AnalysisTheme, ThemeLuts> = {
+  demand: lutsFor("demand"),
+  supply: lutsFor("supply"),
+  utilization: lutsFor("utilization"),
+  accessibility: lutsFor("accessibility"),
+  "urban-context": lutsFor("urban-context"),
+  screening: lutsFor("screening"),
+  exploration: lutsFor("exploration"),
+};
+
+// ── Cổng gradient: ĐO ở module scope, không hardcode theo tên theme ─────────────────────
+//
+// Hai cổng, hai phép đo, cùng chạy một lần lúc nạp module (như LUT):
+//   · TUẦN TỰ — anchor nguồn đầu tiên phải ≥ 2,0:1 với nền bản đồ (sàn §3 của CR).
+//   · PHÂN KỲ — cặp màu GIÁP MỐC (anchor sát mốc của cánh can thiệp vs cánh xám-lam) phải
+//     giữ ΔE ≥ 15 dưới cả ba cách nhìn: thường, deutan, protan (§4f + acceptance test 5).
+//     Nhờ endpoint identity của `buildLut`, đo trên anchor chính là đo trên LUT sample.
+
+/** Sàn ΔE (Oklab ×100) cho cặp màu giáp mốc phân kỳ — cổng hạng mục §4f. */
+export const PIVOT_MIN_DELTA_E = 15;
+
+/**
+ * Mô phỏng mù màu đỏ-lục theo Viénot–Brettel–Mollon 1999 trên RGB tuyến tính.
+ * Chỉ hai loại đỏ-lục: tritan hiếm hơn hai bậc và §4f không đặt cổng cho nó.
+ */
+export function simulateCvd(rgb: RGB, kind: "deutan" | "protan"): RGB {
+  const r = srgbToLinear(rgb[0]);
+  const g = srgbToLinear(rgb[1]);
+  const b = srgbToLinear(rgb[2]);
+  const L = 0.31399022 * r + 0.63951294 * g + 0.04649755 * b;
+  const M = 0.15537241 * r + 0.75789446 * g + 0.08670142 * b;
+  const S = 0.01775239 * r + 0.10944209 * g + 0.87256922 * b;
+  const L2 = kind === "protan" ? 1.05118294 * M - 0.05116099 * S : L;
+  const M2 = kind === "deutan" ? 0.9513092 * L + 0.04866992 * S : M;
+  const clamp = (v: number) => Math.min(255, Math.max(0, linearToSrgb(v)));
+  return [
+    clamp(5.47221206 * L2 - 4.6419601 * M2 + 0.16963708 * S),
+    clamp(-1.1252419 * L2 + 2.29317094 * M2 - 0.1678952 * S),
+    clamp(0.02980165 * L2 - 0.19318073 * M2 + 1.16364789 * S),
+  ];
+}
+
+/** Khoảng cách Oklab ×100 — cùng thang với các số đo §4f đã ghi trong file này (9,2 · 6,4 · 0,3). */
+export function oklabDeltaE(a: RGB, b: RGB): number {
+  return labDistance(rgbToOklab(a), rgbToOklab(b)) * 100;
+}
+
+type GradientGate = { allowed: true } | { allowed: false; reason: string };
+
+function measureSequentialGate(theme: AnalysisTheme): GradientGate {
+  const anchors = SEQUENTIAL_GRADIENT_ANCHORS[theme];
+  if (!anchors || contrastAgainstBasemap(hexToRgb(anchors[0]!)) < 2) {
+    return {
+      allowed: false,
+      reason: "Đầu sáng của bảng màu này chưa đạt tương phản 2:1 với nền bản đồ.",
+    };
+  }
+  return { allowed: true };
+}
+
+function measureDivergingGate(theme: AnalysisTheme): GradientGate {
+  const arm = THEME_PALETTES[theme].diverge;
+  if (!arm) {
+    return { allowed: false, reason: "Bảng phân kỳ của bảng màu này chưa qua cổng tương phản." };
+  }
+  const nearPivot = hexToRgb(arm.hex[0]);
+  const neutral = hexToRgb(DIVERGE_NEUTRAL_HEX[0]);
+  const passes =
+    oklabDeltaE(nearPivot, neutral) >= PIVOT_MIN_DELTA_E &&
+    (["deutan", "protan"] as const).every(
+      (kind) => oklabDeltaE(simulateCvd(nearPivot, kind), simulateCvd(neutral, kind)) >= PIVOT_MIN_DELTA_E,
+    );
+  return passes
+    ? { allowed: true }
+    : {
+        allowed: false,
+        reason: "Cặp màu giáp mốc của bảng này không giữ được ΔE ≥ 15 dưới mù màu đỏ-lục.",
+      };
+}
+
+const THEME_LIST = Object.keys(THEME_LUTS) as AnalysisTheme[];
+const SEQUENTIAL_GATES = Object.fromEntries(
+  THEME_LIST.map((theme) => [theme, measureSequentialGate(theme)]),
+) as Record<AnalysisTheme, GradientGate>;
+const DIVERGING_GATES = Object.fromEntries(
+  THEME_LIST.map((theme) => [theme, measureDivergingGate(theme)]),
+) as Record<AnalysisTheme, GradientGate>;
+
+/**
+ * Gradient có được BẬT cho theme này không — kết quả ĐO, không phải một danh sách tên.
+ * `screening` tuần tự rớt vì không có anchor tái neo (nợ §3); `exploration` phân kỳ rớt vì
+ * cặp giáp mốc chỉ còn ΔE 13,9 dưới protan — không trường phân kỳ nào đang dùng theme đó,
+ * nhưng cổng phải chặn trước khi có trường đầu tiên chứ không phải sau.
+ */
+export function gradientAvailability(theme: AnalysisTheme, diverging: boolean): { allowed: boolean; reason?: string } {
+  return diverging ? DIVERGING_GATES[theme] : SEQUENTIAL_GATES[theme];
+}
+
 export function getThemePalette(theme?: AnalysisTheme): ThemePalette {
   return THEME_PALETTES[theme ?? "exploration"] ?? THEME_PALETTES.exploration;
 }
@@ -420,6 +739,9 @@ export type CellValue = number | boolean | string | null | undefined;
 
 export interface NumericScale {
   kind: "numeric";
+  mode: ScaleMode;
+  domain: NumericDomain;
+  transform: ScaleTransform;
   /** Ngưỡng dưới của từng bậc, tăng dần. Độ dài = số bậc thật (có thể < 7). */
   breaks: number[];
   /** Bậc 1 có phải là tập {0} riêng không — DESIGN.md §6a quy tắc 2. */
@@ -455,6 +777,7 @@ export interface NumericScale {
 
 export interface BoolScale {
   kind: "bool";
+  mode: "binned";
   /** Bậc 0 = false, bậc 1 = true. Hai bậc, dùng c2 và c6 — §6a quy tắc 4. */
   n: number;
   nNull: number;
@@ -463,6 +786,7 @@ export interface BoolScale {
 
 export interface CategoricalScale {
   kind: "categorical";
+  mode: "binned";
   /** Hạng mục xếp theo số ô giảm dần. Màu là bậc LẠNH, không phải ramp — §6a quy tắc 5. */
   categories: string[];
   counts: number[];
@@ -488,6 +812,12 @@ const ZERO_SHARE_THRESHOLD = 0.05;
 /** Số bậc MỖI PHÍA của thang phân kỳ. Bằng nhau hai bên là điều kiện để "cách mốc bao xa"
  *  đọc được bằng khoảng cách trên dải — lệch bậc thì cùng một quãng nói hai điều. */
 const DIVERGING_PER_SIDE = 3;
+const DEFAULT_SCALE_CONTRACT: ScaleContract = {
+  color: "fixed-binned",
+  transform: "linear",
+  clip: { lo: "min", hi: "none" },
+  reason: "Thang này chỉ hỗ trợ bậc.",
+};
 
 /**
  * Khai báo PHÂN KỲ của một trường — thứ mà `Polarity` không nói được.
@@ -523,6 +853,34 @@ function quantile(sorted: number[], p: number): number {
   return a + (sorted[hi]! - a) * (i - lo);
 }
 
+function emptyDomain(): NumericDomain {
+  return { lo: 0, hi: 0, median: 0, min: 0, max: 0, nClippedLow: 0, nClippedHigh: 0 };
+}
+
+function domainFor(values: number[], contract: ScaleContract, diverge: Diverge | null): NumericDomain {
+  const sorted = values.filter(Number.isFinite).slice().sort((a, b) => a - b);
+  if (sorted.length === 0) return emptyDomain();
+  const min = sorted[0]!;
+  const max = sorted[sorted.length - 1]!;
+  const lo = contract.clip.lo === 0 ? 0 : min;
+  let hi: number;
+  if (contract.clip.hi === "none") hi = max;
+  else if (diverge) {
+    const above = sorted.filter((v) => v >= diverge.at);
+    hi = above.length ? quantile(above, 0.99) : diverge.at;
+  } else hi = quantile(sorted, 0.99);
+  if (!Number.isFinite(hi)) hi = max;
+  return {
+    lo,
+    hi,
+    median: quantile(sorted, 0.5),
+    min,
+    max,
+    nClippedLow: sorted.reduce((n, v) => n + (v < lo ? 1 : 0), 0),
+    nClippedHigh: sorted.reduce((n, v) => n + (v > hi ? 1 : 0), 0),
+  };
+}
+
 /**
  * Chia bậc theo DESIGN.md §6a:
  *   1. mặc định 7 bậc phân vị trên giá trị không null
@@ -549,7 +907,10 @@ export function computeClassing(values: (number | null | undefined)[]): NumericS
     else present.push(v);
   }
   if (present.length === 0)
-    return { kind: "numeric", breaks: [], zeroClass: false, max: null, counts: [], n: 0, nNull, diverge: null };
+    return {
+      kind: "numeric", mode: "binned", domain: emptyDomain(), transform: "linear",
+      breaks: [], zeroClass: false, max: null, counts: [], n: 0, nNull, diverge: null,
+    };
 
   const nZero = present.reduce((acc, v) => (v === 0 ? acc + 1 : acc), 0);
   const zeroClass = nZero / present.length >= ZERO_SHARE_THRESHOLD;
@@ -569,6 +930,9 @@ export function computeClassing(values: (number | null | undefined)[]): NumericS
 
   return {
     kind: "numeric",
+    mode: "binned",
+    domain: domainFor(present, DEFAULT_SCALE_CONTRACT, null),
+    transform: "linear",
     breaks,
     zeroClass,
     max: pool[pool.length - 1] ?? null,
@@ -631,6 +995,9 @@ export function computeDivergingClassing(
 
   return {
     kind: "numeric",
+    mode: "binned",
+    domain: domainFor(present, DEFAULT_SCALE_CONTRACT, d),
+    transform: "linear",
     breaks,
     zeroClass: false,
     max: above[above.length - 1] ?? null,
@@ -663,7 +1030,10 @@ export function computeDivergingClassing(
 export function computeClassingByWeight(values: number[]): NumericScale {
   const pool = values.filter((v) => Number.isFinite(v) && v > 0).slice().sort((a, b) => a - b);
   if (pool.length === 0)
-    return { kind: "numeric", breaks: [], zeroClass: false, max: null, counts: [], n: 0, nNull: 0, diverge: null };
+    return {
+      kind: "numeric", mode: "binned", domain: emptyDomain(), transform: "linear",
+      breaks: [], zeroClass: false, max: null, counts: [], n: 0, nNull: 0, diverge: null,
+    };
 
   const total = pool.reduce((a, b) => a + b, 0);
   const breaks: number[] = [];
@@ -677,6 +1047,9 @@ export function computeClassingByWeight(values: number[]): NumericScale {
   }
   return {
     kind: "numeric",
+    mode: "binned",
+    domain: domainFor(pool, DEFAULT_SCALE_CONTRACT, null),
+    transform: "linear",
     breaks,
     zeroClass: false,
     max: pool[pool.length - 1]!,
@@ -693,16 +1066,51 @@ export function computeClassingByWeight(values: number[]): NumericScale {
  * Quy tắc 4: bool → 2 bậc. Quy tắc 5: hạng mục → bậc lạnh, KHÔNG dùng ramp tuần tự, vì
  * thứ tự ở đó không có nghĩa. Cả hai vẫn chỉ tô MỘT trường mỗi lúc (ràng buộc 2).
  */
+export interface ScaleBuildOptions {
+  contract: ScaleContract;
+  requestedMode?: ScaleMode;
+  gradientAllowed?: boolean;
+}
+
+function numericScaleWithContract(
+  scale: NumericScale,
+  present: number[],
+  options: ScaleBuildOptions,
+): NumericScale {
+  const requested = options.requestedMode ?? "binned";
+  return {
+    ...scale,
+    // `scale.n > 0` là hợp đồng null (QA 2.1-004): tập rỗng/toàn-null không có miền số nào
+    // để nội suy — `emptyDomain()` toàn số 0 là sentinel, và một dải gradient 0→0 sẽ trình
+    // bày "không có dữ liệu" như một phép đo bằng 0 hợp lệ.
+    mode:
+      options.contract.color === "toggle" &&
+      requested === "gradient" &&
+      options.gradientAllowed !== false &&
+      scale.n > 0
+        ? "gradient"
+        : "binned",
+    domain: domainFor(present, options.contract, scale.diverge),
+    transform: options.contract.transform,
+  };
+}
+
 export function buildScale(
   kind: "numeric" | "bool" | "categorical",
   values: CellValue[],
   /** Khai báo phân kỳ của trường (`FieldMeta.diverge`) — vắng thì chia bậc tuần tự. */
   diverge?: Diverge | null,
   categorical?: CategoricalContract,
+  options: ScaleBuildOptions = { contract: DEFAULT_SCALE_CONTRACT },
 ): Scale {
   if (kind === "numeric") {
-    const nums = values.map((v) => (typeof v === "number" ? v : null));
-    return diverge ? computeDivergingClassing(nums, diverge) : computeClassing(nums);
+    const nums = values.map((v) => (typeof v === "number" && Number.isFinite(v) ? v : null));
+    const present = nums.filter((v): v is number => v !== null);
+    return numericScaleWithContract(
+      diverge ? computeDivergingClassing(nums, diverge) : computeClassing(nums),
+      present,
+      options,
+    );
   }
   if (kind === "bool") {
     const counts: [number, number] = [0, 0];
@@ -712,7 +1120,7 @@ export function buildScale(
       else if (v) counts[1]++;
       else counts[0]++;
     }
-    return { kind: "bool", n: counts[0] + counts[1], nNull, counts };
+    return { kind: "bool", mode: "binned", n: counts[0] + counts[1], nNull, counts };
   }
   const tally = new Map<string, number>();
   let nNull = 0;
@@ -741,6 +1149,7 @@ export function buildScale(
     : undefined;
   return {
     kind: "categorical",
+    mode: "binned",
     categories: sorted.map(([k]) => k),
     counts: sorted.map(([, c]) => c),
     n: sorted.reduce((s, [, c]) => s + c, 0),
@@ -753,6 +1162,22 @@ export function buildScale(
 /** Số bậc thật của một scale — legend hiện đúng chừng này swatch, không độn (§6a-3). */
 export function classCount(s: Scale): number {
   return s.kind === "numeric" ? s.breaks.length : s.kind === "bool" ? 2 : s.categories.length;
+}
+
+/** Change only the encoding mode; domain/classing identity stays memoized with the dataset. */
+export function applyScaleMode(
+  scale: Scale,
+  contract: ScaleContract,
+  requested: ScaleMode,
+  gradientAllowed: boolean,
+): Scale {
+  if (scale.kind !== "numeric") return scale;
+  // Cùng luật n > 0 với `numericScaleWithContract` — xem chú thích ở đó (QA 2.1-004).
+  const mode =
+    contract.color === "toggle" && requested === "gradient" && gradientAllowed && scale.n > 0
+      ? "gradient"
+      : "binned";
+  return scale.mode === mode ? scale : { ...scale, mode };
 }
 
 /**
@@ -858,7 +1283,7 @@ export function classOf(value: CellValue, s: Scale): number | null {
     const i = s.categories.indexOf(String(value));
     return i < 0 ? null : i;
   }
-  if (typeof value !== "number" || Number.isNaN(value)) return null;
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
   if (s.breaks.length === 0) return null;
   if (s.zeroClass && value === 0) return 0;
   let idx = 0;
@@ -866,11 +1291,115 @@ export function classOf(value: CellValue, s: Scale): number | null {
   return idx;
 }
 
+function transformed(x: number, transform: ScaleTransform): number {
+  const clamped = Math.min(1, Math.max(0, x));
+  return transform === "sqrt" ? Math.sqrt(clamped) : clamped;
+}
+
+export function sequentialPosition(value: number, scale: NumericScale): number {
+  const { lo, hi } = scale.domain;
+  if (!Number.isFinite(value)) return 0;
+  if (!(hi > lo)) return value > hi ? 1 : 0;
+  return transformed((Math.min(hi, Math.max(lo, value)) - lo) / (hi - lo), scale.transform);
+}
+
+/** Diverging color bars reserve exactly half their width for each arm. */
+export function colorPosition(value: number, scale: NumericScale): number {
+  const d = scale.diverge;
+  if (!d) return sequentialPosition(value, scale);
+  const { lo, hi } = scale.domain;
+  if (value < d.at) {
+    const span = d.at - lo;
+    const magnitude = span > 0 ? (d.at - Math.max(lo, value)) / span : 0;
+    return 0.5 * (1 - transformed(magnitude, scale.transform));
+  }
+  const span = hi - d.at;
+  const magnitude = span > 0 ? (Math.min(hi, value) - d.at) / span : 0;
+  return 0.5 + 0.5 * transformed(magnitude, scale.transform);
+}
+
+/** Shared continuous magnitude for elevation; diverging arms use one normalizer. */
+export function elevationPosition(value: number, scale: NumericScale): number {
+  const d = scale.diverge;
+  if (!d) return sequentialPosition(value, scale);
+  const { lo, hi } = scale.domain;
+  const clipped = Math.min(hi, Math.max(lo, value));
+  const span = Math.max(Math.abs(lo - d.at), Math.abs(hi - d.at));
+  return span > 0 ? transformed(Math.abs(clipped - d.at) / span, scale.transform) : 0;
+}
+
+export interface GradientStop {
+  color: RGB;
+  /** CSS-position fraction on the legend bar. */
+  position: number;
+}
+
+/**
+ * Legend samples the exact module-scope LUTs used by `colorFor`; it never invents a CSS
+ * interpolation space of its own. Diverging scales duplicate the pivot so the semantic
+ * boundary remains a hard notch instead of blending the two arms into a third colour.
+ */
+export function gradientStops(
+  scale: NumericScale,
+  theme?: AnalysisTheme,
+  sampleCount = 32,
+): GradientStop[] {
+  const count = Math.max(16, sampleCount);
+  const activeTheme = theme ?? "exploration";
+  const luts = THEME_LUTS[activeTheme];
+  if (!scale.diverge) {
+    const lut = luts.sequential;
+    if (!lut) return [];
+    return Array.from({ length: count }, (_, i) => ({
+      color: lut[Math.round((i / (count - 1)) * (lut.length - 1))]!,
+      position: i / (count - 1),
+    }));
+  }
+  if (!luts.intervention) return [];
+  const below = scale.diverge.hue === "below" ? luts.intervention : luts.neutral;
+  const above = scale.diverge.hue === "below" ? luts.neutral : luts.intervention;
+  const armCount = Math.max(8, Math.floor(count / 2));
+  const stops: GradientStop[] = [];
+  for (let i = 0; i < armCount; i++) {
+    const p = i / (armCount - 1);
+    stops.push({
+      color: below[Math.round((1 - p) * (below.length - 1))]!,
+      position: p * 0.5,
+    });
+  }
+  for (let i = 0; i < armCount; i++) {
+    const p = i / (armCount - 1);
+    stops.push({
+      color: above[Math.round(p * (above.length - 1))]!,
+      position: 0.5 + p * 0.5,
+    });
+  }
+  return stops;
+}
+
 /**
  * ĐƯỜNG VÀO DUY NHẤT từ giá trị sang màu.
  * Trả `null` khi không có giá trị — người gọi phải vẽ gạch chéo, KHÔNG được thay bằng 0.
  */
 export function colorFor(value: CellValue, s: Scale, theme?: AnalysisTheme): RGB | null {
+  if (s.kind === "numeric" && s.mode === "gradient") {
+    if (typeof value !== "number" || !Number.isFinite(value)) return null;
+    const activeTheme = theme ?? "exploration";
+    if (s.diverge) {
+      const intervention = THEME_LUTS[activeTheme].intervention;
+      if (!intervention) return null;
+      const belowIntervention = s.diverge.hue === "below";
+      const arm = value < s.diverge.at
+        ? (belowIntervention ? intervention : THEME_LUTS[activeTheme].neutral)
+        : (belowIntervention ? THEME_LUTS[activeTheme].neutral : intervention);
+      const p = colorPosition(value, s);
+      const magnitude = value < s.diverge.at ? 1 - p * 2 : (p - 0.5) * 2;
+      return arm[Math.round(Math.min(1, Math.max(0, magnitude)) * (arm.length - 1))] ?? null;
+    }
+    const lut = THEME_LUTS[activeTheme].sequential;
+    if (!lut) return null;
+    return lut[Math.round(sequentialPosition(value, s) * (lut.length - 1))] ?? null;
+  }
   const k = classOf(value, s);
   if (k === null) return null;
   return scaleColors(s, theme)[k] ?? null;

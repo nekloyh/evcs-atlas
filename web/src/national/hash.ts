@@ -65,7 +65,7 @@ export function serializeNationalHash(prev: string, s: NationalHash): string {
   // Các khoá chỉ có nghĩa trong workspace tỉnh không được đi theo link toàn quốc. Vẫn giữ
   // khoá lạ của caller (`giu=nguyen` trong test), nhưng loại state đã có owner rõ ràng để
   // URL không mang hai workspace chồng lên nhau.
-  for (const key of ["s", "d", "v", "p", "c", "t", "b"]) p.delete(key);
+  for (const key of ["s", "d", "v", "p", "c", "t", "b", "sc"]) p.delete(key);
   p.set(PROVINCE_KEY, NATIONAL);
   p.set("f", s.field);
   if (s.layers.size) p.set("l", [...s.layers].sort().join(","));

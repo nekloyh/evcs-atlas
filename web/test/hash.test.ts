@@ -24,6 +24,7 @@ import { DEFAULT_DATASET_ID } from "../src/state/selection.ts";
 const VIEW = { lng: 105.84, lat: 21, zoom: 9.3, pitch: 0, bearing: 0 };
 const BASE: HashState = {
   field: "population",
+  scaleMode: "binned",
   mode: "2d",
   view: VIEW,
   layers: [],
@@ -104,6 +105,19 @@ test("`l` ghi theo thứ tự CHUẨN HOÁ, không theo thứ tự bấm", () =>
 
 test("không overlay nào bật thì KHÔNG ghi khoá `l` rỗng", () => {
   assert.doesNotMatch(serializeHash(BASE), /l=/);
+});
+
+test("`sc` round-trip gradient; absent và giá trị lạ đều về binned", () => {
+  assert.equal(parseHash("#sc=g").scaleMode, "gradient");
+  assert.equal(parseHash("#f=population").scaleMode, "binned");
+  assert.equal(parseHash("#sc=continuous").scaleMode, "binned");
+  assert.match(serializeHash({ ...BASE, scaleMode: "gradient" }), /(?:^|&)sc=g(?:&|$)/);
+  assert.doesNotMatch(serializeHash(BASE), /(?:^|&)sc=/);
+});
+
+test("story pin binned và preset/hash mặc định không tự phát `sc`", () => {
+  assert.equal(parseHash("#s=von-cuc&sc=g").scaleMode, "binned");
+  assert.doesNotMatch(serializeHash(BASE), /(?:^|&)sc=/);
 });
 
 // ── Khoá `f` — hai họ trường (§6b) ─────────────────────────────────────────────
@@ -306,6 +320,7 @@ test("filter range giữ `..` và `-` đọc được bằng mắt", () => {
 test("ghi rồi đọc lại cho đúng state ban đầu", () => {
   const state: HashState = {
     field: "commune:ports_per_10k_pop",
+    scaleMode: "binned",
     mode: "2d",
     view: { lng: 105.84, lat: 21, zoom: 11, pitch: 0, bearing: 0 },
     layers: ["stations", "beyond2km"],

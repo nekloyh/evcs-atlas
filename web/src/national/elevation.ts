@@ -12,29 +12,32 @@
  * zoom, `POI_BLOCK_HEIGHT_M` là hằng 40 m. Đùn ô r6 phá luật đó — nên nó phải phá theo
  * đúng một cách và nói ra cách ấy.
  *
- * Cách đó là **mã hoá trùng**: chiều cao đọc từ `classOf(value, scale)`, đúng con số sinh
- * ra màu. Hệ quả là 3D **không thêm một thang thứ hai** — nó chỉ dựng cùng bảy bậc mà
- * legend đang in lên khỏi mặt phẳng.
- *
- * Lấy giá trị THÔ thì hỏng theo kiểu im lặng: bậc cuối là một khoảng MỞ (với
- * `ports_per_10k_pop` nó bắt đầu ở 11 và chạy tới 230,7), nên một ô ngoại lai sẽ vọt lên
- * trời trong khi vẫn mang đúng màu bậc cuối như hàng xóm — bản đồ có hai thang mà legend
- * chỉ in một.
+ * Cách đó là **mã hoá trùng** trên một miền: màu liên tục và chiều cao cùng đọc
+ * `scale.domain` + `scale.transform`; ở chế độ bậc, màu giữ các bậc đã QA còn chiều cao
+ * vẫn giữ độ lớn bên trong bậc. Giá trị ngoại lai bị chặn ở biên khai trong Registry và
+ * plateau được legend công bố, nên 3D không dựng một thang ngầm thứ hai.
  *
  * ── CỰC TÍNH KHÔNG VÀO ĐÂY ────────────────────────────────────────────────────────────
  *
  * `elevationFor` nhận đúng hai thứ: giá trị và thang. `polarity` **không** phải tham số,
  * và đó là cố ý: cực tính chỉ lật ánh xạ bậc→MÀU để giữ bất biến "đậm = chỗ cần can
  * thiệp" (§M2.1-B); nó không đổi bậc. Cho nó vào đây là dựng hai quy tắc cho một câu hỏi,
- * và làm mất bất biến dễ đọc nhất của chế độ này: **cao = giá trị lớn**, ở mọi trường.
+ * và làm mất bất biến dễ đọc nhất của thang tuần tự: **cao = giá trị lớn**. Với thang
+ * phân kỳ, hợp đồng Registry đổi câu đó thành **cao = xa mốc**.
  */
 
-import { classCount, classOf, type CellValue, type Scale } from "../viz/palette";
+import {
+  elevationPosition,
+  type CellValue,
+  type NumericDomain,
+  type Scale,
+  type ScaleContract,
+} from "../viz/palette";
 import type { NationalUnit } from "./fields";
 import { RES_BASE } from "./lod";
 
 /**
- * Chiều cao của bậc CAO NHẤT, mét.
+ * Chiều cao liên tục CAO NHẤT, mét.
  *
  * **Hiệu chuẩn bằng ảnh render ở z4,6 (khung nhìn mặc định của cả nước), pitch 50°** —
  * không phải bằng một con số tròn cho đẹp. Mốc: khối cao nhất trông cao khoảng **1–1,5 lần
@@ -56,13 +59,15 @@ import { RES_BASE } from "./lod";
  *
  * 14 km là ~3,6 lần cạnh ô tính theo mét, và điều đó phải nói ra: ở một khung nhìn cả nước
  * thì chiều cao **buộc phải phóng đại** so với tỉ lệ mặt đất, nếu không nó không tồn tại
- * trên màn. Đó chính là lý do legend phải in ra rằng chiều cao là bậc — nó không phải một
+ * trên màn. Đó chính là lý do legend phải in ra rằng chiều cao là mã hoá — nó không phải một
  * đại lượng đo được bằng thước.
  *
  * Con số này là hằng số THẬT, không giấu sau `elevationScale`: một hằng số có tên thì đọc
  * được ở đây, còn một hệ số nhân trên layer thì phải nhân nhẩm mới biết khối cao bao nhiêu.
  */
 export const MAX_ELEV_M = 14_000;
+export const MAX_ELEV_R8_M = 1_800;
+export const ELEVATION_FLOOR = 0.02;
 
 /**
  * Trần chiều cao ở MỘT bậc lưới — hằng trên là giá trị ở bậc gốc r6.
@@ -96,9 +101,9 @@ export function can3D(unit: NationalUnit): boolean {
  *
  * Hai luật, và luật thứ hai mới là luật khó:
  *
- *  1. **Không đo được ⇒ 0** (`classOf` trả `null`). Ô đó vẫn vẽ VÂN xám như ở 2D.
- *  2. **Mọi ô CÓ ĐO đều nhô lên**, kể cả bậc thấp nhất — vì thế là `(k + 1) / n` chứ không
- *     phải `k / (n - 1)`. Không có sàn này thì bậc 1 cao đúng 0 m, tức **trông y hệt ô
+ *  1. **Không đo được ⇒ 0**. Ô đó vẫn vẽ VÂN xám như ở 2D.
+ *  2. **Mọi ô CÓ ĐO đều nhô lên**, kể cả giá trị ở sàn miền — vì thế có sàn 2%. Không có
+ *     nó thì giá trị đo ở `lo` cao đúng 0 m, tức **trông y hệt ô
  *     không đo được**, và "chưa ai đo" đọc thành "đo ra bằng 0" — cùng họ với bẫy "meter
  *     rỗng đọc thành 0%".
  *
@@ -114,10 +119,42 @@ export function elevationFor(
   scale: Scale | null,
   max: number = MAX_ELEV_M,
 ): number {
-  if (!scale) return 0;
-  const k = classOf(value, scale);
-  if (k === null) return 0;
-  const n = classCount(scale);
-  if (n <= 0) return 0;
-  return (max * (k + 1)) / n;
+  if (!scale || scale.kind !== "numeric" || scale.n === 0) return 0;
+  if (typeof value !== "number" || !Number.isFinite(value)) return 0;
+  const position = elevationPosition(value, scale);
+  return max * Math.max(ELEVATION_FLOOR, position);
+}
+
+function transformName(contract: ScaleContract): string {
+  return contract.transform === "sqrt" ? "thang căn bậc hai" : "thang tuyến tính";
+}
+
+function ceilingName(contract: ScaleContract): string {
+  return contract.clip.hi === "p99" ? "trần p99" : "không cắt trần";
+}
+
+/**
+ * Câu mô tả kênh chiều cao ở legend — THUẦN và có test, vì đây đúng là chỗ đã nói dối một
+ * lần (QA 2.1-002): chiều cao đã chuyển sang LIÊN TỤC trên miền {transform, clip} nhưng
+ * legend vẫn tuyên bố "N bậc". Câu này đọc từ chính `ScaleContract` của trường và
+ * `NumericDomain` của thang đang vẽ, nên nó không thể trôi khỏi công thức của
+ * `elevationFor` mà không đổi cùng một khai báo.
+ */
+export function elevationDisclosure(
+  contract: ScaleContract,
+  domain: NumericDomain | null,
+): string {
+  const overflow =
+    domain && domain.nClippedHigh > 0
+      ? ` · ${domain.nClippedHigh.toLocaleString("vi-VN")} ô vượt trần cao bằng trần`
+      : "";
+  return (
+    `chiều cao = cùng trường đang tô, liên tục theo ${transformName(contract)} · ` +
+    `${ceilingName(contract)}${overflow} · không đo bằng thước · ô không đo được giữ phẳng`
+  );
+}
+
+/** Chú thích của nút 3D — cùng nguồn khai báo với `elevationDisclosure`, chỉ ngắn hơn. */
+export function elevationButtonNote(contract: ScaleContract): string {
+  return `đùn ô gộp liên tục theo ${transformName(contract)} của trường đang tô, ${ceilingName(contract)}, pitch 50°`;
 }

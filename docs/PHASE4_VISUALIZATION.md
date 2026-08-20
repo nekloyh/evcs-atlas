@@ -99,6 +99,13 @@ encodes value by position, not hue; Supply tiers must not borrow the Station-por
 Null uses the shared hatch/open-mark token. A chart may use position, outline, or opacity
 for its controlled state, but may not introduce a second data hue.
 
+Phase 2.1 scale mode does not change chart business logic. Map gradients and binned maps
+both read their anchors/LUT from the Lens Registry palette; single-series charts continue
+to read that palette's `series` anchor. Histogram/heatmap bins remain binned in both map
+modes. `Legend` alone branches between the QA'd swatch ruler and the transform-aware LUT
+gradient; both branches receive the runtime `Scale`, and null/not-applicable/filtered
+materials remain outside the numeric bar.
+
 ### 1.2 Demand → Population Histogram
 
 Chart ID: `demand-population-histogram`

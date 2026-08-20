@@ -389,6 +389,7 @@ test("Hash: sim=<lat>,<lng> parses to candidate with 5 decimal precision", () =>
 test("Hash: serializeHash preserves candidate in sim parameter", () => {
   const state = {
     field: "population",
+    scaleMode: "binned" as const,
     mode: "2d" as const,
     view: { lng: 105.85, lat: 21.02, zoom: 12, pitch: 0, bearing: 0 },
     layers: [],
@@ -621,6 +622,7 @@ test("T22: hash sim= hỏng bị BỎ, không sinh ứng viên (F9)", () => {
   // round-trip: serialize rồi parse trả đúng toạ độ 5 chữ số
   const st = {
     field: "population",
+    scaleMode: "binned" as const,
     mode: "2d" as const,
     view: { lng: 105.85, lat: 21.02, zoom: 12, pitch: 0, bearing: 0 },
     layers: [],

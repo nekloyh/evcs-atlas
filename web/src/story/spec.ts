@@ -272,6 +272,8 @@ export type SceneChartBinding =
 
 export interface SceneSpec {
   id: SceneId;
+  /** Approved scenes pin the QA-verified binned encoding. */
+  scaleMode: "binned";
   /** nhãn nhỏ phía trên tiêu đề — nối cảnh với luận điểm của §13d */
   kicker: string;
   title: string;
@@ -295,6 +297,7 @@ export interface SceneSpec {
 /** State mà một cảnh GHI ĐÈ lên store dùng chung — luật L1 của §14a. Mọi khoá bắt buộc. */
 export interface SceneState {
   field: string;
+  scaleMode: "binned";
   view: View;
   layers: OverlayId[];
   select: string | null;

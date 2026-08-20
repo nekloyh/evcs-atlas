@@ -68,6 +68,7 @@ const VIEW = { lng: 105.84, lat: 21, zoom: 9.3, pitch: 0, bearing: 0 };
 const BASE: HashState = {
   nationalMode: false,
   field: "population",
+  scaleMode: "binned",
   mode: "2d",
   view: VIEW,
   layers: [],

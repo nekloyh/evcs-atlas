@@ -364,6 +364,7 @@ const VIEW = { lng: 105.84, lat: 21, zoom: 9.3, pitch: 0, bearing: 0 };
 const MAP_STATE: HashState = {
   nationalMode: false,
   field: "population",
+  scaleMode: "binned",
   mode: "2d",
   view: VIEW,
   layers: ["stations"],
@@ -505,6 +506,7 @@ test("thoát cảnh để lại một trường HỢP LỆ — bàn giao L2 khô
 test("`s=<cảnh>.<nhịp>` vòng ghi ↔ đọc, và nhịp ĐẦU không phát hậu tố", () => {
   const st = (scene: string, beat: string | null): HashState => ({
     field: "population",
+    scaleMode: "binned",
     mode: "2d",
     view: { lng: 105, lat: 21, zoom: 10, pitch: 0, bearing: 0 },
     layers: [],
