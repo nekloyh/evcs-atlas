@@ -6,7 +6,7 @@
  */
 
 import type { AnalysisFilter, PowerTierId } from "../state/filter";
-import { POWER_TIER_LABELS, POWER_TIER_ORDER, powerTierOf } from "../state/filter";
+import { POWER_TIER_LABELS, POWER_TIER_ORDER, isKnownPopulation, powerTierOf } from "../state/filter";
 import type { GridCell, StationPoint } from "../data/queries";
 import { BEYOND_2KM_M } from "../domain-thresholds";
 import type { StationOccupancy } from "../data/occupancy";
@@ -48,6 +48,90 @@ export interface DemandHistogramModel {
 }
 
 const N_POSITIVE_BINS = 23;
+/** Một khe `=0` + 23 cột dương. Đây là hằng BỐ CỤC của §1.2, không phải một break dữ liệu. */
+const N_POPULATION_SLOTS = N_POSITIVE_BINS + 1;
+
+// ── 1a. Miền hiển thị dân số — MỘT chỗ khai, ba chỗ đọc (CR 4.2 §B, F5) ─────
+//
+// Trước CR 4.2 phép đặt chỗ này có HAI bản: `buildDemandPopulationHistogram` dựng
+// `plotX1/plotX2` từ `log1p` trên `[minPositive, max]`, còn `PopulationHistogram` chép lại
+// nguyên phép ấy cho vạch thập phân. Bản thứ BA — scatter bằng chứng — bị từ chối: một
+// công thức đặt chỗ có ba bản là ba cơ hội để cột histogram và chấm scatter nói về hai
+// khoảng khác nhau mà không lỗi nào phát ra.
+//
+// Trích nguyên văn từ bản dựng cột, nên phép tách này KHÔNG đổi hành vi; cổng canh là bộ
+// test histogram sẵn có (`chart-models.test.ts`, `phase41-chart-encoding.test.ts`).
+
+export interface PopulationDisplayDomain {
+  /** Giá trị DƯƠNG nhỏ nhất trong tập — mốc trái của dải log. `0` khi tập không có số dương. */
+  minPositivePop: number;
+  maxPop: number;
+  /** Tập có ít nhất một ô dân số dương không. Sai ⇒ chỉ còn khe `=0`, chiếm trọn bề ngang. */
+  hasPositive: boolean;
+}
+
+/**
+ * Miền hiển thị suy từ MỌI ô có dân số đọc được — không phải từ tập con đang vẽ.
+ *
+ * Vị từ là `isKnownPopulation` của `state/filter.ts` (§5.2 giao phép thử cho module ấy),
+ * nên bẫy `pop = -1` chỉ có một định nghĩa trong cả app.
+ */
+export function populationDisplayDomain(
+  cells: readonly { pop: number | null | undefined }[],
+): PopulationDisplayDomain {
+  let minPositive = Infinity;
+  let maxPop = 0;
+  for (const c of cells) {
+    if (!isKnownPopulation(c.pop)) continue;
+    if (c.pop > 0) {
+      if (c.pop < minPositive) minPositive = c.pop;
+      if (c.pop > maxPop) maxPop = c.pop;
+    }
+  }
+  const hasPositive = Number.isFinite(minPositive);
+  if (!hasPositive) minPositive = 0;
+  if (maxPop < minPositive) maxPop = minPositive;
+  return { minPositivePop: minPositive, maxPop, hasPositive };
+}
+
+/**
+ * Một giá trị dân số → vị trí trên bề ngang khung vẽ, trong `[0, 1]`.
+ *
+ * `v === 0` rơi vào khe phân loại `[0, 1/24]` và trả về TÂM khe — `0` là một giá trị thật
+ * (§1.2), không phải giá trị thiếu, nên nó có chỗ đứng riêng chứ không bị gộp vào dải dương.
+ * `v > 0` đặt chỗ bằng `log1p` chuẩn hoá trên `[minPositive, maxPop]`, lấp phần `[1/24, 1]`.
+ *
+ * Phép `log1p` chỉ ĐẶT CHỖ. Nó không đổi đơn vị và không bao giờ được in ra màn hình.
+ */
+export function populationPlotFrac(v: number, domain: PopulationDisplayDomain): number {
+  if (!domain.hasPositive) return 0.5;
+  if (v <= 0) return 0.5 / N_POPULATION_SLOTS;
+  const minLog = Math.log1p(domain.minPositivePop);
+  const maxLog = Math.log1p(domain.maxPop);
+  if (!(maxLog > minLog)) return 1 / N_POPULATION_SLOTS;
+  const z = Math.max(0, Math.min(1, (Math.log1p(v) - minLog) / (maxLog - minLog)));
+  return (1 + N_POSITIVE_BINS * z) / N_POPULATION_SLOTS;
+}
+
+/**
+ * Nghịch đảo của `populationPlotFrac` — dùng cho dòng ĐỌC SỐ, nơi con trỏ cho một vị trí
+ * và câu trả lời phải là một số DÂN SỐ THẬT.
+ *
+ * Trả `0` cho mọi vị trí nằm trong khe `=0`: ở đó câu đúng là "đúng 0 người", không phải
+ * một giá trị nội suy.
+ */
+export function populationAtFrac(frac: number, domain: PopulationDisplayDomain): number {
+  const f = Math.max(0, Math.min(1, frac));
+  if (!domain.hasPositive) return 0;
+  // Biên `1/24` thuộc về dải DƯƠNG, không thuộc khe `=0`: `minPositivePop` đặt đúng ở đó, nên
+  // một biên đóng phía khe sẽ làm phép nghịch đảo của giá trị dương nhỏ nhất trả về 0.
+  if (f < 1 / N_POPULATION_SLOTS) return 0;
+  const minLog = Math.log1p(domain.minPositivePop);
+  const maxLog = Math.log1p(domain.maxPop);
+  if (!(maxLog > minLog)) return domain.minPositivePop;
+  const z = (f * N_POPULATION_SLOTS - 1) / N_POSITIVE_BINS;
+  return Math.expm1(minLog + z * (maxLog - minLog));
+}
 
 /** Expected O(N) in-place selection; avoids sorting the full field snapshot for one median. */
 function nthValue(values: number[], k: number): number {
@@ -81,23 +165,20 @@ export function buildDemandPopulationHistogram(
 ): DemandHistogramModel {
   let nMissing = 0;
   const rawPops: number[] = [];
-  let minPositive = Infinity;
-  let maxPop = 0;
 
   for (const c of cells) {
     // The chart contract is population, independent of whichever map field is active.
     // `value` is the active map measure and may be access, ports, etc.
-    const v = typeof c.pop === "number" && Number.isFinite(c.pop) && c.pop >= 0 ? c.pop : null;
-    if (v === null) {
+    if (!isKnownPopulation(c.pop)) {
       nMissing++;
       continue;
     }
-    rawPops.push(v);
-    if (v > 0) {
-      if (v < minPositive) minPositive = v;
-      if (v > maxPop) maxPop = v;
-    }
+    rawPops.push(c.pop);
   }
+
+  // Miền hiển thị đến từ helper dùng chung với scatter bằng chứng (CR 4.2 §B), không dựng
+  // lại tại chỗ: hai bản của cùng một miền là hai biểu đồ nói về hai khoảng khác nhau.
+  const { minPositivePop: minPositive, maxPop, hasPositive } = populationDisplayDomain(cells);
 
   // Calculate median
   let median: number | null = null;
@@ -106,10 +187,6 @@ export function buildDemandPopulationHistogram(
     const m = work.length >> 1;
     median = work.length % 2 ? nthValue(work, m) : (nthValue(work, m - 1) + nthValue(work, m)) / 2;
   }
-
-  const hasPositive = Number.isFinite(minPositive);
-  if (!hasPositive) minPositive = 0;
-  if (maxPop < minPositive) maxPop = minPositive;
 
   const minLog = Math.log1p(minPositive);
   const maxLog = Math.log1p(maxPop);
@@ -716,6 +793,242 @@ export function buildOpportunityCommuneRank(
     totalCommunes: communes.length,
     nMissingRank: missingCount,
     selectedCommuneCode,
+  };
+}
+
+// ── 5b. Opportunity EVIDENCE: Demand × Access Scatter ───────────────────────
+//
+// CR 4.2. Đây là biểu đồ BẰNG CHỨNG, không phải biểu đồ chính thứ sáu: nó không phát bộ
+// lọc, không phát mốc giờ, không phát lựa chọn, và `PrimaryLensChart` không định tuyến nó.
+//
+// Ba quyết định của bản dựng model, mỗi cái đều là một quyết định chứ không phải mặc định:
+//
+//   1. **Miền X đến từ MỌI ô có dân số đọc được**, không phải từ tập ô vẽ được. Hệ quả cố
+//      ý: ô đông người nhất mà khuyết cự ly thì mép phải của trục KHÔNG có chấm nào. Đó là
+//      đúng — trục là miền dân số của bộ dữ liệu (§1.2 "không bao giờ cắt cụt max"), còn
+//      dòng đếm (§C) giải thích chỗ trống. Cách kia — miền trôi theo số ô khuyết — làm hình
+//      học trục X phụ thuộc âm thầm vào mẫu khuyết dữ liệu.
+//   2. **Y là `sqrt`, KHÔNG kẹp p99.** Trường tự khai `TOGGLE_SQRT_MIN_P99` nên phép biến
+//      đổi là của trường; còn phép KẸP thì không theo, vì kẹp sẽ XOÁ 6,0–8,9% số chấm — và
+//      đúng những chấm xa nhất, tức tập ô mà lens Cơ hội tồn tại để nói về.
+//   3. **Gộp theo LƯỚI 2 px, không rút mẫu.** Góc "đông người mà xa" là phần THƯA của đám
+//      mây, nên mọi luật rút mẫu đều xoá ưu tiên đúng những chấm cần giữ. Gộp lưới chỉ
+//      nhập những chấm vốn đã trùng nhau trên màn hình.
+
+/** Khung vẽ của scatter, tính bằng px. Lưới bằng đúng cỡ mark ⇒ phép cộng alpha là CHÍNH XÁC. */
+export const SCATTER_PLOT_W = 248;
+export const SCATTER_PLOT_H = 134;
+export const SCATTER_LATTICE_PX = 2;
+/** 124 × 67 = 8.308 ô lưới — trần cứng của số ô có mark, bất kể bộ dữ liệu to bao nhiêu. */
+export const SCATTER_COLS = SCATTER_PLOT_W / SCATTER_LATTICE_PX;
+export const SCATTER_ROWS = SCATTER_PLOT_H / SCATTER_LATTICE_PX;
+/**
+ * Bậc chồng tối đa. KHÔNG phải một break dữ liệu: quá 6 thì màu tổng hợp chỉ còn cách màu
+ * bão hoà ΔE 0,89 — trong dung sai ΔE ≤ 1,0 của tiêu chí 9 CR 4.1 — nên cắt ở 6 chặn DOM
+ * xuống 6 node mà mắt không mất gì.
+ */
+export const SCATTER_MAX_LEVEL = 6;
+/**
+ * Độ đặc của MỘT ô lẻ. Không phải `MUTED_ALPHA` 0,25 của bản đồ: đo ở đó một chấm lẻ cách
+ * đường lưới ΔE 3,85 — DƯỚI sàn 6 của §4b, tức là biến mất. Ở 0,45 nó cách nền 17,45 và
+ * cách đường lưới 10,72.
+ */
+export const SCATTER_BASE_ALPHA = 0.45;
+
+/**
+ * Cự ly ĐỌC ĐƯỢC hay không — chặt hơn `Number.isFinite(c.dist)` của `buildAccessPopulationCurve`.
+ *
+ * Số âm bị loại RIÊNG chứ không lẫn vào null: `Math.sqrt(-1)` là `NaN`, và một `NaN` đi vào
+ * thuộc tính `d` của `<path>` sẽ xoá mark **im lặng**. Không gói nào đang có giá trị âm; vị
+ * từ này tồn tại để một lần xuất dữ liệu sau không thể làm mất hàng mà không có con số nào
+ * hiện lên màn hình.
+ */
+export function isKnownDistance(d: number | null | undefined): d is number {
+  return typeof d === "number" && Number.isFinite(d) && d >= 0;
+}
+
+/**
+ * Độ đặc của một ô lưới chứa `n` ô H3.
+ *
+ * `1 − (1−a)^n` đúng bằng thứ mà `n` mark trùng nhau ở alpha `a` tổng hợp thành, nên một ô
+ * bậc `k` giống HỆT `k` mark chồng lên nhau ở mức pixel — đó là lý do phép gộp lưới không
+ * phải một phép xấp xỉ. Nó thôi chính xác đúng ở chỗ bị cắt: từ bậc 6 trở lên.
+ */
+export function overplotAlpha(n: number): number {
+  if (n <= 0) return 0;
+  return 1 - (1 - SCATTER_BASE_ALPHA) ** Math.min(n, SCATTER_MAX_LEVEL);
+}
+
+/** Vị trí `sqrt` của một cự ly trên trục Y, trong `[0, 1]` — `0` ở đáy khung. */
+export function scatterDistFrac(d: number, maxDistanceM: number): number {
+  if (!(maxDistanceM > 0)) return 0;
+  return Math.max(0, Math.min(1, Math.sqrt(d) / Math.sqrt(maxDistanceM)));
+}
+
+/** Nghịch đảo — dòng ĐỌC SỐ in mét thật, không bao giờ in một căn bậc hai. */
+export function scatterDistAtFrac(frac: number, maxDistanceM: number): number {
+  const f = Math.max(0, Math.min(1, frac));
+  return f * f * maxDistanceM;
+}
+
+export interface ScatterMark {
+  col: number;
+  row: number;
+  /** Số ô H3 rơi vào ô lưới này. Alpha mã hoá SỐ ĐẾM, không phải một tỉ lệ. */
+  n: number;
+}
+
+export interface ScatterLevel {
+  level: number;
+  alpha: number;
+  marks: ScatterMark[];
+}
+
+export interface DemandAccessScatterModel {
+  domain: PopulationDisplayDomain;
+  /** Tối đa 6 phần tử ⇒ tối đa 6 node mark trong DOM, bất kể bộ dữ liệu to bao nhiêu. */
+  levels: ScatterLevel[];
+  /** Tra số chồng của ô lưới dưới con trỏ — khoá là `row * SCATTER_COLS + col`. */
+  stacks: ReadonlyMap<number, number>;
+  /** Số ô H3 ĐANG VẼ (gồm cả ô 0 người). */
+  nPlotted: number;
+  /** Ô đúng 0 người, VẼ ở khe `=0` tại cự ly thật của nó — 0 là một số đo, không phải thiếu. */
+  nZeroPopulationPlotted: number;
+  /** Ô biết dân số nhưng khuyết cự ly: LOẠI và ĐẾM. Không đặt ở 0, không đặt ở max. */
+  nExcludedDistance: number;
+  popExcludedDistance: number;
+  /** Ô khuyết dân số (`null`/`undefined`) — dân số là vị từ NGOÀI, nên "khuyết cả hai" đếm ở đây. */
+  nNullPopulation: number;
+  /** Giá trị có mặt nhưng hỏng: âm, `NaN`, `Infinity`. Không bao giờ thành một mark biến mất. */
+  nInvalid: number;
+  /** Mẫu số của câu "…% dân đã biết". */
+  populationKnownTotal: number;
+  maxDistanceM: number;
+  maxStack: number;
+  /** Bất biến bảo toàn: `Σ n + nExcludedDistance + nNullPopulation + nInvalid === totalCells`. */
+  totalCells: number;
+  nOccupiedLattice: number;
+}
+
+const clampIndex = (v: number, hi: number) => (v < 0 ? 0 : v > hi ? hi : v);
+
+export function buildDemandAccessScatter(
+  cells: readonly GridCell[],
+): DemandAccessScatterModel {
+  const domain = populationDisplayDomain(cells);
+
+  let nZeroPopulationPlotted = 0;
+  let nExcludedDistance = 0;
+  let popExcludedDistance = 0;
+  let nNullPopulation = 0;
+  let nInvalid = 0;
+  let populationKnownTotal = 0;
+  let maxDistanceM = 0;
+
+  const keptFracX: number[] = [];
+  const keptDist: number[] = [];
+
+  for (const c of cells) {
+    const pop = c.pop;
+    // Thứ tự có chủ ý: "giá trị HỎNG" tách khỏi "giá trị VẮNG" trước khi hỏi tới cự ly.
+    // `pop = -1` là dữ liệu hỏng, không phải một ô chưa đo — gộp hai thứ vào một con số là
+    // xoá mất sự khác nhau mà §C bắt phải in ra.
+    if (typeof pop === "number" && !isKnownPopulation(pop)) {
+      nInvalid++;
+      continue;
+    }
+    if (!isKnownPopulation(pop)) {
+      nNullPopulation++;
+      continue;
+    }
+    populationKnownTotal += pop;
+
+    const d = c.dist;
+    if (d === null || d === undefined) {
+      nExcludedDistance++;
+      popExcludedDistance += pop;
+      continue;
+    }
+    if (!isKnownDistance(d)) {
+      nInvalid++;
+      continue;
+    }
+
+    keptFracX.push(populationPlotFrac(pop, domain));
+    keptDist.push(d);
+    if (pop === 0) nZeroPopulationPlotted++;
+    if (d > maxDistanceM) maxDistanceM = d;
+  }
+
+  // Trục Y chỉ chốt được sau khi biết cự ly lớn nhất VẼ ĐƯỢC, nên phép gán ô lưới là một
+  // lượt thứ hai. Vẫn O(N); miền X thì không phụ thuộc lượt này (điểm 1 của docstring).
+  const stacks = new Map<number, number>();
+  let maxStack = 0;
+  for (let i = 0; i < keptFracX.length; i++) {
+    const col = clampIndex(Math.floor(keptFracX[i]! * SCATTER_COLS), SCATTER_COLS - 1);
+    const fy = scatterDistFrac(keptDist[i]!, maxDistanceM);
+    const row = clampIndex(Math.floor((1 - fy) * SCATTER_ROWS), SCATTER_ROWS - 1);
+    const key = row * SCATTER_COLS + col;
+    const n = (stacks.get(key) ?? 0) + 1;
+    stacks.set(key, n);
+    if (n > maxStack) maxStack = n;
+  }
+
+  const byLevel = new Map<number, ScatterMark[]>();
+  for (const [key, n] of stacks) {
+    const level = Math.min(n, SCATTER_MAX_LEVEL);
+    const bucket = byLevel.get(level);
+    const mark: ScatterMark = { col: key % SCATTER_COLS, row: Math.floor(key / SCATTER_COLS), n };
+    if (bucket) bucket.push(mark);
+    else byLevel.set(level, [mark]);
+  }
+  const levels: ScatterLevel[] = [];
+  for (let level = 1; level <= SCATTER_MAX_LEVEL; level++) {
+    const marks = byLevel.get(level);
+    if (marks) levels.push({ level, alpha: overplotAlpha(level), marks });
+  }
+
+  return {
+    domain,
+    levels,
+    stacks,
+    nPlotted: keptFracX.length,
+    nZeroPopulationPlotted,
+    nExcludedDistance,
+    popExcludedDistance,
+    nNullPopulation,
+    nInvalid,
+    populationKnownTotal,
+    maxDistanceM,
+    maxStack,
+    totalCells: cells.length,
+    nOccupiedLattice: stacks.size,
+  };
+}
+
+/** Số ô H3 chồng nhau tại một ô lưới. `0` = chưa có ô nào ở đây, và dòng đọc phải NÓI ra. */
+export function scatterStackAt(model: DemandAccessScatterModel, col: number, row: number): number {
+  return model.stacks.get(row * SCATTER_COLS + col) ?? 0;
+}
+
+/**
+ * Nhớ kết quả theo THAM CHIẾU đầu vào.
+ *
+ * Vì sao không phải `useMemo`: khối bằng chứng đóng/mở được, và `useMemo` có `open` trong
+ * danh sách phụ thuộc sẽ dựng lại model mỗi lần mở. §A đòi ngược lại — dựng MỘT lần ở lần
+ * mở đầu tiên, rồi đóng/mở với cùng một snapshot `cells` thì không dựng lại gì.
+ */
+export function memoizeByReference<I, O>(build: (input: I) => O): (input: I) => O {
+  let lastInput: I | undefined;
+  let lastOutput: O | undefined;
+  let hasValue = false;
+  return (input: I): O => {
+    if (!hasValue || lastInput !== input) {
+      lastInput = input;
+      lastOutput = build(input);
+      hasValue = true;
+    }
+    return lastOutput as O;
   };
 }
 

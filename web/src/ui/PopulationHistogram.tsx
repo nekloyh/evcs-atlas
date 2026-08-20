@@ -13,7 +13,8 @@ import { DEFAULT_DATASET_ID } from "../state/selection";
 import { HAIRLINE_HEX, INK_MUTED_HEX, mutedCss, seriesColorForTheme } from "../viz/palette";
 import type { AnalysisTheme } from "../viz/theme";
 import { CHART_W } from "./chart-size";
-import type { DemandHistogramModel, PopulationBin } from "../viz/chart-models";
+import { populationPlotFrac, type DemandHistogramModel, type PopulationBin } from "../viz/chart-models";
+import { formatPop } from "./format";
 import { Readout } from "./Readout";
 
 const MUTED_CSS = mutedCss();
@@ -21,13 +22,6 @@ const MUTED_CSS = mutedCss();
 const W = CHART_W;
 const H = 108;
 const M = { left: 32, right: 8, top: 12, bottom: 22 };
-
-function formatPop(v: number): string {
-  if (v === 0) return "0";
-  if (v >= 1000000) return `${(v / 1000000).toLocaleString("vi-VN", { maximumFractionDigits: 1 })} tr`;
-  if (v >= 1000) return `${(v / 1000).toLocaleString("vi-VN", { maximumFractionDigits: 1 })}k`;
-  return Math.round(v).toLocaleString("vi-VN");
-}
 
 export function PopulationHistogram({
   model,
@@ -133,14 +127,24 @@ export function PopulationHistogram({
   const dragMax = isDragActive ? Math.max(dragStartIdx, dragCurrentIdx) : -1;
 
   /**
+   * Miền hiển thị của model, ở dạng mà helper dùng chung nhận (CR 4.2 §B).
+   *
+   * Ba chỗ trong file này từng tự chép lại phép `log1p` chuẩn hoá — vạch thập phân, đường
+   * trung vị, và (ở `chart-models`) mép cột. Nay cả ba gọi một hàm.
+   */
+  const domain = {
+    minPositivePop: model.minPositivePop,
+    maxPop: model.maxPop,
+    hasPositive: model.positiveBins.length > 0,
+  };
+
+  /**
    * Vạch thập phân của trục dương — 1, 10, 100, 1k… nằm trong miền quan sát được.
    *
-   * Vẽ đúng bằng phép đặt chỗ mà `chart-models` dùng cho các cột (`log1p` chuẩn hoá trên
-   * `[minPositive, max]`), nên vạch và cột không thể trôi khỏi nhau. Vạch cuối bị bỏ khi
-   * nó chạm nhãn `maxPop` ở mép phải để hai chữ số không chồng lên nhau.
+   * Vạch cuối bị bỏ khi nó chạm nhãn `maxPop` ở mép phải để hai chữ số không chồng lên nhau.
    */
   const decadeTicks = (() => {
-    if (model.positiveBins.length === 0) return [];
+    if (!domain.hasPositive) return [];
     const minLog = Math.log1p(model.minPositivePop);
     const maxLog = Math.log1p(model.maxPop);
     if (!(maxLog > minLog)) return [];
@@ -148,8 +152,7 @@ export function PopulationHistogram({
     for (let exp = 0; exp <= 7; exp++) {
       const value = 10 ** exp;
       if (value < model.minPositivePop || value > model.maxPop) continue;
-      const frac = (Math.log1p(value) - minLog) / (maxLog - minLog);
-      const x = M.left + slotW + frac * (plotW - slotW);
+      const x = M.left + populationPlotFrac(value, domain) * plotW;
       if (x > W - M.right - 18) continue;
       out.push({ value, x });
     }
@@ -157,18 +160,8 @@ export function PopulationHistogram({
   })();
 
   // Median X coordinate
-  let medianPlotX: number | null = null;
-  if (model.medianPop !== null) {
-    if (model.medianPop === 0) {
-      medianPlotX = M.left + slotW / 2;
-    } else {
-      const minLog = Math.log1p(model.minPositivePop);
-      const maxLog = Math.log1p(model.maxPop);
-      const mLog = Math.log1p(model.medianPop);
-      const frac = maxLog > minLog ? Math.max(0, Math.min(1, (mLog - minLog) / (maxLog - minLog))) : 0;
-      medianPlotX = M.left + slotW + frac * (plotW - slotW);
-    }
-  }
+  const medianPlotX =
+    model.medianPop === null ? null : M.left + populationPlotFrac(model.medianPop, domain) * plotW;
 
   return (
     <div

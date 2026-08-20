@@ -284,7 +284,7 @@ primary slot and are not loaded eagerly.
 | Existing chart/view | Decision | Reason |
 |---|---|---|
 | `SupplyLorenz` | Keep as collapsed, read-only Supply secondary after primary acceptance | It answers a genuinely different question: concentration of ports relative to population, not charger power composition. |
-| Demand × Access `Scatter` | Keep code; defer UI activation | It identifies populous/far Cells, but its old two-axis brush would reintroduce a second filter shape before the one-filter migration is complete. If restored, it belongs to Opportunity evidence and starts read-only. |
+| Demand × Access `Scatter` | **Activated as Opportunity evidence: read-only, collapsed, emits nothing** (CR 4.2) | It identifies populous/far Cells. The old two-axis brush concern is now answered **structurally, not by promise**: `isFilterCompatible` admits an `h3-cell` filter only under lens `demand`, and all three doors (boot, `hashchange`, `switchLens`/`setField`) apply it — so no filter can exist while an Opportunity field is active, and the chart has no filter state to read, render, or emit (CR 4.2 F1). Activation **rewrote** the module read-only rather than wiring the old props: `state/brush.ts` is not revived and stays reachable only from the unmounted `ui/Histogram.tsx`, so §5.5 step 5 still holds. |
 | `HourProfile` | Keep as a marginal companion inside Utilization, not a sixth primary chart | Position exposes a daily rhythm that the fixed shared color scale can compress. It reads the same 168-cell model and emits only `TimeCursorSet`. |
 | Station `MiniHeatmap` | Keep in Inspector evidence | It answers one selected Station, not the lens-wide population. |
 | Generic Histogram for Supply/Access/Utilization/Opportunity | Remove from primary UI | It duplicates or contradicts the approved mapping and often counts the wrong entity for the business question. |
@@ -674,7 +674,11 @@ Registry invariants:
 2. every chart ID resolves to one presenter/model builder;
 3. chart input dependencies are declared once;
 4. a primary chart cannot be registered on `FieldMeta`;
-5. unavailable dependencies produce a typed unavailable state, not an empty chart.
+5. unavailable dependencies produce a typed unavailable state, not an empty chart;
+6. **an evidence chart ID cannot be registered as a `PrimaryChartId`** (CR 4.2). Evidence
+   charts live in `EVIDENCE_CHART_REGISTRY`, are built by `LensChartController`, and are
+   **not** routed by `PrimaryLensChart` — its exhaustive `never` switch stays five-armed.
+   Invariant 1 is unchanged and re-asserted by CR 4.2 AT-1.
 
 ### 5.2 Modules and ownership
 

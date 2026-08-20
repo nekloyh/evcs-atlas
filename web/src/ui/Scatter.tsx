@@ -1,190 +1,421 @@
 /**
- * Scatter `population` × `dist_station_network_m`, brush 2D — DESIGN.md §3d.
+ * Phase 4.2 — Opportunity EVIDENCE: Demand × Access Scatter.
  *
- * Vì sao đúng cặp này là mặc định: nó là luận điểm B ở dạng biểu đồ — **cầu** trên một
- * trục, **khoảng cách tới cung** trên trục kia, nên góc "đông người mà xa trạm" chính là
- * tập ô mà bài toán đặt trạm nói về. Kéo một hộp ở góc đó rồi nhìn lên bản đồ là toàn bộ
- * lý do dock tồn tại.
+ * Chart ID: `opportunity-demand-access-scatter` — **bằng chứng, không phải biểu đồ chính**.
  *
- * Hai điều về thang đo, cả hai đều là quyết định:
+ * ── Biểu đồ này KHÔNG PHÁT GÌ ─────────────────────────────────────────────────────────
  *
- * **Trục X căn bậc hai.** Dân số lệch nặng (trung vị vài trăm, đuôi tới hàng chục nghìn):
- * trên thang tuyến tính 90% số ô dồn vào một vệt sát trục và không kéo chọn được gì. Căn
- * bậc hai trải phần thấp ra mà vẫn nhận **giá trị 0** — log thì không, và 0 người là một
- * giá trị thật của trường này. Trục vẫn in ngưỡng THẬT (§3b), nên không con số nào bị giấu.
+ * Không bộ lọc, không mốc giờ, không lựa chọn thực thể. Ba `on*Intent` **vắng mặt khỏi kiểu
+ * props**, không phải "có mà không dùng": một lần nối dây về sau là một lỗi biên dịch chứ
+ * không phải một hành vi mới lặng lẽ xuất hiện.
  *
- * **Ô null KHÔNG có mặt trên biểu đồ.** 51 ô không có `dist_station_network_m` không có
- * chỗ nào trên một mặt phẳng hai trục giá trị — đặt chúng ở 0 là bịa. Chúng vẫn nằm trên
- * bản đồ (vân xám) và vẫn bị brush loại, và dock đếm chúng ra thành chữ.
+ * Và điều đó đã được state bảo đảm sẵn, không chỉ bằng lời hứa (CR 4.2 F1): `isFilterCompatible`
+ * chỉ nhận filter `h3-cell` dưới lens Cầu và filter `station` dưới lens Cung — cả ba cửa
+ * (boot, `hashchange`, `switchLens`/`setField`) đều chạy nó. Dưới lens Cơ hội **không có
+ * filter nào tồn tại được**, nên biểu đồ này không có tập con nào để vẽ và không có gì để phát.
+ *
+ * Vì thế bản này VIẾT LẠI module cũ thay vì nối dây nó: bản M4 import `ScatterBrush`,
+ * `SCATTER_X`, `SCATTER_Y` từ `state/brush.ts` và `useDragRect` từ `brush-overlay`. Gắn nó
+ * lên như cũ sẽ hồi sinh đúng module brush mà §5.5 bước 5 đã cho nghỉ, tức là dựng lại một
+ * HÌNH DẠNG BỘ LỌC THỨ HAI — chuyện mà §1.7 hoãn hẳn việc kích hoạt biểu đồ này để tránh.
+ *
+ * ── Vì sao đọc TOẠ ĐỘ CON TRỎ chứ không đọc "chấm gần nhất" ───────────────────────────
+ *
+ * Giữ lại lý lẽ của bản cũ, nay có số đo: tới 89 ô H3 trên một pixel. "Chấm gần nhất" trả về
+ * một phần tử tuỳ ý trong chồng ấy và đọc thành một khẳng định về MỘT ô cụ thể mà nó không
+ * có quyền nói. Toạ độ con trỏ thì luôn đúng, và `n` trả lời đúng câu người ta hỏi khi nhìn
+ * một vệt đậm: "ở đây có bao nhiêu ô".
  */
 
-import { useEffect, useMemo, useRef } from "react";
-import * as Plot from "@observablehq/plot";
+import { useMemo, useRef, useState, type KeyboardEvent } from "react";
 
-import type { Range, ScatterBrush } from "../state/brush";
-import { SCATTER_X, SCATTER_Y } from "../state/brush";
-import { HAIRLINE_HEX, INK_MUTED_HEX, RAMP_HEX, formatBreak, mutedCss } from "../viz/palette";
-import { toData, toPx, useDragRect, type Axis } from "./brush-overlay";
-import { Readout } from "./Readout";
+import { COLOR_PANEL } from "../design-tokens";
+import { BEYOND_2KM_M } from "../domain-thresholds";
+import { formatIn, type UnitSpec } from "../units";
+import { HAIRLINE_HEX, INK_2_HEX, INK_MUTED_HEX, seriesColorForTheme } from "../viz/palette";
+import type { AnalysisTheme } from "../viz/theme";
+import {
+  SCATTER_COLS,
+  SCATTER_LATTICE_PX,
+  SCATTER_PLOT_H,
+  SCATTER_PLOT_W,
+  SCATTER_ROWS,
+  populationAtFrac,
+  scatterDistAtFrac,
+  scatterDistFrac,
+  scatterStackAt,
+  type DemandAccessScatterModel,
+} from "../viz/chart-models";
 import { CHART_W } from "./chart-size";
-
-const SERIES = RAMP_HEX[4];
-// Chấm 1,3 px cần mực ĐẶC hơn cột histogram: §4d đã lập sẵn tiền lệ — "nét mảnh ở
-// alpha 0,5 thì biến mất, đó là lỗi chứ không phải nhất quán". Cùng ký hiệu, khác độ đặc.
-const MUTED_CSS = mutedCss(0.55);
+import { formatNumber, formatPop } from "./format";
+import { Readout } from "./Readout";
+import {
+  SCATTER_EMPTY_LATTICE,
+  SCATTER_HOVER_HINT,
+  SCATTER_RULE_LABEL,
+  SCATTER_STATE_COPY,
+  SCATTER_X_AXIS_TITLE,
+  scatterCountsLines,
+  scatterXDecadeTicks,
+  scatterYTicks,
+} from "./scatter-copy";
 
 const W = CHART_W;
 const H = 168;
-const M = { left: 40, right: 8, top: 6, bottom: 26 };
+/**
+ * `left: 40` chứ không phải 32 của histogram: vạch Y ở đây mang nhãn km. Hai biểu đồ không
+ * bao giờ cùng hiện (khác lens), nên yêu cầu ĐỒNG BỘ nằm ở phép ánh xạ dữ liệu→phân số, chứ
+ * không nằm ở pixel. `296 − 40 − 8 = 248` và `168 − 6 − 28 = 134`: khung chia hết cho lưới 2 px.
+ */
+const M = { left: 40, right: 8, top: 6, bottom: 28 };
 
-export interface Point {
-  x: number;
-  y: number;
+/** Ô lưới đầu tiên của dải DƯƠNG — chỗ con trỏ bàn phím hạ xuống ở lần focus đầu. */
+const FIRST_POSITIVE_COL = Math.floor(SCATTER_COLS / 24);
+
+const clampIndex = (v: number, hi: number) => (v < 0 ? 0 : v > hi ? hi : v);
+
+interface Cursor {
+  col: number;
+  row: number;
 }
 
-const within = (v: number, r: Range) => v >= r.lo && v <= r.hi;
-
 export function Scatter({
-  points,
-  brush,
-  onBrush,
-  nMissing,
+  model,
+  theme,
+  distUnit,
 }: {
-  points: Point[];
-  brush: ScatterBrush | undefined;
-  onBrush: (b: ScatterBrush | null) => void;
-  /** ô thiếu MỘT trong hai trục — chúng không có chỗ trên mặt phẳng, xem docstring đầu file */
-  nMissing: number;
+  /** `null` = snapshot lưới ô H3 chưa nằm trong RAM (§F, trạng thái Đang nạp). */
+  model: DemandAccessScatterModel | null;
+  /** Mực chuỗi = anchor `series` của theme lens đang mở (CR 4.1 §C2). */
+  theme: AnalysisTheme;
+  /** PHẢI là `FIELD_BY_ID.get("dist_station_network_m").unit` — presenter không gõ đơn vị. */
+  distUnit: UnitSpec;
 }) {
-  const host = useRef<HTMLDivElement>(null);
+  const SERIES = seriesColorForTheme(theme);
+  const [cursor, setCursor] = useState<Cursor | null>(null);
+  // Chỉ phím mới đọc thành tiếng: một cú rê 60 Hz sẽ biến vùng live thành tiếng ồn liên tục.
+  const [spoken, setSpoken] = useState("");
+  const plotRef = useRef<SVGRectElement>(null);
 
-  const dom = useMemo(() => {
-    let xh = 0;
-    let yh = 0;
-    for (const p of points) {
-      if (p.x > xh) xh = p.x;
-      if (p.y > yh) yh = p.y;
+  const yTicks = useMemo(
+    () => scatterYTicks(model?.maxDistanceM ?? 0, distUnit),
+    [model?.maxDistanceM, distUnit],
+  );
+  const xTicks = useMemo(
+    () => (model ? scatterXDecadeTicks(model.domain, SCATTER_PLOT_W) : []),
+    [model],
+  );
+
+  if (!model) {
+    return (
+      <p className="py-4 text-center text-note text-ink-muted" role="status">
+        {SCATTER_STATE_COPY.loading}
+      </p>
+    );
+  }
+
+  const counts = scatterCountsLines(model);
+
+  if (model.nPlotted === 0) {
+    // Không khung trục rỗng: §6.1 mục 4. Một khung trống đọc thành "đo rồi, không có gì".
+    return (
+      <div className="space-y-0.5 text-note leading-snug text-ink-muted">
+        <p className="text-ink-2">{SCATTER_STATE_COPY.empty}</p>
+        {counts.map((line) => (
+          <p key={line}>{line}</p>
+        ))}
+      </div>
+    );
+  }
+
+  const ruleFrac = scatterDistFrac(BEYOND_2KM_M, model.maxDistanceM);
+  const ruleY = M.top + (1 - ruleFrac) * SCATTER_PLOT_H;
+  const ruleInBox = model.maxDistanceM >= BEYOND_2KM_M;
+  const ruleRow = clampIndex(Math.floor((1 - ruleFrac) * SCATTER_ROWS), SCATTER_ROWS - 1);
+
+  /** Tâm ô lưới → giá trị THẬT của hai trục. Không luỹ thừa nào tới được màn hình. */
+  const readAt = (c: Cursor) => {
+    const fx = ((c.col + 0.5) * SCATTER_LATTICE_PX) / SCATTER_PLOT_W;
+    const fy = 1 - ((c.row + 0.5) * SCATTER_LATTICE_PX) / SCATTER_PLOT_H;
+    return {
+      pop: populationAtFrac(fx, model.domain),
+      dist: scatterDistAtFrac(fy, model.maxDistanceM),
+      n: scatterStackAt(model, c.col, c.row),
+    };
+  };
+
+  const readoutText = (c: Cursor) => {
+    const r = readAt(c);
+    const d = `${formatIn(r.dist, yTicks.scaled)} ${yTicks.scaled.label}`;
+    /*
+     * CR viết `formatPop(x)` cho dòng đọc. Ảnh render bác: `GridCell.pop` là số THỰC, và
+     * `formatPop` làm tròn mọi giá trị dưới 0,5 thành đúng chuỗi `"0"` — tức là nhãn của khe
+     * `=0`. Trên `p/01` con trỏ ở ô lưới thứ 7 (đã nằm trong dải DƯƠNG) đọc ra "0 người",
+     * khẳng định một ô không người ở chỗ dữ liệu nói có người. `formatPop` vẫn đúng cho nhãn
+     * trục — ở đó mọi giá trị là một bậc thập phân — nhưng sai cho một vị trí con trỏ bất kỳ.
+     */
+    const pop = r.pop === 0 ? "đúng 0" : formatNumber(r.pop);
+    return `${pop} người · ${d} · ${r.n > 0 ? `${r.n.toLocaleString("vi-VN")} ô` : SCATTER_EMPTY_LATTICE}`;
+  };
+
+  const cursorAt = (clientX: number, clientY: number): Cursor | null => {
+    const box = plotRef.current?.getBoundingClientRect();
+    if (!box) return null;
+    return {
+      col: clampIndex(Math.floor(((clientX - box.left) / box.width) * SCATTER_COLS), SCATTER_COLS - 1),
+      row: clampIndex(Math.floor(((clientY - box.top) / box.height) * SCATTER_ROWS), SCATTER_ROWS - 1),
+    };
+  };
+
+  /** Đặt con trỏ + đọc thành tiếng. Tính NGOÀI updater: updater phải thuần. */
+  const commit = (next: Cursor) => {
+    setCursor(next);
+    setSpoken(readoutText(next));
+  };
+
+  const moveBy = (dc: number, dr: number) => {
+    const base = cursor ?? { col: FIRST_POSITIVE_COL, row: ruleRow };
+    commit({
+      col: clampIndex(base.col + dc, SCATTER_COLS - 1),
+      row: clampIndex(base.row + dr, SCATTER_ROWS - 1),
+    });
+  };
+
+  const jumpTo = (col: number) => commit({ col, row: cursor?.row ?? ruleRow });
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    const step = e.shiftKey ? 10 : 1;
+    switch (e.key) {
+      case "ArrowLeft": moveBy(-step, 0); break;
+      case "ArrowRight": moveBy(step, 0); break;
+      // Trục Y của SVG chạy ngược: phím LÊN là chỉ số hàng GIẢM. Viết ra vì đây là chỗ dễ
+      // lật dấu nhất, và lật dấu thì con trỏ đi ngược mà không có lỗi nào phát ra.
+      case "ArrowUp": moveBy(0, -step); break;
+      case "ArrowDown": moveBy(0, step); break;
+      case "Home": jumpTo(0); break;
+      case "End": jumpTo(SCATTER_COLS - 1); break;
+      case "Escape": setCursor(null); setSpoken(""); return;
+      default: return;
     }
-    return { xh: xh || 1, yh: yh || 1 };
-  }, [points]);
+    e.preventDefault();
+  };
 
-  const ax: Axis = { d0: 0, d1: dom.xh, r0: M.left, r1: W - M.right, kind: "sqrt" };
-  // Trục Y của SVG chạy ngược: `r0` là đáy khung, `r1` là đỉnh. Viết ra vì đây là chỗ dễ
-  // lật dấu nhất, và lật dấu thì hộp brush lệch mà không có lỗi nào.
-  const ay: Axis = { d0: 0, d1: dom.yh, r0: H - M.bottom, r1: M.top, kind: "linear" };
-
-  const { ref, live, hover } = useDragRect((r) => {
-    if (!r) return onBrush(null);
-    const x0 = toData(ax, r.x0);
-    const x1 = toData(ax, r.x1);
-    // `r.y0` là mép TRÊN của hộp pixel ⇒ giá trị LỚN hơn trên trục dữ liệu.
-    const yTop = toData(ay, r.y0);
-    const yBot = toData(ay, r.y1);
-    onBrush({
-      x: SCATTER_X,
-      xr: { lo: Math.min(x0, x1), hi: Math.max(x0, x1) },
-      y: SCATTER_Y,
-      yr: { lo: Math.min(yTop, yBot), hi: Math.max(yTop, yBot) },
-    });
-  });
-
-  useEffect(() => {
-    const el = host.current;
-    if (!el) return;
-    const inBox = (p: Point) => !brush || (within(p.x, brush.xr) && within(p.y, brush.yr));
-    const chart = Plot.plot({
-      width: W,
-      height: H,
-      marginLeft: M.left,
-      marginRight: M.right,
-      marginTop: M.top,
-      marginBottom: M.bottom,
-      style: { background: "transparent", fontSize: "9px", color: INK_MUTED_HEX },
-      x: { type: "sqrt", domain: [0, dom.xh], ticks: 4, tickFormat: formatBreak, label: "dân số ô →", labelOffset: 22 },
-      y: { domain: [0, dom.yh], ticks: 4, tickFormat: formatBreak, label: "↑ m tới trạm" },
-      marks: [
-        Plot.gridX({ stroke: HAIRLINE_HEX, strokeOpacity: 1, strokeWidth: 1 }),
-        Plot.gridY({ stroke: HAIRLINE_HEX, strokeOpacity: 1, strokeWidth: 1 }),
-        Plot.dot(points, {
-          x: "x",
-          y: "y",
-          r: 1.3,
-          // 4.400 chấm chồng nhau: alpha thấp để mật độ đọc được bằng độ đậm, thay vì một
-          // mảng đặc. Cùng ý với "chấm là hạt ở zoom thấp" của lớp trạm (§4d-1).
-          fill: (d: Point) => (inBox(d) ? SERIES : MUTED_CSS),
-          fillOpacity: 0.45,
-        }),
-      ],
-    });
-    el.append(chart);
-    return () => chart.remove();
-  }, [points, brush, dom]);
-
-  const box = brush
-    ? {
-        x: toPx(ax, brush.xr.lo),
-        w: Math.max(1, toPx(ax, brush.xr.hi) - toPx(ax, brush.xr.lo)),
-        y: toPx(ay, brush.yr.hi),
-        h: Math.max(1, toPx(ay, brush.yr.lo) - toPx(ay, brush.yr.hi)),
-      }
-    : null;
-  const dragBox = live
-    ? {
-        x: Math.min(live.x0, live.x1),
-        w: Math.abs(live.x1 - live.x0),
-        y: Math.min(live.y0, live.y1),
-        h: Math.abs(live.y1 - live.y0),
-      }
-    : null;
-  const show = dragBox ?? box;
+  const ariaLabel =
+    `${SCATTER_X_AXIS_TITLE}. ${yTicks.axisTitle}. ` +
+    counts.join(" ") +
+    " Dùng phím mũi tên để đọc mốc hai trục.";
 
   return (
-    <div>
-      <div className="relative" style={{ width: W, height: H }}>
-        <div ref={host} />
-        <div
-          ref={ref}
-          className="absolute inset-0 cursor-crosshair touch-none"
-          title="kéo một hộp để chọn theo CẢ HAI trục · bấm một cái để bỏ chọn"
-        >
-          {show && (
-            <div
-              className="pointer-events-none absolute border"
-              style={{
-                left: show.x,
-                top: show.y,
-                width: show.w,
-                height: show.h,
-                borderColor: SERIES,
-                background: `${SERIES}14`,
-              }}
+    <div className="select-none min-w-0">
+      {/*
+        MỘT tiêu đề trên đầu, không phải hai. Ảnh render bắt được: hai câu đơn vị đặt cạnh
+        nhau trong một dải 296 px thì cả hai cùng xuống hai dòng và đọc thành một khối chữ.
+        Tiêu đề X đi xuống ĐÁY khung — chỗ trục X thật sự nằm — trong phần lề `bottom: 28`
+        vốn được nới ra (histogram dùng 22) chính vì lý do này.
+      */}
+      <div className="truncate pb-1 text-note text-ink-muted">{yTicks.axisTitle}</div>
+
+      <div
+        className="relative cursor-crosshair touch-none"
+        style={{ width: W, height: H }}
+        role="group"
+        aria-label={ariaLabel}
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        // Lần focus đầu hạ con trỏ xuống ĐÚNG đường 2 km ở mép trái dải dương, nên thứ đầu
+        // tiên một người đọc bằng bàn phím gặp là luật miền đã khai báo.
+        onFocus={() => setCursor((prev) => prev ?? { col: FIRST_POSITIVE_COL, row: ruleRow })}
+        onPointerMove={(e) => setCursor(cursorAt(e.clientX, e.clientY))}
+        onPointerLeave={() => setCursor(null)}
+      >
+        <svg width={W} height={H} className="overflow-visible">
+          {/* Lưới ngang ở đúng vị trí vạch Y — mắt đọc mốc mà không phải kẻ tay. */}
+          {yTicks.values.map((v, i) => {
+            const y = M.top + (1 - i / (yTicks.values.length - 1)) * SCATTER_PLOT_H;
+            return (
+              <line
+                key={v}
+                x1={M.left}
+                x2={M.left + SCATTER_PLOT_W}
+                y1={y}
+                y2={y}
+                stroke={HAIRLINE_HEX}
+                strokeDasharray={i === 0 ? undefined : "2,2"}
+              />
+            );
+          })}
+
+          {/* Vách ngăn khe `=0` với dải dương — cùng cấu tạo với §1.2. */}
+          {model.domain.hasPositive && (
+            <line
+              x1={M.left + SCATTER_PLOT_W / 24}
+              x2={M.left + SCATTER_PLOT_W / 24}
+              y1={M.top}
+              y2={M.top + SCATTER_PLOT_H + 4}
+              stroke={INK_MUTED_HEX}
+              strokeWidth={1}
             />
           )}
-        </div>
+
+          {/*
+            MỘT `<path>` cho mỗi bậc chồng, tối đa sáu — bất kể bộ dữ liệu có 4.397 hay
+            200.000 hàng. Không hàng nào bị bỏ và không hàng nào bị rút mẫu: góc "đông người
+            mà xa trạm" là phần THƯA của đám mây, nên mọi luật rút mẫu đều xoá ưu tiên đúng
+            những chấm mà biểu đồ này tồn tại để cho thấy.
+          */}
+          <g transform={`translate(${M.left}, ${M.top})`}>
+            {model.levels.map((lv) => (
+              <path
+                key={lv.level}
+                d={lv.marks
+                  .map((m) => {
+                    const x = m.col * SCATTER_LATTICE_PX;
+                    const y = m.row * SCATTER_LATTICE_PX;
+                    return `M${x} ${y}h${SCATTER_LATTICE_PX}v${SCATTER_LATTICE_PX}h-${SCATTER_LATTICE_PX}Z`;
+                  })
+                  .join("")}
+                fill={SERIES}
+                fillOpacity={lv.alpha}
+                shapeRendering="crispEdges"
+              />
+            ))}
+          </g>
+
+          {/* Đường 2 km, vẽ TRÊN các mark. Nhãn nói *ngưỡng quy định*, không nói *break*. */}
+          {ruleInBox && (
+            <g pointerEvents="none">
+              <line
+                x1={M.left}
+                x2={M.left + SCATTER_PLOT_W}
+                y1={ruleY}
+                y2={ruleY}
+                stroke={HAIRLINE_HEX}
+                strokeWidth={2}
+              />
+              {/*
+                Quầng nền cùng màu panel quanh chữ. Ảnh render bắt được: đường 2 km rơi đúng
+                vào dải ĐẶC nhất của đám mây, nên nhãn nằm đè lên hàng trăm mark và nhoè đi.
+                `paintOrder="stroke"` vẽ viền TRƯỚC rồi mới vẽ ruột chữ — cùng thủ pháp tách
+                nền mà `AccessCurve` dùng cho chấm callout (`stroke={BASEMAP_HEX}`), chứ không
+                phải một thẻ nổi (§3 cấm vô điều kiện).
+              */}
+              <text
+                x={M.left + 3}
+                y={ruleY - 3}
+                fontSize={9}
+                fill={INK_2_HEX}
+                stroke={COLOR_PANEL}
+                strokeWidth={2.5}
+                paintOrder="stroke"
+                strokeLinejoin="round"
+                textAnchor="start"
+              >
+                {SCATTER_RULE_LABEL}
+              </text>
+            </g>
+          )}
+
+          {/* Con trỏ đọc — hai nét mảnh, không một thẻ nổi nào (§3 cấm vô điều kiện). */}
+          {cursor && (
+            <g pointerEvents="none">
+              <line
+                x1={M.left + (cursor.col + 0.5) * SCATTER_LATTICE_PX}
+                x2={M.left + (cursor.col + 0.5) * SCATTER_LATTICE_PX}
+                y1={M.top}
+                y2={M.top + SCATTER_PLOT_H}
+                stroke={INK_MUTED_HEX}
+                strokeDasharray="2,2"
+              />
+              <line
+                x1={M.left}
+                x2={M.left + SCATTER_PLOT_W}
+                y1={M.top + (cursor.row + 0.5) * SCATTER_LATTICE_PX}
+                y2={M.top + (cursor.row + 0.5) * SCATTER_LATTICE_PX}
+                stroke={INK_MUTED_HEX}
+                strokeDasharray="2,2"
+              />
+            </g>
+          )}
+
+          {/* Vùng bắt con trỏ — cũng là hệ quy chiếu pixel của phép đổi toạ độ. */}
+          <rect
+            ref={plotRef}
+            x={M.left}
+            y={M.top}
+            width={SCATTER_PLOT_W}
+            height={SCATTER_PLOT_H}
+            fill="transparent"
+          />
+
+          {/* Vạch Y: giá trị đã nghịch biến đổi về mét, in qua `scaleUnit` một thang chung. */}
+          {yTicks.labels.map((label, i) => (
+            <text
+              key={yTicks.values[i]}
+              x={M.left - 4}
+              y={M.top + (1 - i / (yTicks.values.length - 1)) * SCATTER_PLOT_H + 3}
+              fontSize={9}
+              fill={INK_MUTED_HEX}
+              textAnchor="end"
+            >
+              {label}
+            </text>
+          ))}
+
+          {/* Vạch X: dân số THẬT, không phải logarit. */}
+          <text
+            x={M.left + SCATTER_PLOT_W / 48}
+            y={H - 16}
+            fontSize={9}
+            fill={INK_MUTED_HEX}
+            textAnchor="middle"
+          >
+            =0
+          </text>
+          {xTicks.map((tick) => (
+            <g key={tick.value}>
+              <line
+                x1={M.left + tick.frac * SCATTER_PLOT_W}
+                x2={M.left + tick.frac * SCATTER_PLOT_W}
+                y1={M.top + SCATTER_PLOT_H}
+                y2={M.top + SCATTER_PLOT_H + 3}
+                stroke={INK_MUTED_HEX}
+              />
+              <text
+                x={M.left + tick.frac * SCATTER_PLOT_W}
+                y={H - 16}
+                fontSize={9}
+                fill={INK_MUTED_HEX}
+                textAnchor="middle"
+              >
+                {tick.label}
+              </text>
+            </g>
+          ))}
+          {model.domain.hasPositive && (
+            <text x={W - M.right} y={H - 16} fontSize={9} fill={INK_MUTED_HEX} textAnchor="end">
+              {formatPop(model.domain.maxPop)}
+            </text>
+          )}
+          <text x={W - M.right} y={H - 3} fontSize={9} fill={INK_MUTED_HEX} textAnchor="end">
+            {SCATTER_X_AXIS_TITLE} →
+          </text>
+        </svg>
       </div>
-      {/*
-        Readout ở đây in TOẠ ĐỘ CON TRỎ, không in "chấm gần nhất". Có chủ ý: 4.400 chấm
-        1,3 px chồng nhau ở góc trái dưới, nên "chấm gần nhất" trả về một ô ngẫu nhiên
-        trong đám đó và đọc thành một khẳng định về một ô cụ thể mà nó không có quyền nói.
-        Toạ độ thì luôn đúng, và nó trả lời đúng câu hỏi người ta hỏi trước khi kéo: "tôi
-        sắp cắt ở mốc nào".
-      */}
-      <Readout hint="rê để đọc mốc hai trục">
-        {hover && (
-          <>
-            <span className="tabular-nums text-ink">{formatBreak(toData(ax, hover.x))}</span>
-            <span className="text-ink-muted">người ·</span>
-            <span className="tabular-nums text-ink">{formatBreak(toData(ay, hover.y))}</span>
-            <span className="text-ink-muted">m tới trạm · {points.length.toLocaleString("vi-VN")} ô đang vẽ</span>
-          </>
-        )}
+
+      <Readout hint={SCATTER_HOVER_HINT}>
+        {cursor && <span className="tabular-nums text-ink">{readoutText(cursor)}</span>}
       </Readout>
-      {nMissing > 0 && (
-        <p className="pt-0.5 text-note leading-snug text-ink-muted">
-          {nMissing.toLocaleString("vi-VN")} ô thiếu một trục — không có chỗ nào trên một mặt
-          phẳng hai trục giá trị, nên chúng không được vẽ. Trên bản đồ chúng vẫn là vân xám.
-        </p>
-      )}
+
+      {/* Bản đọc thành tiếng chỉ đổi khi con trỏ đi bằng PHÍM — xem docstring của `spoken`. */}
+      <span className="sr-only" aria-live="polite">
+        {spoken}
+      </span>
+
+      <div className="space-y-0.5 pt-1 text-note leading-snug text-ink-muted">
+        {counts.map((line) => (
+          <p key={line}>{line}</p>
+        ))}
+      </div>
     </div>
   );
 }

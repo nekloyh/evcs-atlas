@@ -24,6 +24,25 @@ export function formatNumber(v: number | null | undefined): string {
 }
 
 /**
+ * Nhãn trục DÂN SỐ — hậu tố độ lớn theo TỪNG giá trị (`1 · 10 · 100 · 1k · 10k`).
+ *
+ * Ở đây `scaleUnit` là sai, và lý do là chính điều kiện tiên quyết của nó: nó chọn MỘT thang
+ * cho cả dải (`units.ts` đầu file). Một trục năm bậc thập phân vi phạm đúng điều kiện ấy —
+ * `scaleUnit({kind:"person"}, 46232)` trả `{divisor: 1000, label: "nghìn người"}`, và năm
+ * vạch in ra `0,001 · 0,01 · 0,1 · 1 · 10`. Trục Y cự ly thì ngược lại (một dải độ lớn), nên
+ * nó ĐI QUA `scaleUnit`. Hai trục, hai luật, và ranh giới là số bậc độ lớn của dải.
+ *
+ * Rời `PopulationHistogram` ra đây ở CR 4.2: histogram và scatter bằng chứng dùng chung một
+ * miền hiển thị, nên chúng phải dùng chung cả cách in nhãn của miền ấy.
+ */
+export function formatPop(v: number): string {
+  if (v === 0) return "0";
+  if (v >= 1000000) return `${(v / 1000000).toLocaleString("vi-VN", { maximumFractionDigits: 1 })} tr`;
+  if (v >= 1000) return `${(v / 1000).toLocaleString("vi-VN", { maximumFractionDigits: 1 })}k`;
+  return Math.round(v).toLocaleString("vi-VN");
+}
+
+/**
  * Giá trị một ô thành chữ. `null` KHÔNG BAO GIỜ thành `0` hay `—` trần: nó thành một câu
  * nói rõ đây là "không biết" hay "biết là không" — ràng buộc 1 ở tầng chữ.
  *

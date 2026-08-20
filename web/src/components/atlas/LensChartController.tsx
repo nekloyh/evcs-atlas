@@ -8,27 +8,39 @@
  * `data/chart-session.ts` (§5.2). Ở đây chỉ còn trạng thái nạp/hỏng/thử lại của UI.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { StationOccupancy } from "../../data/occupancy";
 import type { GridCell, StationPoint } from "../../data/queries";
 import { loadOpportunityCommunes } from "../../data/chart-session";
-import { LENSES, lensOfField, type FieldMeta } from "../../fields";
+import { FIELD_BY_ID, LENSES, gridColumnAvailable, lensOfField, type FieldMeta } from "../../fields";
 import { useStore } from "../../state/store";
 import type { ChartIntentSink } from "../../state/analysis-events";
 import { themeOfLens } from "../../viz/theme";
-import { LENS_PRIMARY_CHARTS, PRIMARY_CHART_REGISTRY } from "../../viz/chart-contracts";
 import {
+  EVIDENCE_CHART_REGISTRY,
+  LENS_PRIMARY_CHARTS,
+  PRIMARY_CHART_REGISTRY,
+  evidenceChartsOfLens,
+} from "../../viz/chart-contracts";
+import {
+  buildDemandAccessScatter,
   buildDemandPopulationHistogram,
   buildSupplyPowerTierBreakdown,
   buildAccessPopulationCurve,
   buildUtilizationWeekHeatmap,
   buildOpportunityCommuneRank,
+  memoizeByReference,
   type OpportunityCommuneRow,
 } from "../../viz/chart-models";
 import type { Scale } from "../../viz/palette";
 import { FilterClearedNotice, FilterSummary, type FilterCounts } from "../../ui/FilterSummary";
+import { Scatter } from "../../ui/Scatter";
+import { SCATTER_STATE_COPY } from "../../ui/scatter-copy";
 import { PrimaryLensChart } from "./PrimaryLensChart";
+
+/** Cột mà bằng chứng Cầu × Tiếp cận đọc trục Y từ. Một chỗ khai, hai chỗ hỏi. */
+const SCATTER_DIST_FIELD = "dist_station_network_m";
 
 export function LensChartController({
   field,
@@ -151,6 +163,31 @@ export function LensChartController({
     return null;
   }, [primaryChartId, demandModel, supplyModel, accessModel]);
 
+  /**
+   * Khe BẰNG CHỨNG — CR 4.2 §A. Khe đầu tiên thuộc loại này.
+   *
+   * Trạng thái đóng/mở là `useState` NGAY Ở ĐÂY: không store, không hash, không preset,
+   * không cảnh. Hệ quả cố ý — nó không chia sẻ được, không khôi phục được, không xuất hiện
+   * trong câu chuyện được. Đó chính là ý nghĩa của "biểu đồ này không phát gì".
+   */
+  const evidenceCharts = evidenceChartsOfLens(lensId);
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const scatterMeta = EVIDENCE_CHART_REGISTRY["opportunity-demand-access-scatter"];
+  const showScatter = evidenceCharts.some((m) => m.id === scatterMeta.id);
+  // Bám vào CỘT, không bám vào "không có hàng nào vẽ được": cột vắng thì `fetchField` phát
+  // `NULL AS dist` cho mọi hàng, và biểu đồ sẽ in "không ô nào có đủ hai giá trị" — một câu
+  // khẳng định về phép đo chưa từng chạy. `không áp dụng` khác `không biết`.
+  const scatterColumnAvailable = gridColumnAvailable(SCATTER_DIST_FIELD);
+  // Đơn vị trục Y đến từ registry trường, KHÔNG gõ ở presenter (CR 4.2 §B).
+  const scatterDistUnit = FIELD_BY_ID.get(SCATTER_DIST_FIELD)?.unit ?? null;
+  // Nhớ theo THAM CHIẾU `cells`: không dựng khi còn đóng, dựng MỘT lần ở lần mở đầu tiên,
+  // và đóng rồi mở lại với cùng snapshot thì không dựng lại gì (§A "Loading discipline").
+  const buildScatter = useRef(memoizeByReference(buildDemandAccessScatter)).current;
+  const scatterModel =
+    showScatter && evidenceOpen && scatterColumnAvailable && cells.length > 0
+      ? buildScatter(cells)
+      : null;
+
   const sink = useMemo<ChartIntentSink>(
     () => ({
       onFilterIntent: (f) => setFilter(f),
@@ -220,6 +257,45 @@ export function LensChartController({
           theme={theme}
           sink={sink}
         />
+      )}
+
+      {/*
+        Khe BẰNG CHỨNG, ngay DƯỚI biểu đồ chính và trong cùng cây con này. Cùng cấu tạo với
+        footer NGUỒN của `AtlasReadColumn`: `<details>` mặc định ĐÓNG (§1.7 — biểu đồ phụ
+        không chia khe chính và không được nạp sẵn).
+
+        `PrimaryLensChart` KHÔNG định tuyến khối này: `switch` vét cạn của nó vẫn năm nhánh,
+        và `EVIDENCE_CHART_IDS` rời hẳn `PRIMARY_CHART_IDS`.
+      */}
+      {showScatter && scatterDistUnit && (
+        <details
+          className="group border-t border-hairline"
+          open={evidenceOpen}
+          onToggle={(e) => setEvidenceOpen((e.currentTarget as HTMLDetailsElement).open)}
+        >
+          <summary
+            className={`flex list-none items-baseline gap-2 py-1.5 ${scatterColumnAvailable ? "cursor-pointer" : "cursor-not-allowed opacity-60"}`}
+            // Cột vắng ⇒ khối vẫn RENDER nhưng vô hiệu, và lý do nhìn thấy được. Một khối
+            // biến mất im lặng không phân biệt được với một khối chưa bao giờ được dựng.
+            onClick={(e) => { if (!scatterColumnAvailable) e.preventDefault(); }}
+          >
+            <span className="eyebrow shrink-0 text-ink-muted">{scatterMeta.eyebrow}</span>
+            <span className="min-w-0 flex-1 truncate text-note text-ink-2">{scatterMeta.title}</span>
+            <span aria-hidden className="shrink-0 text-note text-ink-muted">
+              <span className="group-open:hidden">▸</span>
+              <span className="hidden group-open:inline">▾</span>
+            </span>
+          </summary>
+          {scatterColumnAvailable ? (
+            <div className="pt-1">
+              <Scatter model={scatterModel} theme={theme} distUnit={scatterDistUnit} />
+            </div>
+          ) : (
+            <p className="pt-1 text-note leading-snug text-ink-muted" role="status">
+              {SCATTER_STATE_COPY.unavailable}
+            </p>
+          )}
+        </details>
       )}
     </div>
   );

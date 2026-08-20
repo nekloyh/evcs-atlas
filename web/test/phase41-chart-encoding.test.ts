@@ -365,6 +365,9 @@ test("Acceptance 7: Identity token registry — không module biểu đồ nào 
     "ui/PowerTierBreakdown.tsx",
     "ui/AccessCurve.tsx",
     "ui/OpportunityCommuneRankBars.tsx",
+    // CR 4.2: scatter bằng chứng nhận `theme` qua prop từ `LensChartController` — cùng luật
+    // §C2 với năm biểu đồ chính, dù nó không phải một biểu đồ chính.
+    "ui/Scatter.tsx",
     "ui/HourProfile.tsx",
     "ui/SupplyLorenz.tsx",
     "ui/Heatmap168.tsx",
