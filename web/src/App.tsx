@@ -70,6 +70,7 @@ import {
   gradientAvailability,
   type CellValue,
   type Scale,
+  type ScaleMode,
 } from "./viz/palette";
 import { bivariateAxes } from "./viz/demand";
 import { themeFor } from "./viz/theme";
@@ -147,6 +148,15 @@ export default function App() {
 
   const fail = (e: unknown) => setError(e instanceof Error ? e.message : String(e));
 
+  /**
+   * Chế độ thang mà bản đồ ĐANG vẽ — xem chú thích ở chỗ dựng `HashState` (CO-2).
+   *
+   * Một ref chứ không một state: nó không được kích một lượt render nào (giá trị của nó
+   * SUY RA từ lượt render vừa rồi), và bộ ghi hash là một closure dựng một lần lúc mount
+   * nên nó phải đọc được giá trị mới nhất qua một ô nhớ ổn định.
+   */
+  const effectiveScaleModeRef = useRef<ScaleMode>("binned");
+
   // Hash là serialization HAI CHIỀU: ghi có debounce 250ms, và nghe `hashchange` để sửa
   // tay URL / bấm Back đều có tác dụng — §9.
   useEffect(() => {
@@ -175,7 +185,20 @@ export default function App() {
         const sim = useSimulationStore.getState();
         return {
           field: s.field,
-          scaleMode: s.scaleMode,
+          // Chế độ thang THỰC SỰ đang vẽ, không phải chế độ được YÊU CẦU — CO-2.
+          //
+          // `store.scaleMode` là sở thích của người dùng và nó SỐNG SÓT qua một trường
+          // không gradient được (bấm Cầu→Cung→Cầu phải trả lại dải liên tục). Nhưng hash
+          // là "một link mở ra đúng bức tranh ấy" (CR 2.1 §2): ghi `sc=g` trong lúc bản đồ
+          // vẽ bậc là để URL khẳng định một điều màn hình không làm — và đó đúng là thứ
+          // ràng buộc "một nguồn sự thật" cấm ở khoá `f`.
+          //
+          // `scale.mode` là kết quả của `applyScaleMode` dưới hợp đồng của chính trường
+          // đang mở cộng cổng `gradientAvailability`, tức là câu trả lời của bản đồ. Khi
+          // thang chưa dựng xong thì giữ nguyên chế độ yêu cầu: nếu không, mỗi lần đổi
+          // trường hash sẽ rụng `sc` rồi mọc lại, đẩy thêm một mục lịch sử cho một khoảnh
+          // khắc không ai nhìn thấy.
+          scaleMode: effectiveScaleModeRef.current,
           mode: s.mode,
           view: s.view,
           layers: [...s.layers],
@@ -311,6 +334,11 @@ export default function App() {
         : null,
     [meta, utilizationScale, baseScale, requestedScaleMode, gradientGate.allowed],
   );
+
+  // Đặt trong thân render, ngay sau `scale`: đây là chỗ DUY NHẤT biết cả chế độ yêu cầu
+  // lẫn chế độ bản đồ chốt lại. `scale === null` = thang chưa dựng xong (xem chú thích).
+  effectiveScaleModeRef.current =
+    scale && scale.kind === "numeric" ? scale.mode : requestedScaleMode;
 
   const storyPkg: StoryPackage = useMemo(
     () => ({

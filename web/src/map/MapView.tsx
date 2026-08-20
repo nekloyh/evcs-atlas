@@ -581,6 +581,28 @@ const SELECT_PASSES = [
   ["core", rgba(SELECT_RGB, 255), SELECT_CORE_W],
 ] as const satisfies readonly (readonly [string, [number, number, number, number], number])[];
 
+/**
+ * Tham số vẽ của ký hiệu ĐANG CHỌN trong 3D — CO-1.
+ *
+ * "Đang chọn" là một trạng thái của giao diện, không phải một giá trị của trường (xem
+ * `SELECT_PASSES`). Trong 3D mọi lớp dữ liệu ĐÙN LÊN còn mọi ký hiệu chọn nằm ở cao độ 0,
+ * nên khối của chính đối tượng được chọn nuốt luôn nét đánh dấu nó. Đo được ở mức phóng mà
+ * điều hướng của Phase 5 bay tới (ô 13,5 · trạm 14,5, pitch 50): **87 trên 626.735 pixel**
+ * đổi giữa hai lượt render bật/tắt lựa chọn — tức không có nét nào được vẽ ra cả.
+ *
+ * Tắt phép thử độ sâu cho RIÊNG các lớp này. Dữ liệu vẫn che dữ liệu — bất biến "khối cao
+ * che khối thấp" không đổi; chỉ trạng thái là không bị che, vì một trạng thái không đọc
+ * được thì bằng không có.
+ */
+const SELECT_PARAMS_3D = {
+  // deck.gl 9 / luma.gl 9 nói bằng từ vựng WebGPU: `depthCompare: "always"` là phép thử độ
+  // sâu LUÔN đậu, tức đúng nghĩa `depthTest: false` của đời trước. `depthWriteEnabled:
+  // false` đi kèm để nét chọn không ghi vào bộ đệm độ sâu — nếu ghi, nó tự biến mình thành
+  // tấm chắn cho những lớp vẽ sau nó.
+  depthCompare: "always",
+  depthWriteEnabled: false,
+} as const;
+
 interface BuildInput extends Props {
   selected: string | null;
   layersOn: Set<OverlayId>;
@@ -656,6 +678,17 @@ export function buildLayers({
   const out: Layer[] = [];
   const demandP1 = !inStory && hasDemandRepresentations(field);
   const demandSurface = demandP1 && (demandRepresentation === "density" || demandRepresentation === "hybrid");
+  // Lớp Ô có ĐANG đùn khối không — điều kiện y hệt lời gọi `hexLayers` bên dưới, đặt tên
+  // ra để nét chọn của ô đọc được nó mà không phải chép lại phép thử (chép lại là cách hai
+  // nhánh lệch nhau sau lần sửa thứ ba).
+  const hexExtruded =
+    mode === "3d" &&
+    paintOn &&
+    Boolean(scale) &&
+    plan.paint === "hex" &&
+    !(demandP1 && demandRepresentation !== "hex");
+  /** Xem `SELECT_PARAMS_3D`. 2D không đổi một byte nào — ở đó không có gì để che. */
+  const selectParams = mode === "3d" ? { parameters: SELECT_PARAMS_3D } : {};
 
   const activeTheme = themeFor(field, demandRepresentation);
 
@@ -789,6 +822,7 @@ export function buildLayers({
           getLineColor: color,
           lineWidthUnits: "pixels",
           getLineWidth: width,
+          ...selectParams,
           updateTriggers: { getLineColor: selectedCommune },
         }),
       );
@@ -819,6 +853,7 @@ export function buildLayers({
             getLineColor: color,
             lineWidthUnits: "pixels",
             getLineWidth: width,
+            ...selectParams,
             updateTriggers: { getRadius: r, getPosition: selectedStation },
           }),
         );
@@ -828,23 +863,42 @@ export function buildLayers({
 
   const selectedCell = cellIdOf(selected);
   if (selectedCell) {
+    // Ô là hình học DUY NHẤT trong năm cái tự nó đùn lên, nên riêng nó không dừng ở việc
+    // không bị che: nét chọn LEO LÊN đúng mặt trên của khối nó gọi tên (CO-1). Vẽ ở chân
+    // khối thì trong một khung nghiêng nét nằm lệch hẳn khỏi mặt đang sáng — người xem đọc
+    // ra một ô KHÁC đang được chọn, tức tệ hơn cả việc không vẽ gì.
+    //
+    // `elevationFor` là đúng hàm mà `hexLayers` dùng cho `getElevation`, với cùng `scale`
+    // và cùng trần `MAX_ELEV_R8_M`: một miền, hai kênh (CR 2.1 §4) — nét không thể trôi
+    // khỏi mặt khối vì nó không có công thức riêng để trôi.
+    //
+    // Ô ngoài tập lọc không có khối nào (§2.1 loại nó khỏi `data` từ tầng App), nên `z = 0`
+    // — và đó là chỗ nó thật sự nằm.
+    const row = hexExtruded ? analyticalCells.find((c) => c.h3 === selectedCell) : undefined;
+    const z = row ? elevationFor(row.value, scale, MAX_ELEV_R8_M) : 0;
+    // `PathLayer` chứ không `H3HexagonLayer`: lớp kia không nhận toạ độ có cao độ, và
+    // `stroked` của nó chỉ có tác dụng khi `extruded: false`. `cellToBoundary` cho đúng
+    // đường bao thật của ô, nên nó thay luôn được vai trò của `highPrecision`.
+    const ring = (cellToBoundary(selectedCell, true) as [number, number][]).map(
+      ([lng, lat]) => [lng, lat, z] as [number, number, number],
+    );
+    // Đóng vòng bằng tay — `PathLayer` vẽ đường MỞ, thiếu dòng này thì lục giác hở một cạnh.
+    if (ring.length > 0) ring.push(ring[0]!);
     for (const [suffix, color, width] of SELECT_PASSES) {
       out.push(
-        new H3HexagonLayer<{ h3: string }>({
+        new PathLayer<{ path: [number, number, number][] }>({
           id: `grid-selected-${suffix}`,
-          data: [{ h3: selectedCell }],
-          getHexagon: (d) => d.h3,
-          // Chế độ `auto` dựng ô bằng một lục giác ĐỀU dùng chung, lấy từ ô ở tâm khung nhìn.
-          // Viền chọn phải trùng đúng ô bên dưới nên ép high precision. Một ô thì không tốn gì.
-          highPrecision: true,
-          extruded: false,
-          filled: false,
-          stroked: true,
+          data: [{ path: ring }],
+          getPath: (d) => d.path,
+          widthUnits: "pixels",
+          getWidth: width,
+          widthMinPixels: width,
+          getColor: color,
+          capRounded: true,
+          jointRounded: true,
           pickable: false,
-          getLineColor: color,
-          lineWidthUnits: "pixels",
-          getLineWidth: width,
-          updateTriggers: { getHexagon: selectedCell },
+          ...selectParams,
+          updateTriggers: { getPath: [selectedCell, z], getColor: color },
         }),
       );
     }
@@ -874,6 +928,7 @@ export function buildLayers({
             capRounded: true,
             jointRounded: true,
             pickable: false,
+            ...selectParams,
             updateTriggers: { getColor: selectedRoad },
           }),
         );
@@ -1977,6 +2032,8 @@ function poiLayers(
           getLineColor: rgba(SELECT_RGB, 255),
           lineWidthUnits: "pixels",
           getLineWidth: SELECT_CORE_W,
+          // Cùng luật với bốn hình học kia — xem `SELECT_PARAMS_3D`.
+          ...(is3d ? { parameters: SELECT_PARAMS_3D } : {}),
           updateTriggers: { getLineColor: selectedRef },
         }),
       );

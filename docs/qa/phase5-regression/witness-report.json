@@ -1,0 +1,78 @@
+{
+  "ring_pixels": {
+    "pre": {
+      "cell-3d-gradient": {
+        "changed": 3209,
+        "total": 832032,
+        "pct": 0.3857,
+        "meanDE": 29.78,
+        "maxDE": 63.66
+      },
+      "cell-3d-binned": {
+        "changed": 0,
+        "total": 832032,
+        "pct": 0,
+        "meanDE": null,
+        "maxDE": 0
+      },
+      "cell-2d-gradient": {
+        "changed": 2130,
+        "total": 832032,
+        "pct": 0.256,
+        "meanDE": 38.08,
+        "maxDE": 45.4
+      },
+      "stat-3d-gradient": {
+        "changed": 175106,
+        "total": 832032,
+        "pct": 21.0456,
+        "meanDE": 25.63,
+        "maxDE": 63.84
+      },
+      "stat-2d-gradient": {
+        "changed": 159119,
+        "total": 832032,
+        "pct": 19.1241,
+        "meanDE": 24.45,
+        "maxDE": 56.84
+      }
+    },
+    "post": {
+      "cell-3d-gradient": {
+        "changed": 1432,
+        "total": 832032,
+        "pct": 0.1721,
+        "meanDE": 39.39,
+        "maxDE": 64.32
+      },
+      "cell-3d-binned": {
+        "changed": 1432,
+        "total": 832032,
+        "pct": 0.1721,
+        "meanDE": 39.73,
+        "maxDE": 64.32
+      },
+      "cell-2d-gradient": {
+        "changed": 2124,
+        "total": 832032,
+        "pct": 0.2553,
+        "meanDE": 38.12,
+        "maxDE": 55.19
+      },
+      "stat-3d-gradient": {
+        "changed": 175297,
+        "total": 832032,
+        "pct": 21.0685,
+        "meanDE": 25.64,
+        "maxDE": 63.84
+      },
+      "stat-2d-gradient": {
+        "changed": 159119,
+        "total": 832032,
+        "pct": 19.1241,
+        "meanDE": 24.45,
+        "maxDE": 56.84
+      }
+    }
+  }
+}
