@@ -21,12 +21,125 @@ export interface Coverage {
    * được vẽ một meter rỗng (meter rỗng đọc thành **0%**).
    */
   pop_share?: number;
-  /** chỉ có ở apartment_levels_sum — cột không null nhưng lệch 0 nặng */
-  nonzero_cells?: number;
-  share_of_cells_with_apartments?: number;
   /** chỉ có ở util_cell — mẫu số toàn lưới đọc nhầm thành "đo kém"; mẫu số đúng là số ô CÓ TRẠM */
   cells_with_station?: number;
   share_measured_among_cells_with_station?: number;
+}
+
+/** Trạng thái ô trống — bốn cái, và chỉ NOT_APPLICABLE rời mẫu số. §0.2. */
+export type NullStateName = "MISSING" | "NOT_APPLICABLE" | "NOT_MEASURED" | "FILTERED";
+
+export interface NullStateBucket {
+  n: number;
+  /** Trạng thái thật. Khoá của xô có thể mang hậu tố (`MISSING@residual`) — đọc trường này. */
+  state: NullStateName;
+  /** Vị từ, hoặc lời tuyên bố mức bảng. In nguyên văn cạnh số đếm. */
+  rule: string;
+  /**
+   * Trạng thái được gán BẰNG GÌ — điều kiện để §1.1 Rule 0 kiểm được.
+   * `"residual"` nghĩa là KHÔNG luật nào giải thích được: một khuyết tật (§9), không phải
+   * một ô trống lành tính. UI phải vẽ nó khác hẳn hai loại kia.
+   */
+  basis: "row_predicate" | "table_invariant" | "residual";
+  /** Bắt buộc khi `basis === "table_invariant"`: khoá manifest đối chiếu được. */
+  verified_by?: string;
+  threshold?: { name: string; value: number | string; source: string };
+}
+
+export interface ColumnNullStateInfo {
+  n_rows: number;
+  n_present: number;
+  /**
+   * Mẫu số THÔ — `n_present / n_rows`. Đi CÙNG `share_of_applicable`, không bị nó thay thế:
+   * `util_cell` đọc 9,93 % ở đây và 97,33 % ở kia, và đúng một trong hai đáng báo động.
+   * AC-4 buộc cả hai có mặt trên màn hình.
+   */
+  share_rows: number;
+  states: Record<string, NullStateBucket>;
+  /** `n_rows − Σ NOT_APPLICABLE`. Phần của bảng mà câu hỏi CÓ nghĩa. */
+  n_applicable: number;
+  share_of_applicable: number;
+  pop_share?: number;
+}
+
+export type NullStates = Record<string, Record<string, ColumnNullStateInfo>>;
+
+/**
+ * Khoá đã KHAI nhưng phép đo chưa từng chạy (§9-8). Khác hẳn "bằng 0" và khác hẳn ô trống:
+ * một dấu gạch đứng cạnh các số đã đo đọc thành "không đáng kể".
+ */
+export type NotMeasured = Record<
+  string,
+  { reason: string; consequence: string; upstream_ask: string }
+>;
+
+export interface InvalidValueInfo {
+  n: number;
+  share_rows?: number;
+  share_pop?: number;
+  rule: string;
+  disposition: string;
+}
+
+export type InvalidValues = Record<string, InvalidValueInfo>;
+export type DegenerateColumns = Record<string, number | string>;
+
+export interface FilterInfo {
+  /**
+   * `"removal"` — luật của TA gỡ dòng đi, và `before − removed = after` đóng kín.
+   * `"two_sets"` — hai phép TRÍCH khác nhau, giao nhau một phần. Không tập nào là mẫu số của
+   * tập kia, nên `removed` là `null`: ép nó thành một hiệu cho ra số ÂM ở những tỉnh mà tập
+   * nhu cầu lớn hơn tập trực quan (Cao Bằng: 123 vs 84), và một phương trình vẫn "đóng kín"
+   * trong khi con số nó khẳng định thì vô nghĩa.
+   */
+  kind: "removal" | "two_sets";
+  name: string;
+  rule_const: string;
+  source_file: string;
+  before: number;
+  removed: number | null;
+  after: number;
+  denominator: string;
+  share_removed_stations?: number;
+  share_removed_ports?: number;
+  share_removed_power?: number;
+  /** Chỉ có ở `two_sets`: bốn con số thật thay cho một hiệu bịa ra. */
+  n_visual?: number;
+  n_demand?: number;
+  n_both?: number;
+  n_visual_only?: number;
+  n_demand_only?: number;
+}
+
+export type Filters = Record<string, FilterInfo>;
+
+export interface ExclusionsInfo {
+  thresholds?: Record<string, number>;
+  excluded: boolean;
+  exclusion_reasons?: string[];
+  exclusion_flags?: string[];
+  poi_not_interpretable: boolean;
+  poi_details?: Record<string, unknown>;
+}
+
+export interface FreshnessInfo {
+  exported_utc: string;
+  inputs: {
+    osm_pbf: string;
+    stations_canonical: string;
+    vnsdi_valid_from: string;
+    occupancy_window: [string, string] | null;
+  };
+  row_level: {
+    column: string;
+    unit: string | null;
+    note: string;
+    p50: number | null;
+    p90: number | null;
+    max: number | null;
+    n_present: number;
+    n_rows: number;
+  };
 }
 
 export interface CategoryCounts {
@@ -76,10 +189,29 @@ export function manifestFile(files: ManifestFiles | undefined, name: string): Ma
 
 export interface Manifest {
   exported_utc: string;
+  vintage?: {
+    name: string;
+    source: string;
+    valid_from: string;
+    published: string;
+    levels: string[];
+    n_provinces: number;
+    n_communes: number;
+    province_key: string;
+    commune_key: string;
+    rejected?: Record<string, string>;
+  };
   n_cells: number;
   // Runtime also accepts the legacy string[] emitted by the Hà Nội bundle.
   files: Record<string, ManifestFile>;
   coverage: Record<string, Coverage>;
+  null_states?: NullStates;
+  not_measured?: NotMeasured;
+  invalid_values?: InvalidValues;
+  degenerate_columns?: DegenerateColumns;
+  filters?: Filters;
+  exclusions?: ExclusionsInfo;
+  freshness?: FreshnessInfo;
   categories: Record<string, CategoryCounts>;
   /**
    * Tổng cung — KPI row của chế độ DỮ LIỆU (§3f-1), phát ở M4.2.
@@ -114,6 +246,12 @@ export interface Manifest {
      * liệu là một từ vựng và mọi chỗ đọc phải biết mình đang ở bộ nào.
      */
     occ_status_ok?: { n_total: number; n_ok: number; share: number };
+    /**
+     * "Chưa đo được" tách theo LÝ DO — `OK` / `THIEU_COVERAGE` / `THIEU_PEER` (§2.5).
+     * Từ vựng KHÔNG được cứng hoá ở TS: nó là `value_counts` của cột, và tỉnh khác có thể
+     * mang giá trị khác (AC-20).
+     */
+    occ_status_counts?: Record<string, number>;
     /**
      * Điểm sạc cá nhân đã loại — bản TRUNG TÍNH của `source_metrics.private_ac_dropped`.
      * Tên trường bỏ chữ `hanoi` (`share_of_hanoi_stations_before` → `share_stations`).

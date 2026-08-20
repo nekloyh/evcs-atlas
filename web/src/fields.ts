@@ -14,6 +14,7 @@
  */
 
 import { pct, type Manifest } from "./data/manifest";
+import type { NullState } from "./data/null-states";
 import { dataPath } from "./data/province";
 import type { CompareView, OverlayId, ReadingUnit } from "./state/types";
 import { formatIn, scaleUnit, unitPhrase, type ScaledUnit, type UnitSpec } from "./units";
@@ -171,30 +172,36 @@ export interface FieldMeta extends VisualContract {
   /** mô tả một câu — ô tìm kiếm lọc trên cả trường này, không chỉ trên tên cột */
   desc: string;
   kind: FieldKind;
-  /**
-   * Null ở trường này CÓ NGHĨA — §7a. Đặt chuỗi này là chặn badge ⚠ phủ ô lại:
-   * "⚠ chỉ dành cho 'không biết', không dành cho 'biết là không'".
-   */
-  nullMeans?: string;
   /** nhãn của swatch ô-trống ở legend; mặc định “không đo được” */
   nullLabel?: string;
   /**
-   * Null của trường này có **HAI nguyên nhân** — mở rộng §7a (M3-Q3).
+   * Null của trường này có **HAI nguyên nhân** — §7a mở rộng, và từ Phase 8 là **hình chiếu
+   * LÚC CHẠY của `NullContract`** ở `data/null-states.ts`.
    *
-   * §7a chia null làm hai loại: "không biết" (có ⚠) và "biết là không" (không ⚠). Cờ
-   * `nullMeans` diễn đạt được điều đó ở cấp TRƯỜNG. Nhưng `detour_ratio` có cả hai loại
-   * **trong cùng một trường**, và gộp chúng vào một vân xám là để 86 ô SÁT TRẠM — nhóm
-   * được phục vụ tốt nhất thành phố — đeo cùng ký hiệu với 50 ô hoang không tới được.
+   * Vì sao còn tồn tại bên cạnh `NullContract`: hai thứ trả lời hai câu hỏi khác nhau.
+   * `NullContract` + `manifest.null_states` cho **số đếm tổng** của một cột; bản đồ thì cần
+   * phân loại **từng ô đang nạp** để chọn vân, và nó chỉ có trong tay những cột `fetchCells`
+   * mang về. `by` là cột bool rẻ tiền làm được việc đó.
    *
-   * `by` là một cột **bool đã có sẵn** trong hàng. `true` ⇒ null loại "không áp dụng"
-   * (vân 90°, KHÔNG tính vào ⚠). `false` ⇒ null loại "không biết" (vân 45°, có ⚠).
+   * Điều bắt buộc là hai bên KHÔNG ĐƯỢC nói khác nhau, và trước Phase 8 chúng nói khác nhau
+   * theo đúng nghĩa đen: khai báo cũ TRỪ nhóm `by = true` khỏi mẫu số và gắn ⚠ cho nhóm
+   * `by = false`, tức **đảo ngược cả hai** so với §0.2. Với `detour_ratio` điều đó cho rail
+   * đọc 99,9 % trong khi khối KHOẢNG TRỐNG đọc 98,0 % — cùng một cột, hai màn hình, hai số.
+   *
+   * Nên bây giờ mỗi nhánh tự KHAI TRẠNG THÁI của nó, và ba hệ quả suy ra từ trạng thái chứ
+   * không ai chọn tay: có bị trừ khỏi mẫu số không (chỉ NOT_APPLICABLE), có đeo ⚠ không
+   * (chỉ MISSING và NOT_MEASURED), và vẽ vân góc nào (§6.4).
+   * `test/null-states.test.ts` chốt hai bên khớp nhau trên dữ liệu thật.
    */
   nullSplit?: {
+    /** Cột bool CÓ SẴN trong hàng đã nạp — phép phân loại phải chạy được không cần truy vấn. */
     by: "network_reachable";
-    /** nhãn cho nhóm "không áp dụng" ở legend */
-    label: string;
-    /** vì sao câu hỏi không áp dụng — hiện cạnh badge */
-    explain: string;
+    /** Trạng thái §0.2 khi `by` là `true`, và nhãn của nhóm ấy ở legend. */
+    whenTrue: { state: NullState; label: string };
+    /** Trạng thái khi `by` là `false`. */
+    whenFalse: { state: NullState; label: string };
+    /** Hợp đồng mà khai báo này chiếu xuống — `"<bảng>.<cột>"`, test đối chiếu theo khoá này. */
+    projects: string;
   };
   /**
    * Câu giải thích đi kèm badge ⚠ phủ ô, khi số thô chưa nói hết.
@@ -624,11 +631,15 @@ const CELL_SPECS: Spec[] = [
     // chim bay < 200 m (`DETOUR_MIN_EUCLID_M`), vì ở cỡ đó `dist_station_network_m` bị
     // `road_access_offset_m` chi phối: tỉ số đo ĐỘ LỆCH CỦA TÂM Ô so với mặt đường, không
     // đo hình học sông/cầu mà trường này nói về. Câu hỏi không áp dụng — khác hẳn "chưa biết".
+    // Ô tới được mà vẫn trống ⇒ chim bay < 200 m ⇒ LUẬT CỦA TA gỡ giá trị đi: đó là FILTERED,
+    // và FILTERED Ở LẠI mẫu số (§0.2) — giá trị vốn tồn tại, ta chọn không công bố nó.
+    // Ô không tới được ⇒ không có đường nào tới ⇒ câu hỏi không tồn tại: NOT_APPLICABLE, và
+    // đó là nhóm DUY NHẤT rời khỏi mẫu số. Không nhóm nào đeo ⚠.
     nullSplit: {
       by: "network_reachable",
-      label: "sát trạm, không tính tỉ số",
-      explain:
-        "Ô có khoảng cách chim bay dưới 200 m tới trạm. Ở cỡ đó tỉ số đo quãng từ tâm ô ra mặt đường chứ không đo đường vòng, nên bộ dữ liệu không tính — đây là “biết là không áp dụng”, không phải “không biết”, nên nó KHÔNG vào badge ⚠ (§7a).",
+      whenTrue: { state: "FILTERED", label: "sát trạm dưới 200 m, luật của ta không tính tỉ số" },
+      whenFalse: { state: "NOT_APPLICABLE", label: "không tới được bằng đường bộ" },
+      projects: "grid.detour_ratio",
     },
     coverageNote:
       "Ô để trống có HAI nguyên nhân khác hẳn nhau, và chúng vẽ bằng hai vân khác nhau: ô không tới được bằng đường bộ (vân chéo — thật sự không biết), và ô sát trạm dưới 200 m (vân dọc — câu hỏi không áp dụng). Về phần có giá trị: 1 nghĩa là đi thẳng được, 2 nghĩa là chim bay nói ô này gần gấp đôi thực tế; sông Hồng và số cầu ít là nguyên nhân hình học của phần lớn ô cao.",
@@ -952,7 +963,6 @@ const STATION_SPECS: Spec[] = [
     desc: "Số cổng sạc công cộng đã lắp tại từng trạm. Màu mã hoá quy mô tài sản; bán kính chấm cố định để không thêm encoding thứ hai.",
     unit: { kind: "port", note: "đã lắp tại trạm" },
     kind: "numeric",
-    nullMeans: "Nguồn không khai số cổng của trạm này; không được đọc thành trạm 0 cổng.",
   },
   {
     id: "occ",
@@ -977,7 +987,6 @@ const STATION_SPECS: Spec[] = [
     desc: "Tổng công suất các cổng sạc đã lắp tại trạm.",
     unit: { kind: "kw", note: "lắp đặt tại trạm" },
     kind: "numeric",
-    nullMeans: "Nguồn không khai công suất của trạm này; không được đọc thành trạm 0 kW.",
     map: false,
   },
   {
@@ -988,7 +997,6 @@ const STATION_SPECS: Spec[] = [
     desc: "Trạng thái vận hành của trạm theo dữ liệu nguồn.",
     unit: null,
     kind: "categorical",
-    nullMeans: "Nguồn không nói trạng thái vận hành của trạm này.",
     map: false,
   },
 ];
@@ -1475,8 +1483,10 @@ export interface RuntimeCoverage {
    * "0% dân" và đọc thành "những đoạn này không phục vụ ai".
    */
   pop_share: number | undefined;
-  /** số ô null vì CÂU HỎI KHÔNG ÁP DỤNG — đã bị trừ khỏi  (§7a mở rộng) */
+  /** số ô null vì CÂU HỎI KHÔNG ÁP DỤNG — nhóm DUY NHẤT bị trừ khỏi mẫu số (§0.2). */
   n_not_applicable?: number;
+  /** số ô null vì LUẬT CỦA TA gỡ giá trị đi. Ở LẠI mẫu số, nhưng không đeo ⚠ và có vân riêng. */
+  n_filtered?: number;
 }
 
 /** Danh từ đơn vị đọc, dùng trong câu badge. Xã không phải "ô", và đoạn đường cũng vậy. */
@@ -1488,11 +1498,32 @@ export function unitNoun(u: ReadingUnit): string {
 }
 
 /**
+ * Ô trống của cột này CÓ nghĩa là "không biết" không? Đọc từ `manifest.null_states`.
+ *
+ * Đây là thứ thay cho `nullMeans` (Phase 8 §1.2, AC-3). `nullMeans` là một câu tiếng Việt gõ
+ * tay tắt badge ⚠ cho cả trường; nó đúng về tinh thần và sai về cơ chế, vì không gì kiểm được
+ * nó. Bây giờ câu trả lời đến từ số đếm mà exporter phát ra: cột nào không có ô trống nào
+ * mang trạng thái MISSING hay NOT_MEASURED thì mọi ô trống của nó là "biết là không", và
+ * §7a cấm ⚠ ở đó.
+ *
+ * Trả `undefined` khi manifest không nói gì — chỗ gọi giữ nguyên hành vi cũ thay vì đoán.
+ */
+export function nullStateWarns(m: Manifest, table: string, column: string): boolean | undefined {
+  const d = m.null_states?.[table]?.[column];
+  if (!d) return undefined;
+  return Object.values(d.states).some(
+    (b) => b.state === "MISSING" || b.state === "NOT_MEASURED",
+  );
+}
+
+/**
  * Badge ⚠ của một trường. Con số lấy từ manifest **hoặc từ số đo lúc chạy**, câu chữ lấy
  * từ `FieldMeta` — §7c.
  *
- * Badge phủ là một QUY TẮC chạy trên số đo (`share < 1`), không phải danh sách gõ tay; và
- * nó bị chặn khi trường tự khai `nullMeans` (§7a: ⚠ chỉ dành cho "không biết").
+ * Badge phủ là một QUY TẮC chạy trên số đo (`share < 1`), không phải danh sách gõ tay. Nó bị
+ * chặn khi `null_states` cho thấy mọi ô trống của cột là "biết là không" — §7a: ⚠ chỉ dành
+ * cho "không biết". Trước Phase 8 phép chặn ấy đọc một chuỗi `nullMeans` gõ tay cạnh trường;
+ * bây giờ nó đọc số đếm đã ship, nên nó kiểm được và nó không thể lệch khỏi dữ liệu.
  */
 export function badgesFor(
   f: FieldMeta,
@@ -1515,7 +1546,13 @@ export function badgesFor(
       }
     : runtime?.get(f.id);
 
-  if (cov && cov.share < 1 && !f.nullMeans) {
+  // §7a qua `null_states`: cột mà mọi ô trống đều KHÔNG ÁP DỤNG hoặc ĐÃ LỌC thì không đeo ⚠.
+  // Ở đơn vị đọc TRẠM đó là `n_ports`/`power_kw_site` (nguồn không khai ⇒ vẫn là "không
+  // biết", vẫn ⚠) và `n_guns_imputed` (không cần gán ⇒ KHÔNG ⚠, và nó 97,2 % trống).
+  const nullTable = f.readAs === "cell" ? "grid" : f.readAs === "station" ? "stations" : null;
+  const warns = nullTable ? nullStateWarns(m, nullTable, f.column) : undefined;
+
+  if (cov && cov.share < 1 && warns !== false) {
     const note = typeof f.coverageNote === "function" ? f.coverageNote(m) : f.coverageNote;
     const noun = unitNoun(f.readAs);
     // Vế "% dân" chỉ có mặt khi đơn vị đọc CÓ dân. Đoạn đường thì không — xem `pop_share`.

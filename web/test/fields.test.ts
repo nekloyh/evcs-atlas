@@ -26,7 +26,6 @@ import {
   mapFieldsOfUnit,
   fieldsOfUnit,
   unitNoun,
-  type FieldMeta,
   type RuntimeCoverage,
 } from "../src/fields.ts";
 import type { Manifest } from "../src/data/manifest.ts";
@@ -224,30 +223,10 @@ test("phủ 100% ⇒ KHÔNG có badge", () => {
   assert.deepEqual(badgesFor(FIELD_BY_ID.get("population")!, m), []);
 });
 
-test("§7a: trường mà null CÓ NGHĨA không mang badge, dù phủ chỉ 33%", () => {
-  // Trường TỔNG HỢP, không lấy từ FIELDS: sau khi pipeline bỏ `not_buildable_reason` thì
-  // không cột nào còn khai `nullMeans`, nhưng QUY TẮC §7a vẫn sống trong `badgesFor` và
-  // vẫn phải đúng. Test quy tắc chứ không test dữ liệu — đúng tinh thần §12: dữ liệu đổi
-  // thì test không được im lặng biến mất cùng nó.
-  const f: FieldMeta = {
-    id: "gia_dinh",
-    column: "gia_dinh",
-    readAs: "cell",
-    lens: null,
-    group: "dat",
-    label: "Trường giả định",
-    desc: "Null ở đây nghĩa là “biết là không”, không phải “không biết”.",
-    unit: null,
-    kind: "categorical",
-    nullMeans: "Ô trống nghĩa là ĐẶT ĐƯỢC.",
-  };
-  const m = manifest({
-    coverage: { gia_dinh: { n_present: 1466, cell_share: 0.3311, pop_share: 0.0331 } },
-  });
-  assert.deepEqual(badgesFor(f, m), []);
-  // Cùng con số đó, bỏ `nullMeans` đi thì badge PHẢI mọc — nếu không thì phép kiểm trên
-  // pass vì lý do sai (ví dụ vì tra nhầm khoá coverage).
-  assert.equal(badgesFor({ ...f, nullMeans: undefined }, m).length, 1);
+test("Phase 8 §1.1: nullMeans is retired across all fields in FIELD_REGISTRY", () => {
+  for (const f of FIELDS) {
+    assert.equal((f as any).nullMeans, undefined, `Trường ${f.id} còn chứa nullMeans`);
+  }
 });
 
 test("trường của XÃ đếm bằng “xã”, không bằng “ô” — mẫu số 126 chứ không 4.427", () => {
@@ -316,10 +295,7 @@ test("không SỐ ĐO PHỦ nào bị gõ cứng cạnh badge ⚠ (§7c)", () =>
   // `buildable` ghi "đã xây dựng ≥ 5% và mặt nước ≤ 50%" — đó là luật của DECISIONS §7,
   // nó không đổi khi dữ liệu đổi, nên nó không thuộc loại nợ mà §7c nhắm tới.
   for (const f of FIELDS) {
-    const nearBadge = [
-      typeof f.coverageNote === "string" ? f.coverageNote : "",
-      f.nullMeans ?? "",
-    ].join(" ");
+    const nearBadge = typeof f.coverageNote === "string" ? f.coverageNote : "";
     assert.doesNotMatch(nearBadge, /\d+([.,]\d+)?\s*%/, `${f.id} có phần trăm gõ tay`);
   }
 });
@@ -364,14 +340,6 @@ test("chỉ `detour_ratio` khai `nullSplit`, và cột phân loại phải là c
     const by = FIELD_BY_ID.get(f.nullSplit!.by);
     assert.ok(by, `${f.id}: cột phân loại ${f.nullSplit!.by} không tồn tại`);
     assert.equal(by!.kind, "bool", "cột phân loại phải là bool");
-  }
-});
-
-test("trường có `nullSplit` KHÔNG được đồng thời khai `nullMeans`", () => {
-  // Hai cơ chế loại trừ nhau: `nullMeans` tắt ⚠ cho CẢ trường, `nullSplit` chỉ tắt cho một
-  // nhóm. Khai cả hai thì nhóm "không biết" mất badge — đúng cái §7a muốn tránh.
-  for (const f of FIELDS) {
-    assert.ok(!(f.nullSplit && f.nullMeans), `${f.id} khai cả hai`);
   }
 });
 

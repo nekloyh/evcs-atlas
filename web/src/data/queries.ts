@@ -10,6 +10,7 @@ import type { DemandCell } from "../viz/lorenz";
 import type { PoiCollection } from "./poi";
 import type { CellValue } from "../viz/palette";
 import { FIELDS, type FieldMeta, type RuntimeCoverage } from "../fields";
+import type { NullState } from "./null-states";
 import { powerTierOf, type PowerTierId } from "../state/filter";
 import type { OpportunityCommuneRow } from "../viz/chart-models";
 import { BEYOND_2KM_M } from "../domain-thresholds";
@@ -238,6 +239,18 @@ export function fetchField(meta: FieldMeta): Promise<GridCell[]> {
  *
  * Một truy vấn cho tất cả, không phải mỗi trường một truy vấn: chúng cùng quét một bảng.
  */
+/**
+ * Vị từ SQL chọn nhánh của `nullSplit` mang TRẠNG THÁI đã cho, hoặc `false` nếu không nhánh
+ * nào mang nó. Trạng thái quyết định vị từ — không ai gõ `NOT`/không-`NOT` bằng tay.
+ */
+function splitPredicate(f: FieldMeta, state: NullState): string {
+  const sp = f.nullSplit;
+  if (!sp) return "false";
+  if (sp.whenTrue.state === state) return gcol(sp.by);
+  if (sp.whenFalse.state === state) return `NOT ${gcol(sp.by)}`;
+  return "false";
+}
+
 export async function fetchDerivedCoverage(): Promise<Map<string, RuntimeCoverage>> {
   // Trường có `nullSplit` cũng cần đo lúc chạy, dù nó là cột thô: badge ⚠ của nó phải TRỪ
   // nhóm "không áp dụng" ra, mà `manifest.coverage` chỉ biết tổng số null (§7a mở rộng).
@@ -249,11 +262,15 @@ export async function fetchDerivedCoverage(): Promise<Map<string, RuntimeCoverag
   const parts = derived.flatMap((f, i) => [
     `count(*) FILTER (WHERE (${selectExpr(f)}) IS NOT NULL) AS n${i}`,
     `sum(${gcol("population")}) FILTER (WHERE (${selectExpr(f)}) IS NOT NULL) AS p${i}`,
-    // Nhóm "không áp dụng": giá trị null NHƯNG cột phân loại nói câu hỏi không áp dụng.
-    // Nó bị TRỪ khỏi mẫu số của ⚠ — badge chỉ được nói về phần thật sự "không biết".
+    // Hai nhóm null, và ĐỂ TRẠNG THÁI QUYẾT ĐỊNH nhánh nào đi đường nào — không chọn tay.
+    // Chỉ NOT_APPLICABLE rời khỏi mẫu số (§0.2); FILTERED ở lại nhưng không đeo ⚠. Bản trước
+    // trừ nhầm nhánh và cho rail một con số khác hẳn khối KHOẢNG TRỐNG cho cùng một cột.
     f.nullSplit
-      ? `count(*) FILTER (WHERE (${selectExpr(f)}) IS NULL AND ${gcol(f.nullSplit.by)}) AS x${i}`
+      ? `count(*) FILTER (WHERE (${selectExpr(f)}) IS NULL AND ${splitPredicate(f, "NOT_APPLICABLE")}) AS x${i}`
       : `0 AS x${i}`,
+    f.nullSplit
+      ? `count(*) FILTER (WHERE (${selectExpr(f)}) IS NULL AND ${splitPredicate(f, "FILTERED")}) AS y${i}`
+      : `0 AS y${i}`,
   ]);
   const t = await query(
     `SELECT count(*) AS n_all, sum(${gcol("population")}) AS p_all, ${parts.join(", ")}
@@ -266,9 +283,10 @@ export async function fetchDerivedCoverage(): Promise<Map<string, RuntimeCoverag
     const n = Number(row[`n${i}`]) || 0;
     const p = Number(row[`p${i}`]) || 0;
     const notApplicable = Number(row[`x${i}`]) || 0;
-    // Mẫu số bỏ nhóm "không áp dụng" đi: `detour_ratio` phủ 4.264/4.400 = 96,9% nếu đếm
-    // thô, nhưng 4.264/4.314 = 98,8% nếu hỏi đúng câu "trong những ô mà câu hỏi có nghĩa,
-    // bao nhiêu ô trả lời được". Câu sau mới là thứ badge ⚠ nói.
+    const filtered = Number(row[`y${i}`]) || 0;
+    // Mẫu số bỏ nhóm KHÔNG ÁP DỤNG đi, và CHỈ nhóm đó: hỏi đúng câu "trong những ô mà câu
+    // hỏi có nghĩa, bao nhiêu ô trả lời được". Nhóm ĐÃ LỌC ở lại mẫu số — giá trị vốn tồn
+    // tại và chính ta chọn không công bố nó, nên giấu nó khỏi mẫu số là tự chấm điểm mình.
     const total = Math.max(nAll - notApplicable, 1);
     out.set(f.id, {
       n_present: n,
@@ -276,6 +294,7 @@ export async function fetchDerivedCoverage(): Promise<Map<string, RuntimeCoverag
       share: n / total,
       pop_share: pAll ? p / pAll : 0,
       n_not_applicable: notApplicable || undefined,
+      n_filtered: filtered || undefined,
     });
   });
   return out;

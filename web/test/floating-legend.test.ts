@@ -26,7 +26,13 @@ test("analytical legend contract: null split field detour_ratio", () => {
   const field = FIELD_BY_ID.get("detour_ratio")!;
   assert.ok(field.nullSplit);
   assert.equal(field.nullSplit.by, "network_reachable");
-  assert.ok(field.nullSplit.label.length > 0);
+  // Từ Phase 8 mỗi nhánh tự KHAI TRẠNG THÁI, và ba hệ quả suy ra từ đó chứ không ai chọn
+  // tay: bị trừ khỏi mẫu số không, đeo ⚠ không, vẽ vân góc nào. Trước đó khai báo chỉ có
+  // một `label` cho một nhánh, và nó trừ nhầm nhánh — xem `null-states.test.ts`.
+  assert.ok(field.nullSplit.whenTrue.label.length > 0);
+  assert.ok(field.nullSplit.whenFalse.label.length > 0);
+  assert.equal(field.nullSplit.whenTrue.state, "FILTERED");
+  assert.equal(field.nullSplit.whenFalse.state, "NOT_APPLICABLE");
 });
 
 test("analytical legend contract: station occupancy field", () => {

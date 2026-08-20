@@ -412,6 +412,160 @@ async function searchBench() {
   log("\nXONG — kết quả tìm kiếm ở window.BENCH_SEARCH");
 }
 
+/**
+ * §5.3 — năm ngân sách của bảng phẳng và của phép xuất, đo trên đúng TỈNH XẤU NHẤT mà đặc tả
+ * nêu tên.
+ *
+ * "Một ngân sách không có trong bench thì không phải một ngân sách" (§5.3). Vì thế mỗi dòng ở
+ * đây in cả **ngân sách** lẫn **p95 đo được** lẫn một cổng ĐẠT/HỎNG, và kết quả treo ở
+ * `window.BENCH_TABLE` để AC-15 đọc được thay vì phải tin.
+ *
+ * Bench đăng ký file theo ĐƯỜNG DẪN TỈNH TRỰC TIẾP chứ không qua `dataPath()`. Bản phát hành
+ * này ghim `PROVINCE = null` (`province.ts`) nên app chỉ mở bộ Hà Nội — nhưng dữ liệu của 68
+ * và 79 CÓ trong `web/public/data/p/`, và ngân sách nói về tỉnh nào thì phải đo trên tỉnh ấy.
+ * Đo Hà Nội rồi tuyên bố Lâm Đồng đạt là một phép ngoại suy, không phải một phép đo.
+ */
+const TABLE_BUDGETS = [
+  { id: "first_page", label: "trang đầu sau đăng ký", province: "68", table: "grid", budget: 400 },
+  { id: "page_change", label: "đổi trang", province: "68", table: "grid", budget: 150 },
+  { id: "sort_change", label: "đổi sắp xếp", province: "79", table: "roads", budget: 400 },
+  { id: "filter_change", label: "đổi bộ lọc (kèm đếm lại)", province: "68", table: "grid", budget: 500 },
+  { id: "export_csv", label: "xuất CSV tới Blob", province: "68", table: "grid", budget: 3000 },
+] as const;
+
+async function timed(fn: () => Promise<unknown>, runs = 5, warmup = 1): Promise<number> {
+  for (let i = 0; i < warmup; i++) await fn();
+  const ts: number[] = [];
+  for (let i = 0; i < runs; i++) {
+    const t0 = performance.now();
+    await fn();
+    ts.push(performance.now() - t0);
+  }
+  return pct(ts.sort((a, b) => a - b), 0.95);
+}
+
+async function tableBench() {
+  log("\n── NGÂN SÁCH BẢNG PHẲNG & XUẤT DỮ LIỆU (§5.3) ──");
+  const { fetchTablePage, getTableSchema, __resetDataModeCaches } = await import("./data/datamode");
+  const { registerParquet, query, getDb, getIssuedQueryCount } = await import("./data/duckdb");
+
+  const rows: Array<Record<string, unknown>> = [];
+  const note = (id: string, province: string, budget: number, p95: number, extra = "") => {
+    const pass = p95 <= budget;
+    rows.push({ id, province, budget_ms: budget, p95_ms: +p95.toFixed(1), pass });
+    log(
+      `TABLE  ${id.padEnd(14)} p${province}  p95 ${p95.toFixed(1).padStart(8)} ms  ` +
+        `/ ngân sách ${String(budget).padStart(5)} ms  ${pass ? "ĐẠT" : "HỎNG"}${extra}`,
+    );
+  };
+
+  for (const b of TABLE_BUDGETS) {
+    const path = `p/${b.province}/${b.table === "grid" ? "grid_h3_r8" : b.table}.parquet`;
+    try {
+      await registerParquet(path);
+      const nT = await query(`SELECT count(*) AS n FROM read_parquet('${path}')`);
+      const nRows = Number(nT.get(0)!["n"]);
+
+      if (b.id === "export_csv") {
+        // Đường CSV thật: `COPY` vào FS ảo → `copyFileToBuffer` → `Blob` → `dropFile`.
+        // Đo tới lúc có Blob, và kiểm FS ảo SẠCH sau đó (AC-14).
+        //
+        // Phép kiểm "sạch" so KÍCH THƯỚC chứ không bắt ngoại lệ: đo trên chính bản WASM này,
+        // `copyFileToBuffer` trên một tên đã `dropFile` KHÔNG ném — nó trả về một buffer 1 byte.
+        // Bắt ngoại lệ ở đây sẽ báo rò rỉ ở mọi lần chạy, kể cả khi FS đã sạch thật.
+        const db = await getDb();
+        let leaked = false;
+        let bytes = 0;
+        const p95 = await timed(async () => {
+          const tmp = `bench_${Math.random().toString(36).slice(2)}.csv`;
+          await query(
+            `COPY (SELECT * FROM read_parquet('${path}')) TO '${tmp}' (FORMAT CSV, HEADER)`,
+          );
+          const buf = await db.copyFileToBuffer(tmp);
+          bytes = buf.length;
+          const blob = new Blob([buf as unknown as BlobPart], { type: "text/csv" });
+          if (blob.size !== buf.length || blob.size < 1_000_000) leaked = true;
+          await db.dropFile(tmp);
+          let stillThere = false;
+          try {
+            stillThere = (await db.copyFileToBuffer(tmp)).length > 64;
+          } catch {
+            /* ném cũng là sạch */
+          }
+          if (stillThere) leaked = true;
+        }, 3, 1);
+        note(
+          "export_csv", b.province, b.budget, p95,
+          `  (${nRows} dòng → ${(bytes / 1e6).toFixed(2)} MB, FS ảo ${leaked ? "CÒN RÁC" : "sạch"})`,
+        );
+        rows[rows.length - 1]!["vfs_clean"] = !leaked;
+        continue;
+      }
+
+      const cols = await getTableSchema(b.table as "grid" | "roads");
+      const base = {
+        tableId: b.table as "grid" | "roads",
+        desc: false,
+        limit: 50,
+        provinceCode: b.province,
+        visibleColumns: cols.slice(0, 12),
+      };
+
+      if (b.id === "first_page") {
+        // "Sau đăng ký" nghĩa là đệm LẠNH: xoá đệm trước mỗi lần đo, nếu không thì ta đang đo
+        // một phép tra Map chứ không đo một truy vấn.
+        const p95 = await timed(async () => {
+          __resetDataModeCaches();
+          await registerParquet(path);
+          await fetchTablePage({ ...base, sort: null, offset: 0, filter: "" });
+        }, 3, 1);
+        note("first_page", b.province, b.budget, p95, `  (${nRows} dòng)`);
+      } else if (b.id === "page_change") {
+        let page = 0;
+        // AC-17 — đổi trang phải phát ĐÚNG MỘT truy vấn. Schema và `count(*)` đều đã nhớ, nên
+        // truy vấn duy nhất còn lại là chính trang đó.
+        await fetchTablePage({ ...base, sort: null, offset: 0, filter: "" });
+        const before = getIssuedQueryCount();
+        await fetchTablePage({ ...base, sort: null, offset: 50, filter: "" });
+        const perPage = getIssuedQueryCount() - before;
+        const p95 = await timed(async () => {
+          page = (page + 1) % 20;
+          await fetchTablePage({ ...base, sort: null, offset: page * 50, filter: "" });
+        });
+        note("page_change", b.province, b.budget, p95, `  (${perPage} truy vấn/trang)`);
+        rows[rows.length - 1]!["queries_per_page"] = perPage;
+      } else if (b.id === "sort_change") {
+        const sortable = cols.filter((c) => c !== "coords");
+        let k = 0;
+        const p95 = await timed(async () => {
+          k = (k + 1) % sortable.length;
+          await fetchTablePage({ ...base, sort: sortable[k]!, offset: 0, filter: "" });
+        });
+        note("sort_change", b.province, b.budget, p95, `  (${nRows} dòng)`);
+      } else {
+        let k = 0;
+        const p95 = await timed(async () => {
+          k += 1;
+          await fetchTablePage({ ...base, sort: null, offset: 0, filter: `x${k % 7}` });
+        });
+        note("filter_change", b.province, b.budget, p95, `  (${nRows} dòng, đếm lại mỗi lần)`);
+      }
+    } catch (e) {
+      log(`TABLE  ${b.id.padEnd(14)} p${b.province}  KHÔNG ĐO ĐƯỢC: ${String(e)}`);
+      rows.push({ id: b.id, province: b.province, budget_ms: b.budget, p95_ms: null, pass: false });
+    }
+  }
+
+  const allPass = rows.every((r) => r["pass"] === true);
+  (window as unknown as { BENCH_TABLE: unknown }).BENCH_TABLE = {
+    budgets: rows,
+    all_pass: allPass,
+  };
+  log(`\nTABLE  Tổng kết §5.3: ${allPass ? "MỌI NGÂN SÁCH ĐẠT" : "CÓ NGÂN SÁCH HỎNG"} — chi tiết ở window.BENCH_TABLE`);
+}
+
 void main()
   .then(searchBench)
+  .then(tableBench)
   .catch((e) => log(`HỎNG: ${String(e)}`));
+

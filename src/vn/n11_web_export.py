@@ -39,12 +39,37 @@ from shapely.geometry import mapping
 
 from evcs.schema import COMMUNE, GRID
 from evcs.core.osm import ACCESS_BLOCKED
+from evcs.core.roadgraph import DETOUR_MIN_EUCLID_M
 
 from . import admin, paths, qa
 from .n10_quality import MIN_OCC_MEASURED_SHARE
 from .runner import Step
 
-VERSION = "8"  # 8: web road surface chỉ còn public-driveable; thêm count access-blocked
+VERSION = "10"  # 10: Phase 8 QA — luật null khai báo, ngày ISO suy ra, khối not_measured
+
+# ── Ngày ĐÓNG BĂNG của nguồn thượng nguồn — MỘT nguồn sự thật ────────────────────────
+#
+# Không cột nào trong dữ liệu mang hai ngày này (chúng là ngày cắt của file PBF và của bảng
+# canonical), nên chúng phải sống ở một hằng. Điều KHÔNG được phép là sống ở HAI hằng: manifest
+# phát chúng hai lần — `snapshots` ở dạng hiển thị `dd/mm/yyyy` và `freshness.inputs` ở dạng
+# ISO cho trình duyệt — và trước lượt này mỗi chỗ gõ lại một bản. Giờ cả hai dẫn xuất từ đây.
+SNAPSHOT_DATES = {
+    "osm_pbf": "2026-07-28",
+    "stations_canonical": "2026-07-29",
+}
+
+
+def _display_date(iso: str) -> str:
+    """`2026-07-28` → `28/07/2026`. Dạng hiển thị cũ của `snapshots`, giữ nguyên hợp đồng."""
+    y, m, d = iso.split("-")
+    return f"{d}/{m}/{y}"
+
+
+def _iso_date(display: str) -> str:
+    """`16/6/2025` → `2025-06-16`. Chiều ngược, cho `admin.VINTAGE['valid_from']`."""
+    d, m, y = display.split("/")
+    return f"{y}-{int(m):02d}-{int(d):02d}"
+
 
 WEB_DATA = paths.ROOT / "web/public/data"
 WEB_PROV = WEB_DATA / "p"
@@ -328,6 +353,13 @@ def _totals(src) -> dict:
             "n_ok": int((occ.occ_status == "OK").sum()),
             "share": round(float((occ.occ_status == "OK").mean()), 6),
         }
+        # "Chưa đo được" tách theo LÝ DO (§2.5). `occ_status_ok` chỉ nói bao nhiêu trạm đạt;
+        # nó không phân biệt "thiếu quan sát" với "thiếu nhóm đối chuẩn", mà hai thứ đó gọi
+        # hai hành động khác nhau ở thượng nguồn. Đếm trực tiếp, không gõ danh mục giá trị:
+        # `AC-20` cấm cứng hoá từ vựng hạng mục, và tỉnh khác có thể có giá trị khác.
+        out["occ_status_counts"] = {
+            str(k): int(v) for k, v in occ.occ_status.value_counts(dropna=False).items()
+        }
     return out
 
 
@@ -359,6 +391,617 @@ def _private_ac_block(qrow: pd.DataFrame) -> dict:
             "share_ports": share("private_ac_share_ports"),
             "share_power": share("private_ac_share_power"),
         }
+    }
+
+
+def _s(series: pd.Series) -> pd.Series:
+    """Mask bool KHÔNG có NA — `NaN` trong phép so sánh phải đọc thành *không khớp*.
+
+    Cần vì `stations.port_config_source` và `occ.util_reportable` đều nullable: một phép
+    `!=` trên pandas nullable trả `pd.NA`, và `pd.NA` trong `&` lan ra cả mask.
+    """
+    return series.fillna(False).astype(bool)
+
+
+# ── Bảng luật NULL — MỘT nguồn sự thật ───────────────────────────────────────────────
+#
+# Phản chiếu `NULL_CONTRACTS` ở `web/src/data/null-states.ts`; `tests/test_n11_null_states.py`
+# so hai bên theo tên cột nên một bên thêm cột mà bên kia quên là **đỏ test**, không phải một
+# khác biệt âm thầm.
+#
+# Thứ tự trong danh sách LÀ thủ tục quyết định của §1.1 — NOT_APPLICABLE trước, rồi FILTERED,
+# rồi NOT_MEASURED; khớp đầu tiên thắng, phần dư rơi về MISSING. Đảo thứ tự là đổi mẫu số:
+# NOT_APPLICABLE bị TRỪ khỏi mẫu số còn FILTERED thì không.
+#
+# `basis` nói trạng thái được gán BẰNG GÌ, và đó là điều kiện để §1.1 Rule 0 kiểm được:
+#   • "row_predicate"   — một cột đã ship trong CÙNG HÀNG nói ra điều đó. Kiểm lại được.
+#   • "table_invariant" — cả bảng không có cột bạn đồng hành nào; trạng thái là một tuyên bố
+#                         ở mức bảng, và nó phải mang `verified_by` trỏ tới một khoá manifest
+#                         đối chiếu được. Ba cột rơi vào đây và UI vẽ chúng khác đi (§6.2).
+#
+# Rule 0 nguyên văn cấm gán trạng thái bằng "một chuỗi gõ tay trong TypeScript". Ba trường hợp
+# `table_invariant` dưới đây được §0.3 thẩm định là NOT APPLICABLE và AC-6 buộc chúng KHÔNG
+# mang cảnh báo, nên chúng ở lại — nhưng chúng tự khai là tuyên bố mức bảng thay vì giả trang
+# thành một vị từ theo hàng. Xung đột §1.1-vs-§0.3 đã báo cáo ở QA 8-QA-022.
+
+_NULL_RULES: dict[tuple[str, str], list[dict]] = {}
+
+
+def _rule(table: str, column: str, state: str, rule: str, needs, pred, **extra) -> None:
+    _NULL_RULES.setdefault((table, column), []).append(
+        {"state": state, "rule": rule, "needs": needs, "pred": pred, **extra}
+    )
+
+
+_UNREACH = "evidence_grade_distance IN ('UNREACHABLE_NO_PATH', 'UNREACHABLE_NO_ROAD_ACCESS')"
+
+
+def _unreachable(df: pd.DataFrame) -> pd.Series:
+    return df["evidence_grade_distance"].isin(
+        ["UNREACHABLE_NO_PATH", "UNREACHABLE_NO_ROAD_ACCESS"]
+    )
+
+
+# 1. grid — 4 cột nullable trên 61
+for _c in ("dist_station_network_m", "dist_station_asym_m"):
+    _rule("grid", _c, "NOT_APPLICABLE", _UNREACH, ["evidence_grade_distance"], _unreachable)
+
+# `detour_ratio`: NOT_APPLICABLE đứng TRƯỚC FILTERED theo §1.1. Ở dữ liệu hôm nay hai thứ tự
+# cho cùng con số (0 ô vừa không tới được vừa có chim bay < 200 m, đo trên cả 34 tỉnh), nên
+# đây là sửa cho ĐÚNG LUẬT chứ không phải sửa một con số đang sai.
+_rule("grid", "detour_ratio", "NOT_APPLICABLE", _UNREACH, ["evidence_grade_distance"], _unreachable)
+_rule(
+    "grid",
+    "detour_ratio",
+    "FILTERED",
+    f"dist_station_euclid_m < {DETOUR_MIN_EUCLID_M}",
+    ["dist_station_euclid_m"],
+    lambda df: _s(df["dist_station_euclid_m"] < DETOUR_MIN_EUCLID_M),
+    threshold={
+        "name": "DETOUR_MIN_EUCLID_M",
+        "value": float(DETOUR_MIN_EUCLID_M),
+        "source": "src/evcs/core/roadgraph.py",
+    },
+)
+_rule(
+    "grid", "util_cell", "NOT_APPLICABLE", "n_stations = 0",
+    ["n_stations"], lambda df: _s(df["n_stations"] == 0),
+)
+_rule(
+    "grid", "util_cell", "NOT_MEASURED", "n_stations > 0 AND n_stations_measured = 0",
+    ["n_stations", "n_stations_measured"],
+    lambda df: _s((df["n_stations"] > 0) & (df["n_stations_measured"] == 0)),
+)
+
+# 2. stations — 9 cột nullable trên 26
+for _c in ("commune_code", "commune_name", "commune_kind"):
+    _rule(
+        "stations", _c, "NOT_APPLICABLE", "scope = 'BUFFER'",
+        ["scope"], lambda df: _s(df["scope"] == "BUFFER"),
+    )
+# `n_ports`/`current_type`/`power_kw_max_port`/`power_kw_site`: nguồn không khai cấu hình cổng.
+# Trạng thái là MISSING ở CẢ HAI nhánh, nhưng nhánh có luật và phần dư KHÔNG được gộp làm một
+# — gộp là dán một luật lên một hàng không thoả nó (§3.1, và đó là 8-QA-003).
+for _c in ("n_ports", "current_type", "power_kw_max_port", "power_kw_site"):
+    _rule(
+        "stations", _c, "MISSING", "port_config_source = 'UNKNOWN'",
+        ["port_config_source"], lambda df: _s(df["port_config_source"] == "UNKNOWN"),
+        bucket="MISSING@unknown_port_config",
+    )
+_rule(
+    "stations", "n_guns_imputed", "NOT_APPLICABLE", "port_config_source <> 'UNKNOWN'",
+    ["port_config_source"], lambda df: _s(df["port_config_source"] != "UNKNOWN"),
+)
+_rule(
+    "stations", "freshness", "NOT_APPLICABLE", "has_timeseries = false",
+    ["has_timeseries"], lambda df: _s(df["has_timeseries"] == False),  # nullable bool: `== False` giữ NA là "không khớp"
+)
+
+# 3. station_occupancy — 8 cột nullable trên 25
+for _c in ("util", "util_p95", "util_denominator_ports", "current_type"):
+    _rule(
+        "station_occupancy", _c, "NOT_MEASURED", "util_reportable = false",
+        ["util_reportable"], lambda df: _s(df["util_reportable"] == False),  # nullable bool — xem trên
+    )
+for _c in ("night_share", "weekend_ratio"):
+    _rule(
+        "station_occupancy", _c, "NOT_APPLICABLE", "ever_active = false",
+        ["ever_active"], lambda df: _s(df["ever_active"] == False),  # nullable bool — xem trên
+    )
+for _c in ("util_pctl", "util_pctl_peer"):
+    _rule(
+        "station_occupancy", _c, "NOT_APPLICABLE", "util IS NULL",
+        ["util"], lambda df: df["util"].isna(),
+    )
+    _rule(
+        "station_occupancy", _c, "FILTERED", "occ_status = 'THIEU_COVERAGE'",
+        ["occ_status"], lambda df: _s(df["occ_status"] == "THIEU_COVERAGE"),
+    )
+
+# 4. roads — 1 cột nullable trên 5. KHÔNG có cột bạn đồng hành trong bảng đã ship
+# (`osm_id, road_class, bridge, dist_station_m, coords`), nên đây là tuyên bố mức bảng và nó
+# tự khai như vậy. Đối chiếu được: số phải khớp `roads.ways_unreachable_null_dist`.
+_rule(
+    "roads", "dist_station_m", "NOT_APPLICABLE",
+    "đoạn đường không nối được tới trạm nào trong đồ thị dẫn đường",
+    [], None, basis="table_invariant", verified_by="roads.ways_unreachable_null_dist",
+)
+
+# 5. commune — 2 cột nullable trên 21
+_rule(
+    "commune", "quality_flag", "NOT_APPLICABLE", "xã không phát sinh cờ chất lượng nào",
+    [], None, basis="table_invariant", verified_by="quality.n_communes_flagged",
+)
+# `util_mean_port_weighted` thì CÓ cột bạn đồng hành, và nó tách được làm hai — đo trên cả 34
+# tỉnh: 1.381 / 1.402 ô trống là xã KHÔNG có trạm nào (câu hỏi không áp dụng), 21 ô còn lại là
+# xã CÓ trạm mà không trạm nào đo được (đã nhìn, không thấy gì). Gộp hai thứ đó vào một nhãn
+# gõ tay là mất đúng phân biệt mà pha này dựng ra.
+_rule(
+    "commune", "util_mean_port_weighted", "NOT_APPLICABLE", "n_stations = 0",
+    ["n_stations"], lambda df: _s(df["n_stations"].fillna(0) == 0),
+)
+_rule(
+    "commune", "util_mean_port_weighted", "NOT_MEASURED",
+    "n_stations > 0 AND không trạm nào đo được mức sử dụng",
+    ["n_stations"], lambda df: _s(df["n_stations"].fillna(0) > 0),
+)
+
+# 6. poi — 2 cột nullable trên 8. OSM không mang thẻ; đó là MISSING theo §1.1 bước 4.
+_rule("poi", "levels", "MISSING", "OSM không có thẻ building:levels", [], None,
+      basis="table_invariant", verified_by="poi.n_visual")
+_rule("poi", "name", "MISSING", "OSM không có thẻ name", [], None,
+      basis="table_invariant", verified_by="poi.n_visual")
+
+# 7. provinces — 1 cột nullable trên 28. Bảng 34 dòng ship ở `web/public/data/provinces.parquet`;
+# nó là bảng TOÀN QUỐC nên giống `vintage`/`snapshots`, mỗi tỉnh mang một bản giống hệt.
+_rule(
+    "provinces", "quality_flags", "NOT_APPLICABLE", "tỉnh không phát sinh cờ chất lượng nào",
+    [], None, basis="table_invariant", verified_by="vintage.n_provinces",
+)
+
+
+def _null_states_for(
+    table: str,
+    df: pd.DataFrame,
+    columns: list[str],
+    pop: pd.Series | None = None,
+) -> dict:
+    """Phân giải ô trống của MỘT bảng theo `_NULL_RULES`. Không có nhánh riêng cho cột nào.
+
+    Bất biến mà hàm này giữ, và là lý do nó thay 300 dòng chép tay:
+      • ``Σ states[*].n == n_rows − n_present`` — không hàng nào rơi mất, không hàng nào
+        bị đếm hai lần (mask đã gán bị trừ khỏi mask tiếp theo).
+      • Phần dư KHÔNG BAO GIỜ được cộng vào một xô đã mang luật. Nó ra xô ``MISSING`` riêng
+        với ``rule: "residual"`` — đó là cách §9-1/2/3 còn nhìn thấy được.
+    """
+    total_pop = float(pop.sum()) if pop is not None else 0.0
+    out: dict = {}
+    for col in columns:
+        if col not in df.columns:
+            continue
+        n_rows = len(df)
+        blank = df[col].isna()
+        n_blanks = int(blank.sum())
+        if n_blanks == 0:
+            continue
+
+        states: dict[str, dict] = {}
+        unassigned = blank.copy()
+        for r in _NULL_RULES.get((table, col), []):
+            if any(n not in df.columns for n in r["needs"]):
+                continue
+            mask = unassigned if r["pred"] is None else (unassigned & r["pred"](df))
+            n = int(mask.sum())
+            if n == 0:
+                continue
+            key = r.get("bucket", r["state"])
+            rec = {
+                "n": n,
+                "state": r["state"],
+                "rule": r["rule"],
+                "basis": r.get("basis", "row_predicate"),
+            }
+            if "verified_by" in r:
+                rec["verified_by"] = r["verified_by"]
+            if "threshold" in r:
+                rec["threshold"] = r["threshold"]
+            states[key] = rec
+            unassigned = unassigned & ~mask
+
+        residual = int(unassigned.sum())
+        if residual > 0:
+            # Ô trống không luật nào giải thích. Nó là MỘT KHUYẾT TẬT và nó ở lại đúng như thế
+            # — không nhập vào xô có luật, không làm tròn đi. §9-1/2/3 sống ở dòng này.
+            states["MISSING@residual"] = {
+                "n": residual,
+                "state": "MISSING",
+                "rule": "không luật nào giải thích — khuyết tật, xem §9",
+                "basis": "residual",
+            }
+
+        n_not_app = sum(v["n"] for v in states.values() if v["state"] == "NOT_APPLICABLE")
+        n_present = n_rows - n_blanks
+        n_app = n_rows - n_not_app
+        rec = {
+            "n_rows": n_rows,
+            "n_present": n_present,
+            # `share_rows` là mẫu số THÔ — 9,93 % của `util_cell`. Nó đi cùng
+            # `share_of_applicable` chứ không bị nó thay thế: AC-4 buộc CẢ HAI có mặt, vì
+            # đúng một trong hai đáng báo động và người đọc phải thấy được là cái nào.
+            "share_rows": round(n_present / n_rows, 6) if n_rows else 1.0,
+            "states": states,
+            "n_applicable": n_app,
+            "share_of_applicable": round(n_present / n_app, 6) if n_app > 0 else 1.0,
+        }
+        if pop is not None and total_pop > 0:
+            rec["pop_share"] = round(float(pop[df[col].notna()].sum() / total_pop), 6)
+        out[col] = rec
+    return out
+
+
+_NULLABLE_COLUMNS: dict[str, list[str]] = {
+    "grid": ["dist_station_network_m", "dist_station_asym_m", "detour_ratio", "util_cell"],
+    "stations": [
+        "commune_code", "commune_name", "commune_kind", "n_ports", "n_guns_imputed",
+        "current_type", "power_kw_max_port", "power_kw_site", "freshness",
+    ],
+    "station_occupancy": [
+        "util", "util_p95", "util_denominator_ports", "current_type",
+        "night_share", "weekend_ratio", "util_pctl", "util_pctl_peer",
+    ],
+    "roads": ["dist_station_m"],
+    "commune": ["quality_flag", "util_mean_port_weighted"],
+    "poi": ["levels", "name"],
+    "provinces": ["quality_flags"],
+}
+
+
+def _null_states(
+    grid: pd.DataFrame,
+    stations: pd.DataFrame,
+    occ: pd.DataFrame,
+    roads_df: pd.DataFrame,
+    commune_df: pd.DataFrame,
+    poi_df: pd.DataFrame,
+    provinces_df: pd.DataFrame,
+) -> dict:
+    """`null_states` — §3.1. Sáu bảng của tỉnh + bảng 34 tỉnh toàn quốc.
+
+    Cột chỉ xuất hiện khi nó CÓ ít nhất một ô trống (§3.1). Cột phủ 100 % nói chuyện ở
+    `coverage`, không ở đây.
+    """
+    pop = grid["population"] if "population" in grid.columns else None
+    frames = {
+        "grid": (grid, pop),
+        "stations": (stations, None),
+        "station_occupancy": (occ, None),
+        "roads": (roads_df, None),
+        "commune": (commune_df, None),
+        "poi": (poi_df, None),
+        "provinces": (provinces_df, None),
+    }
+    out: dict = {}
+    for table, (df, p) in frames.items():
+        block = _null_states_for(table, df, _NULLABLE_COLUMNS[table], p)
+        if block:
+            out[table] = block
+    return out
+
+
+def _invalid_values(grid: pd.DataFrame, commune_df: pd.DataFrame) -> dict:
+    out: dict = {}
+    has_pop = "population" in grid.columns
+    total_pop = float(grid.population.sum()) if has_pop else 0.0
+    if "pop_source" in grid.columns:
+        unanch = (
+            grid["pop_source"] == "WORLDPOP2025_UNANCHORED_OFFICIAL_IMPLAUSIBLE"
+        )
+        n_unanch = int(unanch.sum())
+        if n_unanch > 0:
+            out["grid.population"] = {
+                "n": n_unanch,
+                "share_rows": round(n_unanch / len(grid), 6),
+                "share_pop": round(
+                    float(grid.loc[unanch, "population"].sum() / total_pop), 6
+                )
+                if total_pop > 0
+                else 0.0,
+                "rule": "pop_source = 'WORLDPOP2025_UNANCHORED_OFFICIAL_IMPLAUSIBLE'",
+                "disposition": "shipped-with-label",
+            }
+        z_no_w = grid["pop_source"] == "ZERO_NO_WEIGHT"
+        n_z = int(z_no_w.sum())
+        if n_z > 0:
+            out["grid.population@zero_no_weight"] = {
+                "n": n_z,
+                "share_rows": round(n_z / len(grid), 6),
+                "rule": "pop_source = 'ZERO_NO_WEIGHT'",
+                "disposition": "shipped-with-label",
+            }
+    if "quality_flag" in commune_df.columns:
+        qf = commune_df["quality_flag"] == "DANSO_CONG_BO_QUA_THAP"
+        n_qf = int(qf.sum())
+        if n_qf > 0:
+            out["commune.population"] = {
+                "n": n_qf,
+                "rule": "quality_flag = 'DANSO_CONG_BO_QUA_THAP'",
+                "disposition": "shipped-with-label",
+            }
+    return out
+
+
+def _degenerate_columns(grid: pd.DataFrame) -> dict:
+    """Cột phủ 100 % mà KHÔNG chở thông tin nào — đúng một giá trị khác null (§3.3).
+
+    Đây là một trong hai chuyện mà không bộ đếm null nào thấy được: `snow_frac` phủ 100 % ở
+    cả 34 tỉnh và luôn bằng 0,0. Một bảng sức khoẻ chỉ đếm ô trống cho nó thanh màu xanh.
+
+    `province_code` bị loại vì hằng theo định nghĩa — nó là khoá phân mảnh, không phải số đo.
+    """
+    degenerate = {}
+    for c in grid.columns:
+        if c == "province_code":
+            continue
+        if grid[c].nunique(dropna=True) == 1:
+            val = grid[c].dropna().iloc[0]
+            # `.item()` chứ không `isinstance(val, (int, float))`: `np.int64` KHÔNG là `int`
+            # của Python, nên nhánh cũ đẩy mọi cột đếm nguyên (`n_mall`, `n_apartment`…) ra
+            # thành chuỗi `"0"` trong khi `snow_frac` ra số `0.0` — cùng một hợp đồng, hai kiểu.
+            item = val.item() if hasattr(val, "item") else val
+            degenerate[c] = item if isinstance(item, (int, float)) and not isinstance(item, bool) else str(item)
+    return degenerate
+
+
+# Khoá của khối `quality` mà phép đo THƯỢNG NGUỒN chưa từng chạy — null ở cả 34 tỉnh (§9-8).
+# Chúng phải hiện ra là CHƯA ĐO, không phải một dấu gạch đứng cạnh các số đã đo: một dấu gạch
+# đọc thành "bằng 0" hoặc "không đáng kể", và cả hai đều sai.
+_QUALITY_NOT_MEASURED = {
+    "quality.n_only_in_secondary": {
+        "reason": "phép đối chiếu nhà vận hành thứ cấp chưa từng chạy",
+        "consequence": (
+            "cờ THIEU_NHA_VAN_HANH_KHAC do đó KHÔNG THỂ nổ ở bất kỳ tỉnh nào "
+            "(src/vn/n10_quality.py) — một cờ không tới được về mặt cấu trúc"
+        ),
+        "upstream_ask": "§10-2",
+    },
+    "quality.share_only_in_secondary": {
+        "reason": "phép đối chiếu nhà vận hành thứ cấp chưa từng chạy",
+        "consequence": "không có mẫu số để tính tỉ lệ",
+        "upstream_ask": "§10-2",
+    },
+}
+
+
+def _not_measured_block(qrow: pd.DataFrame) -> dict:
+    """Khoá đã KHAI nhưng chưa ĐO. Chỉ phát khoá thực sự còn null — đo, không gõ tay.
+
+    Nếu thượng nguồn chạy phép đối chiếu (§10-2) thì khoá tự biến khỏi khối này ở lần export
+    kế tiếp, không cần ai nhớ xoá nó.
+    """
+    if qrow.empty:
+        return {}
+    row = qrow.iloc[0]
+    out = {}
+    for key, meta in _QUALITY_NOT_MEASURED.items():
+        col = key.split(".", 1)[1]
+        if col in row.index and pd.isna(row[col]):
+            out[key] = dict(meta)
+    return out
+
+
+def _filters_block(
+    totals_data: dict,
+    road_meta: dict,
+    occ: pd.DataFrame,
+    grid: pd.DataFrame,
+    poi_df: pd.DataFrame,
+    poi_demand_path,
+) -> dict:
+    out: dict = {}
+
+    # 1. Private AC
+    p_ac = totals_data.get("private_ac_dropped", {})
+    in_scope_stations = totals_data.get("in_scope", {}).get("n_stations", 0)
+    n_dropped_ac = p_ac.get("n", 0)
+    out["private_ac_charge_points"] = {
+        "kind": "removal",
+        "name": "Điểm sạc cá nhân AC (1 súng AC)",
+        "rule_const": "is_private_ac(n_guns_installed, current_type_asset)",
+        "source_file": "src/evcs/core/supply.py:16",
+        "before": in_scope_stations + n_dropped_ac,
+        "removed": n_dropped_ac,
+        "after": in_scope_stations,
+        "denominator": "trạm trong ranh giới (in_scope)",
+        "share_removed_stations": p_ac.get("share_stations"),
+        "share_removed_ports": p_ac.get("share_ports"),
+        "share_removed_power": p_ac.get("share_power"),
+    }
+
+    # 2. Road ways
+    ways_in_shard = road_meta.get("ways_in_shard", 0)
+    ways_shipped = road_meta.get("ways_shipped", 0)
+    dropped_roads = (
+        road_meta.get("ways_dropped_buffer_copy", 0)
+        + road_meta.get("ways_dropped_service", 0)
+        + road_meta.get("ways_dropped_access_blocked", 0)
+    )
+    out["road_ways"] = {
+        "kind": "removal",
+        "name": "Đoạn đường không phải xe công cộng đi được",
+        "rule_const": "in_province & ~road_class.isin(SERVICE) & ~access.isin(ACCESS_BLOCKED)",
+        "source_file": "src/vn/n11_web_export.py:164",
+        "before": ways_in_shard,
+        "removed": dropped_roads,
+        "after": ways_shipped,
+        "denominator": "đoạn đường trong shard OSM",
+    }
+
+    # 3. Peer ranking exclusion
+    removed_peer = (
+        int((occ["util"].notna() & (occ["occ_status"] == "THIEU_COVERAGE")).sum())
+        if len(occ) and "util" in occ.columns and "occ_status" in occ.columns
+        else 0
+    )
+    after_peer = (
+        int(occ["util_pctl"].notna().sum())
+        if len(occ) and "util_pctl" in occ.columns
+        else 0
+    )
+    out["peer_ranking_exclusion"] = {
+        "kind": "removal",
+        "name": "Loại khỏi xếp hạng phân vị do thiếu quan sát",
+        "rule_const": "occ_status = 'THIEU_COVERAGE'",
+        "source_file": "src/vn/n10_quality.py",
+        "before": after_peer + removed_peer,
+        "removed": removed_peer,
+        "after": after_peer,
+        "denominator": "trạm có đo mức sử dụng",
+    }
+
+    # 4. Detour suppression
+    removed_detour = (
+        int(
+            (
+                grid["detour_ratio"].isna()
+                & (grid["dist_station_euclid_m"] < DETOUR_MIN_EUCLID_M)
+            ).sum()
+        )
+        if "detour_ratio" in grid.columns and "dist_station_euclid_m" in grid.columns
+        else 0
+    )
+    after_detour = (
+        int(grid["detour_ratio"].notna().sum())
+        if "detour_ratio" in grid.columns
+        else 0
+    )
+    out["detour_suppression"] = {
+        "kind": "removal",
+        "name": "Triệt tiêu hệ số đi vòng khi chim bay < 200 m",
+        "rule_const": f"dist_station_euclid_m < {DETOUR_MIN_EUCLID_M}",
+        "source_file": "src/evcs/core/roadgraph.py:51",
+        "before": after_detour + removed_detour,
+        "removed": removed_detour,
+        "after": after_detour,
+        "denominator": "ô tiếp cận được",
+    }
+
+    # 5. POI nhu cầu vs POI trực quan — và đây KHÔNG phải một phép lọc.
+    #
+    # Hai chuyện đã sai ở bản trước. Chuyện nhỏ: tên file là `poi_demand.parquet`, không phải
+    # `poi.parquet`, nên phép đọc trượt rồi rơi về `n_visual` và cả 34 tỉnh cùng ship
+    # `removed: 0` — 1.977 dòng hiện ra là số không, trên đúng khối có nhiệm vụ nói ra cái gì
+    # đã bị bỏ. Chuyện lớn: kể cả đọc đúng file thì `trước − đã loại = sau` vẫn là một câu SAI.
+    #
+    # ĐO trên cả 34 tỉnh: hai tập GIAO NHAU MỘT PHẦN, không lồng nhau. Ở Cao Bằng (04) tập nhu
+    # cầu có 123 đối tượng còn tập trực quan có 84 — 27 chung, 96 chỉ-nhu-cầu, 57 chỉ-trực-quan.
+    # Ép nó vào khuôn phép lọc cho ra `removed = −39`, và một phương trình vẫn "đóng kín" trong
+    # khi con số nó khẳng định thì vô nghĩa. Hai tập là hai phép TRÍCH khác nhau với hai từ vựng
+    # lớp khác nhau, nên khối này khai `kind: "two_sets"` và nói ra bốn con số thật.
+    n_visual = len(poi_df)
+    if not poi_demand_path.exists():
+        raise FileNotFoundError(
+            f"Thiếu {poi_demand_path} — khối POI không có mẫu số. Không được rơi về n_visual."
+        )
+    demand = pq.read_table(poi_demand_path, columns=["osm_type", "osm_id"]).to_pandas()
+    kv = set(zip(poi_df["osm_type"], poi_df["osm_id"], strict=False))
+    kd = set(zip(demand["osm_type"], demand["osm_id"], strict=False))
+    out["poi_demand_vs_visual"] = {
+        "kind": "two_sets",
+        "name": "POI nhu cầu sạc vs POI bối cảnh trực quan",
+        "rule_const": "demand_classes ∩ visual_classes ≠ ∅, KHÔNG lồng nhau",
+        "source_file": "src/evcs/core/osm.py",
+        "before": n_visual,
+        # `null`, không phải 0. Không có phép loại nào xảy ra ở đây, và một số 0 đọc thành
+        # "không có gì bị loại" — một tuyên bố khác hẳn "câu hỏi không áp dụng".
+        "removed": None,
+        "after": len(demand),
+        "denominator": "hai tập độc lập; không tập nào là mẫu số của tập kia",
+        "n_visual": n_visual,
+        "n_demand": len(demand),
+        "n_both": len(kv & kd),
+        "n_visual_only": len(kv - kd),
+        "n_demand_only": len(kd - kv),
+    }
+
+    return out
+
+
+def _exclusions_block(code: str) -> dict:
+    ex_file = paths.QA / "exclusions.json"
+    if not ex_file.exists():
+        return {}
+    ex_data = json.loads(ex_file.read_text("utf-8"))
+    excluded_entry = next(
+        (
+            e
+            for e in ex_data.get("de_nghi_loai_khoi_phan_tich", [])
+            if e["province_code"] == code
+        ),
+        None,
+    )
+    poi_entry = next(
+        (
+            e
+            for e in ex_data.get("khong_loai_nhung_cam_dien_giai_POI", [])
+            if e["province_code"] == code
+        ),
+        None,
+    )
+    return {
+        "thresholds": ex_data.get("nguong", {}),
+        "excluded": excluded_entry is not None,
+        "exclusion_reasons": excluded_entry.get("reasons", [])
+        if excluded_entry
+        else [],
+        "exclusion_flags": excluded_entry.get("all_flags", [])
+        if excluded_entry
+        else [],
+        "poi_not_interpretable": poi_entry is not None,
+        "poi_details": poi_entry or {},
+    }
+
+
+def _freshness_block(
+    stations: pd.DataFrame, occ_window: list[str] | None, exported_utc: str
+) -> dict:
+    """`freshness` — §3.6. Ngày ở dạng ISO cho web, phân phối `freshness` theo hàng.
+
+    **Ngày lấy từ `SNAPSHOT_DATES`, không gõ lại ở đây.** Bản trước gõ ba chuỗi ISO ngay
+    trong khối này trong khi `snapshots` (cùng manifest, cách 20 dòng) dựng cùng ba ngày ấy
+    từ nguồn khác — `vnsdi_valid_from` thì đọc `admin.VINTAGE`, hai ngày kia thì gõ ở dạng
+    `dd/mm/yyyy`. Cùng một sự thật ở hai chỗ, hai định dạng: đổi niên bản là hai khối trên
+    cùng một màn hình nói hai ngày khác nhau, và không có gì nổ.
+    """
+    fr = stations["freshness"] if "freshness" in stations.columns else None
+    has = fr is not None and bool(fr.notna().any())
+
+    def q(fn) -> float | None:
+        return float(round(fn(), 4)) if has else None
+
+    return {
+        "exported_utc": exported_utc,
+        # Đồng hồ MỨC GÓI, tuyệt đối. Web đọc ISO ở đây để khỏi phải phân tích `28/07/2026`
+        # trong trình duyệt; `snapshots` giữ nguyên dạng hiển thị cũ của nó.
+        "inputs": {
+            "osm_pbf": SNAPSHOT_DATES["osm_pbf"],
+            "stations_canonical": SNAPSHOT_DATES["stations_canonical"],
+            "vnsdi_valid_from": _iso_date(admin.VINTAGE["valid_from"]),
+            "occupancy_window": occ_window,
+        },
+        # Đồng hồ MỨC HÀNG, tương đối — và KHÔNG so sánh được với khối trên. Không đơn vị,
+        # không mốc thời gian, không định nghĩa ở bất kỳ đâu trong repo này (§10-1). Cho tới
+        # khi thượng nguồn trả lời, nó ship là một PHÂN PHỐI dưới nhãn "chưa định nghĩa" và
+        # không được vạch ngưỡng, tô thang "cũ", hay gộp vào một điểm sức khoẻ nào.
+        "row_level": {
+            "column": "stations.freshness",
+            "unit": None,
+            "note": "0–1, nhỏ là mới; định nghĩa chưa có ở thượng nguồn",
+            "p50": q(lambda: fr.median()),
+            "p90": q(lambda: fr.quantile(0.9)),
+            "max": q(lambda: fr.max()),
+            "n_present": int(fr.notna().sum()) if fr is not None else 0,
+            "n_rows": len(stations),
+        },
     }
 
 
@@ -455,12 +1098,25 @@ def export_province(code: str) -> dict:
                 }
             )
 
-    # Cột THẬT SỰ có trong hai file vừa ghi — đọc schema, không suy từ trí nhớ.
-    road_cols = sorted(pq.read_schema(d / "roads.parquet").names)
-    station_cols = sorted(pq.read_schema(d / "stations.parquet").names)
+    stations_df = pq.read_table(d / "stations.parquet").to_pandas()
+    occ_df = pq.read_table(d / "station_occupancy.parquet").to_pandas()
+    roads_shipped_df = pq.read_table(d / "roads.parquet").to_pandas()
+    commune_df = pq.read_table(src / "commune.parquet").to_pandas()
+    poi_df = pq.read_table(src / "poi_visual.parquet").to_pandas()
+    poi_demand_path = src / "poi_demand.parquet"
+    # Bảng 34 tỉnh — bảng TOÀN QUỐC, ship ở `web/public/data/provinces.parquet`. Nó vào
+    # `null_states` của mọi tỉnh vì đó là nơi web đọc, cùng lối với `vintage`/`snapshots`:
+    # một bản giống hệt trong cả 34 manifest.
+    provinces_qa_df = qa_prov
+
+    road_cols = sorted(roads_shipped_df.columns)
+    station_cols = sorted(stations_df.columns)
+
+    totals_dict = _totals(src) | _private_ac_block(qrow)
+    exported_utc_str = datetime.now(UTC).isoformat(timespec="seconds")
 
     manifest = {
-        "exported_utc": datetime.now(UTC).isoformat(timespec="seconds"),
+        "exported_utc": exported_utc_str,
         "vintage": admin.VINTAGE,
         "province": {
             "province_code": code,
@@ -503,6 +1159,17 @@ def export_province(code: str) -> dict:
             "columns": sorted(_reference_columns() - set(grid.columns)),
         },
         "coverage": _coverage(grid),
+        "null_states": _null_states(
+            grid, stations_df, occ_df, roads_shipped_df, commune_df, poi_df, provinces_qa_df
+        ),
+        "not_measured": _not_measured_block(qrow),
+        "invalid_values": _invalid_values(grid, commune_df),
+        "degenerate_columns": _degenerate_columns(grid),
+        "filters": _filters_block(
+            totals_dict, road_meta, occ_df, grid, poi_df, poi_demand_path
+        ),
+        "exclusions": _exclusions_block(code),
+        "freshness": _freshness_block(stations_df, occ_window, exported_utc_str),
         "categories": {
             c: {
                 "values": {str(k): int(v) for k, v in grid[c].value_counts().items()},
@@ -515,7 +1182,7 @@ def export_province(code: str) -> dict:
         # `private_ac_dropped` ghép vào đây từ `quality` chứ không để UI đọc `quality`: khối
         # `quality` là số đo QA của bước n05 (37 khoá, tên theo lối QA), còn `totals` là hợp
         # đồng với web. Trộn hai vai thì đổi một chỉ số QA sẽ vỡ một tile trên màn hình.
-        "totals": _totals(src) | _private_ac_block(qrow),
+        "totals": totals_dict,
         "poi": poi_meta,
         "roads": road_meta,
         "quality": (
@@ -536,13 +1203,14 @@ def export_province(code: str) -> dict:
         "unusable_layers": unusable,
         # Khối NGUỒN của rail đọc thẳng từ đây (§8). Bốn dòng đầu đọc được TỪ DỮ LIỆU; hai
         # dòng cuối là ngày đóng băng của nguồn thượng nguồn, không cột nào mang chúng —
-        # giữ ở tầng dữ liệu chứ không ở TS, đúng chỗ bản Hà Nội đã đặt.
+        # giữ ở tầng dữ liệu chứ không ở TS, đúng chỗ bản Hà Nội đã đặt. Cả hai dẫn xuất từ
+        # `SNAPSHOT_DATES` để `freshness.inputs` không thể trôi khỏi khối này.
         "snapshots": {
             "occupancy_snapshot_id": occ_snapshot,
             "occupancy_window": occ_window,
             "vnsdi_valid_from": admin.VINTAGE["valid_from"],
-            "osm_pbf": "28/07/2026",
-            "stations_canonical": "29/07/2026",
+            "osm_pbf": _display_date(SNAPSHOT_DATES["osm_pbf"]),
+            "stations_canonical": _display_date(SNAPSHOT_DATES["stations_canonical"]),
         },
     }
     (d / "manifest.json").write_text(
@@ -606,9 +1274,74 @@ def _province_index() -> dict:
         )
     gj = WEB_DATA / "provinces.geojson"
     gj.write_text(_fc(feats), encoding="utf-8")
+
+    health = WEB_DATA / "province_health.json"
+    health.write_text(
+        json.dumps(_province_health(idx, qp), ensure_ascii=False, indent=1), encoding="utf-8"
+    )
     return {
         "provinces.parquet": p.stat().st_size,
         "provinces.geojson": gj.stat().st_size,
+        "province_health.json": health.stat().st_size,
+    }
+
+
+def _province_health(idx: pd.DataFrame, qp: pd.DataFrame) -> dict:
+    """Bảng sức khoẻ 34 TỈNH — §2.8, một file cho cả nước.
+
+    Vì sao là file riêng chứ không nhét vào từng manifest tỉnh: đây là một sự thật TOÀN QUỐC.
+    Chép 34 dòng vào cả 34 manifest là 34 bản có thể lệch nhau, và web thì đằng nào cũng phải
+    đọc cả bảng để vẽ một dòng "tỉnh này đứng đâu". Một file 34 dòng, nạp lười khi mở chế độ
+    DỮ LIỆU, rẻ hơn 34 lượt tải manifest.
+
+    Suy thoái KHÔNG đều giữa các tỉnh và điều đó đo được — năm tín hiệu dưới đây là năm tín
+    hiệu §2.8 nêu tên, đọc thẳng từ bảng QA chứ không gõ lại con số nào.
+    """
+    ex_file = paths.QA / "exclusions.json"
+    ex = json.loads(ex_file.read_text("utf-8")) if ex_file.exists() else {}
+    excluded = {e["province_code"]: e for e in ex.get("de_nghi_loai_khoi_phan_tich", [])}
+    poi_bad = {e["province_code"] for e in ex.get("khong_loai_nhung_cam_dien_giai_POI", [])}
+
+    def f(v):
+        return None if pd.isna(v) else float(v)
+
+    def i(v):
+        return None if pd.isna(v) else int(v)
+
+    rows = []
+    for _, r in qp.sort_values("province_code").iterrows():
+        code = str(r.province_code)
+        flags = r.quality_flags
+        name_row = idx[idx.province_code == code]
+        rows.append(
+            {
+                "province_code": code,
+                "province_name": (
+                    str(name_row.iloc[0].province_name) if len(name_row) else str(r.province_name)
+                ),
+                "n_stations": i(r.n_stations),
+                # Cờ chất lượng: 3 tỉnh sạch, 4 tỉnh mang cả bốn cờ.
+                "quality_flags": [] if pd.isna(flags) else str(flags).split("|"),
+                # Ô không tới được bằng đường: 0,07 % (01) → 66,6 % (56). Đi CÙNG phần dân bị
+                # ảnh hưởng — một mình nó đọc thành "mất hai phần ba dữ liệu" ở Khánh Hoà,
+                # trong khi phần dân sống trong đám ô đó là 0,87 %.
+                "share_cells_reachable": f(r.share_cells_reachable),
+                "share_pop_unreachable": f(r.share_pop_unreachable),
+                # Đo được telemetry: 0,0 % (Điện Biên) → 96,9 % (Đồng Nai).
+                "share_stations_measured": f(r.share_stations_measured),
+                # POI diễn giải được: 3,6 % (79) → 76,6 % (96) số xã không có POI nào.
+                "share_communes_zero_poi": f(r.share_communes_zero_poi),
+                # Neo dân số: 0,9519 (01) → 1,6072 (91).
+                "vnsdi_anchor_ratio": f(r.vnsdi_anchor_ratio),
+                "excluded": code in excluded,
+                "exclusion_reasons": excluded.get(code, {}).get("reasons", []),
+                "poi_not_interpretable": code in poi_bad,
+            }
+        )
+    return {
+        "thresholds": ex.get("nguong", {}),
+        "source": "store/qa/provinces.parquet + store/qa/exclusions.json",
+        "provinces": rows,
     }
 
 

@@ -34,6 +34,7 @@ import type { DemandRepresentation, Mode, OverlayId } from "../state/types";
 import { PathStyleExtension } from "@deck.gl/extensions";
 import { cellToBoundary } from "h3-js";
 import { HatchExtension } from "../viz/hatch-extension";
+import { NULL_STATE_HATCH_DEG, type NullState } from "../data/null-states";
 import { planFor } from "../viz/render-plan";
 import { cellIdOf, communeCodeOf, poiRefOf, roadIdOf, serializeSelection, stationIdOf } from "../data/h3";
 import { dacKhuLabels, type DacKhuLabel } from "../data/dackhu";
@@ -107,9 +108,32 @@ interface Props {
 
 /** Vân của overlay VÙNG — 135°, nghiêng ngược vân null 45°. §4d-1. */
 const OVERLAY_HATCH = new HatchExtension({ angle: 135 });
-const NULL_HATCH = new HatchExtension({ angle: 45 });
-/** Vân của ô null vì CÂU HỎI KHÔNG ÁP DỤNG — 90° dọc, cùng xám, khác góc (§7a mở rộng). */
-const NA_HATCH = new HatchExtension({ angle: 90 });
+
+/**
+ * Một vân cho MỖI trạng thái ô trống — §6.4, góc lấy từ `NULL_STATE_HATCH_DEG` chứ không gõ
+ * lại ở đây. Cùng xám (đều là vắng giá trị), khác góc (khác nguyên nhân): gộp chúng lại là
+ * để ô sát trạm — nhóm được phục vụ tốt nhất thành phố — đeo cùng ký hiệu với ô hoang không
+ * tới được, tức hai đầu đối lập của thang phục vụ dưới một vân.
+ */
+const STATE_HATCH: Record<NullState, HatchExtension> = {
+  MISSING: new HatchExtension({ angle: NULL_STATE_HATCH_DEG.MISSING }),
+  NOT_APPLICABLE: new HatchExtension({ angle: NULL_STATE_HATCH_DEG.NOT_APPLICABLE }),
+  NOT_MEASURED: new HatchExtension({ angle: NULL_STATE_HATCH_DEG.NOT_MEASURED }),
+  FILTERED: new HatchExtension({ angle: NULL_STATE_HATCH_DEG.FILTERED }),
+};
+const NULL_HATCH = STATE_HATCH.MISSING;
+
+/**
+ * Ô trống này thuộc trạng thái nào, đọc từ khai báo `nullSplit` của chính trường.
+ *
+ * Trường không khai `nullSplit` ⇒ MISSING: một ô trống không có luật nào phân giải là "không
+ * biết", đúng §1.1 bước 4. Không đoán gì thêm ở tầng bản đồ.
+ */
+function splitStateOf(field: FieldMeta, c: { reachable?: boolean | null }): NullState {
+  const sp = field.nullSplit;
+  if (!sp) return "MISSING";
+  return c.reachable === true ? sp.whenTrue.state : sp.whenFalse.state;
+}
 
 const rgba = (c: RGB, a: number) => [c[0], c[1], c[2], a] as [number, number, number, number];
 
@@ -1000,11 +1024,15 @@ function hexLayers(
   if (filter) {
     const kept = cells.filter((c) => filter.keep(c.value));
     const valued = kept.filter((c) => c.value !== null && c.value !== undefined);
-    const notApplicable = kept.filter(
-      (c) => (c.value === null || c.value === undefined) && Boolean(field.nullSplit && c.reachable === true),
-    );
+    // Nhánh nào là "câu hỏi không áp dụng" do TRẠNG THÁI của `nullSplit` quyết định, không
+    // do `reachable === true` gõ cứng ở đây — §0.2 và §6.4 mới là nơi định nghĩa nó.
+    const blank = (c: GridCell) => c.value === null || c.value === undefined;
+    const byState = (st: NullState) =>
+      kept.filter((c) => blank(c) && splitStateOf(field, c) === st);
+    const notApplicable = byState("NOT_APPLICABLE");
+    const filtered = byState("FILTERED");
     const missing = kept.filter(
-      (c) => (c.value === null || c.value === undefined) && !Boolean(field.nullSplit && c.reachable === true),
+      (c) => blank(c) && !["NOT_APPLICABLE", "FILTERED"].includes(splitStateOf(field, c)),
     );
     const { colors } = rampFor(scale, field.polarity, theme);
     const common = {
@@ -1044,7 +1072,14 @@ function hexLayers(
         id: "grid-filtered-na",
         data: notApplicable,
         getFillColor: () => rgba(HATCH_RGB, 255),
-        extensions: [NA_HATCH],
+        extensions: [STATE_HATCH.NOT_APPLICABLE],
+      }),
+      new H3HexagonLayer<GridCell>({
+        ...common,
+        id: "grid-filtered-removed",
+        data: filtered,
+        getFillColor: () => rgba(HATCH_RGB, 255),
+        extensions: [STATE_HATCH.FILTERED],
       }),
     ];
   }
@@ -1057,10 +1092,16 @@ function hexLayers(
   // Gộp chúng lại là để 86 ô sát trạm đeo cùng ký hiệu với 50 ô hoang không tới được:
   // hai đầu đối lập của thang phục vụ, một vân.
   const notApplicable: GridCell[] = [];
+  /** Ô trống vì LUẬT CỦA TA gỡ giá trị đi — vân riêng, và nó Ở LẠI mẫu số (§0.2). */
+  const filtered: GridCell[] = [];
   for (const c of cells) {
     if (c.value !== null && c.value !== undefined) valued.push(c);
-    else if (field.nullSplit && c.reachable === true) notApplicable.push(c);
-    else missing.push(c);
+    else {
+      const st = splitStateOf(field, c);
+      if (st === "NOT_APPLICABLE") notApplicable.push(c);
+      else if (st === "FILTERED") filtered.push(c);
+      else missing.push(c);
+    }
   }
 
   const { colors } = rampFor(scale, field.polarity, theme);
@@ -1105,7 +1146,14 @@ function hexLayers(
       id: "grid-na",
       data: notApplicable,
       getFillColor: () => rgba(HATCH_RGB, 255),
-      extensions: [NA_HATCH],
+      extensions: [STATE_HATCH.NOT_APPLICABLE],
+    }),
+    new H3HexagonLayer<GridCell>({
+      ...common,
+      id: "grid-removed",
+      data: filtered,
+      getFillColor: () => rgba(HATCH_RGB, 255),
+      extensions: [STATE_HATCH.FILTERED],
     }),
   ];
 }

@@ -1,3 +1,5 @@
+import { Fragment } from "react";
+
 import {
   constantShort,
   polarityNote,
@@ -9,6 +11,7 @@ import {
   hasDemandRepresentations,
 } from "../fields";
 import { pct, type Manifest } from "../data/manifest";
+import { NULL_STATE_HATCH_DEG, type NullState } from "../data/null-states";
 import { SURFACE_CELL_M } from "../data/queries";
 import { useStore } from "../state/store";
 import { beatHasFilter } from "../story/scenes";
@@ -210,7 +213,10 @@ export function Legend({
   // Tổng null tách làm hai. `n_not_applicable` đo lúc chạy (§7c: không gõ tay con số nào);
   // thiếu nó thì tất cả về nhóm "không biết" — thà nói ít hơn là nói sai.
   const nNotApplicable = field.nullSplit ? (cov?.n_not_applicable ?? 0) : 0;
-  const nUnknown = Math.max((scale?.nNull ?? 0) - nNotApplicable, 0);
+  const nFiltered = field.nullSplit ? (cov?.n_filtered ?? 0) : 0;
+  // Còn lại mới là "không biết". Trừ CẢ HAI nhóm đã giải thích được: gộp nhóm ĐÃ LỌC vào
+  // đây là gọi 87 ô sát trạm — nhóm được phục vụ tốt nhất thành phố — là "không đo được".
+  const nUnknown = Math.max((scale?.nNull ?? 0) - nNotApplicable - nFiltered, 0);
 
   /*
    * Dải nổi ở góc trên-trái là một THANG MÀU, không phải một tờ chú thích.
@@ -237,10 +243,10 @@ export function Legend({
         />
         <LegendNulls
           field={field}
-          scale={scale}
           noun={noun}
           nUnknown={nUnknown}
           nNotApplicable={nNotApplicable}
+          nFiltered={nFiltered}
         />
         {plan.coarse && (
           <button
@@ -270,7 +276,7 @@ export function Legend({
               <span className="tabular-nums text-ink-muted">
                 {cov.n_present.toLocaleString("vi-VN")}/{cov.n_total.toLocaleString("vi-VN")} {noun}
                 {field.id === STATION_OCC_FIELD && " có nhịp đọc được"}
-                {cov.share < 1 && !field.nullMeans && cov.pop_share !== undefined &&
+                {cov.share < 1 && cov.pop_share !== undefined &&
                   ` · ${pct(cov.pop_share)} dân`}
               </span>
             )}
@@ -339,22 +345,23 @@ export function Legend({
             </div>
           </>
         )}
-        {/* Swatch null THỨ HAI — §7a mở rộng. Cùng xám (đều là vắng giá trị), khác góc
-            (khác nguyên nhân): vân DỌC = "câu hỏi không áp dụng", vân CHÉO = "không biết".
-            Không có nó thì 86 ô sát trạm và 50 ô không tới được đọc y hệt nhau. */}
-        {field.nullSplit && nNotApplicable > 0 && (
-          <>
-            <div
-              className="w-10 border-l border-hairline"
-              style={{
-                backgroundImage: `repeating-linear-gradient(90deg, ${HATCH_HEX} 0 1px, transparent 1px 6px)`,
-              }}
-            />
-            <div className="flex items-center px-2 text-ink-2">
-              {field.nullSplit.label} ({nNotApplicable.toLocaleString("vi-VN")} {noun})
-            </div>
-          </>
-        )}
+        {/* Swatch null THỨ HAI — §7a mở rộng, góc lấy từ TRẠNG THÁI (§6.4). Cùng xám (đều
+            là vắng giá trị), khác góc vì khác nguyên nhân. Không có nó thì ô sát trạm và ô
+            không tới được đọc y hệt nhau — hai đầu đối lập của thang phục vụ, một vân. */}
+        {field.nullSplit &&
+          splitGroups(field, nNotApplicable, nFiltered).map((g) => (
+            <Fragment key={g.state}>
+              <div
+                className="w-10 border-l border-hairline"
+                style={{
+                  backgroundImage: `repeating-linear-gradient(${NULL_STATE_HATCH_DEG[g.state]}deg, ${HATCH_HEX} 0 1px, transparent 1px 6px)`,
+                }}
+              />
+              <div className="flex items-center px-2 text-ink-2">
+                {g.label} ({g.n.toLocaleString("vi-VN")} {noun})
+              </div>
+            </Fragment>
+          ))}
       </div>
       <div className="flex items-center gap-2 px-3 text-ink-2">
         {/* Ô nhỏ hơn mức đọc được từng bậc màu — §13a-1 vẫn đúng, chỉ hình phạt là đổi
@@ -388,8 +395,10 @@ export function Legend({
           {field.id === STATION_OCC_FIELD && " có nhịp đọc được"}
           {/* Phủ theo DÂN chỉ có nghĩa khi ô trống nghĩa là "không biết". Với trường mà
               null có nghĩa (§7a), thêm "% dân" vào đây là dựng lại đúng cái báo động giả
-              mà badge ⚠ đã bị cấm. */}
-          {cov.share < 1 && !field.nullMeans && cov.pop_share !== undefined &&
+              mà badge ⚠ đã bị cấm — nay phép chặn ấy nằm ở `badgesFor` và đọc
+              `manifest.null_states` thay vì một chuỗi gõ tay (Phase 8 §1.2). Khối này chỉ
+              vẽ khi ĐÃ có `cov`, tức đã qua cùng phép chặn đó. */}
+          {cov.share < 1 && cov.pop_share !== undefined &&
             ` · ${pct(cov.pop_share)} dân`}
         </div>
       )}
@@ -529,20 +538,21 @@ function RampRuler({
  */
 function LegendNulls({
   field,
-  scale,
   noun,
   nUnknown,
   nNotApplicable,
+  nFiltered,
 }: {
   field: FieldMeta;
-  scale: Scale | null;
   noun: string;
+  /** Ô trống mà KHÔNG luật nào giải thích. Đã trừ cả hai nhóm đã phân giải được. */
   nUnknown: number;
   nNotApplicable: number;
+  nFiltered: number;
 }) {
-  const hasUnknown = Boolean(scale && scale.nNull > 0);
-  const hasNA = Boolean(field.nullSplit && nNotApplicable > 0);
-  if (!hasUnknown && !hasNA) return null;
+  const groups = field.nullSplit ? splitGroups(field, nNotApplicable, nFiltered) : [];
+  const hasUnknown = nUnknown > 0;
+  if (!hasUnknown && groups.length === 0) return null;
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-note text-ink-2">
@@ -555,21 +565,39 @@ function LegendNulls({
           </span>
         </span>
       )}
-      {hasNA && field.nullSplit && (
-        <span className="flex items-center gap-1.5">
-          <NullSwatch readAs={field.readAs} angle={90} />
-          {field.nullSplit.label}{" "}
+      {groups.map((g) => (
+        <span key={g.state} className="flex items-center gap-1.5">
+          <NullSwatch readAs={field.readAs} angle={NULL_STATE_HATCH_DEG[g.state]} />
+          {g.label}{" "}
           <span className="tabular-nums text-ink-muted">
-            ({nNotApplicable.toLocaleString("vi-VN")} {noun})
+            ({g.n.toLocaleString("vi-VN")} {noun})
           </span>
         </span>
-      )}
+      ))}
     </div>
   );
 }
 
+/**
+ * Hai nhánh của `nullSplit` kèm số đếm, bỏ nhánh rỗng. Nhãn và góc vân đều suy từ TRẠNG
+ * THÁI mà chính khai báo trường nói ra — chú giải không thể lệch khỏi mẫu số nữa.
+ */
+function splitGroups(
+  field: FieldMeta,
+  nNotApplicable: number,
+  nFiltered: number,
+): Array<{ state: NullState; label: string; n: number }> {
+  const sp = field.nullSplit;
+  if (!sp) return [];
+  const nOf = (st: NullState) =>
+    st === "NOT_APPLICABLE" ? nNotApplicable : st === "FILTERED" ? nFiltered : 0;
+  return [sp.whenTrue, sp.whenFalse]
+    .map((b) => ({ state: b.state, label: b.label, n: nOf(b.state) }))
+    .filter((g) => g.n > 0);
+}
+
 /** Chú giải phải là đúng cái mark trên bản đồ: đường → nét, trạm → chấm rỗng, còn lại → vân. */
-function NullSwatch({ readAs, angle }: { readAs: FieldMeta["readAs"]; angle: 45 | 90 }) {
+function NullSwatch({ readAs, angle }: { readAs: FieldMeta["readAs"]; angle: 0 | 45 | 90 | 135 }) {
   if (readAs === "road")
     return <span aria-hidden="true" className="inline-block h-0.5 w-4" style={{ background: HATCH_HEX }} />;
   if (readAs === "station")

@@ -156,7 +156,7 @@ export function CellPanel(props: CellPanelProps) {
             </div>
             <div className="pt-1 text-body text-ink-muted">
               {heroValue === null
-                ? (activeField.nullMeans ?? "Giá trị không xác định hoặc không áp dụng cho ô này.")
+                ? "Giá trị không xác định hoặc không áp dụng cho ô này."
                 : activeField.desc}
             </div>
           </div>

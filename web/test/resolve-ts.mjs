@@ -15,6 +15,12 @@ import { registerHooks } from "node:module";
 
 registerHooks({
   resolve(specifier, context, next) {
+    if (specifier.includes("?url")) {
+      return {
+        url: 'data:text/javascript,export default "";',
+        shortCircuit: true,
+      };
+    }
     // Chỉ đụng đường dẫn tương đối không có đuôi. Gói trong `node_modules` giữ nguyên.
     if (specifier.startsWith(".") && !/\.[cm]?[jt]sx?$/.test(specifier)) {
       try {

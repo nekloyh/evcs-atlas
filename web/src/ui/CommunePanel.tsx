@@ -159,7 +159,7 @@ export function CommunePanel(props: CommunePanelProps) {
 
             <div className="pt-1 text-body text-ink-muted">
               {heroValue === null
-                ? (activeField.nullMeans ?? "Giá trị không xác định hoặc thiếu dữ liệu cho xã/phường này.")
+                ? "Giá trị không xác định hoặc thiếu dữ liệu cho xã/phường này."
                 : activeField.desc}
             </div>
           </div>

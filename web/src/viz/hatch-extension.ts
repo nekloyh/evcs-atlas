@@ -2,17 +2,20 @@ import { LayerExtension } from "@deck.gl/core";
 
 export interface HatchOpts {
   /**
-   * `45` = ô null vì **KHÔNG BIẾT** (§4b) · `90` = ô null vì **CÂU HỎI KHÔNG ÁP DỤNG**
-   * (§7a mở rộng, M3-Q3) · `135` = overlay dạng VÙNG (§4d-1).
+   * Một góc cho MỖI trạng thái ô trống — Phase 8 §6.4, và `NULL_STATE_HATCH_DEG` là nơi khai:
+   * `0` = ĐÃ LỌC theo luật của ta · `45` = THIẾU NGUỒN ("không biết", §4b) ·
+   * `90` = KHÔNG ÁP DỤNG (§7a mở rộng, M3-Q3) · `135` = CHƯA ĐO ĐƯỢC.
+   * `135` cũng là góc của overlay dạng VÙNG (§4d-1), nhưng khác MÀU nên không lẫn.
    *
-   * 45 và 90 cùng màu xám vì cùng nghĩa "vắng giá trị"; khác góc vì khác NGUYÊN NHÂN.
-   * 135 khác cả màu lẫn góc vì nó không phải vắng giá trị mà là một lớp chồng.
+   * Bốn góc null cùng màu xám vì cùng nghĩa "vắng giá trị"; khác góc vì khác NGUYÊN NHÂN, và
+   * bốn góc cách nhau đúng 45° là khoảng cách lớn nhất chia được cho bốn hướng — tức ngưỡng
+   * phân biệt được ở nét 1 px.
    *
    * Góc là kênh phân biệt, không phải trang trí: hai vân nghiêng ngược nhau thì chỗ chồng
    * nhau thành lưới caro và vẫn đọc ra được là "hai thứ cùng ở đây". Cùng góc khác màu thì
    * chỗ chồng nhau chỉ còn một màu thắng.
    */
-  angle?: 45 | 90 | 135;
+  angle?: 0 | 45 | 90 | 135;
 }
 
 /**
@@ -47,13 +50,17 @@ export class HatchExtension extends LayerExtension<Required<HatchOpts>> {
     // x + y ⇒ các đường nghiêng một chiều; x − y ⇒ nghiêng chiều ngược lại.
     // `mod` của GLSL luôn trả không âm với chu kỳ dương, nên hiệu số âm vẫn đúng.
     const a = extension.opts.angle;
-    // 90° = chỉ phụ thuộc x ⇒ các nét DỌC. 45°/135° = tổng/hiệu ⇒ hai chiều nghiêng ngược.
+    // Cùng quy ước với `repeating-linear-gradient` của CSS ở legend, nên vân trên bản đồ và
+    // ô mẫu trong chú giải là CÙNG một hình: 0° = nét NGANG (chỉ phụ thuộc y), 90° = nét DỌC
+    // (chỉ phụ thuộc x), 45°/135° = tổng/hiệu ⇒ hai chiều nghiêng ngược nhau.
     const axis =
-      a === 90
-        ? "gl_FragCoord.x"
-        : a === 135
-          ? "gl_FragCoord.x - gl_FragCoord.y"
-          : "gl_FragCoord.x + gl_FragCoord.y";
+      a === 0
+        ? "gl_FragCoord.y"
+        : a === 90
+          ? "gl_FragCoord.x"
+          : a === 135
+            ? "gl_FragCoord.x - gl_FragCoord.y"
+            : "gl_FragCoord.x + gl_FragCoord.y";
     return {
       defines: {
         HATCH_PERIOD: (6 * dpr).toFixed(1),
