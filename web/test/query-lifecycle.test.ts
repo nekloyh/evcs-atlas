@@ -94,8 +94,13 @@ test("Access Curve là CHỈ ĐỌC — không nhận và không phát intent n�
     "Access Curve đo Ô H3 còn bản đồ Tiếp cận tô ĐƯỜNG: phát bộ lọc từ đây là bịa một phép quy đổi");
 
   const router = code("components/atlas/PrimaryLensChart.tsx");
-  assert.match(router, /<AccessCurve model=\{accessModel\} \/>/,
-    "router chỉ được truyền model cho Access Curve, không truyền callback");
+  // Chốt theo Ý ĐỊNH, không theo chuỗi JSX nguyên văn: Access Curve được nhận dữ liệu và
+  // mực (CR 4.1 §C2 thêm `theme`), nhưng KHÔNG được nhận một callback nào. Chốt nguyên văn
+  // biến mọi prop khai báo hợp lệ về sau thành một lần FAIL giả.
+  assert.match(router, /<AccessCurve\b[^>]*\bmodel=\{accessModel\}/,
+    "router phải truyền model cho Access Curve");
+  assert.doesNotMatch(router, /<AccessCurve\b[^>]*on[A-Z]\w*=/,
+    "router không được truyền callback nào cho Access Curve");
 });
 
 test("mỗi biểu đồ chỉ nhận đúng callback nó được phép phát (§3.3)", () => {

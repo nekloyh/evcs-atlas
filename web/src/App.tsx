@@ -264,6 +264,33 @@ export default function App() {
 
   // Chỉ công bố rows và scale khi cả hai thuộc cùng field. Trong lúc truy vấn field mới,
   // snapshot cũ bị che thay vì ghép metadata mới với giá trị/ngưỡng cũ trong một frame.
+  /**
+   * Chia bậc của `station:occ` — tính MỘT LẦN trên cả 168 giờ, không theo từng giờ.
+   *
+   * Đây là quyết định quan trọng nhất của trường này (xem `allOccValues`): chia bậc theo
+   * giờ thì màu đổi nghĩa 4 lần mỗi giây khi scrubber chạy, và hai giờ không so được với
+   * nhau. Cùng lý do §1b loại `HeatmapLayer`, chỉ khác trục.
+   *
+   * Đứng ở đây, TRƯỚC `scale`, vì từ CR 4.1 nó là nguồn DUY NHẤT của thang trường này: bản
+   * đồ, dock và panel đều nhận đúng object mà `utilizationScale` trả về.
+   */
+  const occClassing = useMemo(
+    () => {
+      const occ = FIELD_BY_ID.get(STATION_OCC_FIELD);
+      return occupancy && occ ? buildFieldScale(occ, allOccValues(occupancy.profiles)) : null;
+    },
+    [occupancy],
+  );
+
+  const occGradientGate = gradientAvailability("utilization", false);
+  const occContract = scaleContractOf(FIELD_BY_ID.get(STATION_OCC_FIELD)!);
+  const utilizationScale = useMemo(
+    () => occClassing
+      ? applyScaleMode(occClassing, occContract, requestedScaleMode, occGradientGate.allowed)
+      : null,
+    [occClassing, occContract, requestedScaleMode, occGradientGate.allowed],
+  );
+
   const activeCellSnapshot = meta.readAs === "cell" && cellSnapshot?.fieldId === meta.id ? cellSnapshot : null;
   const cells = meta.readAs === "cell" ? activeCellSnapshot?.rows ?? [] : cellSnapshot?.rows ?? [];
   const baseScale = meta.readAs === "cell"
@@ -272,10 +299,17 @@ export default function App() {
   const activeTheme = themeFor(meta, demandRepresentation);
   const gradientGate = gradientAvailability(activeTheme, Boolean(meta.diverge));
   const scale = useMemo(
-    () => baseScale
-      ? applyScaleMode(baseScale, scaleContractOf(meta), requestedScaleMode, gradientGate.allowed)
-      : null,
-    [baseScale, meta, requestedScaleMode, gradientGate.allowed],
+    // `station:occ` KHÔNG đi qua snapshot: heatmap dock, mini-heatmap của panel và lớp chấm
+    // trạm phải cầm ĐÚNG MỘT object `Scale` (CR 4.1 acceptance test 4). Gọi `applyScaleMode`
+    // hai lần trên cùng đầu vào cho hai object BẰNG NHAU nhưng KHÁC NHAU ở chế độ gradient
+    // (`{...scale, mode}`), và khi đó "miền lệch nhau là bất khả biểu diễn" chỉ còn là một
+    // lời hứa chứ không phải một tính chất của mã.
+    () => meta.id === STATION_OCC_FIELD
+      ? utilizationScale
+      : baseScale
+        ? applyScaleMode(baseScale, scaleContractOf(meta), requestedScaleMode, gradientGate.allowed)
+        : null,
+    [meta, utilizationScale, baseScale, requestedScaleMode, gradientGate.allowed],
   );
 
   const storyPkg: StoryPackage = useMemo(
@@ -469,27 +503,24 @@ export default function App() {
   const analysisFilter = useStore((s) => s.filter.active);
 
   /**
-   * Chia bậc của `station:occ` — tính MỘT LẦN trên cả 168 giờ, không theo từng giờ.
+   * Hai SỐ ĐẾM của giờ đang xem — legend đếm cái ĐANG VẼ, không đếm cả tuần.
    *
-   * Đây là quyết định quan trọng nhất của trường này (xem `allOccValues`): chia bậc theo
-   * giờ thì màu đổi nghĩa 4 lần mỗi giây khi scrubber chạy, và hai giờ không so được với
-   * nhau. Cùng lý do §1b loại `HeatmapLayer`, chỉ khác trục.
+   * Chúng KHÔNG được nhét vào `Scale` (trước CR 4.1 chúng bị spread đè lên `n`/`nNull` của
+   * `occClassing`). Hai lý do, cả hai đều đã cắn:
+   *
+   *  1. Nhét vào là phá identity của thang — heatmap và lớp chấm trạm hết cầm chung một
+   *     object, và ngưỡng bậc bỗng mang số đếm của một giờ.
+   *  2. `n` của thang là số TRẠM-GIỜ dùng để chia bậc (cả tuần), còn hai số này là số TRẠM
+   *     ở một giờ. Ghi đè là trộn hai đơn vị vào một ô nhớ, và `classingNote` in ra đơn vị
+   *     nào cũng sai.
+   *
+   * Nên chúng đi thành một prop RIÊNG tới legend, giữ đúng bất biến ở `viz/occ.ts`:
+   * "swatch chấm rỗng hỏi về giờ trên màn hình, và nó PHẢI đổi theo giờ".
    */
-  const occClassing = useMemo(
-    () => {
-      const occ = FIELD_BY_ID.get(STATION_OCC_FIELD);
-      return occupancy && occ ? buildFieldScale(occ, allOccValues(occupancy.profiles)) : null;
-    },
-    [occupancy],
+  const occDrawnCount = useMemo(
+    () => (occupancy ? occCountAt(occupancy.profiles, t) : null),
+    [occupancy, t],
   );
-
-  // Trường trạm: NGƯỠNG lấy từ cả tuần (ở trên), còn hai SỐ ĐẾM là của giờ đang xem —
-  // legend đếm cái đang vẽ. Hai thứ khác nhau và chúng phải đến từ hai chỗ khác nhau.
-  useEffect(() => {
-    if (meta.id !== STATION_OCC_FIELD || !occupancy || !occClassing) return;
-    const c = occCountAt(occupancy.profiles, t);
-    setScaleSnapshot({ fieldId: meta.id, scale: { ...occClassing, n: c.present, nNull: c.missing } });
-  }, [meta, occupancy, occClassing, t]);
 
   // Asset supply không phụ thuộc telemetry. Cùng geometry trạm nhưng khác measure, nên
   // scale đọc trực tiếp `stations` và null là “chưa khai cổng”, không là “chưa quan sát”.
@@ -692,8 +723,9 @@ export default function App() {
             stations={stations}
             cells={cells}
             occupancy={occupancy}
-            utilizationScale={occClassing}
+            utilizationScale={utilizationScale}
             utilizationUnavailableReason={occupancyUnavailable?.reason}
+            drawnCount={meta.id === STATION_OCC_FIELD ? occDrawnCount : null}
             presetStats={presetStats}
           />}
       map={
@@ -728,7 +760,7 @@ export default function App() {
               communes={communes}
               poi={poi}
               occupancy={occupancy}
-              occScale={occClassing}
+              occScale={utilizationScale}
               roads={roads}
               roadsLoading={roadsLoading}
               cells={cells}

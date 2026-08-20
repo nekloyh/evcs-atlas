@@ -16,6 +16,7 @@ import { loadOpportunityCommunes } from "../../data/chart-session";
 import { LENSES, lensOfField, type FieldMeta } from "../../fields";
 import { useStore } from "../../state/store";
 import type { ChartIntentSink } from "../../state/analysis-events";
+import { themeOfLens } from "../../viz/theme";
 import { LENS_PRIMARY_CHARTS, PRIMARY_CHART_REGISTRY } from "../../viz/chart-contracts";
 import {
   buildDemandPopulationHistogram,
@@ -56,6 +57,7 @@ export function LensChartController({
   const selectEntity = useStore((s) => s.selectEntity);
   const t = useStore((s) => s.t);
   const setT = useStore((s) => s.setT);
+  const demandRepresentation = useStore((s) => s.demandRepresentation);
 
   const lensId = lensOfField(field.id) ?? "demand";
   const lensMeta = LENSES.find((l) => l.id === lensId);
@@ -64,6 +66,10 @@ export function LensChartController({
   // bằng nhau; đọc từ `lensMeta` trước để registry là bên NÓI, không phải bên bị đối chiếu.
   const primaryChartId = lensMeta?.primaryChart ?? LENS_PRIMARY_CHARTS[lensId];
   const chartMeta = PRIMARY_CHART_REGISTRY[primaryChartId];
+  // Theme đi từ registry, và đi kèm representation ĐANG BẬT: `ThemeReadout` ngay trên cùng
+  // cột đọc dùng representation sống, nên ghim `"hex"` ở đây sẽ cho cột ấy tự mâu thuẫn ở
+  // lens Cầu mỗi khi người xem đổi sang đồng mức/nhiệt/bivariate (CR 4.1 §C2).
+  const theme = themeOfLens(lensId, demandRepresentation);
 
   // Lazy load opportunity communes with explicit loading/error/retry states.
   const [opportunityLoad, setOpportunityLoad] = useState<
@@ -211,6 +217,7 @@ export function LensChartController({
           opportunityModel={opportunityModel}
           t={t}
           scale={primaryChartId === "utilization-week-heatmap" ? utilizationScale : scale}
+          theme={theme}
           sink={sink}
         />
       )}

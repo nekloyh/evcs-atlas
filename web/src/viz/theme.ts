@@ -1,4 +1,4 @@
-import type { FieldMeta } from "../fields";
+import { defaultFieldOfLens, type FieldMeta, type LensId } from "../fields";
 import type { DemandRepresentation } from "../state/types";
 
 export type AnalysisTheme =
@@ -19,4 +19,21 @@ export function themeFor(field: FieldMeta, demand: DemandRepresentation): Analys
   if (field.group === "cung") return "supply";
   if (field.group === "dat" || field.id.startsWith("n_poi") || field.id === "n_apartment" || field.id === "apartment_levels_sum") return "urban-context";
   return "exploration";
+}
+
+/**
+ * Theme của một LENS — đường duy nhất từ câu hỏi sang mực của biểu đồ (CR 4.1 §C2).
+ *
+ * Vì sao phải có hàm này thay vì mỗi biểu đồ gõ tên theme của mình: ánh xạ lens → theme đã
+ * sống ở `themeFor` + trường mặc định của lens. Gõ lại `"supply"` trong `PowerTierBreakdown`
+ * là nhân bản ánh xạ ấy ra năm chỗ, và năm bản sao đó không có gì buộc chúng đổi theo khi
+ * registry đổi — đúng cái mâu thuẫn mà §C2 sinh ra để xoá.
+ *
+ * `demand` phải là representation ĐANG BẬT, không phải một mặc định: ở lens Cầu, `themeFor`
+ * trả `demand` hay `exploration` tuỳ representation, nên ghim `"hex"` ở đây sẽ khiến biểu đồ
+ * và `ThemeReadout` — hai thứ nằm cùng một cột đọc — sơn hai màu khác nhau.
+ */
+export function themeOfLens(lens: LensId, demand: DemandRepresentation): AnalysisTheme {
+  const field = defaultFieldOfLens(lens);
+  return field ? themeFor(field, demand) : "exploration";
 }

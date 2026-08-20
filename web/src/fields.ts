@@ -196,6 +196,14 @@ export type FieldMeta = VisualContract & {
   /** nhãn của swatch ô-trống ở legend; mặc định “không đo được” */
   nullLabel?: string;
   /**
+   * Đơn vị của TẬP CHIA BẬC khi nó khác đơn vị đọc — mặc định vắng, tức hai tập trùng nhau.
+   *
+   * Chỉ `station:occ` cần: nó đọc theo TRẠM nhưng chia bậc trên 168 giờ × trạm, nên câu
+   * "≈16.120 trạm/bậc" của legend đếm đúng số mà gọi sai tên. Khai ở đây thay vì để legend
+   * đoán theo `readAs`: legend không có cách nào biết `allOccValues` đã trải phẳng trục giờ.
+   */
+  classingNoun?: string;
+  /**
    * Null của trường này có **HAI nguyên nhân** — §7a mở rộng, và từ Phase 8 là **hình chiếu
    * LÚC CHẠY của `NullContract`** ở `data/null-states.ts`.
    *
@@ -1068,6 +1076,9 @@ const STATION_SPECS: Spec[] = [
     unit: { kind: "ratio", note: `cổng bận ÷ cổng lắp đặt tại giờ đang xem · dưới ${OBSERVED_H_MIN} h quan sát thì không tô` },
     kind: "numeric",
     scaleContract: TOGGLE_LINEAR_ZERO_NONE,
+    // Thang chia bậc trên MỌI ô giờ đọc được của mọi trạm IN, không trên danh sách trạm —
+    // xem `allOccValues`. Hai tập khác nhau nên legend phải gọi đúng tên tập của mình.
+    classingNoun: "trạm-giờ",
     // Không phải một cột — §13c-1. Công thức KHÔNG chạy trong SQL như các trường phái sinh
     // khác: nó phụ thuộc `t`, thứ đổi 4 lần mỗi giây khi play. Một truy vấn DuckDB mỗi
     // khung hình là sai kiến trúc, nên hồ sơ 168h nạp một lần vào `Float32Array` và công

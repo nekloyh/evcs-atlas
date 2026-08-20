@@ -20,7 +20,8 @@
  */
 
 import { DOW_LABELS, dowOf, hourOf, tOf } from "../state/types";
-import { HATCH_HEX, INK_MUTED_HEX, classOf, rampFor, type Scale } from "../viz/palette";
+import { HATCH_HEX, INK_MUTED_HEX, colorFor, type RGB, type Scale } from "../viz/palette";
+import type { AnalysisTheme } from "../viz/theme";
 import { CHART_W } from "./chart-size";
 
 const W = CHART_W;
@@ -36,6 +37,7 @@ const INK = "#0b0b0b";
 export function MiniHeatmap({
   values,
   scale,
+  theme,
   t,
   onT,
 }: {
@@ -43,11 +45,12 @@ export function MiniHeatmap({
   values: (number | null)[];
   /** CÙNG `Scale` mà chấm trạm và heatmap dock dùng — xem luật 1 ở đầu file */
   scale: Scale | null;
+  /** CÙNG theme mà bản đồ dùng cho trường này — người gọi lấy từ registry, không mặc định. */
+  theme: AnalysisTheme;
   t: number;
   onT: (t: number) => void;
 }) {
   if (!scale) return null;
-  const { colors } = rampFor(scale, "high-bad");
 
   return (
     <svg width={W} height={H} className="block" role="img" aria-label="nhịp 168 giờ của trạm">
@@ -75,8 +78,8 @@ export function MiniHeatmap({
       {values.map((v, i) => {
         const d = dowOf(i);
         const h = hourOf(i);
-        const k = v === null ? null : classOf(v, scale);
-        const fill = k === null ? `url(#${HATCH_ID})` : rgbCss(colors[k]);
+        const color = colorFor(v, scale, theme);
+        const fill = !color ? `url(#${HATCH_ID})` : rgbCss(color);
         return (
           <rect
             key={i}
@@ -115,6 +118,6 @@ export function MiniHeatmap({
 const pctOf = (v: number) =>
   `${(v * 100).toLocaleString("vi-VN", { maximumFractionDigits: 1 })}% cổng bận`;
 
-function rgbCss(c: [number, number, number] | undefined): string {
-  return c ? `rgb(${c[0]},${c[1]},${c[2]})` : "transparent";
+function rgbCss([r, g, b]: RGB): string {
+  return `rgb(${r} ${g} ${b})`;
 }

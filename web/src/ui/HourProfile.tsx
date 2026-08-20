@@ -39,12 +39,10 @@ import { useMemo, useState } from "react";
 
 import { HOURS_IN_WEEK, hourOf } from "../state/types";
 import { hourProfile, type HourBand } from "../viz/occ";
-import { HAIRLINE_HEX, INK_HEX, INK_MUTED_HEX, RAMP_HEX } from "../viz/palette";
+import { HAIRLINE_HEX, INK_HEX, INK_MUTED_HEX, seriesColorForTheme } from "../viz/palette";
+import type { AnalysisTheme } from "../viz/theme";
 import { HEAT_M, HEAT_W } from "./Heatmap168";
 import { Readout } from "./Readout";
-
-/** `c5` — chuỗi dữ liệu, cùng hex mà histogram và Lorenz dùng (§4d-2). */
-const SERIES = RAMP_HEX[4]!;
 
 const W = HEAT_W;
 const H = 64;
@@ -55,14 +53,18 @@ const COL_W = PLOT_W / 24;
 
 export function HourProfile({
   cells,
+  theme,
   t,
   onT,
 }: {
   cells: readonly { t: number; value: number | null }[];
+  /** `c5` — chuỗi dữ liệu, cùng theme với heatmap nó đứng cạnh (CR 4.1 §C2). */
+  theme: AnalysisTheme;
   /** giờ đang xem — cột của nó được nhấn, cùng đồng bộ hai chiều với scrubber (§3e) */
   t: number;
   onT: (t: number) => void;
 }) {
+  const SERIES = seriesColorForTheme(theme);
   const bands = useMemo(() => hourProfile(cells), [cells]);
   const [hoverHour, setHoverHour] = useState<number | null>(null);
 

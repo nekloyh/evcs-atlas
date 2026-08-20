@@ -10,7 +10,8 @@ import { useEffect, useRef, useState } from "react";
 import * as Plot from "@observablehq/plot";
 
 import { DOW_LABELS, dowOf, hourOf, tOf } from "../state/types";
-import { BASEMAP_HEX, HATCH_HEX, INK_HEX, INK_MUTED_HEX, classOf, rampFor, type RGB, type Scale } from "../viz/palette";
+import { BASEMAP_HEX, HATCH_HEX, INK_HEX, INK_MUTED_HEX, colorFor, type RGB, type Scale } from "../viz/palette";
+import type { AnalysisTheme } from "../viz/theme";
 import type { UtilizationHourCell } from "../viz/chart-models";
 import { OBSERVED_H_MIN } from "../viz/occ";
 import { Readout } from "./Readout";
@@ -39,12 +40,19 @@ const CELL_H = PLOT_H / 7;
 export function Heatmap168({
   cells,
   scale,
+  theme,
   t,
   onTimeIntent,
   disabledReason,
 }: {
   cells: UtilizationHourCell[];
   scale: Scale | null;
+  /**
+   * Bảng màu đến từ registry qua người gọi — KHÔNG có mặc định ở đây. Một mặc định `"utilization"`
+   * gõ tay trong biểu đồ là bản sao thứ hai của ánh xạ lens → theme, đúng thứ §C1 cấm; và nó
+   * sẽ im lặng sơn đúng ở hôm nay rồi im lặng sơn sai vào ngày registry đổi.
+   */
+  theme: AnalysisTheme;
   t: number;
   onTimeIntent?: (t: number) => void;
   disabledReason?: string;
@@ -56,7 +64,6 @@ export function Heatmap168({
   useEffect(() => {
     const el = host.current;
     if (!el || !scale || cells.length === 0) return;
-    const { colors } = rampFor(scale, "high-bad");
 
     const chart = Plot.plot({
       width: W,
@@ -83,10 +90,9 @@ export function Heatmap168({
           x: "hour",
           y: "dow",
           fill: (d: UtilizationHourCell) => {
-            if (d.value === null) return `url(#${HATCH_ID})`;
-            const k = classOf(d.value, scale);
-            if (k === null) return `url(#${HATCH_ID})`;
-            return rgbCss(colors[k] ?? colors[0]!);
+            const color = colorFor(d.value, scale, theme);
+            if (!color) return `url(#${HATCH_ID})`;
+            return rgbCss(color);
           },
           inset: 0.5,
         }),
@@ -105,7 +111,7 @@ export function Heatmap168({
 
     el.append(chart);
     return () => chart.remove();
-  }, [cells, scale]);
+  }, [cells, scale, theme]);
 
   if (disabledReason) {
     return (

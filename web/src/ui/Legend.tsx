@@ -64,6 +64,7 @@ export function Legend({
   surfaceBreaks,
   bivariate = null,
   selectedValue = null,
+  drawnCount = null,
   variant = "inline",
 }: {
   field: FieldMeta;
@@ -75,6 +76,12 @@ export function Legend({
   bivariate?: BivariateAxes | null;
   /** Giá trị của đối tượng đang chọn theo measure này — mốc trên thước đo. */
   selectedValue?: number | null;
+  /**
+   * Số mark ĐANG VẼ, khi trường có một tập vẽ khác tập chia bậc (`station:occ`: thang dựng
+   * trên 168 giờ, còn bản đồ vẽ MỘT giờ). Có nó thì swatch "chưa đo được" đếm theo giờ đang
+   * xem — bất biến của `viz/occ.ts` — thay vì đếm null của cả tuần.
+   */
+  drawnCount?: { present: number; missing: number } | null;
   /** Inline is the legacy full-width strip; floating preserves all semantics in a wrapped stack. */
   variant?: "inline" | "floating";
 }) {
@@ -219,9 +226,14 @@ export function Legend({
   // thiếu nó thì tất cả về nhóm "không biết" — thà nói ít hơn là nói sai.
   const nNotApplicable = field.nullSplit ? (cov?.n_not_applicable ?? 0) : 0;
   const nFiltered = field.nullSplit ? (cov?.n_filtered ?? 0) : 0;
+  // Số ô trống mà legend phải nói tới là số của cái ĐANG VẼ. Với trường theo giờ, thang
+  // dựng trên cả tuần và đã lọc null trước khi chia bậc (`allOccValues`) — `scale.nNull` ở
+  // đó bằng 0 vĩnh viễn, nên đọc nó là khai "không thiếu gì" trên một bản đồ đang có chấm
+  // rỗng. `drawnCount` là cửa duy nhất cho tập vẽ ấy.
+  const nNullDrawn = drawnCount ? drawnCount.missing : scale?.nNull ?? 0;
   // Còn lại mới là "không biết". Trừ CẢ HAI nhóm đã giải thích được: gộp nhóm ĐÃ LỌC vào
   // đây là gọi 87 ô sát trạm — nhóm được phục vụ tốt nhất thành phố — là "không đo được".
-  const nUnknown = Math.max((scale?.nNull ?? 0) - nNotApplicable - nFiltered, 0);
+  const nUnknown = Math.max(nNullDrawn - nNotApplicable - nFiltered, 0);
 
   if (scale?.kind === "numeric" && scale.mode === "gradient") {
     const contract = scaleContractOf(field);
@@ -350,8 +362,8 @@ export function Legend({
                 {polarityNote(field)}
               </span>
             )}
-            {classingNote(scale, noun) && (
-              <span className="tabular-nums text-ink-muted">{classingNote(scale, noun)}</span>
+            {classingNote(scale, field.classingNoun ?? noun) && (
+              <span className="tabular-nums text-ink-muted">{classingNote(scale, field.classingNoun ?? noun)}</span>
             )}
             {cov && (
               <span className="tabular-nums text-ink-muted">
@@ -398,7 +410,7 @@ export function Legend({
             trên bản đồ (cùng luật với `ShapeSwatch` của tab LAYER). Một ô vân 45° ở đây sẽ
             hứa một chất liệu mà đường 1px và chấm 6px không mang được — mực thì giữ
             nguyên, vì khái niệm không đổi. */}
-        {scale && scale.nNull > 0 && (
+        {scale && nNullDrawn > 0 && (
           <>
             {field.readAs === "road" ? (
               <div className="flex w-10 items-center justify-center border-l border-hairline">

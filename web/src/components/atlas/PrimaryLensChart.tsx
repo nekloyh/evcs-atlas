@@ -7,6 +7,7 @@
 import type { PrimaryChartId } from "../../viz/chart-contracts";
 import type { ChartIntentSink } from "../../state/analysis-events";
 import type { Scale } from "../../viz/palette";
+import type { AnalysisTheme } from "../../viz/theme";
 import type {
   DemandHistogramModel,
   SupplyPowerTierModel,
@@ -31,6 +32,7 @@ export function PrimaryLensChart({
   opportunityModel,
   t = 0,
   scale = null,
+  theme,
   sink,
 }: {
   chartId: PrimaryChartId;
@@ -41,22 +43,24 @@ export function PrimaryLensChart({
   opportunityModel?: OpportunityCommuneRankModel;
   t?: number;
   scale?: Scale | null;
+  /** Mực của lens — đến từ registry qua `LensChartController`, không module nào tự gõ. */
+  theme: AnalysisTheme;
   sink: ChartIntentSink;
 }) {
   switch (chartId) {
     case "demand-population-histogram":
       return demandModel ? (
-        <PopulationHistogram model={demandModel} onFilterIntent={sink.onFilterIntent} />
+        <PopulationHistogram model={demandModel} theme={theme} onFilterIntent={sink.onFilterIntent} />
       ) : null;
 
     case "supply-power-tier-breakdown":
       return supplyModel ? (
-        <PowerTierBreakdown model={supplyModel} onFilterIntent={sink.onFilterIntent} />
+        <PowerTierBreakdown model={supplyModel} theme={theme} onFilterIntent={sink.onFilterIntent} />
       ) : null;
 
     case "access-population-curve":
       return accessModel ? (
-        <AccessCurve model={accessModel} />
+        <AccessCurve model={accessModel} theme={theme} />
       ) : null;
 
     case "utilization-week-heatmap":
@@ -65,6 +69,7 @@ export function PrimaryLensChart({
           <Heatmap168
             cells={utilizationModel.cells}
             scale={scale}
+            theme={theme}
             t={t}
             onTimeIntent={sink.onTimeIntent}
             disabledReason={utilizationModel.disabledReason}
@@ -72,6 +77,7 @@ export function PrimaryLensChart({
           {!utilizationModel.disabledReason && (
             <HourProfile
               cells={utilizationModel.cells}
+              theme={theme}
               t={t}
               onT={sink.onTimeIntent ?? (() => {})}
             />
@@ -83,6 +89,7 @@ export function PrimaryLensChart({
       return opportunityModel ? (
         <OpportunityCommuneRankBars
           model={opportunityModel}
+          theme={theme}
           onEntityIntent={sink.onEntityIntent}
         />
       ) : null;

@@ -10,22 +10,26 @@ import { useState } from "react";
 import type { AnalysisFilter, PowerTierId } from "../state/filter";
 import { POWER_TIER_ORDER } from "../state/filter";
 import { DEFAULT_DATASET_ID } from "../state/selection";
-import { HATCH_HEX, RAMP_HEX, mutedCss } from "../viz/palette";
+import { HATCH_HEX, mutedCss, seriesColorForTheme } from "../viz/palette";
+import type { AnalysisTheme } from "../viz/theme";
 import type { PowerTierRow, SupplyPowerTierModel } from "../viz/chart-models";
 import { Readout } from "./Readout";
 
-const SERIES = RAMP_HEX[4];
 const MUTED_CSS = mutedCss();
 /** Vân của cấp CHƯA RÕ — cùng mực vân null của bản đồ, không phải một mực đen gõ tay. */
 const UNKNOWN_HATCH = `repeating-linear-gradient(135deg, transparent 0 3px, ${HATCH_HEX} 3px 4px)`;
 
 export function PowerTierBreakdown({
   model,
+  theme,
   onFilterIntent,
 }: {
   model: SupplyPowerTierModel;
+  /** Mực chuỗi = anchor `series` của theme lens đang mở (CR 4.1 §C2). */
+  theme: AnalysisTheme;
   onFilterIntent?: (filter: AnalysisFilter | null) => void;
 }) {
+  const SERIES = seriesColorForTheme(theme);
   const [hoverRow, setHoverRow] = useState<PowerTierRow | null>(null);
 
   const handleToggleTier = (tierId: PowerTierId) => {

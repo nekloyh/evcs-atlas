@@ -1,0 +1,62 @@
+{
+  "demand": {
+    "field": "population",
+    "theme": "exploration",
+    "hex": "#b74817",
+    "hits": 25,
+    "samples": [
+      "rgb(183, 72, 23)",
+      "#b74817"
+    ],
+    "hasChart": true,
+    "pass": true
+  },
+  "supply": {
+    "field": "station:ports",
+    "theme": "supply",
+    "hex": "#1f8376",
+    "hits": 6,
+    "samples": [
+      "rgb(31, 131, 118)",
+      "rgb(31, 131, 118)"
+    ],
+    "hasChart": true,
+    "pass": true
+  },
+  "access": {
+    "field": "road:dist_station_m",
+    "theme": "accessibility",
+    "hex": "#2e63b8",
+    "hits": 3,
+    "samples": [
+      "rgb(46, 99, 184)",
+      "#2e63b8"
+    ],
+    "hasChart": true,
+    "pass": true
+  },
+  "utilization": {
+    "field": "station:occ",
+    "theme": "utilization",
+    "hex": "#9c45ab",
+    "hits": 138,
+    "samples": [
+      "rgb(156, 69, 171)",
+      "rgb(156 69 171)"
+    ],
+    "hasChart": true,
+    "pass": true
+  },
+  "opportunity": {
+    "field": "screen_margin_m",
+    "theme": "screening",
+    "hex": "#c77a07",
+    "hits": 10,
+    "samples": [
+      "rgb(199, 122, 7)",
+      "rgb(199, 122, 7)"
+    ],
+    "hasChart": true,
+    "pass": true
+  }
+}

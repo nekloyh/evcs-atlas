@@ -9,13 +9,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import * as Plot from "@observablehq/plot";
 
 import { scaleUnit } from "../units";
-import { BASEMAP_HEX, HAIRLINE_HEX, INK_2_HEX, INK_MUTED_HEX, RAMP_HEX } from "../viz/palette";
+import { BASEMAP_HEX, HAIRLINE_HEX, INK_2_HEX, INK_MUTED_HEX, getThemePalette, seriesColorForTheme } from "../viz/palette";
+import type { AnalysisTheme } from "../viz/theme";
 import type { AccessCurveModel } from "../viz/chart-models";
 import { Readout } from "./Readout";
 import { CHART_W } from "./chart-size";
 
-const SERIES = RAMP_HEX[4];
-const CALLOUT = RAMP_HEX[6];
 const INK_2 = INK_2_HEX;
 
 export const CALLOUT_M = 2_000;
@@ -26,7 +25,9 @@ const M = { left: 34, right: 10, top: 8, bottom: 24 };
 
 const asPct = (d: number) => `${Math.round(d * 100)}%`;
 
-export function AccessCurve({ model }: { model: AccessCurveModel }) {
+export function AccessCurve({ model, theme }: { model: AccessCurveModel; theme: AnalysisTheme }) {
+  const SERIES = seriesColorForTheme(theme);
+  const CALLOUT = getThemePalette(theme).hex[6];
   const host = useRef<HTMLDivElement>(null);
   const [hoverDist, setHoverDist] = useState<number | null>(null);
 
@@ -107,7 +108,7 @@ export function AccessCurve({ model }: { model: AccessCurveModel }) {
     });
     el.append(chart);
     return () => chart.remove();
-  }, [model, xMax, unit.divisor, unit.label]);
+  }, [model, xMax, unit.divisor, unit.label, SERIES, CALLOUT]);
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();

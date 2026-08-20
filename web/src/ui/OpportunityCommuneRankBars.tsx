@@ -10,20 +10,23 @@
 import { useState } from "react";
 import type { CommuneCode, EntitySelection } from "../state/selection";
 import { DEFAULT_DATASET_ID } from "../state/selection";
-import { RAMP_HEX } from "../viz/palette";
+import { getThemePalette, seriesColorForTheme } from "../viz/palette";
+import type { AnalysisTheme } from "../viz/theme";
 import type { OpportunityCommuneRankModel, OpportunityRankItem } from "../viz/chart-models";
 import { Readout } from "./Readout";
 
-const SERIES = RAMP_HEX[4];
-const SELECTED_COLOR = RAMP_HEX[6];
-
 export function OpportunityCommuneRankBars({
   model,
+  theme,
   onEntityIntent,
 }: {
   model: OpportunityCommuneRankModel;
+  /** Mực chuỗi = anchor `series` của theme lens đang mở (CR 4.1 §C2). */
+  theme: AnalysisTheme;
   onEntityIntent?: (selection: EntitySelection) => void;
 }) {
+  const SERIES = seriesColorForTheme(theme);
+  const SELECTED_COLOR = getThemePalette(theme).hex[6];
   const [hoverItem, setHoverItem] = useState<OpportunityRankItem | null>(null);
 
   const handleSelectCommune = (item: OpportunityRankItem) => {

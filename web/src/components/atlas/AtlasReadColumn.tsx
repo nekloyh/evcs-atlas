@@ -58,6 +58,11 @@ export interface AtlasReadColumnProps {
   occupancy?: StationOccupancy | null;
   utilizationScale?: Scale | null;
   utilizationUnavailableReason?: string;
+  /**
+   * Số mark ĐANG VẼ ở giờ đang xem — chỉ trường theo giờ (`station:occ`) mới có. Tách khỏi
+   * `Scale` vì thang đếm TRẠM-GIỜ của cả tuần còn cặp này đếm TRẠM ở một giờ (CR 4.1 §C1).
+   */
+  drawnCount?: { present: number; missing: number } | null;
   /** Thống kê một phiên cho Quick Preset — Phase 5 §2.3. Suy từ dữ liệu đã cư trú. */
   presetStats: PresetStats;
 }
@@ -104,6 +109,7 @@ export function AtlasReadColumn({
   occupancy = null,
   utilizationScale = null,
   utilizationUnavailableReason,
+  drawnCount = null,
   presetStats,
 }: AtlasReadColumnProps) {
   const paintOn = useStore((s) => s.paintOn);
@@ -121,8 +127,12 @@ export function AtlasReadColumn({
   const noun = unitNoun(field.readAs);
   const phrase = unitPhrase(field.unit, scaleUnit(field.unit, 0));
   const badges = manifest ? badgesFor(field, manifest, runtime) : [];
-  const nNull = scale?.nNull ?? 0;
-  const nTotal = (scale?.n ?? 0) + nNull;
+  // Câu KHUYẾT nói về tập ĐANG VẼ, cùng một tập với swatch ô trống của legend — nếu không,
+  // hai dòng cách nhau ba centimet sẽ nói ngược nhau: legend "35 trạm chưa đo ở giờ này"
+  // ngay trên một câu "không trạm nào khuyết". Với trường theo giờ, `scale.n` là số
+  // TRẠM-GIỜ của cả tuần và `scale.nNull` bằng 0 theo dựng (`allOccValues` lọc null trước).
+  const nNull = drawnCount ? drawnCount.missing : scale?.nNull ?? 0;
+  const nTotal = drawnCount ? drawnCount.present + drawnCount.missing : (scale?.n ?? 0) + nNull;
   const nullLine =
     scale === null
       ? null
@@ -229,6 +239,7 @@ export function AtlasReadColumn({
               surfaceBreaks={surfaceBreaks}
               bivariate={bivariate}
               selectedValue={selectedValue}
+              drawnCount={drawnCount}
               variant="floating"
             />
           </LegendSlot>

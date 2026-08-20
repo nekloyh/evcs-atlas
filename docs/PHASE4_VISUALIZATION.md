@@ -101,10 +101,21 @@ for its controlled state, but may not introduce a second data hue.
 
 Phase 2.1 scale mode does not change chart business logic. Map gradients and binned maps
 both read their anchors/LUT from the Lens Registry palette; single-series charts continue
-to read that palette's `series` anchor. Histogram/heatmap bins remain binned in both map
-modes. `Legend` alone branches between the QA'd swatch ruler and the transform-aware LUT
+to read that palette's `series` anchor — the anchor of the **lens theme**, reached through
+`themeOfLens(lens, representation)`, never a hue typed into a chart module (CR 4.1 §C2).
+
+Histogram bars stay binned in both map modes: they are chart-local `log1p` display bins
+(§1.2), not the map's breaks, and they carry no value-colour channel. The 7×24 utilization
+heatmap is the exception and **follows the map mode** — it is the one chart whose hue
+encodes the same measure as its lens map, sharing one `Scale` object with the Station layer
+(CR 4.1 §C1/§D).
+
+`Legend` alone branches between the QA'd swatch ruler and the transform-aware LUT
 gradient; both branches receive the runtime `Scale`, and null/not-applicable/filtered
-materials remain outside the numeric bar.
+materials remain outside the numeric bar. Where a field's classing population differs from
+its reading unit — `station:occ` classes over station-hours but draws stations — the
+per-hour counts reach the legend as their own input (`drawnCount`), never by overwriting
+`Scale.n`/`nNull`.
 
 ### 1.2 Demand → Population Histogram
 
@@ -133,6 +144,12 @@ Chart ID: `supply-power-tier-breakdown`
 
 Power tier is based on the strongest installed port, `power_kw_max_port`. It is not based
 on `power_kw_site`, `n_ports`, `current_type`, connector registry counts, or grid capacity.
+
+The 22/60/120/180 kW cuts are **DOMAIN thresholds** under the CR 2.1 provenance taxonomy
+(CR 4.1 §A): they name real charger power classes aligned to observed nameplate modes, and
+they were never copied from any map scale — the Supply map paints `station:ports`, a
+different variable. They are preserved verbatim across both scale modes. Earlier text in
+this section calling them "presentation thresholds" meant only "not adequacy standards".
 
 ```ts
 export type PowerTierId =

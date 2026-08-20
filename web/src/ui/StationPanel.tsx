@@ -10,14 +10,22 @@ import * as React from "react";
 import type { StationViewModel } from "../components/atlas/inspector-types";
 import { cellSelection, communeSelection, type EntitySelection } from "../state/selection";
 import { isInScope } from "../data/scope";
-import { CONSTANTS, constantShort } from "../fields";
+import { CONSTANTS, FIELD_BY_ID, STATION_OCC_FIELD, constantShort } from "../fields";
 import { DOW_FULL } from "../state/types";
 import type { Scale } from "../viz/palette";
+import { themeFor } from "../viz/theme";
 import { MiniHeatmap } from "./MiniHeatmap";
 import { formatValue } from "./format";
 import { SourceBlock } from "./Source";
 import { Copy, Check } from "lucide-react";
 import { formatPercentile, formatTriState } from "./inspector-format";
+
+/**
+ * Mini-heatmap luôn vẽ `station:occ` — bằng chứng của TRẠM, không đổi theo lens đang mở —
+ * nên theme của nó đọc thẳng từ chính trường ấy trong registry thay vì gõ tên bảng màu.
+ * Đối số representation là trơ ở đây: `themeFor` chỉ dùng nó cho `population` đọc theo ô.
+ */
+const OCC_THEME = themeFor(FIELD_BY_ID.get(STATION_OCC_FIELD)!, "hex");
 
 export interface StationPanelProps {
   model?: StationViewModel;
@@ -281,7 +289,7 @@ export function StationPanel(props: StationPanelProps) {
         {/* Mini-Heatmap 7x24 */}
         <div className="px-3 pt-2">
           {series && scale ? (
-            <MiniHeatmap values={series} scale={scale} t={t} onT={onT} />
+            <MiniHeatmap values={series} scale={scale} theme={OCC_THEME} t={t} onT={onT} />
           ) : (
             <p className="py-2 text-body text-ink-muted">
               {detail.occStatus === "unavailable"

@@ -1,0 +1,216 @@
+{
+  "generated_on": "2026-08-20",
+  "viewport": "1680x1050",
+  "dpr": 1,
+  "checks": {
+    "tc12_aggregate_band": {
+      "rule": "ghi lại dải của 168 ô hợp thành trên thang [0,1] dùng chung — thuộc tính của quyết định §1.5, không phải cổng CR này được đặt ra",
+      "n_cells": 168,
+      "n_null": 0,
+      "min_pct": 11,
+      "max_pct": 36.2,
+      "spec_claimed": "11–36 %",
+      "mitigation": "HourProfile mang nhịp mà thang dùng chung nén lại (§1.7)"
+    },
+    "tc9_gradient_same_value_same_color": {
+      "rule": "ô heatmap giá trị v vs dải legend lấy mẫu tại position(v)=v; sàn spec ΔE ≤ 1",
+      "n_measured": 168,
+      "n_hidden_by_scroll": 0,
+      "max_dE": 0.636,
+      "p95_dE": 0.503,
+      "median_dE": 0.307,
+      "n_over_1": 0,
+      "pass": true,
+      "extremes": [
+        {
+          "v_pct": 25.3,
+          "cell": [
+            182,
+            105,
+            196
+          ],
+          "bar": [
+            180,
+            103,
+            194
+          ],
+          "dE": 0.636
+        },
+        {
+          "v_pct": 26.5,
+          "cell": [
+            179,
+            102,
+            194
+          ],
+          "bar": [
+            179,
+            102,
+            194
+          ],
+          "dE": 0
+        }
+      ]
+    },
+    "tc9_binned_subset": {
+      "rule": "mọi màu ô của heatmap bậc phải có mặt trong tập swatch legend (ΔE < 0,5)",
+      "n_chart_colors": 3,
+      "n_legend_colors": 13,
+      "n_unmatched": 0,
+      "pass": true,
+      "unmatched": []
+    },
+    "qa001_hourly_null_count": {
+      "rule": "swatch 'chưa đo được' đếm TRẠM ở giờ đang xem (bất biến viz/occ.ts) và câu chia bậc gọi đúng tên tập chia bậc",
+      "at_t0": {
+        "hollow": [
+          "(35 trạm)"
+        ],
+        "classing": [
+          "Đơn vị và cách chia bậc ▸",
+          "Tỉ lệ cổng đang bận của từng trạm tại một ô giờ của tuần (7 thứ × 24 giờ). Kéo scrubber ở đáy để đổi giờ. Trạm chưa quan sát đủ ở giờ đó vẽ CHẤM RỖNG, không tô bậc nhạt — “chưa biết” không được đọc thành “vắng khách”.",
+          "35/710 trạm không có giá trị: chúng vẽ vân chéo xám, không tô bậc nhạt. Vắng số ≠ bằng 0."
+        ]
+      },
+      "at_t100": {
+        "hollow": [
+          "(71 trạm)"
+        ],
+        "classing": [
+          "Đơn vị và cách chia bậc ▸",
+          "Tỉ lệ cổng đang bận của từng trạm tại một ô giờ của tuần (7 thứ × 24 giờ). Kéo scrubber ở đáy để đổi giờ. Trạm chưa quan sát đủ ở giờ đó vẽ CHẤM RỖNG, không tô bậc nhạt — “chưa biết” không được đọc thành “vắng khách”.",
+          "71/710 trạm không có giá trị: chúng vẽ vân chéo xám, không tô bậc nhạt. Vắng số ≠ bằng 0."
+        ]
+      },
+      "changes_with_t": true,
+      "classing_names_station_hours": true,
+      "classing_note_text": "7 bậc · bậc đầu là 0 riêng (17.483 trạm-giờ) · còn lại chia đều theo số trạm-giờ",
+      "note": "Câu chia bậc nằm trong khối <details> \"Đơn vị và cách chia bậc\" — mở ra mới đọc được (w6-classing-note.png). Badge phủ tuần 690/710 trạm đứng cạnh mà KHÔNG lẫn với số theo giờ (35 → 71): đúng hai câu hỏi khác nhau của viz/occ.ts."
+    },
+    "tc10_hatch_distinctness": {
+      "rule": "vân hợp thành vs ô gradient NHẠT NHẤT được vẽ, sàn ΔE §4b = 6 (đo lại ở chế độ gradient — nợ tc12 của 2.1)",
+      "station": "Tòa HPC Landmark 105",
+      "n_hatch": 1,
+      "n_painted": 167,
+      "hatch_composited": [
+        235.5,
+        235.5,
+        232.8
+      ],
+      "lightest_painted": [
+        213.6,
+        160.7,
+        221.8
+      ],
+      "dE": 19.45,
+      "threshold": 6,
+      "pass": true,
+      "dark_theme": "KHÔNG ÁP DỤNG: index.css không có prefers-color-scheme và không có biến thể tối cho mặt panel. Ba style NỀN BẢN ĐỒ (voyager/positron/dark) chỉ đổi bản đồ, không đổi mặt cột đọc nơi heatmap sống."
+    },
+    "tc11_story_witness": {
+      "rule": "cảnh ghim sc=binned; heatmap trong cảnh nhận scale=null nên không ô nào mang màu giá trị (đường C1 không chạm tới cảnh)",
+      "scenes": [
+        {
+          "scene": "nhip-tuan",
+          "file": "w5-story-nhip-tuan.png",
+          "hash": "#s=nhip-tuan&m=2d",
+          "hasHeatmap": true,
+          "heatmapPainted": false,
+          "pinnedBinned": true,
+          "textLen": 10747
+        },
+        {
+          "scene": "cung-lech",
+          "file": "w5-story-cung-lech.png",
+          "hash": "#s=cung-lech&m=2d&c=commune:00292",
+          "hasHeatmap": true,
+          "heatmapPainted": false,
+          "pinnedBinned": true,
+          "textLen": 12442
+        },
+        {
+          "scene": "di-vong",
+          "file": "w5-story-di-vong.png",
+          "hash": "#s=di-vong&m=2d",
+          "hasHeatmap": true,
+          "heatmapPainted": false,
+          "pinnedBinned": true,
+          "textLen": 13369
+        }
+      ],
+      "heatmap_never_painted_in_story": true,
+      "all_pinned_binned": true
+    },
+    "qa006_theme_follows_representation": {
+      "rule": "QA 4.1-006: mực biểu đồ của lens Cầu đi theo representation ĐANG BẬT (themeOfLens(lens, demandRepresentation)), không ghim \"hex\"",
+      "hex_representation": {
+        "theme": "exploration",
+        "bar_fill": "#b74817"
+      },
+      "density_representation": {
+        "theme": "demand",
+        "bar_fill": "#e5521c"
+      },
+      "changes_with_representation": true,
+      "files": [
+        "w7-demand-hex.png",
+        "w7-demand-density.png"
+      ]
+    },
+    "c2_lens_ink_sweep": {
+      "rule": "§C2 blast radius: mỗi lens phải sơn đúng anchor series của theme lens ấy, lấy từ registry",
+      "lenses": {
+        "demand": {
+          "theme": "exploration",
+          "expected_series": "#b74817",
+          "hits_in_read_column": 25,
+          "pass": true
+        },
+        "supply": {
+          "theme": "supply",
+          "expected_series": "#1f8376",
+          "hits_in_read_column": 6,
+          "pass": true
+        },
+        "access": {
+          "theme": "accessibility",
+          "expected_series": "#2e63b8",
+          "hits_in_read_column": 3,
+          "pass": true
+        },
+        "utilization": {
+          "theme": "utilization",
+          "expected_series": "#9c45ab",
+          "hits_in_read_column": 138,
+          "pass": true
+        },
+        "opportunity": {
+          "theme": "screening",
+          "expected_series": "#c77a07",
+          "hits_in_read_column": 10,
+          "pass": true
+        }
+      },
+      "all_pass": true,
+      "note": "Chú ý khi đọc lại: screening là HỔ PHÁCH #c77a07, không phải xanh lá — #33903c là urban-context. Lần quét đầu dùng bảng kỳ vọng sai và báo opportunity 0 hit; lỗi nằm ở phép đo, không ở mã."
+    }
+  },
+  "files": [
+    "w1-utilization-gradient.png",
+    "w2-utilization-binned.png",
+    "w3-legend-hour-0.png",
+    "w3-legend-hour-100.png",
+    "w4-station-panel-hatch-gradient.png",
+    "w5-story-cung-lech.png",
+    "w5-story-di-vong.png",
+    "w5-story-nhip-tuan.png",
+    "w6-classing-note.png",
+    "w7-demand-density.png",
+    "w7-demand-hex.png",
+    "w8-lens-access.png",
+    "w8-lens-demand.png",
+    "w8-lens-opportunity.png",
+    "w8-lens-supply.png",
+    "w8-lens-utilization.png"
+  ]
+}

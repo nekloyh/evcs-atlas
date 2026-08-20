@@ -10,12 +10,12 @@ import * as React from "react";
 import { useState, useRef } from "react";
 import type { AnalysisFilter } from "../state/filter";
 import { DEFAULT_DATASET_ID } from "../state/selection";
-import { HAIRLINE_HEX, INK_MUTED_HEX, RAMP_HEX, mutedCss } from "../viz/palette";
+import { HAIRLINE_HEX, INK_MUTED_HEX, mutedCss, seriesColorForTheme } from "../viz/palette";
+import type { AnalysisTheme } from "../viz/theme";
 import { CHART_W } from "./chart-size";
 import type { DemandHistogramModel, PopulationBin } from "../viz/chart-models";
 import { Readout } from "./Readout";
 
-const SERIES = RAMP_HEX[4];
 const MUTED_CSS = mutedCss();
 
 const W = CHART_W;
@@ -31,11 +31,15 @@ function formatPop(v: number): string {
 
 export function PopulationHistogram({
   model,
+  theme,
   onFilterIntent,
 }: {
   model: DemandHistogramModel;
+  /** Mực chuỗi = anchor `series` của theme lens đang mở (CR 4.1 §C2). */
+  theme: AnalysisTheme;
   onFilterIntent?: (filter: AnalysisFilter | null) => void;
 }) {
+  const SERIES = seriesColorForTheme(theme);
   const [hoverBin, setHoverBin] = useState<PopulationBin | null>(null);
   const [dragStartIdx, setDragStartIdx] = useState<number | null>(null);
   const [dragCurrentIdx, setDragCurrentIdx] = useState<number | null>(null);

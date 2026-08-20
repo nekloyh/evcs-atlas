@@ -8,6 +8,7 @@ import { PowerTierBreakdown } from "../ui/PowerTierBreakdown";
 import { RoutePairs } from "../ui/RoutePairs";
 import { StructureSweep } from "../ui/StructureSweep";
 import { SupplyLorenz } from "../ui/SupplyLorenz";
+import { themeOfLens } from "../viz/theme";
 import { LorenzChart } from "./LorenzChart";
 import { Figure, Para, Pending, SoWhat, Stat } from "./parts";
 import { ASSUMPTIONS, resolveMetric, type ResolveContext } from "./resolve";
@@ -115,6 +116,13 @@ export function renderClaim(tpl: ClaimTemplate, ctx: ResolveContext, key: string
 // ── Hình dùng chung ─────────────────────────────────────────────────────────
 
 /**
+ * Cảnh không có bộ chọn representation — người đọc không đổi được cách đọc giữa chừng — nên
+ * theme của khe hình neo vào cách đọc mặc định. Vẫn đi qua `themeOfLens`, tức vẫn là registry
+ * trả lời "lens này mực gì", không phải cảnh tự gõ tên bảng màu (CR 4.1 §C2/§F).
+ */
+const STORY_REPRESENTATION = "hex" as const;
+
+/**
  * Một khe hình → chính component mà workspace dùng, nhận chính model object ấy.
  *
  * Không component nào ở đây do `story/` sở hữu; cảnh mượn, không rẽ nhánh. Model chưa dựng
@@ -126,7 +134,7 @@ function FigureSlot({ id, ctx }: { id: SharedFigureId; ctx: ResolveContext }) {
   switch (id) {
     case "lorenz-area-pop": {
       const l = models["lorenz-area-pop"]?.["curve"];
-      return l ? <LorenzChart data={l as never} /> : null;
+      return l ? <LorenzChart data={l as never} theme={themeOfLens("demand", STORY_REPRESENTATION)} /> : null;
     }
     case "structure-sweep": {
       const m = models["spatial-structure"];
@@ -134,7 +142,7 @@ function FigureSlot({ id, ctx }: { id: SharedFigureId; ctx: ResolveContext }) {
     }
     case "supply-lorenz": {
       const eq = models["supply-equity"]?.["equity"];
-      return eq ? <SupplyLorenz data={eq as never} /> : null;
+      return eq ? <SupplyLorenz data={eq as never} theme={themeOfLens("supply", STORY_REPRESENTATION)} /> : null;
     }
     case "route-pairs": {
       const routes = ctx.pkg.routes;
@@ -142,11 +150,11 @@ function FigureSlot({ id, ctx }: { id: SharedFigureId; ctx: ResolveContext }) {
     }
     case "access-curve": {
       const curve = models["access-curve"]?.["curve"];
-      return curve ? <AccessCurve model={curve as never} /> : null;
+      return curve ? <AccessCurve model={curve as never} theme={themeOfLens("access", STORY_REPRESENTATION)} /> : null;
     }
     case "opportunity-rank": {
       const m = models["opportunity-rank"]?.["model"];
-      return m ? <OpportunityCommuneRankBars model={m as never} /> : null;
+      return m ? <OpportunityCommuneRankBars model={m as never} theme={themeOfLens("opportunity", STORY_REPRESENTATION)} /> : null;
     }
     case "utilization-week": {
       const m = models["utilization-week"];
@@ -154,12 +162,17 @@ function FigureSlot({ id, ctx }: { id: SharedFigureId; ctx: ResolveContext }) {
       const heat = m["model"] as { cells: never[] } | undefined;
       const t = m["peakT"];
       return heat && heat.cells.length > 0 ? (
-        <Heatmap168 cells={heat.cells} scale={null} t={typeof t === "number" ? t : 0} />
+        <Heatmap168
+          cells={heat.cells}
+          scale={null}
+          theme={themeOfLens("utilization", STORY_REPRESENTATION)}
+          t={typeof t === "number" ? t : 0}
+        />
       ) : null;
     }
     case "power-tier": {
       const m = models["power-tier"]?.["model"];
-      return m ? <PowerTierBreakdown model={m as never} /> : null;
+      return m ? <PowerTierBreakdown model={m as never} theme={themeOfLens("supply", STORY_REPRESENTATION)} /> : null;
     }
   }
 }

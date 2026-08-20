@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import * as Plot from "@observablehq/plot";
 
-import { RAMP_HEX, HAIRLINE_HEX, BASEMAP_HEX, INK_2_HEX, INK_MUTED_HEX } from "../viz/palette";
+import { HAIRLINE_HEX, BASEMAP_HEX, INK_2_HEX, INK_MUTED_HEX, getThemePalette, seriesColorForTheme } from "../viz/palette";
+import type { AnalysisTheme } from "../viz/theme";
 import { Readout } from "../ui/Readout";
 import { areaShareForPop, popShareForArea, thin, type Lorenz } from "../viz/lorenz";
 
@@ -20,10 +21,6 @@ import { areaShareForPop, popShareForArea, thin, type Lorenz } from "../viz/lore
  *   · trục · nhãn · số — mực §4e. Chữ không bao giờ mang màu dữ liệu.
  */
 
-/** `c5` — chuỗi dữ liệu. */
-const SERIES = RAMP_HEX[4];
-/** `c7` — điểm được gọi tên. Nhấn bằng độ đậm trong cùng ramp (§4d-2). */
-const CALLOUT = RAMP_HEX[6];
 const INK_2 = INK_2_HEX;
 
 /** Ngưỡng được gọi tên trên đường cong: "bao nhiêu phần diện tích thì đủ chứa một nửa Hà Nội". */
@@ -44,7 +41,19 @@ const asPct = (d: number) => `${Math.round(d * 100)}%`;
 /** Lề của khung vẽ. Readout đổi pixel ↔ tỉ lệ diện tích bằng CHÍNH hai số này. */
 const MARGIN = { left: 52, right: 18 };
 
-export function LorenzChart({ data, width = 356 }: { data: Lorenz; width?: number }) {
+export function LorenzChart({
+  data,
+  theme,
+  width = 356,
+}: {
+  data: Lorenz;
+  theme: AnalysisTheme;
+  width?: number;
+}) {
+  /** `c5` — chuỗi dữ liệu. */
+  const SERIES = seriesColorForTheme(theme);
+  /** `c7` — điểm được gọi tên. Nhấn bằng độ đậm trong cùng ramp (§4d-2). */
+  const CALLOUT = getThemePalette(theme).hex[6];
   const host = useRef<HTMLDivElement>(null);
   const [areaAt, setAreaAt] = useState<number | null>(null);
 
@@ -123,7 +132,7 @@ export function LorenzChart({ data, width = 356 }: { data: Lorenz; width?: numbe
 
     el.append(chart);
     return () => chart.remove();
-  }, [data, width]);
+  }, [data, width, SERIES, CALLOUT]);
 
   const p = areaAt === null ? null : popShareForArea(data, areaAt);
 

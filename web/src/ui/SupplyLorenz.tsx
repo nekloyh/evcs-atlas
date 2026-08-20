@@ -15,12 +15,11 @@ import * as Plot from "@observablehq/plot";
 
 import { areaShareForPop, popShareForArea, thin } from "../viz/lorenz";
 import type { SupplyEquity } from "../viz/equity";
-import { BASEMAP_HEX, HAIRLINE_HEX, INK_2_HEX, INK_MUTED_HEX, RAMP_HEX } from "../viz/palette";
+import { BASEMAP_HEX, HAIRLINE_HEX, INK_2_HEX, INK_MUTED_HEX, getThemePalette, seriesColorForTheme } from "../viz/palette";
+import type { AnalysisTheme } from "../viz/theme";
 import { Readout } from "./Readout";
 import { CHART_W } from "./chart-size";
 
-const SERIES = RAMP_HEX[4];
-const CALLOUT = RAMP_HEX[6];
 const INK_2 = INK_2_HEX;
 
 /** Mốc được gọi tên: "bao nhiêu phần dân thì nắm một nửa số cổng của thành phố". */
@@ -32,7 +31,9 @@ const M = { left: 34, right: 12, top: 8, bottom: 26 };
 
 const asPct = (d: number) => `${Math.round(d * 100)}%`;
 
-export function SupplyLorenz({ data }: { data: SupplyEquity }) {
+export function SupplyLorenz({ data, theme }: { data: SupplyEquity; theme: AnalysisTheme }) {
+  const SERIES = seriesColorForTheme(theme);
+  const CALLOUT = getThemePalette(theme).hex[6];
   const host = useRef<HTMLDivElement>(null);
   const [atPx, setAtPx] = useState<number | null>(null);
   const { l } = data;
@@ -90,7 +91,7 @@ export function SupplyLorenz({ data }: { data: SupplyEquity }) {
     });
     el.append(chart);
     return () => chart.remove();
-  }, [l]);
+  }, [l, SERIES, CALLOUT]);
 
   const inner = W - M.left - M.right;
   const aAt = atPx === null || inner <= 0 ? null : (atPx - M.left) / inner;
