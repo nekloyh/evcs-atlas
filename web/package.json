@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:pages": "tsc -b && vite build --base=/evcs-atlas/",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "test": "node --import ./test/resolve-ts.mjs --test test/*.test.ts"
