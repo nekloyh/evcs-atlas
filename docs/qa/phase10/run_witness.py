@@ -2,6 +2,7 @@
 
     uv run python docs/qa/phase10/run_witness.py            # tự chạy `vite` ở :5174
     EVCS_APP=http://localhost:5173/ uv run python docs/qa/phase10/run_witness.py
+    EVCS_APP=https://example.test/ EVCS_WITNESS_OUT=/tmp/witness uv run python docs/qa/phase10/run_witness.py
 
 Tự dựng server chứ không đòi một `pnpm dev` có sẵn (khác witness Phase 9): 10-QA-003 đòi
 bằng chứng TÁI LẬP ĐƯỢC sau một lần checkout sạch, và "nhớ mở server ở cửa sổ khác" là
@@ -30,6 +31,7 @@ import time
 import urllib.error
 import urllib.request
 from pathlib import Path
+from urllib.parse import urlparse
 
 try:
     from websockets.sync.client import connect
@@ -42,11 +44,13 @@ except ModuleNotFoundError:
         os.execv(str(project_python), [str(project_python), __file__, *sys.argv[1:]])
     raise
 
-OUT = Path(__file__).parent
+OUT = Path(os.environ.get("EVCS_WITNESS_OUT", Path(__file__).parent))
+OUT.mkdir(parents=True, exist_ok=True)
 PORT = 9330
 VITE_PORT = 5174
 APP = os.environ.get("EVCS_APP", f"http://127.0.0.1:{VITE_PORT}/")
 WEB = Path(__file__).parents[3] / "web"
+LIVE_SITE = urlparse(APP).hostname not in {"127.0.0.1", "localhost", "::1"}
 
 # Năm bề rộng của §10.6. 760 và 900 là dải một cột; 1024 là mút dưới của hai cột.
 WIDTHS = [760, 900, 1024, 1280, 1600]
@@ -224,7 +228,9 @@ def at1b_boot_fallback(cdp: Cdp) -> dict:
     Đây là ca mà `AppErrorBoundary` KHÔNG với tới được (chưa có cây React nào để bọc), nên
     nó là phép kiểm riêng của nhánh `boot().catch` — thứ phải vẽ bằng DOM trần.
     """
-    cdp.call("Network.setBlockedURLs", {"urls": ["*/src/App.tsx*"]})
+    blocked = "*/assets/App-*.js*" if LIVE_SITE else "*/src/App.tsx*"
+    cdp.call("Network.setCacheDisabled", {"cacheDisabled": True})
+    cdp.call("Network.setBlockedURLs", {"urls": [blocked]})
     goto(cdp, "#tinh=01")
     try:
         cdp.wait_for("document.querySelector('#root [role=alert]') !== null", timeout=25)
@@ -235,7 +241,8 @@ def at1b_boot_fallback(cdp: Cdp) -> dict:
         text = cdp.evaluate("document.getElementById('root').textContent")
     finally:
         cdp.call("Network.setBlockedURLs", {"urls": []})
-    return {"fallback_shown": ok, "text": (text or "").strip()[:200]}
+        cdp.call("Network.setCacheDisabled", {"cacheDisabled": False})
+    return {"fallback_shown": ok, "blocked": blocked, "text": (text or "").strip()[:200]}
 
 
 def at2_filter_coherence(cdp: Cdp) -> dict:
@@ -597,12 +604,27 @@ def main():
             "browser": cdp.call("Browser.getVersion").get("product"),
             "viewport": "1600x1000",
             "gpu": "swiftshader (headless) — số FPS KHÔNG lấy từ lần chạy này; xem baseline.md",
-            "at10_1_error_boundary": at1_error_boundary(cdp),
+            "mode": "live-site" if LIVE_SITE else "local-release",
+            "at10_1_error_boundary": (
+                {
+                    "skipped": True,
+                    "reason": "cần Vite source module + witness-probe; production không ship test hook",
+                }
+                if LIVE_SITE
+                else at1_error_boundary(cdp)
+            ),
             "at10_1b_boot_fallback": at1b_boot_fallback(cdp),
             "at10_2_filter_coherence": at2_filter_coherence(cdp),
             "at10_3_keyboard_sort": at3_keyboard_sort(cdp),
             "at10_6_scrubber_keys": at6_scrubber_keys(cdp),
-            "at10_4_reduced_motion": at4_reduced_motion(cdp),
+            "at10_4_reduced_motion": (
+                {
+                    "skipped": True,
+                    "reason": "cần witness-probe để tap Map prototype; đã đo trong local release",
+                }
+                if LIVE_SITE
+                else at4_reduced_motion(cdp)
+            ),
             "at10_9_focus_restore": at9_focus_restore(cdp),
             "at10_10_responsive": at10_responsive(cdp),
         }
@@ -612,9 +634,10 @@ def main():
         print(json.dumps(report, ensure_ascii=False, indent=2))
 
         a1 = report["at10_1_error_boundary"]
-        assert a1["derived_state_ok"] and a1["rendered_alert"] and a1["message_carries_cause"], (
-            "AT10-1"
-        )
+        if not a1.get("skipped"):
+            assert a1["derived_state_ok"] and a1["rendered_alert"] and a1["message_carries_cause"], (
+                "AT10-1"
+            )
         assert report["at10_1b_boot_fallback"]["fallback_shown"], "AT10-1b"
         a2 = report["at10_2_filter_coherence"]
         assert a2["no_stale_number_while_pending"] and a2["export_locked_while_pending"], "AT10-2"
@@ -624,9 +647,9 @@ def main():
         assert a2["export_open_when_settled"], "AT10-2 (mở lại sau khi settle)"
         assert report["at10_3_keyboard_sort"]["ok"], "AT10-3"
         assert report["at10_6_scrubber_keys"]["ok"], "AT10-6"
-        assert report["at10_4_reduced_motion"]["ok"], (
-            "AT10-4 (nhánh reduce vẫn quay vòng animation)"
-        )
+        a4 = report["at10_4_reduced_motion"]
+        if not a4.get("skipped"):
+            assert a4["ok"], "AT10-4 (nhánh reduce vẫn quay vòng animation)"
         assert report["at10_9_focus_restore"]["ok"], "AT10-9"
         for key, measured in report["at10_10_responsive"].items():
             assert measured["no_overflow"], f"AT10-10 tràn ngang ở {key}: {measured['offenders']}"
@@ -635,7 +658,8 @@ def main():
                     f"AT10-10 {key}: dưới 1024 px bản đồ phải phủ hết bề ngang, "
                     f"đo được {measured['map_width']}/{measured['viewport']} px"
                 )
-        print("\nPHASE 10 WITNESS: PASS")
+        label = "LIVE WITNESS" if LIVE_SITE else "WITNESS"
+        print(f"\nPHASE 10 {label}: PASS")
     finally:
         for child in (proc, vite):
             if child is None:
