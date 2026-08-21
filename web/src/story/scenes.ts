@@ -45,10 +45,12 @@ export const SCENES: readonly SceneSpec[] = [
     lens: "demand",
     claim: {
       parts: [
-        "Người ở Hà Nội dồn lại chứ không trải đều: ",
+        "Người ở ",
+        { provinceName: true },
+        " dồn lại chứ không trải đều: ",
         { slot: { src: "model", model: "lorenz-area-pop", select: "areaForHalfPop" }, fmt: "percent1" },
-        " diện tích thành phố chứa một nửa dân số. Và số “vùng dày” tách rời nhau là ",
-        { em: "thuộc tính của lát cắt ta chọn, không phải của thành phố" },
+        " diện tích chứa một nửa dân số. Và số “vùng dày” tách rời nhau là ",
+        { em: "thuộc tính của lát cắt ta chọn, không phải của địa bàn" },
         " — ",
         { slot: { src: "model", model: "spatial-structure", select: "steps.0.nComponents" }, fmt: "count" },
         " vùng ở phân vị ",
@@ -82,7 +84,9 @@ export const SCENES: readonly SceneSpec[] = [
               parts: [
                 "là tất cả những gì cần để chứa ",
                 { em: "một nửa" },
-                " dân số Hà Nội. ",
+                " dân số ",
+                { provinceName: true },
+                ". ",
                 { slot: { src: "model", model: "lorenz-area-pop", select: "restOfArea" }, fmt: "percent1" },
                 " diện tích còn lại chứa nửa kia.",
               ],
@@ -118,7 +122,7 @@ export const SCENES: readonly SceneSpec[] = [
               parts: [
                 "Đường cong trên là ",
                 { em: "Lorenz" },
-                ": ô lưới xếp theo mật độ giảm dần, rồi cộng dồn cả diện tích lẫn dân số. Đường thẳng nhạt là hình dạng mà một Hà Nội trải đều sẽ có. Khoảng cách giữa hai đường chính là sự dồn lại.",
+                ": ô lưới xếp theo mật độ giảm dần, rồi cộng dồn cả diện tích lẫn dân số. Đường thẳng nhạt là hình dạng mà một địa bàn trải đều sẽ có. Khoảng cách giữa hai đường chính là sự dồn lại.",
               ],
             },
           },
@@ -127,8 +131,8 @@ export const SCENES: readonly SceneSpec[] = [
             text: {
               parts: [
                 "Diện tích ở đây là phần ",
-                { em: "nằm trong ranh giới Hà Nội" },
-                " (area_km2 × area_frac), không phải diện tích hình học của ô. Dân số của ô biên chỉ tính phần trong thành phố, nên mẫu số phải khớp — nếu không, ô biên được gán một phần diện tích mà dân của nó không ở trong đó, và đường cong sẽ nói Hà Nội trải đều hơn thực tế.",
+                { em: "nằm trong ranh giới tỉnh/thành" },
+                " (area_km2 × area_frac), không phải diện tích hình học của ô. Dân số của ô biên chỉ tính phần trong ranh giới, nên mẫu số phải khớp — nếu không, ô biên được gán một phần diện tích mà dân của nó không ở trong đó, và đường cong sẽ nói địa bàn trải đều hơn thực tế.",
               ],
             },
           },
@@ -163,7 +167,7 @@ export const SCENES: readonly SceneSpec[] = [
                 { slot: { src: "model", model: "spatial-structure", select: "steps.0.q" }, fmt: "quantile" },
                 " — nhưng chỉ ",
                 { slot: { src: "model", model: "spatial-structure", select: "steps.0.nComponentsGe3" }, fmt: "count" },
-                " vùng có từ ba ô trở lên. Vùng lớn nhất một mình chiếm ",
+                " vùng đủ lớn để không còn là một đốm. Vùng lớn nhất một mình chiếm ",
                 { slot: { src: "model", model: "spatial-structure", select: "steps.0.largestComponentCells" }, fmt: "count" },
                 " trong ",
                 { slot: { src: "model", model: "spatial-structure", select: "steps.0.nCells" }, fmt: "count" },
@@ -197,7 +201,8 @@ export const SCENES: readonly SceneSpec[] = [
             id: "density-quantiles",
             note: {
               parts: [
-                "Bốn lát cắt này do ta chọn. Chính việc đổi lát cắt là luận điểm — nếu chỉ in một lát cắt thì con số vùng sẽ trông như một sự thật về thành phố.",
+                { slot: { src: "model", model: "spatial-structure", select: "steps.length" }, fmt: "count" },
+                " lát cắt này do ta chọn. Chính việc đổi lát cắt là luận điểm — nếu chỉ in một lát cắt thì con số vùng sẽ trông như một sự thật về địa bàn.",
               ],
             },
           },
@@ -234,7 +239,7 @@ export const SCENES: readonly SceneSpec[] = [
                 { em: "cùng một trường" },
                 " vừa cho ",
                 { slot: { src: "model", model: "spatial-structure", select: "steps.0.nComponents" }, fmt: "count" },
-                " vùng. Số vùng không nằm trong thành phố; nó nằm trong ngưỡng.",
+                " vùng. Số vùng không nằm trong địa bàn; nó nằm trong ngưỡng.",
               ],
             },
           },
@@ -373,7 +378,7 @@ export const SCENES: readonly SceneSpec[] = [
               parts: [
                 "Hai con số trên là số của ",
                 { em: "LỚP XÃ" },
-                " (commune.geojson), không phải tổng các ô lưới trong xã. Hai đơn vị đọc ấy lệch nhau đáng kể ở một phần tư số xã, nên trộn chúng trong một câu là dựng một sự thật thứ ba không tồn tại. Cảnh về bán kính phục vụ đọc theo đơn vị Ô, và nó nói ra điều đó ở ngay chỗ ấy.",
+                " (commune.geojson), không phải tổng các ô lưới trong xã. Hai đơn vị đọc ấy có thể lệch nhau đáng kể ở cùng một xã, nên trộn chúng trong một câu là dựng một sự thật thứ ba không tồn tại. Cảnh về bán kính phục vụ đọc theo đơn vị Ô, và nó nói ra điều đó ở ngay chỗ ấy.",
               ],
             },
           },
@@ -483,7 +488,9 @@ export const SCENES: readonly SceneSpec[] = [
         { slot: { src: "model", model: "detour", select: "falsePositive" }, fmt: "count" },
         " ô là đã phủ mà mạng đường nói là chưa, và ",
         { slot: { src: "model", model: "detour", select: "nCells" }, fmt: "count" },
-        " ô có đường đi thật dài hơn hai lần đường thẳng.",
+        " ô có đường đi thật dài hơn ",
+        { slot: { src: "assumption", id: "detour-threshold" }, fmt: "multiple" },
+        " đường thẳng.",
       ],
     },
     camera: { kind: "fit-marks", mark: "bridges" },
@@ -542,14 +549,18 @@ export const SCENES: readonly SceneSpec[] = [
             id: "major-bridge-min",
             note: {
               parts: [
-                "Bộ dữ liệu KHÔNG có cờ “qua sông Hồng”, nên bộ lọc này chọn theo ",
+                "Bộ dữ liệu KHÔNG có cờ “bắc qua sông nào”, nên bộ lọc này chọn theo ",
                 { em: "chiều dài" },
-                " và câu chữ phải nói đúng thứ nó chọn. Đoạn dài nhất trong gói nằm ở phía tây và không bắc qua sông Hồng nào.",
+                " và câu chữ phải nói đúng thứ nó chọn: một đoạn được kẻ đậm vì nó dài, không vì nó bắc qua một con sông cụ thể.",
               ],
             },
           },
+          // Hai đoạn dưới là VĂN BIÊN TẬP về Hà Nội (sông Hồng và sáu cây cầu) — Phase 7
+          // §1.8 khoanh đúng chúng vào `editorialProvince: "01"`. 33 gói còn lại vẫn thấy
+          // toàn bộ cơ chế (màu chảy theo mạng đường, số cầu, số đoạn) qua các khối trên.
           {
             kind: "para",
+            editorialProvince: "01",
             text: {
               parts: [
                 "Nhìn màu ",
@@ -560,9 +571,10 @@ export const SCENES: readonly SceneSpec[] = [
           },
           {
             kind: "para",
+            editorialProvince: "01",
             text: {
               parts: [
-                "Sáu cây cầu chính qua sông Hồng trong phạm vi này là Thăng Long · Nhật Tân · Long Biên · Chương Dương · Vĩnh Tuy · Thanh Trì. Tên là ",
+                "Các cây cầu chính qua sông Hồng trong phạm vi này là Thăng Long · Nhật Tân · Long Biên · Chương Dương · Vĩnh Tuy · Thanh Trì. Tên là ",
                 { em: "chữ biên tập, không đến từ dữ liệu" },
                 ": bản trích OSM không mang cột name. Vì thế chúng nằm ở đây dưới dạng câu chứ không dán làm nhãn trên bản đồ — dán nhãn là khẳng định một toạ độ mà ta không neo được.",
               ],
@@ -672,7 +684,7 @@ export const SCENES: readonly SceneSpec[] = [
         { slot: { src: "model", model: "access-curve", select: "beyond" }, fmt: "count" },
         " người — ",
         { slot: { src: "model", model: "access-curve", select: "shareBeyond" }, fmt: "percent1" },
-        " thành phố — bắt đầu chuyến đi cách trạm công cộng gần nhất hơn bán kính phục vụ, tính ",
+        " dân trên địa bàn — bắt đầu chuyến đi cách trạm công cộng gần nhất hơn bán kính phục vụ, tính ",
         { em: "theo đường thật" },
         ". Khoảng trống ấy không thuộc về một xã nào: xã nặng nhất chỉ chiếm ",
         { slot: { src: "model", model: "opportunity-rank", select: "topShareOfGap" }, fmt: "percent1" },
@@ -709,7 +721,7 @@ export const SCENES: readonly SceneSpec[] = [
               parts: [
                 "ở ngoài bán kính phục vụ, tức ",
                 { slot: { src: "model", model: "access-curve", select: "shareBeyond" }, fmt: "percent1" },
-                " thành phố.",
+                " dân trên địa bàn.",
               ],
             },
           },
@@ -795,7 +807,7 @@ export const SCENES: readonly SceneSpec[] = [
               parts: [
                 "Số theo xã ở đây là ",
                 { em: "ô lưới gộp về xã của chúng" },
-                ", không phải dân số công bố của lớp xã. Hai đơn vị đọc lệch nhau đáng kể ở một phần tư số xã — nên một xã có thể xuất hiện ở cảnh “cung lệch” với một con số và ở đây với một con số khác, và cả hai đều đúng trong đơn vị của mình.",
+                ", không phải dân số công bố của lớp xã. Hai đơn vị đọc có thể lệch nhau đáng kể ở cùng một xã — nên một xã có thể xuất hiện ở cảnh “cung lệch” với một con số và ở đây với một con số khác, và cả hai đều đúng trong đơn vị của mình.",
               ],
             },
           },
@@ -813,9 +825,16 @@ export const SCENES: readonly SceneSpec[] = [
             kind: "so-what",
             text: {
               parts: [
-                "Gần ba trong mười người bắt đầu chuyến đi ngoài bán kính phục vụ. Bán kính là của ta; thứ dữ liệu nói là khoảng trống ấy ",
+                { slot: { src: "model", model: "access-curve", select: "shareBeyond" }, fmt: "percent1" },
+                " dân bắt đầu chuyến đi ngoài bán kính phục vụ. Bán kính là của ta; thứ dữ liệu nói là khoảng trống ấy ",
                 { em: "không có chủ" },
-                " — xã nặng nhất giữ chưa tới một phần ba mươi, mười xã nặng nhất giữ chưa tới một phần tư. Đây là một bài toán phân bố, và công cụ cho nó là một tấm bản đồ chứ không phải một danh sách rút gọn.",
+                " — xã nặng nhất giữ ",
+                { slot: { src: "model", model: "opportunity-rank", select: "topShareOfGap" }, fmt: "percent1" },
+                ", ",
+                { slot: { src: "model", model: "opportunity-rank", select: "topN" }, fmt: "count" },
+                " xã nặng nhất cộng lại giữ ",
+                { slot: { src: "model", model: "opportunity-rank", select: "top10ShareOfGap" }, fmt: "percent1" },
+                " của nó. Đây là một bài toán phân bố, và công cụ cho nó là một tấm bản đồ chứ không phải một danh sách rút gọn.",
               ],
             },
           },
@@ -951,7 +970,7 @@ export const SCENES: readonly SceneSpec[] = [
             kind: "so-what",
             text: {
               parts: [
-                "Sạc không phải một phụ tải phẳng. Đó là hình dạng mà một mô hình đặt trạm phải phục vụ: công suất kê theo giờ vắng thì thành hàng chờ lúc đỉnh, kê theo đỉnh thì là sắt thép nằm không gần cả tuần. Hai cảnh báo nằm đè lên trên. Thứ nhất, chữ “đo được” ở đây mang hai nghĩa khác nhau và ta in cả hai chứ không chọn cái đẹp hơn. Thứ hai, lớn hơn: gần như toàn bộ trạm trong phạm vi thuộc về một công ty, nên mọi thứ ở trên mô tả mạng lưới của một hãng, không mô tả một thị trường.",
+                "Sạc không phải một phụ tải phẳng. Đó là hình dạng mà một mô hình đặt trạm phải phục vụ. Suy đoán vận hành — bộ dữ liệu này không đo hàng chờ hay lượt sạc bị từ chối: công suất kê theo giờ vắng có thể thiếu lúc đỉnh, kê theo đỉnh có thể nằm không gần cả tuần; dữ liệu ở đây chỉ đo hình dạng đường cong, không đo hai hệ quả ấy. Các cảnh báo nằm đè lên trên. Trước hết, chữ “đo được” ở đây mang hai nghĩa khác nhau và ta in cả hai chứ không chọn cái đẹp hơn. Quan trọng hơn: gần như toàn bộ trạm trong phạm vi thuộc về một công ty, nên mọi thứ ở trên mô tả mạng lưới của một hãng, không mô tả một thị trường.",
               ],
             },
           },
@@ -1002,7 +1021,7 @@ export const SCENES: readonly SceneSpec[] = [
                 { slot: { src: "manifest", path: "totals.private_ac_dropped.share_ports" }, fmt: "percent1" },
                 " số súng và ",
                 { slot: { src: "manifest", path: "totals.private_ac_dropped.share_power" }, fmt: "percent1" },
-                " công suất. Đúng hình dạng ta chờ đợi nếu phần bị loại phần lớn là ổ cắm treo tường.",
+                " công suất. Hình dạng này khớp với — nhưng không chứng minh — cách đọc rằng phần bị loại phần lớn là ổ cắm treo tường.",
               ],
             },
           },
@@ -1012,7 +1031,7 @@ export const SCENES: readonly SceneSpec[] = [
               parts: [
                 "Luật viết ra là: ",
                 { em: "một súng duy nhất VÀ súng đó là AC" },
-                " ⇒ đây là ổ cắm cá nhân, không phải hạ tầng công cộng, nên nó ra khỏi bộ dữ liệu. Luật cắt trên ",
+                " ⇒ luật coi đó là ổ cắm cá nhân, không phải hạ tầng công cộng — một cách phân loại ta chọn, không phải một thuộc tính đã kiểm chứng — nên nó ra khỏi bộ dữ liệu. Luật cắt trên ",
                 { em: "cặp" },
                 " (một súng ",
                 { em: "và" },
@@ -1110,11 +1129,11 @@ export const SCENES: readonly SceneSpec[] = [
     id: "chua-biet",
     scaleMode: "binned",
     kicker: "CẢNH KẾT",
-    title: "Ba điều ta không biết",
+    title: "Những điều ta không biết",
     lens: "supply",
     claim: {
       parts: [
-        "Ba giới hạn, mỗi cái một con số: cầu là ",
+        "Mỗi giới hạn mang một con số: cầu là ",
         { em: "suy ra, không phải quan sát" },
         " (mức sử dụng thật chỉ có ở ",
         { slot: { src: "manifest", path: "coverage.util_cell.cell_share" }, fmt: "percent1" },
@@ -1160,7 +1179,7 @@ export const SCENES: readonly SceneSpec[] = [
               parts: [
                 "Telemetry chỉ tồn tại ở nơi đã có trạm — mà chỗ ",
                 { em: "chưa" },
-                " có trạm mới là chỗ bài toán hỏi. Nên “cầu” trong ba luận điểm đầu là dân số và điểm quan tâm: một biến thay thế, không phải lượt sạc đã xảy ra.",
+                " có trạm mới là chỗ bài toán hỏi. Nên “cầu” trong các luận điểm đầu là dân số và điểm quan tâm: một biến thay thế, không phải lượt sạc đã xảy ra.",
               ],
             },
           },
@@ -1215,7 +1234,7 @@ export const SCENES: readonly SceneSpec[] = [
             kind: "so-what",
             text: {
               parts: [
-                "Ba giới hạn này không làm các luận điểm trước sai — chúng nói các luận điểm ấy đủ cho ",
+                "Các giới hạn này không làm các luận điểm trước sai — chúng nói các luận điểm ấy đủ cho ",
                 { em: "việc gì" },
                 ". Đủ để chọn dạng mô hình và thước đo khoảng cách. Chưa đủ để nói một điểm cụ thể là điểm nên xây.",
               ],

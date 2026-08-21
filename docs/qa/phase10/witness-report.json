@@ -116,34 +116,115 @@
     "label": "Không gian bản đồ chính"
   },
   "at10_10_responsive": {
-    "760": {
+    "map-760": {
       "viewport": 760,
       "scrollWidth": 760,
       "offenders": [],
-      "no_overflow": true
+      "map_width": 760,
+      "no_overflow": true,
+      "one_column": true
     },
-    "900": {
+    "map-900": {
       "viewport": 900,
       "scrollWidth": 900,
       "offenders": [],
-      "no_overflow": true
+      "map_width": 900,
+      "no_overflow": true,
+      "one_column": true
     },
-    "1024": {
+    "map-1024": {
       "viewport": 1024,
       "scrollWidth": 1024,
       "offenders": [],
+      "map_width": 648,
       "no_overflow": true
     },
-    "1280": {
+    "map-1280": {
       "viewport": 1280,
       "scrollWidth": 1280,
       "offenders": [],
+      "map_width": 904,
       "no_overflow": true
     },
-    "1600": {
+    "map-1600": {
       "viewport": 1600,
       "scrollWidth": 1600,
       "offenders": [],
+      "map_width": 1204,
+      "no_overflow": true
+    },
+    "story-760": {
+      "viewport": 760,
+      "scrollWidth": 760,
+      "offenders": [],
+      "map_width": 760,
+      "no_overflow": true,
+      "one_column": true
+    },
+    "story-900": {
+      "viewport": 900,
+      "scrollWidth": 900,
+      "offenders": [],
+      "map_width": 900,
+      "no_overflow": true,
+      "one_column": true
+    },
+    "story-1024": {
+      "viewport": 1024,
+      "scrollWidth": 1024,
+      "offenders": [],
+      "map_width": 568,
+      "no_overflow": true
+    },
+    "story-1280": {
+      "viewport": 1280,
+      "scrollWidth": 1280,
+      "offenders": [],
+      "map_width": 824,
+      "no_overflow": true
+    },
+    "story-1600": {
+      "viewport": 1600,
+      "scrollWidth": 1600,
+      "offenders": [],
+      "map_width": 1144,
+      "no_overflow": true
+    },
+    "national-760": {
+      "viewport": 760,
+      "scrollWidth": 760,
+      "offenders": [],
+      "map_width": 760,
+      "no_overflow": true,
+      "one_column": true
+    },
+    "national-900": {
+      "viewport": 900,
+      "scrollWidth": 900,
+      "offenders": [],
+      "map_width": 900,
+      "no_overflow": true,
+      "one_column": true
+    },
+    "national-1024": {
+      "viewport": 1024,
+      "scrollWidth": 1024,
+      "offenders": [],
+      "map_width": 736,
+      "no_overflow": true
+    },
+    "national-1280": {
+      "viewport": 1280,
+      "scrollWidth": 1280,
+      "offenders": [],
+      "map_width": 992,
+      "no_overflow": true
+    },
+    "national-1600": {
+      "viewport": 1600,
+      "scrollWidth": 1600,
+      "offenders": [],
+      "map_width": 1312,
       "no_overflow": true
     }
   }

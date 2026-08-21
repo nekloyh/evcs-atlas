@@ -118,7 +118,7 @@ export const ASSUMPTIONS: Record<AssumptionId, Assumption> = {
     id: "major-bridge-min",
     value: MAJOR_BRIDGE_MIN_M,
     fmt: "meters",
-    what: "cầu dài bao nhiêu thì kẻ đậm — dữ liệu KHÔNG có cờ “qua sông Hồng”",
+    what: "cầu dài bao nhiêu thì kẻ đậm — dữ liệu KHÔNG có cờ “bắc qua sông nào”",
   },
   "euclid-coverage-radius": {
     id: "euclid-coverage-radius",

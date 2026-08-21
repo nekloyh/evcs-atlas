@@ -109,9 +109,11 @@ test("von-cuc: SỐ VÙNG là thuộc tính của lát cắt — 4 lát cắt, 4
     }
   }
   // Chính con số này là luận điểm, nên nó có một assert riêng chứ không nấp trong vòng lặp.
+  // 92 → 97 ở lát cắt p90 sau khi `pop_density_ppkm2` sửa mẫu số về area_km2 × area_frac
+  // (Final QA blocker 1): ô biên hết bị loãng nên ngưỡng phân vị và cấu trúc vùng đổi theo.
   assert.deepEqual(
     steps.map((s) => s.nComponents),
-    [92, 31, 9, 1],
+    [97, 31, 9, 1],
   );
   near(m("spatial-structure", "moranI"), (E["spatialStructure"] as never as { moranI: number }).moranI, "moranI");
 });

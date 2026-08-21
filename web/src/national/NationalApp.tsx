@@ -26,6 +26,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { useIsDesktop } from "../components/atlas/use-desktop";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../components/ui/sheet";
+
 import { parseNationalHash, serializeNationalHash, type NationalMode } from "./hash";
 import { can3D, elevationButtonNote, elevationDisclosure } from "./elevation";
 import { RES_BASE, resolutionForZoom } from "./lod";
@@ -262,93 +265,12 @@ export default function NationalApp() {
   const activeRow = activeCode ? rows[activeCode] : null;
   const activeMetric = activeRow ? provinceMetric(activeRow, field) : null;
 
-  return (
-    <div className="flex h-full flex-col bg-panel text-ink">
-      <nav className="flex h-11 shrink-0 items-center gap-6 border-b border-hairline px-4 text-heading">
-        <span className="font-semibold tracking-[0.14em]">EVCS TOÀN QUỐC</span>
-        <span className="text-body text-ink-muted">
-          {manifest && grid
-            ? `${manifest.n_provinces} tỉnh · ${grid.n_cells.toLocaleString("vi-VN")} ô gộp r${shownRes}`
-            : "đang nạp…"}
-          {loadingRes !== null && (
-            <span className="ml-2 text-ink-muted">· đang nạp lưới mịn r{loadingRes}…</span>
-          )}
-        </span>
-        {/* Cùng một bộ chọn với hai màn hình kia. Bản cũ ở đây là một `<select>` riêng
-            nhãn "MỞ MỘT TỈNH", và nó thiếu đúng hai đường: về Hà Nội và sang POI. */}
-        <div className="ml-auto">
-          <DatasetPicker readProxyCount={false} />
-        </div>
-        <div className="flex items-center gap-2 tracking-[0.1em]">
-          <ViewButton label="2D" on={mode === "2d"} ready go={() => setMode("2d")} />
-          <span className="text-ink-muted/50">|</span>
-          <ViewButton
-            label="3D"
-            on={mode === "3d"}
-            ready={can3d}
-            // Câu này là NỘI DUNG, không phải trang trí: một nút mờ không tự nói vì sao nó
-            // mờ thì đọc thành "hỏng". Xem quyết định 1 ở `elevation.ts`.
-            note={
-              can3d
-                ? elevationButtonNote(field.scaleContract)
-                : "34 khối tỉnh là biểu đồ cột méo theo phối cảnh, không phải bản đồ — chọn một trường của Ô GỘP để bật 3D"
-            }
-            go={() => setMode("3d")}
-          />
-        </div>
-      </nav>
+  // Màn hẹp: rail thành sheet, cần một cờ mở — cùng khuôn `readColumnOpen` của bậc tỉnh.
+  const isDesktop = useIsDesktop();
+  const [railOpen, setRailOpen] = useState(false);
 
-      <Legend field={field} scale={scale} grid={grid} mode={can3d ? mode : "2d"} notComparableCount={notComparableCount} missingCount={missingCount} />
-
-      <div className="flex min-h-0 flex-1">
-        <main className="relative min-w-0 flex-1">
-          <NationalMap
-            view={view}
-            onView={setView}
-            field={field}
-            scale={scale}
-            cells={cells}
-            provinces={provinces}
-            rows={rows}
-            stations={stations}
-            poi={poi}
-            showStations={wantStations}
-            showPoi={poiGroupsOn}
-            mode={can3d ? mode : "2d"}
-            res={shownRes}
-            hovered={hovered}
-            selected={selected}
-            provinceStates={provinceStates}
-            onHoverProvince={setHovered}
-            onPickProvince={pickProvince}
-          />
-          {error && (
-            <div className="absolute inset-x-0 top-0 border-b border-hairline bg-panel px-4 py-2 text-heading">
-              Không nạp được dữ liệu: {error}
-            </div>
-          )}
-          {/* Bảng đọc của tỉnh đang rê chuột. Đặt TRÊN bản đồ chứ không trong rail: nó đổi
-              theo con trỏ, và mắt không rời khỏi chỗ đang chỉ để đọc một ô ở mép màn hình. */}
-          {activeRow && activeMetric && (
-            <div className="absolute bottom-3 left-3 max-w-sm border border-hairline bg-panel/95 px-3 py-2 text-body">
-              <div className="text-title font-semibold">{activeRow.province_name}</div>
-              <div className="mt-1 tabular-nums">
-                {activeMetric.state === "value"
-                  ? `${field.label}: ${formatValue(field, activeMetric.value)} ${field.unit_label}`
-                  : activeMetric.state === "not-comparable"
-                    ? `KHÔNG SO SÁNH ĐƯỢC · ${activeMetric.reason}`
-                    : `${field.label}: không đo được`}
-              </div>
-              {selected && activeRow.in_store && (
-                <button className="mt-2 border border-hairline px-2 py-1 font-semibold hover:bg-basemap" onClick={() => switchDataset(selected)}>
-                  Mở bản đồ tỉnh →
-                </button>
-              )}
-            </div>
-          )}
-        </main>
-
-        <aside className="w-72 shrink-0 overflow-y-auto border-l border-hairline text-body">
+  const railContent = (
+    <>
           <Group title="CHỈ SỐ ĐÃ CHUẨN HOÁ">
             {NORMALIZED_PROVINCE_FIELDS.map((f) => (
               <FieldRow key={f.id} f={f} on={f.id === fieldId} pick={setFieldId} />
@@ -443,7 +365,126 @@ export default function NationalApp() {
               một vị trí.
             </div>
           </Group>
-        </aside>
+    </>
+  );
+
+  return (
+    <div className="flex h-full flex-col bg-panel text-ink">
+      <nav className="flex h-11 shrink-0 items-center gap-6 border-b border-hairline px-4 text-heading">
+        <span className="font-semibold tracking-[0.14em]">EVCS TOÀN QUỐC</span>
+        <span className="text-body text-ink-muted">
+          {manifest && grid
+            ? `${manifest.n_provinces} tỉnh · ${grid.n_cells.toLocaleString("vi-VN")} ô gộp r${shownRes}`
+            : "đang nạp…"}
+          {loadingRes !== null && (
+            <span className="ml-2 text-ink-muted">· đang nạp lưới mịn r{loadingRes}…</span>
+          )}
+        </span>
+        {/* Cùng một bộ chọn với hai màn hình kia. Bản cũ ở đây là một `<select>` riêng
+            nhãn "MỞ MỘT TỈNH", và nó thiếu đúng hai đường: về Hà Nội và sang POI. */}
+        <div className="ml-auto">
+          <DatasetPicker readProxyCount={false} />
+        </div>
+        {!isDesktop && (
+          <button
+            type="button"
+            aria-expanded={railOpen}
+            aria-label="Mở rail chỉ số và lớp chồng"
+            onClick={() => setRailOpen(true)}
+            className="cursor-pointer border border-hairline px-2 py-1 text-body font-semibold hover:bg-basemap"
+          >
+            Chỉ số
+          </button>
+        )}
+        <div className="flex items-center gap-2 tracking-[0.1em]">
+          <ViewButton label="2D" on={mode === "2d"} ready go={() => setMode("2d")} />
+          <span className="text-ink-muted/50">|</span>
+          <ViewButton
+            label="3D"
+            on={mode === "3d"}
+            ready={can3d}
+            // Câu này là NỘI DUNG, không phải trang trí: một nút mờ không tự nói vì sao nó
+            // mờ thì đọc thành "hỏng". Xem quyết định 1 ở `elevation.ts`.
+            note={
+              can3d
+                ? elevationButtonNote(field.scaleContract)
+                : "34 khối tỉnh là biểu đồ cột méo theo phối cảnh, không phải bản đồ — chọn một trường của Ô GỘP để bật 3D"
+            }
+            go={() => setMode("3d")}
+          />
+        </div>
+      </nav>
+
+      <Legend field={field} scale={scale} grid={grid} mode={can3d ? mode : "2d"} notComparableCount={notComparableCount} missingCount={missingCount} />
+
+      <div className="flex min-h-0 flex-1">
+        <main className="relative min-w-0 flex-1">
+          <NationalMap
+            view={view}
+            onView={setView}
+            field={field}
+            scale={scale}
+            cells={cells}
+            provinces={provinces}
+            rows={rows}
+            stations={stations}
+            poi={poi}
+            showStations={wantStations}
+            showPoi={poiGroupsOn}
+            mode={can3d ? mode : "2d"}
+            res={shownRes}
+            hovered={hovered}
+            selected={selected}
+            provinceStates={provinceStates}
+            onHoverProvince={setHovered}
+            onPickProvince={pickProvince}
+          />
+          {error && (
+            <div className="absolute inset-x-0 top-0 border-b border-hairline bg-panel px-4 py-2 text-heading">
+              Không nạp được dữ liệu: {error}
+            </div>
+          )}
+          {/* Bảng đọc của tỉnh đang rê chuột. Đặt TRÊN bản đồ chứ không trong rail: nó đổi
+              theo con trỏ, và mắt không rời khỏi chỗ đang chỉ để đọc một ô ở mép màn hình. */}
+          {activeRow && activeMetric && (
+            <div className="absolute bottom-3 left-3 max-w-sm border border-hairline bg-panel/95 px-3 py-2 text-body">
+              <div className="text-title font-semibold">{activeRow.province_name}</div>
+              <div className="mt-1 tabular-nums">
+                {activeMetric.state === "value"
+                  ? `${field.label}: ${formatValue(field, activeMetric.value)} ${field.unit_label}`
+                  : activeMetric.state === "not-comparable"
+                    ? `KHÔNG SO SÁNH ĐƯỢC · ${activeMetric.reason}`
+                    : `${field.label}: không đo được`}
+              </div>
+              {selected && activeRow.in_store && (
+                <button className="mt-2 border border-hairline px-2 py-1 font-semibold hover:bg-basemap" onClick={() => switchDataset(selected)}>
+                  Mở bản đồ tỉnh →
+                </button>
+              )}
+            </div>
+          )}
+        </main>
+
+        {/* Rail chỉ số: TRONG LUỒNG từ 1024 px; dưới đó nó là SHEET phải — DESIGN.md §3
+            (màn hẹp là MỘT cột, bản đồ toàn màn) và AT10-10. Bản cũ giữ 288 px inline ở
+            mọi bề rộng, đo được bản đồ chỉ còn 472 px ở màn 760 px. */}
+        {isDesktop ? (
+          <aside className="w-72 shrink-0 overflow-y-auto border-l border-hairline text-body">
+            {railContent}
+          </aside>
+        ) : (
+          <Sheet open={railOpen} onOpenChange={setRailOpen}>
+            <SheetContent
+              side="right"
+              className="flex h-full w-full flex-col overflow-y-auto border-l border-hairline bg-panel p-0 text-body text-ink sm:w-[320px]"
+            >
+              <SheetHeader className="sr-only">
+                <SheetTitle>Chỉ số và lớp chồng toàn quốc</SheetTitle>
+              </SheetHeader>
+              {railContent}
+            </SheetContent>
+          </Sheet>
+        )}
       </div>
     </div>
   );

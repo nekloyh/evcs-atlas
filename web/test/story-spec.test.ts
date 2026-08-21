@@ -113,6 +113,149 @@ test("KHÔNG chuỗi hiển thị nào trong `src/story/**` mang chữ số (ti�
   assert.deepEqual(offenders, [], "câu chữ mang chữ số phải là một KHE, không phải literal");
 });
 
+// ══ Tiêu chí 1b — số VIẾT BẰNG CHỮ cũng là số ═══════════════════════════════
+
+/** Mọi CHUỖI hiển thị của một cảnh: phần câu, chữ nhấn, nhãn nhịp, đơn vị, tiêu đề. */
+function* displayStringsOf(s: SceneSpec): Generator<[where: string, text: string]> {
+  yield [s.id, s.title];
+  yield [s.id, s.kicker];
+  for (const c of claimsOf(s)) {
+    for (const p of c.parts) {
+      if (typeof p === "string") yield [s.id, p];
+      else if ("em" in p) yield [s.id, p.em];
+      else if ("slot" in p && p.unit) yield [s.id, p.unit];
+    }
+  }
+  for (const b of s.beats) {
+    yield [`${s.id}/${b.id}`, b.label];
+    for (const blk of b.blocks) {
+      if (blk.kind === "heading") yield [`${s.id}/${b.id}`, blk.text];
+      if ("unit" in blk && blk.unit) yield [`${s.id}/${b.id}`, blk.unit];
+      if (blk.kind === "subject-card") {
+        for (const r of blk.rows) yield [`${s.id}/${b.id}`, r.unit];
+      }
+    }
+  }
+}
+
+test("số viết BẰNG CHỮ trong câu cũng là literal — bản QA bắt được “một phần tư” sống sót qua test chữ số", () => {
+  // "gần ba trong mười", "một phần ba mươi", "một phần tư" đều là SỐ ĐO gõ tay: dữ liệu
+  // thật cho dải 18,2%–83,0% (dân ngoài 2 km) và 1,4%–6,7% (xã nặng nhất) giữa 34 gói,
+  // nên câu chữ đó sai ở phần lớn tỉnh. "một nửa"/"10%" thì KHÔNG bị cấm: chúng là ĐIỂM
+  // ĐỌC đã đăng ký của mô hình (POP_READ_SHARE/AREA_READ_SHARE) và đi kèm khe của chính nó.
+  const banned =
+    /(một|hai|ba|bốn|năm|sáu|bảy|tám|chín|mười)\s+(phần\s+(hai|ba|tư|bốn|năm|sáu|bảy|tám|chín|mười|trăm|nghìn)|trong\s+(mười|trăm|nghìn))|\b(hai|ba|bốn|năm|sáu|bảy|tám|chín|mười)\s+(lần|lát cắt|ô|giới hạn|cây cầu|luận điểm|cảnh báo)\b|\bchữ số\b/iu;
+  const offenders: string[] = [];
+  for (const s of SCENES) {
+    for (const [where, text] of displayStringsOf(s)) {
+      const m = text.match(banned);
+      if (m) offenders.push(`${where}: “…${m[0]}…”`);
+    }
+  }
+  assert.deepEqual(offenders, [], "một đại lượng phân tích phải là một KHE, kể cả khi viết bằng chữ");
+});
+
+// ══ Tiêu chí 1c — địa danh chỉ sống trong khối đã GATE đúng tỉnh ═════════════
+
+test("văn khả chuyển KHÔNG gọi tên Hà Nội / sông Hồng / cầu — trừ khối para đã gate `editorialProvince`", () => {
+  const places = /Hà Nội|[Ss]ông Hồng|Thăng Long|Nhật Tân|Long Biên|Chương Dương|Vĩnh Tuy|Thanh Trì/u;
+  const offenders: string[] = [];
+  const scan = (where: string, tpl: ClaimTemplate) => {
+    for (const p of tpl.parts) {
+      const text = typeof p === "string" ? p : "em" in p ? p.em : "";
+      if (places.test(text)) offenders.push(`${where}: “${text.slice(0, 60)}…”`);
+    }
+  };
+  for (const s of SCENES) {
+    scan(s.id, s.claim);
+    for (const b of s.beats) {
+      if (b.filter) scan(`${s.id}/${b.id}`, b.filter.label);
+      for (const blk of b.blocks) {
+        if (blk.kind === "para") {
+          if (blk.editorialProvince) continue; // văn biên tập, chỉ render trên đúng tỉnh ấy
+          scan(`${s.id}/${b.id}`, blk.text);
+        }
+        if (blk.kind === "figure") scan(`${s.id}/${b.id}`, blk.caption);
+        if (blk.kind === "stat" || blk.kind === "rule-output") scan(`${s.id}/${b.id}`, blk.label);
+        if (blk.kind === "so-what") scan(`${s.id}/${b.id}`, blk.text);
+        if (blk.kind === "assumption") scan(`${s.id}/${b.id}`, blk.note);
+        if (blk.kind === "subject-card") scan(`${s.id}/${b.id}`, blk.why);
+      }
+    }
+  }
+  // Chú thích của giả định cũng đi ra màn hình, trên MỌI tỉnh dùng ngưỡng ấy.
+  for (const [id, a] of Object.entries(ASSUMPTIONS)) {
+    if (places.test(a.what)) offenders.push(`assumption ${id}: “${a.what}”`);
+  }
+  assert.deepEqual(offenders, []);
+});
+
+test("khối gate tỉnh chỉ là VĂN BIÊN TẬP của di-vong, và gate về đúng “01”", () => {
+  for (const s of SCENES) {
+    for (const b of s.beats) {
+      for (const blk of b.blocks) {
+        if (blk.kind === "para" && blk.editorialProvince) {
+          assert.equal(s.id, "di-vong", `${s.id}: gate tỉnh ngoài cảnh cầu`);
+          assert.equal(blk.editorialProvince, "01");
+        }
+      }
+    }
+  }
+});
+
+test("câu nhân quả vận hành phải tự nhận là suy đoán, không được quay lại khẳng định", () => {
+  const proseOf = (sceneId: string) => {
+    const scene = SCENES.find((s) => s.id === sceneId)!;
+    return [...claimsOf(scene)]
+      .flatMap((claim) => claim.parts)
+      .map((part) => (typeof part === "string" ? part : "em" in part ? part.em : ""))
+      .join(" ");
+  };
+
+  const utilization = proseOf("nhip-tuan");
+  assert.match(utilization, /Suy đoán vận hành/);
+  assert.match(utilization, /không đo hàng chờ hay lượt sạc bị từ chối/);
+  assert.doesNotMatch(
+    utilization,
+    /kê theo giờ vắng thì thành hàng chờ|sắt thép nằm không/,
+    "không được biến một cách đọc hợp lý thành hệ quả đã chứng minh",
+  );
+
+  const exclusion = proseOf("mot-quyet-dinh");
+  assert.match(exclusion, /khớp với — nhưng không chứng minh/);
+  assert.match(exclusion, /ổ cắm treo tường/);
+  assert.doesNotMatch(
+    exclusion,
+    /Đúng hình dạng ta chờ đợi|⇒ đây là ổ cắm cá nhân/,
+    "rule phân loại không được trình bày như thuộc tính đã quan sát",
+  );
+});
+
+// ══ Tiêu chí 1d — cảnh khả chuyển dựng được trên CẢ 34 manifest THẬT ═════════
+
+test("mọi manifest tỉnh đã xuất: tập cảnh dựng được do NĂNG LỰC quyết, không do mã tỉnh", () => {
+  const pDir = new URL("../public/data/p/", import.meta.url).pathname;
+  let provinces: string[] = [];
+  try {
+    provinces = readdirSync(pDir).filter((d) => /^\d{2}$/.test(d));
+  } catch {
+    provinces = [];
+  }
+  if (provinces.length === 0) return; // chưa xuất store — cổng này chạy ở máy có dữ liệu
+  for (const code of provinces) {
+    const m = JSON.parse(readFileSync(`${pDir}${code}/manifest.json`, "utf8")) as Manifest;
+    const here = SCENES.filter((s) => sceneRenderable(s, m)).map((s) => s.id);
+    // Đổi mã tỉnh trên CÙNG manifest không được đổi tập cảnh — cùng luật tiêu chí 15,
+    // nhưng đo trên 34 manifest thật thay vì một manifest bịa.
+    const swapped = {
+      ...m,
+      province: { ...(m as { province?: object }).province, province_code: "99" },
+    } as Manifest;
+    const there = SCENES.filter((s) => sceneRenderable(s, swapped)).map((s) => s.id);
+    assert.deepEqual(here, there, `${code}: tập cảnh đổi theo mã tỉnh`);
+  }
+});
+
 // ══ Tiêu chí 2 — mọi khe phân giải, hoặc câu của nó bị GIỮ LẠI ═══════════════
 
 test("mọi `MetricRef` trỏ vào một mô hình / khoá manifest / giả định đã KHAI (tiêu chí 2)", () => {
@@ -197,7 +340,8 @@ test("mọi cảnh KHAI `requires`, và cảnh trượt điều kiện thì VẮ
 
 test("cổng năng lực KHÔNG phải một phép so mã tỉnh (tiêu chí 15)", () => {
   // Cảnh duy nhất được phép ghim tỉnh là cảnh có VĂN gọi tên một nơi. Hôm nay không cảnh
-  // nào ghim, vì văn về sông Hồng nằm trong một NHỊP chứ không trong điều kiện của cảnh.
+  // nào ghim Ở TẦNG CẢNH: văn về sông Hồng gate ở tầng KHỐI (`para.editorialProvince`),
+  // nên cảnh vẫn khả chuyển và chỉ đoạn biên tập biến mất ở 33 tỉnh còn lại.
   assert.deepEqual(SCENES.filter((s) => s.requires.editorialProvince).map((s) => s.id), []);
 
   // Và đổi MÃ TỈNH trên cùng một manifest KHÔNG được đổi tập cảnh dựng được: năng lực

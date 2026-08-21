@@ -8,6 +8,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { latLngToCell, cellToLatLng, gridDisk } from "h3-js";
 
 import {
@@ -27,6 +28,7 @@ import { checkAdmission, resolveCommuneKind } from "../src/simulation/admissions
 import { runSimulation, isEligibleStation } from "../src/simulation/engine";
 import { validateCalibration } from "../src/simulation/loader";
 import { parseHash, serializeHash } from "../src/state/hash";
+import { SIM_TAG_LABEL, SIM_TAG_SHORT } from "../src/simulation/types";
 import type { SimCalibration } from "../src/simulation/types";
 
 // Load sample Hanoi calibration fixture
@@ -309,15 +311,20 @@ test("Aggregates: headline after only substitutes dAfter in IMPROVES cells", () 
   assert.equal(med, 800);
 });
 
-test("Aggregates: no nearby population does not crash weighted median (F5)", () => {
+test("Aggregates: toàn trọng số 0 ⇒ trung vị theo dân là NULL, không rơi về trung vị không trọng số (QA-5)", () => {
+  // Bản cũ rơi về trung vị KHÔNG trọng số (2000) rồi trình bày như "trung vị theo dân" —
+  // một con số không phải đại lượng ghi trên nhãn. Không có mẫu số thì câu trả lời là null.
   const items = [
     { value: 1000, weight: 0 },
     { value: 2000, weight: 0 },
     { value: 3000, weight: 0 },
   ];
-  const med = calculateWeightedMedian(items);
-  // Falls back to unweighted median of values: 2000
-  assert.equal(med, 2000);
+  assert.equal(calculateWeightedMedian(items), null);
+});
+
+test("Aggregates: đầu vào RỖNG ⇒ null, không phải 0 m (QA-5)", () => {
+  // 0 m đọc thành "trạm ngay cạnh mọi người" — một kết quả phân tích bịa từ một vùng rỗng.
+  assert.equal(calculateWeightedMedian([]), null);
 });
 
 test("Aggregates: calculateDistanceBands buckets correctly", () => {
@@ -466,8 +473,8 @@ test("Engine: runSimulation calculates deterministic output for candidate placem
 
   assert.equal(result.candidate.cell, cell);
   assert.ok(result.cells.length > 0);
-  assert.ok(result.before.popWeightedMedianM > 0);
-  assert.ok(result.after.popWeightedMedianM > 0);
+  assert.ok(result.before.popWeightedMedianM !== null && result.before.popWeightedMedianM > 0);
+  assert.ok(result.after.popWeightedMedianM !== null && result.after.popWeightedMedianM > 0);
   assert.ok(result.after.popWeightedMedianM <= result.before.popWeightedMedianM);
   assert.equal(result.context.stationsWithin5km.length, 1);
   assert.equal(result.context.stationsWithin5km[0]!.code, "HN_001");
@@ -581,6 +588,7 @@ test("T11 property: d_after <= d_old mọi ô, After <= Before ở mọi số t�
       assert.equal(c.dAfter, null);
     }
   }
+  assert.ok(result.before.popWeightedMedianM !== null && result.after.popWeightedMedianM !== null);
   assert.ok(result.after.popWeightedMedianM <= result.before.popWeightedMedianM);
   // After chỉ dịch dân về gần: dải <= 1 km không bao giờ giảm, dải > 5 km không bao giờ tăng
   assert.ok(result.after.popByBand.le1km >= result.before.popByBand.le1km);
@@ -760,4 +768,129 @@ test("§1.8: meta mang số kiểm chứng của tỉnh để popover nội suy 
   });
   assert.deepEqual(r.meta.validation, { n: 4310, within20pct: 0.659, upperMiss: 0.097 });
   assert.equal(r.meta.zoneTruncated, false);
+});
+
+// ── 10. Vá QA phát hành — xuất xứ, thuộc tính trạm thiếu, trung vị không mẫu số ─────────
+
+test("QA-3: xuất xứ nằm TRONG kiểu kết quả — Trước TÍNH TOÁN, Sau ƯỚC LƯỢNG, sàng lọc RULE", () => {
+  const { candidate, centerCell, cells } = syntheticInputs(11);
+  const r = runSimulation({
+    candidate,
+    candidateCell: centerCell,
+    communeKind: "XA",
+    gridCells: cells,
+    stations: [],
+    occupancyMap: new Map(),
+    calibration: HANOI_CALIBRATION,
+  });
+  // Hợp đồng Phase 6 §1.8: "Trước" gộp từ cột CÔNG BỐ (một đại lượng tính toán) — nhãn
+  // [ĐO ĐẠC] cũ là sai tư cách. Nhãn màn hình khớp NGUYÊN VĂN qua bảng cạnh kiểu.
+  assert.equal(r.before.tag, "CALCULATED");
+  assert.equal(r.after.tag, "ESTIMATED");
+  assert.equal(r.screening.tag, "RULE");
+  assert.equal(SIM_TAG_LABEL[r.before.tag], "TÍNH TOÁN");
+  assert.equal(SIM_TAG_LABEL[r.after.tag], "ƯỚC LƯỢNG");
+  assert.equal(SIM_TAG_LABEL[r.screening.tag], "RULE");
+  assert.equal(SIM_TAG_SHORT[r.before.tag], "Tính");
+  assert.equal(SIM_TAG_SHORT[r.after.tag], "Ước");
+});
+
+test("QA-3 mutation: component chỉ render provenance qua tag của kết quả", () => {
+  // Test engine ở trên không thấy JSX: nếu component bị đổi ngược về `[ĐO ĐẠC]` hoặc một
+  // badge ƯỚC LƯỢNG viết tay, kiểu kết quả vẫn đúng và test ấy vẫn xanh. Cổng cấu trúc này
+  // khóa đúng đường cuối từ result → DOM; Chrome witness kiểm phần render thật.
+  const src = readFileSync(
+    new URL("../src/ui/SimulationPanel.tsx", import.meta.url),
+    "utf8",
+  )
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/(^|[^:])\/\/.*$/gm, "$1");
+  assert.doesNotMatch(src, /ĐO ĐẠC/, "nhãn cũ không được sống trong component");
+  assert.doesNotMatch(
+    src,
+    />\s*ƯỚC LƯỢNG\s*</,
+    "badge provenance không được viết tay trong JSX",
+  );
+  assert.match(src, /SIM_TAG_LABEL\[before\.tag\]/);
+  assert.match(src, /SIM_TAG_LABEL\[after\.tag\]/);
+  assert.match(src, /SIM_TAG_LABEL\[screening\.tag\]/);
+  assert.match(src, /SIM_TAG_SHORT\[after\.tag\]/);
+});
+
+test("QA-4: trạm thiếu n_ports/power_kw_site GIỮ null trong context — không bịa '0 cổng · 0 kW'", () => {
+  const loc = { lat: 21.0285, lng: 105.8542 };
+  const cell = latLngToCell(loc.lat, loc.lng, 8);
+  const r = runSimulation({
+    candidate: loc,
+    candidateCell: cell,
+    communeKind: "PHUONG",
+    gridCells: [
+      {
+        h3_r8: cell,
+        lat: loc.lat,
+        lng: loc.lng,
+        population: 100,
+        dist_station_network_m: 900,
+        detour_ratio: 1.4,
+        evidence_grade_distance: "GOOD",
+      },
+    ],
+    stations: [
+      {
+        station_code: "S_NULL",
+        name: "Trạm thiếu thuộc tính",
+        lat: loc.lat + 0.001,
+        lng: loc.lng + 0.001,
+        op_status: "OPERATIONAL",
+        access: "PUBLIC",
+        n_ports: null,
+        power_kw_site: null,
+      },
+      {
+        station_code: "S_FULL",
+        name: "Trạm đủ thuộc tính",
+        lat: loc.lat + 0.002,
+        lng: loc.lng + 0.002,
+        op_status: "OPERATIONAL",
+        access: "PUBLIC",
+        n_ports: 6,
+        power_kw_site: 180,
+      },
+    ],
+    occupancyMap: new Map(),
+    calibration: HANOI_CALIBRATION,
+  });
+  const byCode = new Map(r.context.stationsWithin5km.map((s) => [s.code, s]));
+  assert.equal(byCode.get("S_NULL")!.nPorts, null);
+  assert.equal(byCode.get("S_NULL")!.powerKw, null);
+  assert.equal(byCode.get("S_FULL")!.nPorts, 6);
+  assert.equal(byCode.get("S_FULL")!.powerKw, 180);
+});
+
+test("QA-5 end-to-end: vùng toàn ô 0 dân ⇒ trung vị theo dân của Trước/Sau đều null", () => {
+  const loc = { lat: 21.0285, lng: 105.8542 };
+  const cell = latLngToCell(loc.lat, loc.lng, 8);
+  const cells = gridDisk(cell, 2).map((h) => {
+    const [lat, lng] = cellToLatLng(h);
+    return {
+      h3_r8: h,
+      lat,
+      lng,
+      population: 0,
+      dist_station_network_m: 1500,
+      detour_ratio: 1.5,
+      evidence_grade_distance: "GOOD",
+    };
+  });
+  const r = runSimulation({
+    candidate: loc,
+    candidateCell: cell,
+    communeKind: "XA",
+    gridCells: cells,
+    stations: [],
+    occupancyMap: new Map(),
+    calibration: HANOI_CALIBRATION,
+  });
+  assert.equal(r.before.popWeightedMedianM, null);
+  assert.equal(r.after.popWeightedMedianM, null);
 });

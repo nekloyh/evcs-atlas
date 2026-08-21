@@ -8,6 +8,7 @@
  */
 
 import React, { useState } from "react";
+import { SIM_TAG_LABEL, SIM_TAG_SHORT } from "../simulation/types";
 import type { SimCellResult, SimulationResult } from "../simulation/types";
 
 export interface SimulationPanelProps {
@@ -97,7 +98,12 @@ export function SimulationPanel({
 
   const { candidate, screening, before, after, cells, context, meta } = result;
 
-  const deltaMedM = after.popWeightedMedianM - before.popWeightedMedianM;
+  // Trung vị theo dân là `null` khi vùng không có trọng số dân dương — khi đó delta cũng
+  // không tồn tại, và ô THAY ĐỔI phải nói "không tính được" chứ không phải "Không đổi".
+  const deltaMedM =
+    after.popWeightedMedianM !== null && before.popWeightedMedianM !== null
+      ? after.popWeightedMedianM - before.popWeightedMedianM
+      : null;
 
   // §3.2.4 — mini-list Ô ẢNH HƯỞNG: 5 ô TỆ NHẤT theo cự ly TRƯỚC (không phải "giảm nhiều
   // nhất" — câu chuyện của tính năng là vùng đang thiếu, không phải con số đẹp).
@@ -141,7 +147,7 @@ export function SimulationPanel({
             Sàng lọc L6
           </span>
           <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700 text-slate-300 font-mono">
-            RULE
+            {SIM_TAG_LABEL[screening.tag]}
           </span>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
@@ -208,42 +214,55 @@ export function SimulationPanel({
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="p-2 bg-slate-900/80 rounded border border-slate-700/50">
             <div className="text-[10px] text-slate-400 uppercase font-mono">
-              TRƯỚC <span className="text-cyan-400">[ĐO ĐẠC]</span>
+              TRƯỚC <span className="text-cyan-400">[{SIM_TAG_LABEL[before.tag]}]</span>
             </div>
             <div className="text-base font-semibold text-slate-200 mt-1">
-              {fmtDist(before.popWeightedMedianM)}
+              {before.popWeightedMedianM !== null ? fmtDist(before.popWeightedMedianM) : "—"}
             </div>
           </div>
 
           <div className="p-2 bg-slate-900/80 rounded border border-slate-700/50">
             <div className="text-[10px] text-slate-400 uppercase font-mono">
-              SAU <span className="text-amber-400">[ƯỚC LƯỢNG]</span>
+              SAU <span className="text-amber-400">[{SIM_TAG_LABEL[after.tag]}]</span>
             </div>
             <div className="text-base font-semibold text-amber-300 mt-1">
-              ~{fmtDist(after.popWeightedMedianM)}
+              {after.popWeightedMedianM !== null ? `~${fmtDist(after.popWeightedMedianM)}` : "—"}
             </div>
           </div>
 
           <div className="p-2 bg-slate-900/80 rounded border border-slate-700/50">
-            <div className="text-[10px] text-slate-400 uppercase font-mono">THAY ĐỔI</div>
+            <div className="text-[10px] text-slate-400 uppercase font-mono">
+              THAY ĐỔI <span className="text-amber-400">[{SIM_TAG_LABEL[after.tag]}]</span>
+            </div>
             <div
               className={`text-base font-semibold mt-1 ${
-                deltaMedM < 0 ? "text-emerald-400" : "text-slate-400"
+                deltaMedM !== null && deltaMedM < 0 ? "text-emerald-400" : "text-slate-400"
               }`}
             >
-              {deltaMedM < 0 ? `~ −${fmtDist(Math.abs(deltaMedM))}` : "Không đổi"}
+              {deltaMedM === null
+                ? "—"
+                : deltaMedM < 0
+                  ? `~ −${fmtDist(Math.abs(deltaMedM))}`
+                  : "Không đổi"}
             </div>
           </div>
         </div>
+
+        {before.popWeightedMedianM === null && (
+          <p className="text-[11px] text-slate-400">
+            Không có dân đo được trong vùng ảnh hưởng — trung vị theo dân số không tính
+            được, không có con số thay thế.
+          </p>
+        )}
 
         {/* Dân số theo dải cự ly mạng (§1.8) */}
         <table className="w-full text-xs text-left border-collapse">
           <thead>
             <tr className="border-b border-slate-700 text-slate-400">
               <th className="py-1">Khoảng cách</th>
-              <th className="py-1 text-right">Trước [Đo]</th>
-              <th className="py-1 text-right">Sau [Ước]</th>
-              <th className="py-1 text-right">Δ dân số</th>
+              <th className="py-1 text-right">Trước [{SIM_TAG_SHORT[before.tag]}]</th>
+              <th className="py-1 text-right">Sau [{SIM_TAG_SHORT[after.tag]}]</th>
+              <th className="py-1 text-right">Δ dân số [{SIM_TAG_SHORT[after.tag]}]</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800 text-slate-300">
@@ -326,14 +345,16 @@ export function SimulationPanel({
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               5 ô xa trạm nhất có cải thiện
             </span>
-            <span className="text-[10px] text-amber-400 font-mono">ƯỚC LƯỢNG</span>
+            <span className="text-[10px] text-amber-400 font-mono">
+              {SIM_TAG_LABEL[after.tag]}
+            </span>
           </div>
           <table className="w-full text-xs text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-700 text-slate-400">
                 <th className="py-1">Ô H3</th>
-                <th className="py-1 text-right">Trước [Đo]</th>
-                <th className="py-1 text-right">Sau [Ước]</th>
+                <th className="py-1 text-right">Trước [{SIM_TAG_SHORT[before.tag]}]</th>
+                <th className="py-1 text-right">Sau [{SIM_TAG_SHORT[after.tag]}]</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800 text-slate-300">
@@ -378,7 +399,8 @@ export function SimulationPanel({
                 <div className="truncate max-w-[170px]">
                   <div className="font-medium text-slate-200 truncate">{st.name}</div>
                   <div className="text-[11px] text-slate-400">
-                    {st.nPorts} cổng · {st.powerKw} kW
+                    {st.nPorts !== null ? `${st.nPorts} cổng` : "chưa rõ số cổng"} ·{" "}
+                    {st.powerKw !== null ? `${st.powerKw} kW` : "chưa rõ công suất"}
                     {st.util !== null && (
                       <span className="ml-1.5 text-cyan-300">
                         · mức sử dụng {(st.util * 100).toFixed(0)}%

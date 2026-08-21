@@ -115,7 +115,13 @@ export type FormatId =
 export type ClaimPart =
   | string
   | { em: string }
-  | { slot: MetricRef; fmt: FormatId; unit?: string };
+  | { slot: MetricRef; fmt: FormatId; unit?: string }
+  /**
+   * Tên tỉnh/thành của gói đang mở — khe CHỮ duy nhất. Một cảnh khả chuyển không được viết
+   * "Hà Nội" vào văn: 33 gói còn lại sẽ đọc câu đó như một sự thật về tỉnh của họ. Không
+   * phân giải được (manifest chưa về) thì cả câu bị GIỮ LẠI, cùng luật R5 với khe số.
+   */
+  | { provinceName: true };
 
 /**
  * Một câu, ghép từ chữ literal và khe số.
@@ -220,8 +226,12 @@ export type BlockSpec =
   | { kind: "figure"; value: MetricRef; fmt: FormatId; unit?: string; caption: ClaimTemplate }
   /** dòng số phụ */
   | { kind: "stat"; label: ClaimTemplate; value: MetricRef; fmt: FormatId; unit?: string }
-  /** đoạn văn; số trong đó vẫn là khe */
-  | { kind: "para"; text: ClaimTemplate }
+  /**
+   * đoạn văn; số trong đó vẫn là khe. `editorialProvince` là cổng của VĂN BIÊN TẬP gọi
+   * tên một nơi (sông Hồng và cầu của nó — Phase 7 §1.8): khối chỉ render khi gói đang mở
+   * đúng tỉnh ấy. Đây là cổng NỘI DUNG, không phải cổng cảnh — cảnh vẫn khả chuyển.
+   */
+  | { kind: "para"; text: ClaimTemplate; editorialProvince?: string }
   /** khối "vì sao điều này quyết định", đóng mỗi cảnh */
   | { kind: "so-what"; text: ClaimTemplate }
   /** giả định khai báo: giá trị **và** chữ *giả định* — §4.3 luật R4 */

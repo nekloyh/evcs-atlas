@@ -24,8 +24,9 @@ import { HATCH_RGB, colorFor, type RGB, type Scale } from "../viz/palette";
 import { EXTRUSION_MATERIAL, NATIONAL_LIGHTING } from "../viz/lighting";
 import { buildPoiIconAtlas, iconId, type IconEntry } from "../viz/poi-icons";
 import { HatchExtension } from "../viz/hatch-extension";
-import { formatValue, type NationalField } from "./fields";
-import { provinceMetric, type ProvinceMetricState } from "./metrics";
+import type { NationalField } from "./fields";
+import { type ProvinceMetricState } from "./metrics";
+import { tooltip } from "./tooltip";
 import { NOT_COMPARABLE_RGB } from "./visual-states";
 import type {
   NationalCell,
@@ -421,7 +422,7 @@ export function NationalMap(props: NationalMapProps) {
       // treo sẵn vẫn tốn một lượt dựng shadow map mỗi frame.
       effects: is3d ? [NATIONAL_LIGHTING] : [],
       getTooltip: ({ object, layer }: { object?: unknown; layer?: { id: string } | null }) =>
-        tooltip(object, layer?.id, field, rows),
+        tooltip(object, layer?.id, field, rows, res),
     });
   }, [
     field,
@@ -488,62 +489,4 @@ export function NationalMap(props: NationalMapProps) {
   }, [lng, lat, zoom, ready, wantTilt]);
 
   return <div ref={container} className="h-full w-full" />;
-}
-
-function fmt(v: unknown): string {
-  return typeof v === "number" ? v.toLocaleString("vi-VN", { maximumFractionDigits: 2 }) : "—";
-}
-
-export function tooltip(
-  object: unknown,
-  layerId: string | undefined,
-  field: NationalField,
-  rows: Record<string, ProvinceRow>,
-): { text: string } | null {
-  if (!object) return null;
-  if (layerId === "vn-stations") {
-    const s = object as NationalStation;
-    return {
-      text: [
-        s.name ?? s.station_code,
-        `${s.n_ports ?? "—"} cổng · ${fmt(s.power_kw_site)} kW`,
-        `${s.current_type ?? "—"} · ${s.op_status ?? "—"}`,
-        rows[s.province_code]?.province_name ?? "",
-      ]
-        .filter(Boolean)
-        .join("\n"),
-    };
-  }
-  if (layerId === "vn-poi") {
-    const p = object as NationalPoi;
-    return {
-      text: [p.name ?? "(không tên)", p.tag ?? "", rows[p.province_code]?.province_name ?? ""]
-        .filter(Boolean)
-        .join("\n"),
-    };
-  }
-  if (layerId === "vn-cells") {
-    const c = object as NationalCell;
-    const prov = rows[c.province_code]?.province_name ?? c.province_code;
-    return {
-      text: `${field.label}: ${fmt(c[field.column])} ${field.unit_label}\nô gộp H3 r6 · ${prov}`,
-    };
-  }
-  const f = object as ProvinceFeature;
-  const row = rows[f.properties.province_code];
-  const head = row?.province_name ?? f.properties.province_code;
-  if (field.unit !== "province") return { text: `${head}\nbấm để mở bộ dữ liệu của tỉnh` };
-  if (!row) return { text: `${head}\nThiếu dòng dữ liệu tỉnh` };
-  const metric = provinceMetric(row, field);
-  if (metric.state === "not-comparable") {
-    return { text: `${head}\nKHÔNG SO SÁNH ĐƯỢC · ${metric.reason ?? "không đủ dữ liệu"}\nbấm để mở bộ dữ liệu của tỉnh` };
-  }
-  if (metric.state === "missing") {
-    return { text: `${head}\n${field.label}: không đo được\nbấm để mở bộ dữ liệu của tỉnh` };
-  }
-  return {
-    text: `${head}\n${field.label}: ${formatValue(field, metric.value)} ${field.unit_label}\n${
-      row?.in_store ? "bấm để mở bộ dữ liệu của tỉnh" : "chưa dựng trong store"
-    }`,
-  };
 }

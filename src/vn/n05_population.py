@@ -57,7 +57,7 @@ from evcs.core.grid import RES
 from . import admin, paths, qa
 from .runner import Step
 
-VERSION = "1"
+VERSION = "2"
 
 SRC_ANCHORED = "WORLDPOP2025_ANCHORED_VNSDI"
 SRC_UNANCHORED = "WORLDPOP2025_UNANCHORED_OFFICIAL_IMPLAUSIBLE"
@@ -168,12 +168,15 @@ def run(province_code: str) -> None:
         cell_pop = cell_pop.add(fb, fill_value=0.0)
 
     grid = pq.read_table(
-        paths.PROV / province_code / "grid_cell.parquet", columns=["h3_r8", "area_km2"]
+        paths.PROV / province_code / "grid_cell.parquet",
+        columns=["h3_r8", "area_km2", "area_frac"],
     ).to_pandas()
     out = pd.DataFrame({"h3_r8": grid.h3_r8.astype("string")})
     out["population"] = out.h3_r8.map(cell_pop).fillna(0.0).astype("float64")
     out["population_wp"] = out.h3_r8.map(cell_wp).fillna(0.0).astype("float64")
-    out["pop_density_ppkm2"] = out.population / grid.area_km2.to_numpy()
+    # Mẫu số là PHẦN Ô TRONG TỈNH (area_km2 × area_frac), đúng khai báo ở schema/grid.py —
+    # chia cho ô đầy đủ làm ô biên loãng đi tới ×0,01, và lệch với lớp toàn quốc n12.
+    out["pop_density_ppkm2"] = out.population / (grid.area_km2 * grid.area_frac).to_numpy()
     if len(px):
         dom = px.groupby(["h3_r8", "src"]).population.sum().reset_index()
         dom = dom.sort_values("population", ascending=False).drop_duplicates("h3_r8")

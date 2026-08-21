@@ -78,7 +78,7 @@ export function LorenzChart({
       style: { background: "transparent", fontSize: "10px", color: INK_MUTED_HEX },
       x: {
         domain: [0, 1],
-        label: "phần diện tích Hà Nội, dày dân nhất trước →",
+        label: "phần diện tích trong ranh giới, dày dân nhất trước →",
         labelAnchor: "center",
         labelOffset: 30,
         ticks: 5,

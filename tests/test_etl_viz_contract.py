@@ -98,6 +98,31 @@ def test_bbox_cua_tinh_nam_trong_lanh_tho_viet_nam(pdir: Path):
     assert 6.5 < la < hi_la < 24, p["bbox"]
 
 
+@pytest.mark.parametrize("pdir", TINH, ids=lambda p: p.name)
+def test_mat_do_dan_chia_dung_phan_o_trong_tinh(pdir: Path):
+    """Bất biến CÔNG THỨC của ``pop_density_ppkm2``: dân chia (area_km2 × area_frac).
+
+    Bản phát hành đầu chia cho ``area_km2`` ĐẦY ĐỦ — 21.844 ô biên có dân trên toàn quốc
+    bị loãng tới ×0,01, và lệch hẳn với lớp toàn quốc n12 (nơi tính đúng). Golden chỉ đóng
+    băng con số, không đóng băng công thức, nên phải kiểm Ở ĐÂY — nhất là trên ô BIÊN,
+    nơi hai mẫu số khác nhau thấy được.
+    """
+    import numpy as np
+
+    g = pq.read_table(
+        pdir / "grid_h3_r8.parquet",
+        columns=["population", "area_km2", "area_frac", "pop_density_ppkm2"],
+    ).to_pandas()
+    bien = g[(g.area_frac < 0.999) & (g.population > 0)]
+    if not len(bien):
+        pytest.skip("tỉnh không có ô biên có dân")
+    ky_vong = bien.population / (bien.area_km2 * bien.area_frac)
+    assert np.allclose(bien.pop_density_ppkm2, ky_vong, rtol=1e-9), (
+        f"{int((~np.isclose(bien.pop_density_ppkm2, ky_vong, rtol=1e-9)).sum())} ô biên "
+        f"có mật độ không khớp công thức dân/(area_km2×area_frac)"
+    )
+
+
 def test_34_tinh_cung_mot_bo_cot_xuat_ra():
     """Một schema duy nhất giữa 34 phân mảnh — điều kiện để giao diện dùng lại được."""
     bo = {tuple(pq.read_schema(p / "grid_h3_r8.parquet").names) for p in TINH}
@@ -172,8 +197,6 @@ def test_commune_geojson_khong_mang_thuoc_tinh_la(pdir: Path):
         pytest.skip("không có xã nào")
     la = set(feats[0]["properties"]) - set(COMMUNE.names())
     assert la == set(), f"thuộc tính chưa khai: {sorted(la)}"
-
-
 
 
 # ── B4: cặp tuyến + nhãn đường theo đoạn ─────────────────────────────────

@@ -162,21 +162,19 @@ export function classifyCell(
   return { cls, display, dAfter };
 }
 
+/**
+ * Trung vị CÓ TRỌNG SỐ DÂN, hoặc `null` khi nó không tồn tại. Hai lối cũ đều là số bịa:
+ * vùng rỗng trả 0 đọc thành "trạm ngay cạnh mọi người", còn vùng toàn ô 0 dân rơi về trung
+ * vị KHÔNG trọng số thì con số in ra không còn là đại lượng ghi trên nhãn. "Không có mẫu
+ * số" là một câu trả lời, và cách nói đúng là `null` — không phải một con số thay thế.
+ */
 export function calculateWeightedMedian(
   items: Array<{ value: number; weight: number }>,
-): number {
-  if (items.length === 0) return 0;
-  const valid = items.filter((it) => Number.isFinite(it.value));
-  if (valid.length === 0) return 0;
-
-  const positiveWeights = valid.filter((it) => it.weight > 0);
-  if (positiveWeights.length === 0) {
-    const sorted = valid.map((it) => it.value).sort((a, b) => a - b);
-    const mid = Math.floor(sorted.length / 2);
-    return sorted.length % 2 !== 0
-      ? sorted[mid]!
-      : (sorted[mid - 1]! + sorted[mid]!) / 2;
-  }
+): number | null {
+  const positiveWeights = items.filter(
+    (it) => Number.isFinite(it.value) && it.weight > 0,
+  );
+  if (positiveWeights.length === 0) return null;
 
   positiveWeights.sort((a, b) => a.value - b.value);
   const totalWeight = positiveWeights.reduce((sum, it) => sum + it.weight, 0);

@@ -250,3 +250,42 @@ test("CG-2(B) legend và badge cảnh đọc CÙNG một hàm, không bản ché
   assert.match(view, /\{sceneClip\?\.over &&/);
   assert.match(view, /\{sceneClip\?\.under &&/);
 });
+
+// ══ QA-6 — bấm sang nhịp áp TRỌN BỘ state của nhịp, bằng đúng deep-link ═══════
+
+test("QA-6 setBeat() cho ra CÙNG state với deep-link `#s=<cảnh>.<nhịp>`", () => {
+  // Bản cũ chỉ áp `beat` + `field`: camera/`t` của nhịp trước đứng lại dưới câu chữ của
+  // nhịp mới, và cùng một URL cảnh cho hai state khác nhau tuỳ đường vào (bấm hay dán link).
+  const scene = SCENES.find((s) => s.beats.length > 1 && s.beats.some((b) => b.camera))!;
+  const target = scene.beats.find((b) => b.camera)?.id === scene.beats[0]!.id
+    ? scene.beats[1]!.id
+    : scene.beats.find((b) => b.camera)!.id;
+
+  // Đường 1 — BẤM: vào cảnh ở nhịp đầu, rồi setBeat sang nhịp đích.
+  useStore.setState({ scene: null, dataMode: false, nationalMode: false });
+  useStore.getState().applyHash({ scene: scene.id });
+  // làm bẩn view/t để chắc chắn setBeat phải tự áp lại chứ không thừa hưởng tình cờ
+  useStore.setState({ view: { ...useStore.getState().view, zoom: 3.21 }, t: 77 });
+  useStore.getState().setBeat(target);
+  const clicked = useStore.getState();
+
+  // Đường 2 — DEEP-LINK: cùng cảnh, cùng nhịp, vào thẳng từ hash.
+  useStore.setState({ scene: null, dataMode: false, nationalMode: false });
+  useStore.setState({ t: 77 });
+  useStore.getState().applyHash({ scene: scene.id, beat: target });
+  const linked = useStore.getState();
+
+  assert.equal(clicked.scene, linked.scene);
+  assert.equal(clicked.beat, linked.beat);
+  assert.equal(clicked.field, linked.field);
+  assert.deepEqual(clicked.view, linked.view, "camera của nhịp phải được áp khi BẤM");
+  assert.equal(clicked.t, linked.t, "giờ do nhịp sở hữu phải khớp giữa hai đường vào");
+  assert.deepEqual(clicked.selection, linked.selection);
+  assert.deepEqual([...clicked.layers].sort(), [...linked.layers].sort());
+  assert.equal(clicked.paintOn, linked.paintOn);
+
+  // Và state ấy chính là `sceneState` — nguồn duy nhất của "nhịp này chốt gì".
+  const st = sceneState(scene.id, target);
+  assert.equal(clicked.field, st.field);
+  assert.deepEqual(clicked.view, st.view);
+});

@@ -8,7 +8,7 @@ import {
   zoomForFeatureBounds,
 } from "./view-config";
 import type { QuickPreset } from "./presets";
-import { SCENES, SCENE_BY_ID, beatOf, parseScene, sceneState, type SceneId } from "../story/scenes";
+import { SCENES, SCENE_BY_ID, parseScene, sceneState, type SceneId } from "../story/scenes";
 import {
   INITIAL_FILTER_STATE,
   applyFilterIntent,
@@ -453,10 +453,11 @@ export const useStore = create<AppState>((set) => ({
     }
   },
 
-  // Nhịp đổi trường, nên nó đi qua đúng `field` mà mọi thứ khác đọc — không có state song
-  // song nào. Ràng buộc 2 nguyên vẹn: vẫn một chuỗi, vẫn một trường.
-  setBeat: (beatId) =>
-    set((s) => (s.scene ? { beat: beatId, field: beatOf(s.scene, beatId).field } : {})),
+  // Nhịp sở hữu TRỌN BỘ state đã phân giải của nó (trường, khung, `t`, lựa chọn) — nên
+  // bấm sang nhịp đi qua CÙNG `fromScene` với deep-link `#s=<cảnh>.<nhịp>`. Bản cũ chỉ áp
+  // `beat` + `field`, để camera/giờ của nhịp trước đứng lại dưới câu chữ của nhịp mới, và
+  // cùng một URL cảnh cho hai state khác nhau tuỳ đường vào.
+  setBeat: (beatId) => set((s) => (s.scene ? fromScene(s.scene, beatId) : {})),
 
   searchNavigate: (target) =>
     set((s) => {

@@ -98,6 +98,14 @@ export function renderClaim(tpl: ClaimTemplate, ctx: ResolveContext, key: string
       out.push(<strong key={`${key}-${idx}`}>{part.em}</strong>);
       continue;
     }
+    if ("provinceName" in part) {
+      // Khe CHỮ duy nhất: tên tỉnh của gói đang mở. Chưa phân giải được thì cả câu bị
+      // GIỮ LẠI — cùng luật R5 với khe số, vì một câu "Người ở  dồn lại" là nửa câu.
+      const name = ctx.pkg.manifest?.province?.province_name;
+      if (!name) return null;
+      out.push(name);
+      continue;
+    }
     const v = resolveMetric(part.slot, ctx);
     const required = tpl.required === undefined || tpl.required.includes(idx);
     if (v === null) {
@@ -269,6 +277,14 @@ function Block({ block, ctx, occScale, k }: { block: BlockSpec; ctx: ResolveCont
       );
     }
     case "para": {
+      // Văn biên tập gọi tên một nơi chỉ render trên đúng tỉnh ấy (Phase 7 §1.8): 33 gói
+      // còn lại đọc "sông Hồng và sáu cây cầu" như một sự thật về tỉnh của họ.
+      if (
+        block.editorialProvince &&
+        ctx.pkg.manifest?.province?.province_code !== block.editorialProvince
+      ) {
+        return null;
+      }
       const text = renderClaim(block.text, ctx, `${k}-p`);
       return text === null ? null : <Para>{text}</Para>;
     }

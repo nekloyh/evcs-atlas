@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useRef } from "react";
 
+import { useIsDesktop } from "../components/atlas/use-desktop";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../components/ui/sheet";
+
 import { useStore } from "../state/store";
 import { BeatBody, renderClaim } from "./StorySurface";
 import { beatOf, renderableScenes, storyContext, type SceneId } from "./scenes";
@@ -41,6 +44,12 @@ export function StoryColumn({
   const beatId = useStore((s) => s.beat);
   const enterScene = useStore((s) => s.enterScene);
   const setBeat = useStore((s) => s.setBeat);
+  // Màn hẹp (< 1024 px): cột cảnh là SHEET trái — DESIGN.md §3 đòi bản đồ toàn màn ở
+  // một cột. Dùng CHÍNH cờ `readColumnOpen`: cột cảnh THAY cột đọc ở cùng khe (§14c),
+  // nên nút bottom-nav "cột đọc" mở đúng bề mặt đang giữ khe ấy.
+  const isDesktop = useIsDesktop();
+  const sheetOpen = useStore((s) => s.readColumnOpen);
+  const setSheetOpen = useStore((s) => s.setReadColumnOpen);
   const root = useRef<HTMLDivElement>(null);
   const blocks = useRef(new Map<SceneId, HTMLElement>());
   /** Cảnh mà lần cuộn tự động đang nhắm tới — xem `IntersectionObserver` bên dưới. */
@@ -87,7 +96,8 @@ export function StoryColumn({
     );
     for (const node of blocks.current.values()) io.observe(node);
     return () => io.disconnect();
-  }, [enterScene, scenes]);
+    // `isDesktop`/`sheetOpen` trong deps: sheet đóng là cây bị tháo, mở lại phải gắn lại observer.
+  }, [enterScene, scenes, isDesktop, sheetOpen]);
 
   // Cảnh đổi mà KHÔNG do cột này gây ra — link dán tay, Back/Forward, một cảnh bị gỡ khỏi
   // danh sách dựng được — thì cột phải đi theo. Bản trước chỉ cuộn đúng một lần lúc gắn,
@@ -150,29 +160,14 @@ export function StoryColumn({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [enterScene, scenes]);
 
-  if (scenes.length === 0) {
-    return (
-      <aside className="w-100 shrink-0 overflow-y-auto border-r border-hairline bg-panel">
-        <Para>
-          Bộ dữ liệu đang mở không dựng được cảnh nào. Cảnh vắng mặt chứ không bị làm mờ —
-          một bước chết trong một chuỗi là một ngõ cụt.
-        </Para>
-      </aside>
-    );
-  }
-
-  return (
-    <aside
-      ref={root}
-      /* `border-r`, không `border-l`: cột này đứng ở khe TRÁI, đúng khe mà cột đọc chiếm
-         ngoài chế độ CÂU CHUYỆN (§3h).
-
-         KHÔNG bọc các `section` trong một div `flex-1`: `min-h-full` của chúng phân giải
-         theo chiều cao của thẻ cha, và một div nội dung-tự-co làm mỗi cảnh phồng lên
-         3.707 px trên một cột cao 1.481 px — đo được 78% mỗi cảnh là khoảng trắng. Các
-         `section` phải là con TRỰC TIẾP của thẻ cuộn. */
-      className="w-100 shrink-0 overflow-y-auto border-r border-hairline bg-panel"
-    >
+  const body =
+    scenes.length === 0 ? (
+      <Para>
+        Bộ dữ liệu đang mở không dựng được cảnh nào. Cảnh vắng mặt chứ không bị làm mờ —
+        một bước chết trong một chuỗi là một ngõ cụt.
+      </Para>
+    ) : (
+      <>
       <div className="sticky top-0 z-20 border-b border-hairline bg-panel/95 px-4 py-2.5 backdrop-blur">
         <div className="flex items-center justify-between gap-2 pb-2">
           <div className="flex items-center gap-2">
@@ -305,6 +300,42 @@ export function StoryColumn({
           Giữ nguyên trường, khung nhìn và lớp của cảnh đang xem — rail hiện ra và mọi thứ bấm được.
         </p>
       </div>
+      </>
+    );
+
+  /* Dưới 1024 px cột cảnh là SHEET trái (DESIGN.md §3: màn hẹp là MỘT cột, bản đồ toàn
+     màn). Bản cũ giữ 400 px inline ở mọi bề rộng — đo được bản đồ chỉ còn 360 px ở 760 px. */
+  if (!isDesktop) {
+    return (
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent
+          side="left"
+          className="flex h-full w-full flex-col border-r border-hairline bg-panel p-0 text-ink sm:w-[400px]"
+        >
+          <SheetHeader className="sr-only">
+            <SheetTitle>Cột cảnh câu chuyện</SheetTitle>
+          </SheetHeader>
+          <div ref={root} className="custom-scrollbar min-h-0 flex-1 overflow-y-auto">
+            {body}
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <aside
+      ref={root}
+      /* `border-r`, không `border-l`: cột này đứng ở khe TRÁI, đúng khe mà cột đọc chiếm
+         ngoài chế độ CÂU CHUYỆN (§3h).
+
+         KHÔNG bọc các `section` trong một div `flex-1`: `min-h-full` của chúng phân giải
+         theo chiều cao của thẻ cha, và một div nội dung-tự-co làm mỗi cảnh phồng lên
+         3.707 px trên một cột cao 1.481 px — đo được 78% mỗi cảnh là khoảng trắng. Các
+         `section` phải là con TRỰC TIẾP của thẻ cuộn. */
+      className="w-100 shrink-0 overflow-y-auto border-r border-hairline bg-panel"
+    >
+      {body}
     </aside>
   );
 }

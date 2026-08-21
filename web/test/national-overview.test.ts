@@ -126,3 +126,26 @@ test("route national là page boundary và cache đăng ký bị chặn ở vn/*
   assert.match(data, /stationsCache/);
   assert.match(data, /poiCache/);
 });
+
+// ══ QA-7 — tooltip ô gộp: đơn vị tỉ lệ và bậc H3 đang vẽ ═══════════════════════
+
+test("QA-7 tooltip ô gộp in trường tỉ lệ qua formatValue — 0,27 phải thành 27%", async () => {
+  const { tooltip } = await import("../src/national/tooltip.ts");
+  const built = FIELD_BY_ID.get("c:built")!;
+  const cell = { h3: "861", province_code: "01", built_frac: 0.27 };
+  const tt = tooltip(cell, "vn-cells", built, { "01": row("01", 5) }, 6);
+  assert.ok(tt);
+  assert.match(tt.text, /27%/, `tooltip phải in phần trăm, đang in: ${tt.text}`);
+  assert.doesNotMatch(tt.text, /0,27/, "giá trị thô 0,27 không được ra màn hình");
+});
+
+test("QA-7 tooltip ô gộp nói đúng BẬC đang vẽ — LOD lên r7 thì chuỗi phải là r7", async () => {
+  const { tooltip } = await import("../src/national/tooltip.ts");
+  const pop = FIELD_BY_ID.get("c:population")!;
+  const cell = { h3: "871", province_code: "01", population: 1234 };
+  const at6 = tooltip(cell, "vn-cells", pop, {}, 6)!;
+  const at7 = tooltip(cell, "vn-cells", pop, {}, 7)!;
+  assert.match(at6.text, /H3 r6/);
+  assert.match(at7.text, /H3 r7/);
+  assert.doesNotMatch(at7.text, /r6/, "chuỗi r6 ghi cứng sống sót qua LOD");
+});

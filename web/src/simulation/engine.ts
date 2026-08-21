@@ -250,8 +250,9 @@ export function runSimulation(inputs: SimulationEngineInputs): SimulationResult 
         code: st.station_code,
         name: st.name || st.station_code,
         euclidM: Math.round(distM),
-        nPorts: st.n_ports ?? 0,
-        powerKw: st.power_kw_site ?? 0,
+        // Nguồn không khai thì GIỮ null — đổ về 0 là in "0 cổng · 0 kW" như một sự thật.
+        nPorts: st.n_ports ?? null,
+        powerKw: st.power_kw_site ?? null,
         util: occ?.util !== undefined ? occ.util : null,
         grade: occ?.grade ?? null,
         window:
@@ -270,6 +271,7 @@ export function runSimulation(inputs: SimulationEngineInputs): SimulationResult 
       cell: candidateCell,
     },
     screening: {
+      tag: "RULE",
       decision: screeningOutput.decision,
       marginM: screeningOutput.marginM,
       basis: "euclid",
@@ -277,13 +279,17 @@ export function runSimulation(inputs: SimulationEngineInputs): SimulationResult 
       highLoadEvaluable: isHighLoadEvaluable,
     },
     before: {
-      popWeightedMedianM: Math.round(beforeWeightedMed),
+      tag: "CALCULATED",
+      // `null` = không có trọng số dân dương — trung vị theo dân KHÔNG tồn tại, và
+      // panel phải nói ra điều đó thay vì in một con số thay thế.
+      popWeightedMedianM: beforeWeightedMed === null ? null : Math.round(beforeWeightedMed),
       popByBand: beforePopBands,
       noBaseline: { cells: noBaselineCount, population: Math.round(noBaselinePop) },
       excluded: { cells: excludedCount, population: Math.round(excludedPop) },
     },
     after: {
-      popWeightedMedianM: Math.round(afterWeightedMed),
+      tag: "ESTIMATED",
+      popWeightedMedianM: afterWeightedMed === null ? null : Math.round(afterWeightedMed),
       popByBand: afterPopBands,
       improved: { cells: improvedCount, population: Math.round(improvedPop) },
       uncertain: { cells: uncertainCount, population: Math.round(uncertainPop) },

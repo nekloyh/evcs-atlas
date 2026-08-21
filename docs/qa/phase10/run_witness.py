@@ -24,13 +24,23 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
 import urllib.error
 import urllib.request
 from pathlib import Path
 
-from websockets.sync.client import connect
+try:
+    from websockets.sync.client import connect
+except ModuleNotFoundError:
+    # Cổng phát hành gọi cả `python run_witness.py`. Nếu shell đang đứng ngoài môi trường
+    # uv, re-exec đúng Python của project thay vì chết trước khi phép đo bắt đầu. Không tự
+    # cài hay chạm mạng: checkout chưa `uv sync` vẫn fail rõ bằng lỗi import ban đầu.
+    project_python = Path(__file__).parents[3] / ".venv/bin/python"
+    if project_python.exists() and Path(sys.executable).resolve() != project_python.resolve():
+        os.execv(str(project_python), [str(project_python), __file__, *sys.argv[1:]])
+    raise
 
 OUT = Path(__file__).parent
 PORT = 9330
@@ -192,8 +202,7 @@ def at1_error_boundary(cdp: Cdp) -> dict:
     # Phép tiêm ĐẦY ĐỦ: root React riêng, boundary bọc một component ném. Dụng cụ nằm ở
     # `web/test/witness-probe.tsx` — JS trần qua CDP không giải được specifier trần.
     crash_text = cdp.evaluate(
-        "import('/test/witness-probe.tsx')"
-        ".then(m => m.crashProbe('mô hình chart gặp ca biên'))",
+        "import('/test/witness-probe.tsx').then(m => m.crashProbe('mô hình chart gặp ca biên'))",
         True,
     )
     after = cdp.evaluate("document.body.innerText.length")
@@ -325,7 +334,9 @@ def at6_scrubber_keys(cdp: Cdp) -> dict:
     time.sleep(1.0)
     read = "(() => { const s = document.querySelector('[role=slider][aria-label=\"Giờ trong tuần\"]'); return { now: +s.getAttribute('aria-valuenow'), text: s.getAttribute('aria-valuetext'), min: +s.getAttribute('aria-valuemin'), max: +s.getAttribute('aria-valuemax') }; })()"
     cdp.evaluate("document.querySelector('[role=slider][aria-label=\"Giờ trong tuần\"]').focus()")
-    focused = cdp.evaluate("document.activeElement === document.querySelector('[role=slider][aria-label=\"Giờ trong tuần\"]')")
+    focused = cdp.evaluate(
+        "document.activeElement === document.querySelector('[role=slider][aria-label=\"Giờ trong tuần\"]')"
+    )
     start = cdp.evaluate(read)
     for _ in range(3):
         cdp.key("ArrowRight", "ArrowRight", 39)
@@ -365,11 +376,13 @@ def at6_scrubber_keys(cdp: Cdp) -> dict:
 
 
 def _toggle_3d(cdp: Cdp, label: str) -> bool:
-    return bool(cdp.evaluate(
-        "(() => { const b = [...document.querySelectorAll('nav button')]"
-        f".find(x => x.textContent.trim() === {json.dumps(label)});"
-        " if (!b || b.getAttribute('aria-disabled') === 'true') return false; b.click(); return true; })()"
-    ))
+    return bool(
+        cdp.evaluate(
+            "(() => { const b = [...document.querySelectorAll('nav button')]"
+            f".find(x => x.textContent.trim() === {json.dumps(label)});"
+            " if (!b || b.getAttribute('aria-disabled') === 'true') return false; b.click(); return true; })()"
+        )
+    )
 
 
 def at4_reduced_motion(cdp: Cdp) -> dict:
@@ -387,16 +400,28 @@ def at4_reduced_motion(cdp: Cdp) -> dict:
     time.sleep(3.0)
 
     def measure(reduce: bool) -> list:
-        cdp.call("Emulation.setEmulatedMedia", {"features": [
-            {"name": "prefers-reduced-motion", "value": "reduce" if reduce else "no-preference"}
-        ]})
-        assert cdp.evaluate("window.matchMedia('(prefers-reduced-motion: reduce)').matches") is reduce
+        cdp.call(
+            "Emulation.setEmulatedMedia",
+            {
+                "features": [
+                    {
+                        "name": "prefers-reduced-motion",
+                        "value": "reduce" if reduce else "no-preference",
+                    }
+                ]
+            },
+        )
+        assert (
+            cdp.evaluate("window.matchMedia('(prefers-reduced-motion: reduce)').matches") is reduce
+        )
         _toggle_3d(cdp, "2D")
         time.sleep(1.0)
         cdp.evaluate("import('/test/witness-probe.tsx').then(m => m.tapCamera())", True)
         assert _toggle_3d(cdp, "3D"), "nút 3D không bấm được — trường đang chọn không phải ô gộp?"
         time.sleep(0.9)
-        return cdp.evaluate("import('/test/witness-probe.tsx').then(m => m.readCamera())", True) or []
+        return (
+            cdp.evaluate("import('/test/witness-probe.tsx').then(m => m.readCamera())", True) or []
+        )
 
     reduced = measure(True)
     normal = measure(False)
@@ -411,8 +436,12 @@ def at4_reduced_motion(cdp: Cdp) -> dict:
         "calls_reduced": reduced,
         "calls_normal": normal,
         "measure": "phương thức camera của maplibre được gọi sau khi bấm 3D",
-        "ok": bool(tilt(reduced, "jumpTo") and not tilt(reduced, "easeTo")
-                   and tilt(normal, "easeTo") and not tilt(normal, "jumpTo")),
+        "ok": bool(
+            tilt(reduced, "jumpTo")
+            and not tilt(reduced, "easeTo")
+            and tilt(normal, "easeTo")
+            and not tilt(normal, "jumpTo")
+        ),
     }
 
 
@@ -434,27 +463,50 @@ def at9_focus_restore(cdp: Cdp) -> dict:
     """)
 
 
+# Ba primary surface — Final QA bắt được Story và National giữ rail inline dưới 1024 px
+# (bản đồ còn 360/472 px ở màn 760) vì witness cũ chỉ đo route mặc định.
+RESPONSIVE_ROUTES = {
+    "map": "#tinh=01",
+    "story": "#tinh=01&s=von-cuc",
+    "national": "#tinh=vn",
+}
+
+# Bề rộng THẬT của vùng bản đồ — dưới 1024 px nó phải chiếm trọn viewport (DESIGN.md §3:
+# màn hẹp là MỘT cột, cột đọc/cột cảnh/rail chỉ số đều thành sheet).
+MAP_WIDTH_JS = """
+(() => {
+  const el = document.querySelector('.maplibregl-map') || document.querySelector('main');
+  return el ? Math.round(el.getBoundingClientRect().width) : 0;
+})()
+"""
+
+
 def at10_responsive(cdp: Cdp) -> dict:
     out = {}
-    for w in WIDTHS:
-        cdp.call(
-            "Emulation.setDeviceMetricsOverride",
-            {
-                "width": w,
-                "height": 1000,
-                "deviceScaleFactor": 1,
-                "mobile": False,
-            },
-        )
-        goto(cdp, "#tinh=01")
-        cdp.wait_for("document.querySelector('main') !== null", timeout=40)
-        time.sleep(2.0)
-        measured = cdp.evaluate(OVERFLOW_JS)
-        measured["no_overflow"] = (
-            measured["scrollWidth"] <= measured["viewport"] + 1 and not measured["offenders"]
-        )
-        out[str(w)] = measured
-        cdp.screenshot(f"at10-10-w{w}.png")
+    for route, hash_part in RESPONSIVE_ROUTES.items():
+        for w in WIDTHS:
+            cdp.call(
+                "Emulation.setDeviceMetricsOverride",
+                {
+                    "width": w,
+                    "height": 1000,
+                    "deviceScaleFactor": 1,
+                    "mobile": False,
+                },
+            )
+            goto(cdp, hash_part)
+            cdp.wait_for("document.querySelector('main') !== null", timeout=40)
+            time.sleep(2.0)
+            measured = cdp.evaluate(OVERFLOW_JS)
+            measured["map_width"] = cdp.evaluate(MAP_WIDTH_JS)
+            measured["no_overflow"] = (
+                measured["scrollWidth"] <= measured["viewport"] + 1 and not measured["offenders"]
+            )
+            if w < 1024:
+                # Một cột: bản đồ phủ hết bề ngang (chừa ≤ 8 px cho viền/scrollbar).
+                measured["one_column"] = measured["map_width"] >= measured["viewport"] - 8
+            out[f"{route}-{w}"] = measured
+            cdp.screenshot(f"at10-10-{route}-w{w}.png")
     cdp.call("Emulation.clearDeviceMetricsOverride")
     return out
 
@@ -465,7 +517,9 @@ def start_vite():
         return None
     proc = subprocess.Popen(
         ["pnpm", "exec", "vite", "--host", "127.0.0.1", "--port", str(VITE_PORT), "--strictPort"],
-        cwd=WEB, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        cwd=WEB,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
     for _ in range(200):
         try:
@@ -570,12 +624,17 @@ def main():
         assert a2["export_open_when_settled"], "AT10-2 (mở lại sau khi settle)"
         assert report["at10_3_keyboard_sort"]["ok"], "AT10-3"
         assert report["at10_6_scrubber_keys"]["ok"], "AT10-6"
-        assert report["at10_4_reduced_motion"]["ok"], "AT10-4 (nhánh reduce vẫn quay vòng animation)"
+        assert report["at10_4_reduced_motion"]["ok"], (
+            "AT10-4 (nhánh reduce vẫn quay vòng animation)"
+        )
         assert report["at10_9_focus_restore"]["ok"], "AT10-9"
-        for width, measured in report["at10_10_responsive"].items():
-            assert measured["no_overflow"], (
-                f"AT10-10 tràn ngang ở {width}px: {measured['offenders']}"
-            )
+        for key, measured in report["at10_10_responsive"].items():
+            assert measured["no_overflow"], f"AT10-10 tràn ngang ở {key}: {measured['offenders']}"
+            if "one_column" in measured:
+                assert measured["one_column"], (
+                    f"AT10-10 {key}: dưới 1024 px bản đồ phải phủ hết bề ngang, "
+                    f"đo được {measured['map_width']}/{measured['viewport']} px"
+                )
         print("\nPHASE 10 WITNESS: PASS")
     finally:
         for child in (proc, vite):

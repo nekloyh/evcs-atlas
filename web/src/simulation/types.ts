@@ -7,6 +7,25 @@
 
 export type SimTag = "CALCULATED" | "ESTIMATED" | "RULE";
 
+/**
+ * Nhãn xuất xứ trên màn hình — Engineering Contract §1.8: "Trước" là đại lượng TÍNH TOÁN
+ * từ cột công bố (Dijkstra của n07), KHÔNG phải một số đo trực tiếp; "Sau" và mọi delta /
+ * phân loại là ƯỚC LƯỢNG heuristic; sàng lọc là đầu ra của một RULE. Nhãn sống ở đây (cạnh
+ * kiểu) chứ không viết tay trong component — để test khớp NGUYÊN VĂN được.
+ */
+export const SIM_TAG_LABEL: Record<SimTag, string> = {
+  CALCULATED: "TÍNH TOÁN",
+  ESTIMATED: "ƯỚC LƯỢNG",
+  RULE: "RULE",
+};
+
+/** Dạng ngắn cho đầu cột bảng. */
+export const SIM_TAG_SHORT: Record<SimTag, string> = {
+  CALCULATED: "Tính",
+  ESTIMATED: "Ước",
+  RULE: "Rule",
+};
+
 export type ScreeningDecision = "DE_XUAT" | "DE_XUAT_NEU_CO_DC" | "TU_CHOI" | null;
 export type CommuneKind = "PHUONG" | "XA" | "DAC_KHU";
 
@@ -59,8 +78,10 @@ export interface ContextStation {
   code: string;
   name: string;
   euclidM: number;
-  nPorts: number;
-  powerKw: number;
+  /** `null` = nguồn không khai số cổng — KHÔNG được đổ về 0: "0 cổng" là một sự thật bịa. */
+  nPorts: number | null;
+  /** `null` = nguồn không khai công suất — cùng luật với `nPorts`. */
+  powerKw: number | null;
   util: number | null;
   grade: string | null;
   window: [string, string] | null;
@@ -69,6 +90,8 @@ export interface ContextStation {
 export interface SimulationResult {
   candidate: { lat: number; lng: number; cell: string };
   screening: {
+    /** xuất xứ cấu trúc — đầu ra của một RULE chính sách, không phải số đo */
+    tag: "RULE";
     decision: ScreeningDecision;
     marginM: number | null;
     basis: "euclid";
@@ -77,13 +100,18 @@ export interface SimulationResult {
     highLoadEvaluable: boolean;
   };
   before: {
-    popWeightedMedianM: number;
+    /** xuất xứ cấu trúc — gộp từ cột CÔNG BỐ (Dijkstra n07), là đại lượng TÍNH TOÁN */
+    tag: "CALCULATED";
+    /** `null` = không có trọng số dân dương trong vùng — trung vị THEO DÂN không tồn tại. */
+    popWeightedMedianM: number | null;
     popByBand: Record<"le1km" | "b1_2km" | "b2_5km" | "gt5km", number>;
     noBaseline: { cells: number; population: number };
     excluded: { cells: number; population: number };
   };
   after: {
-    popWeightedMedianM: number;
+    /** xuất xứ cấu trúc — heuristic chim bay × hệ số đi vòng, là ƯỚC LƯỢNG */
+    tag: "ESTIMATED";
+    popWeightedMedianM: number | null;
     popByBand: Record<"le1km" | "b1_2km" | "b2_5km" | "gt5km", number>;
     improved: { cells: number; population: number };
     uncertain: { cells: number; population: number };

@@ -253,10 +253,10 @@ export function NavRail({
               Trên màn rộng cột không đóng được (§3h), nên một nút bật/tắt nó ở đây sẽ là một
               nút không có trạng thái nào để chuyển — đúng loại nói dối bằng giao diện mà §3a
               cấm ở chính thanh này. */}
-          {activeMode === "map" && !isDesktop && (
+          {(activeMode === "map" || activeMode === "story") && !isDesktop && (
             <Tooltip>
               <TooltipTrigger
-                aria-label="Mở cột đọc"
+                aria-label={activeMode === "story" ? "Mở cột cảnh" : "Mở cột đọc"}
                 aria-expanded={readColumnOpen}
                 onClick={onToggleReadColumn}
                 className={`grid h-9 w-9 place-items-center rounded border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
@@ -267,7 +267,9 @@ export function NavRail({
               >
                 <PanelLeftOpen className="h-4 w-4" />
               </TooltipTrigger>
-              <TooltipContent side={tooltipSide}>Cột đọc bản đồ</TooltipContent>
+              <TooltipContent side={tooltipSide}>
+                {activeMode === "story" ? "Cột cảnh câu chuyện" : "Cột đọc bản đồ"}
+              </TooltipContent>
             </Tooltip>
           )}
 
