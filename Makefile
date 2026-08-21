@@ -1,4 +1,4 @@
-.PHONY: check-chain setup clean help web vn vn-plan vn-web vn-quocgia poi-proxy golden golden-ghi schema schema-kiem kiem lint clean-cache
+.PHONY: check-chain setup clean help web vn vn-plan vn-web vn-quocgia poi-proxy golden golden-ghi schema schema-kiem kiem lint clean-cache deploy-pages
 
 help:
 	@echo "make setup    — cài môi trường (uv sync)"
@@ -23,6 +23,7 @@ help:
 	@echo "make lint      — ruff, phạm vi chốt ở pyproject.toml. PHẢI là 0 lỗi."
 	@echo "make golden    — DỪNG nếu một con số của 863 bảng sản phẩm đổi"
 	@echo "make schema    — sinh lại khai báo cột cho web từ src/evcs/schema/grid.py"
+	@echo "make deploy-pages — phát hành snapshot đã build lên nhánh gh-pages"
 	@echo ""
 	@echo "  ── soi pipeline ──"
 	@echo "uv run python -m vn --do-thi              — in DAG suy từ reads/writes"
@@ -104,6 +105,10 @@ kiem: lint schema-kiem
 	uv run pytest
 	cd web && pnpm test
 	$(MAKE) golden
+
+# main là nguồn release; gh-pages chỉ là snapshot sinh tự động, không merge ngược.
+deploy-pages:
+	bash scripts/deploy_pages.sh
 
 check-chain:  ## kiem nhat quan chuoi EDA POI: vao - final = ra (theo tap uid)
 	uv run python scripts/check_chain.py
