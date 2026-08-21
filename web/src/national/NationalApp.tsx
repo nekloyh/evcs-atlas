@@ -24,7 +24,7 @@
  *    đứng được trong khi lớp tính toán toàn quốc còn đang nợ.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { parseNationalHash, serializeNationalHash, type NationalMode } from "./hash";
 import { can3D, elevationButtonNote, elevationDisclosure } from "./elevation";
@@ -33,6 +33,7 @@ import { RES_BASE, resolutionForZoom } from "./lod";
 import { POI_GROUPS, POI_GROUP_BY_KEY, type PoiShape } from "../data/poi";
 import { switchDataset } from "../data/province";
 import { DatasetPicker } from "../ui/DatasetPicker";
+import { formatFixed } from "../ui/format";
 import { zoomForBbox } from "../map/positron";
 import { RAMP_HEX, buildScale, formatBreak, rampFor, type Scale } from "../viz/palette";
 import {
@@ -138,6 +139,10 @@ export default function NationalApp() {
   const [stations, setStations] = useState<NationalStation[] | null>(null);
   const [poi, setPoi] = useState<NationalPoi[] | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
+  // useCallback (Phase 10): handler inline là một identity mới mỗi render, mà nó nằm trong
+  // deps của effect dựng layer bên NationalMap — mỗi lần hover đổi tỉnh là cả stack layer
+  // (lưới r6/r7, 6.380 trạm, POI) bị dựng lại chỉ vì một hàm không đổi gì.
+  const pickProvince = useCallback((code: string) => switchDataset(code), []);
   const [selected, setSelected] = useState<string | null>(null);
   const [view, setView] = useState({ lng: 108.2, lat: 15.5, zoom: 5 });
   const [error, setError] = useState<string | null>(null);
@@ -315,7 +320,7 @@ export default function NationalApp() {
             selected={selected}
             provinceStates={provinceStates}
             onHoverProvince={setHovered}
-            onPickProvince={(code) => switchDataset(code)}
+            onPickProvince={pickProvince}
           />
           {error && (
             <div className="absolute inset-x-0 top-0 border-b border-hairline bg-panel px-4 py-2 text-heading">
@@ -422,7 +427,7 @@ export default function NationalApp() {
               <div>Trạm sạc: bản chụp 29/07/2026, chỉ dùng cục bộ</div>
               {manifest && (
                 <div className="border-t border-hairline pt-1">
-                  tải lần đầu {(manifest.bytes_first_load / 1e6).toFixed(2)} MB · trạm và POI nạp lười
+                  tải lần đầu {formatFixed(manifest.bytes_first_load / 1e6, 2)} MB · trạm và POI nạp lười
                 </div>
               )}
             </div>
@@ -621,5 +626,5 @@ function rgbCss(c: [number, number, number] | undefined): string {
 }
 
 function fmtBreak(f: NationalField, b: number): string {
-  return f.percent ? `${(b * 100).toFixed(b < 0.01 ? 1 : 0)}%` : formatBreak(b);
+  return f.percent ? `${formatFixed(b * 100, b < 0.01 ? 1 : 0)}%` : formatBreak(b);
 }

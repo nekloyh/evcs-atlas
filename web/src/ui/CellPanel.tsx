@@ -10,7 +10,7 @@ import * as React from "react";
 import type { H3CellViewModel } from "../components/atlas/inspector-types";
 import { communeSelection, type EntitySelection } from "../state/selection";
 import { FIELD_BY_ID, constantShort, type FieldMeta } from "../fields";
-import { formatValue } from "./format";
+import { formatFixed, formatValue } from "./format";
 import { baseUnitPhrase } from "../units";
 import { SourceBlock } from "./Source";
 import { Copy, Check } from "lucide-react";
@@ -229,7 +229,7 @@ export function CellPanel(props: CellPanelProps) {
             </p>
             {row["dist_station_euclid_m"] !== null && row["dist_station_euclid_m"] !== undefined && (
               <p className="text-ink-muted text-note">
-                Khoảng cách đường chim bay: {formatValue(row["dist_station_euclid_m"])} m (độ lệch đường đi detour: {row["detour_ratio"] ? Number(row["detour_ratio"]).toFixed(2) : "—"}).
+                Khoảng cách đường chim bay: {formatValue(row["dist_station_euclid_m"])} m (độ lệch đường đi detour: {row["detour_ratio"] ? formatFixed(Number(row["detour_ratio"]), 2) : "—"}).
               </p>
             )}
           </div>
@@ -240,7 +240,7 @@ export function CellPanel(props: CellPanelProps) {
             <p>
               <strong>Mức sử dụng ô:</strong>{" "}
               {row["util_cell"] !== null && row["util_cell"] !== undefined
-                ? `${(Number(row["util_cell"]) * 100).toFixed(1)}%`
+                ? `${formatFixed(Number(row["util_cell"]) * 100, 1)}%`
                 : "Chưa có trạm đo lường đóng góp"}
               {row["n_stations_measured"] !== null && row["n_stations_measured"] !== undefined
                 ? ` (${row["n_stations_measured"]} trạm có đo lường)`
@@ -298,7 +298,7 @@ export function CellPanel(props: CellPanelProps) {
               <TechRow k="Mã H3 r8" v={h3} />
               <TechRow k="Tỉnh/Thành phố" v={str(row["province_code"])} />
               <TechRow k="Toạ độ tâm (lat, lng)" v={`${num(row["lat"])?.toFixed(5) ?? "—"}, ${num(row["lng"])?.toFixed(5) ?? "—"}`} />
-              <TechRow k="Diện tích ô trong tỉnh" v={row["area_km2"] != null ? `${Number(row["area_km2"]).toFixed(4)} km²` : null} />
+              <TechRow k="Diện tích ô trong tỉnh" v={row["area_km2"] != null ? `${formatFixed(Number(row["area_km2"]), 4)} km²` : null} />
               <TechRow k="Tỉ lệ diện tích trong tỉnh" v={areaFrac !== null ? pct1(areaFrac) : null} />
               <TechRow k="Trạng thái ô" v={constantShort(cellState) || cellState} />
               <TechRow k="Mã xã/phường" v={communeCode} />
@@ -443,7 +443,7 @@ function getCellSupportingFacts(lens: string | null, activeColumn: string | unde
     if (activeColumn !== "detour_ratio") {
       facts.push({
         label: "Detour ratio",
-        value: row["detour_ratio"] != null ? Number(row["detour_ratio"]).toFixed(2) : null,
+        value: row["detour_ratio"] != null ? formatFixed(Number(row["detour_ratio"]), 2) : null,
         missingText: "—",
         hint: "Tỉ số cự ly mạng đường / chim bay",
       });
@@ -452,7 +452,7 @@ function getCellSupportingFacts(lens: string | null, activeColumn: string | unde
     if (activeColumn !== "util_cell") {
       facts.push({
         label: "Util ô",
-        value: row["util_cell"] != null ? `${(Number(row["util_cell"]) * 100).toFixed(1)}%` : null,
+        value: row["util_cell"] != null ? `${formatFixed(Number(row["util_cell"]) * 100, 1)}%` : null,
         missingText: "—",
         hint: "Mức sử dụng trung bình các trạm trong ô",
       });

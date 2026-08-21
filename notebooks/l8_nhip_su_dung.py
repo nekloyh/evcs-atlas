@@ -27,8 +27,8 @@
 import sys
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
@@ -37,7 +37,7 @@ ROOT = Path.cwd()
 if ROOT.name == "notebooks":
     ROOT = ROOT.parent
 sys.path.insert(0, str(ROOT / "src"))
-from vn import paths  # noqa: E402
+from vn import paths
 
 plt.rcParams.update({"figure.dpi": 120, "font.size": 9, "axes.grid": True,
                      "grid.alpha": 0.25, "axes.spines.top": False, "axes.spines.right": False})

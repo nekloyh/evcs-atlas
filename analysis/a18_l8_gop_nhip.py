@@ -22,9 +22,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
-from pyarrow import csv as pacsv
-
 from _common import CRITIQUE, ROOT, emit, stations
+from pyarrow import csv as pacsv
 
 # PHẢI là file mà occ_profile_168.meta.json khai là nguồn. Thư mục cha còn `load_ts.csv`
 # (508 MB) — một lượt crawl CŨ, ngắn hơn ~8,5 ngày. Đọc nhầm nó thì "tháng" chỉ phủ 23%

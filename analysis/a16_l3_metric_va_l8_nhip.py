@@ -6,13 +6,12 @@ L8: hồ sơ 168 giờ có tái dựng được "tỉ lệ súng đang bận the
 
 from __future__ import annotations
 
+import _graph
 import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
-from scipy.spatial import cKDTree
-
-import _graph
 from _common import ROOT, emit, grid, stations
+from scipy.spatial import cKDTree
 
 RADII = [1000, 2000, 3000, 5000]
 

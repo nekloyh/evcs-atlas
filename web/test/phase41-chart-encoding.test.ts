@@ -202,7 +202,8 @@ test("Acceptance 4b: hai số đếm của giờ đang xem đi riêng, không gh
 
   const appSrc = code("App.tsx");
   // Số của giờ đến từ `occCountAt` và đi bằng một prop RIÊNG.
-  assert.match(appSrc, /occCountAt\(occupancy\.profiles, t\)/, "App phải đếm theo giờ đang xem");
+  // Phase 10: `t` đọc qua selector (`s.t`) để App khỏi subscribe tick 4 Hz ở gốc — bất biến giữ nguyên.
+  assert.match(appSrc, /occCountAt\(occupancy\.profiles, (s\.)?t\)/, "App phải đếm theo giờ đang xem");
   assert.match(appSrc, /drawnCount=\{meta\.id === STATION_OCC_FIELD \? occDrawnCount : null\}/,
     "số theo giờ đi thành prop riêng, chỉ cho trường theo giờ");
   // …và KHÔNG được spread đè lên thang nữa.

@@ -1,6 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
+import { AppErrorBoundary } from "./AppErrorBoundary";
+
 import { UNKNOWN, apply, factsFrom } from "./data/bootstrap";
 import { loadManifest } from "./data/manifest";
 import { isNationalMode, isProxyMode } from "./data/province";
@@ -28,7 +30,7 @@ async function boot() {
     document.title = "EVCS · Toàn quốc";
     const { default: NationalApp } = await import("./national/NationalApp");
     createRoot(document.getElementById("root")!).render(
-      <StrictMode><NationalApp /></StrictMode>,
+      <StrictMode><AppErrorBoundary><NationalApp /></AppErrorBoundary></StrictMode>,
     );
     return;
   }
@@ -36,7 +38,7 @@ async function boot() {
     document.title = "EVCS · POI";
     const { default: ProxyApp } = await import("./proxy/ProxyApp");
     createRoot(document.getElementById("root")!).render(
-      <StrictMode><ProxyApp /></StrictMode>,
+      <StrictMode><AppErrorBoundary><ProxyApp /></AppErrorBoundary></StrictMode>,
     );
     return;
   }
@@ -60,9 +62,23 @@ async function boot() {
   const { default: App } = await import("./App");
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
-      <App />
+      <AppErrorBoundary>
+        <App />
+      </AppErrorBoundary>
     </StrictMode>,
   );
 }
 
-void boot();
+// Boundary phía trên chỉ hứng lỗi RENDER; lỗi của chính boot() (dynamic import hỏng,
+// mạng đứt giữa chừng) xảy ra trước khi React tồn tại nên phải hứng bằng tay, và bằng
+// DOM trần — cùng lý do inline-style trong AppErrorBoundary.
+boot().catch((err: unknown) => {
+  console.error("[evcs] boot crash:", err);
+  const root = document.getElementById("root");
+  if (root !== null && root.childElementCount === 0) {
+    root.innerHTML =
+      '<div role="alert" style="font-family:system-ui,sans-serif;max-width:36rem;margin:4rem auto;padding:0 1.5rem">' +
+      "<h1 style='font-size:1.1rem'>Không khởi động được ứng dụng</h1>" +
+      "<p style='font-size:.9rem'>Kiểm tra kết nối rồi tải lại trang.</p></div>";
+  }
+});

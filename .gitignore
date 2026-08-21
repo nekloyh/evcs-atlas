@@ -33,13 +33,22 @@ web/tsconfig.tsbuildinfo
 
 # Tài liệu .md thì để ngoài git — theo dõi qua memory thay vì file.
 # Riêng báo cáo QA vẫn GIỮ (xem dòng 7-8): phủ định sau *.md mới có tác dụng.
+#
+# HAI phủ định dưới đây thêm ở Phase 10 (finding 10-QA-001 + 10-QA-003), và cả hai đều là
+# vá một lỗ hệ thống chứ không phải thêm một ngoại lệ:
+#   · `docs/PHASE*.md` — bản liệt kê từng-file cũ dừng ở PHASE5, nên spec của Phase 6→10
+#     nằm ngoài Git. QA của Phase 10 không tìm thấy spec để đối chiếu và phải mở BLOCKER:
+#     một hợp đồng không được version hoá thì không phải một hợp đồng.
+#   · `docs/qa/**/*.md` — `witness-report.json` vào Git nhưng `README.md`/`baseline.md`
+#     cạnh nó thì không, nên phần NGƯỜI ĐỌC của mỗi đợt QA biến mất sau checkout sạch.
+#     Cùng lý do đã viết ở dòng 7-8 cho `data/qa/`: báo cáo chỉ có số tổng hợp.
 *.md
-!docs/PHASE2_LENS_MAP_SYSTEM.md
-!docs/PHASE3_INSPECTOR.md
-!docs/PHASE4_VISUALIZATION.md
-!docs/PHASE5_SEARCH_PRESETS.md
+!docs/PHASE*.md
+!docs/adr/*.md
+!docs/qa/**/*.md
 !web/DESIGN.md
 !docs/visual-research.md
+!docs/COT.md
 !store/qa/*.md
 *.parquet
 

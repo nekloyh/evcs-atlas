@@ -1,0 +1,150 @@
+{
+  "browser": "Chrome/151.0.7922.137",
+  "viewport": "1600x1000",
+  "gpu": "swiftshader (headless) — số FPS KHÔNG lấy từ lần chạy này; xem baseline.md",
+  "at10_1_error_boundary": {
+    "derived_state_ok": true,
+    "rendered_alert": true,
+    "rendered_message": "Ứng dụng gặp lỗi không phục hồi đượcmô hình chart gặp ca biênTải lại trang — nếu vẫn lỗi, xoá phần sau dấu # trên thanh địa chỉ rồi thử lại.",
+    "rendered_html": "<div role=\"alert\" style=\"font-family: system-ui, sans-serif; max-width: 36rem; margin: 4rem auto; padding: 0px 1.5rem; color: rgb(31, 35, 32);\"><h1 style=\"font-size: 1.1rem; margin-bottom: 0.5rem;\">Ứng dụng gặp lỗi không phục hồi được</h1><p style=\"font-size: 0.9rem; line-height: 1.5;\">mô hình chart gặp ca biên</p><p style=\"font-size: 0.9rem; line-height: 1.5;\"><a href=\"/#tinh=01&amp;m=2d&amp;f=po",
+    "message_carries_cause": true,
+    "host_app_survived": true,
+    "before_len": 909,
+    "after_len": 909
+  },
+  "at10_1b_boot_fallback": {
+    "fallback_shown": true,
+    "text": "Không khởi động được ứng dụngKiểm tra kết nối rồi tải lại trang."
+  },
+  "at10_2_filter_coherence": {
+    "before": {
+      "typed": "",
+      "count": "4.400 dòng",
+      "exportsDisabled": false,
+      "nExports": 6
+    },
+    "during_debounce": {
+      "typed": "vinfast",
+      "count": "đang lọc…",
+      "exportsDisabled": true,
+      "nExports": 6
+    },
+    "after": {
+      "typed": "vinfast",
+      "count": "0 / 4.400 dòng khớp bộ lọc",
+      "exportsDisabled": false,
+      "nExports": 6
+    },
+    "during_sort_change": {
+      "typed": "vinfast",
+      "count": "0 / 4.400 dòng khớp bộ lọc",
+      "exportsDisabled": false,
+      "nExports": 6
+    },
+    "no_stale_number_while_pending": true,
+    "sort_change_keeps_number": true,
+    "export_locked_while_pending": true,
+    "export_open_when_settled": true,
+    "count_changed": true
+  },
+  "at10_3_keyboard_sort": {
+    "header": {
+      "focused": true,
+      "label": "h3_r8"
+    },
+    "after_enter": {
+      "col": "h3_r8\n▲",
+      "ariaSort": "ascending"
+    },
+    "ok": true
+  },
+  "at10_6_scrubber_keys": {
+    "focusable": true,
+    "start": {
+      "now": 11,
+      "text": "T2 11:00",
+      "min": 0,
+      "max": 167
+    },
+    "after_3x_right": {
+      "now": 14,
+      "text": "T2 14:00",
+      "min": 0,
+      "max": 167
+    },
+    "home": {
+      "now": 0,
+      "text": "T2 00:00",
+      "min": 0,
+      "max": 167
+    },
+    "wrap_left_from_home": {
+      "now": 167,
+      "text": "CN 23:00",
+      "min": 0,
+      "max": 167
+    },
+    "end": {
+      "now": 167,
+      "text": "CN 23:00",
+      "min": 0,
+      "max": 167
+    },
+    "play_button_named": "chạy — 4 giờ/giây, lặp vô hạn",
+    "ok": true
+  },
+  "at10_4_reduced_motion": {
+    "media_emulation_honoured": true,
+    "calls_reduced": [
+      {
+        "method": "jumpTo",
+        "pitch": 50
+      }
+    ],
+    "calls_normal": [
+      {
+        "method": "easeTo",
+        "pitch": 50
+      }
+    ],
+    "measure": "phương thức camera của maplibre được gọi sau khi bấm 3D",
+    "ok": true
+  },
+  "at10_9_focus_restore": {
+    "ok": true,
+    "tabIndex": -1,
+    "label": "Không gian bản đồ chính"
+  },
+  "at10_10_responsive": {
+    "760": {
+      "viewport": 760,
+      "scrollWidth": 760,
+      "offenders": [],
+      "no_overflow": true
+    },
+    "900": {
+      "viewport": 900,
+      "scrollWidth": 900,
+      "offenders": [],
+      "no_overflow": true
+    },
+    "1024": {
+      "viewport": 1024,
+      "scrollWidth": 1024,
+      "offenders": [],
+      "no_overflow": true
+    },
+    "1280": {
+      "viewport": 1280,
+      "scrollWidth": 1280,
+      "offenders": [],
+      "no_overflow": true
+    },
+    "1600": {
+      "viewport": 1600,
+      "scrollWidth": 1600,
+      "offenders": [],
+      "no_overflow": true
+    }
+  }
+}

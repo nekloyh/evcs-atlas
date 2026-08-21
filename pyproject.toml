@@ -14,8 +14,41 @@ dependencies = [
     "osmium>=4.0",
 ]
 
+# ── lint: PHẠM VI ĐƯỢC CHỐT, không phải mặc định của công cụ ────────────────────
+#
+# Trước Phase 10 ở đây chỉ có `line-length`, nên tập luật thực thi là **mặc định của phiên
+# bản ruff đang cài** — 415 luật ở 0.16, và con số đó đổi theo mỗi lần nâng công cụ. Một
+# cổng chặn mà nội dung của nó do bên thứ ba quyết định thì không phải một cổng chặn. QA
+# Phase 10 (10-QA-006) đo 282 lỗi toàn repo dưới tập ấy; bản khai dưới đây là câu trả lời:
+# chốt tập luật, chốt phạm vi, đưa vào `make kiem`, và giữ nó ở 0.
+#
+# Chọn theo tiêu chí "bắt LỖI, không sửa GU":
+#   E4/E9 · F  — import hỏng, tên không tồn tại, biến chết, shadow. Lỗi thật.
+#   I          — thứ tự import; sửa được tự động, và giữ diff sạch cho mọi phase sau.
+#   RUF100     — `# noqa` chết. Bắt buộc, nếu không sổ ngoại lệ sẽ mục ra mà không ai biết.
+#
+# Bị loại CÓ LÝ DO ĐO ĐƯỢC (không phải vì lười):
+#   E501       — không có formatter trong dự án; bật nó là ép một đợt xuống dòng hàng loạt.
+#   E712       — ruff khuyên `not df[col]` thay cho `df[col] == False`. Với một Series pandas
+#                lời khuyên ấy NÉM ("truth value of a Series is ambiguous"). Một luật khuyên
+#                sai ở 3/3 chỗ nó chỉ ra thì không được làm cổng chặn.
+#   B905       — `zip(strict=)` đổi ngữ nghĩa ở 41 chỗ trong pipeline. Đáng làm, nhưng là
+#                một CR riêng có golden đi kèm, không phải phần đuôi của một phase hiệu năng.
+#   RUF046 và họ hàng "hiện đại hoá" — chạm số học của pipeline để đổi gu viết.
 [tool.ruff]
 line-length = 100
+# `.ipynb` là SẢN PHẨM DỰNG RA từ `.py` cùng tên (`notebooks/_build.py`). Lint bản dựng
+# là lint sai đầu: bản vá sẽ bị ghi đè ở lần build sau, và hai nửa của một cặp trôi khỏi nhau.
+extend-exclude = ["notebooks/*.ipynb"]
+
+[tool.ruff.lint]
+select = ["E4", "E9", "F", "I", "RUF100"]
+
+[tool.ruff.lint.per-file-ignores]
+# Notebook nguồn: hai luật này KHÔNG đúng với hình dạng của một notebook.
+#   F821 — `display` do IPython tiêm vào lúc chạy; nó không tồn tại trong file, đúng vậy.
+#   E402 — mỗi cell import thứ nó cần, ngay chỗ nó cần. Đó là cả điểm của định dạng cell.
+"notebooks/*.py" = ["E402", "F821"]
 
 [build-system]
 requires = ["hatchling"]

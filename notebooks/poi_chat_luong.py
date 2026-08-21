@@ -301,8 +301,8 @@ print("thành phần cũng không khử được điều đó.")
 # kém chỉ làm giảm độ nhạy.
 
 # %%
-from sklearn.linear_model import RidgeCV  # noqa: E402
-from sklearn.model_selection import GroupKFold, cross_val_score  # noqa: E402
+from sklearn.linear_model import RidgeCV
+from sklearn.model_selection import GroupKFold, cross_val_score
 
 F = pq.read_table(ROOT / "data/qa/critique/a20_dac_trung_tram.parquet").to_pandas()
 F = F[F.util_reportable.fillna(False) & (F.grade == "GOOD") & F.util.notna()].reset_index(drop=True)

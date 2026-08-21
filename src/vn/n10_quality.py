@@ -214,7 +214,7 @@ def _write_markdown(df: pd.DataFrame) -> None:
             (x.quality_flags if isinstance(x.quality_flags, str) else "").replace("|", ", ") or "—",
         ])
     w = [max(len(str(r[i])) for r in [hdr] + rows) for i in range(len(hdr))]
-    line = lambda r: "| " + " | ".join(str(v).ljust(w[i]) for i, v in enumerate(r)) + " |"  # noqa: E731
+    line = lambda r: "| " + " | ".join(str(v).ljust(w[i]) for i, v in enumerate(r)) + " |"
     body = [line(hdr), "|" + "|".join("-" * (w[i] + 2) for i in range(len(hdr))) + "|"]
     body += [line(r) for r in rows]
 

@@ -16,7 +16,7 @@ import { useEffect, useRef } from "react";
 
 import { STATION_OCC_FIELD } from "../fields";
 import { useStore } from "../state/store";
-import { DOW_LABELS, HOURS_IN_WEEK, dowOf, hourOf } from "../state/types";
+import { DOW_LABELS, HOURS_IN_WEEK, dowOf, hourOf, scrubberKeyStep } from "../state/types";
 import { HAIRLINE_HEX, RAMP_HEX } from "../viz/palette";
 
 /** Tốc độ mặc định — §3e. */
@@ -73,6 +73,7 @@ export function Scrubber({ field }: { field: string }) {
     <div className="flex shrink-0 items-stretch border-t border-hairline bg-panel text-body">
       <button
         onClick={() => setPlaying(!playing)}
+        aria-label={playing ? "dừng" : `chạy — ${HOURS_PER_SEC} giờ/giây, lặp vô hạn`}
         title={playing ? "dừng" : `chạy — ${HOURS_PER_SEC} giờ/giây, lặp vô hạn`}
         className="w-14 shrink-0 cursor-pointer border-r border-hairline text-heading hover:bg-basemap"
       >
@@ -146,9 +147,26 @@ function Track({
   };
 
   return (
+    /* `role="slider"` + phím mũi tên (Phase 10): trước đó track chỉ nghe pointer — bàn
+       phím và AT không có đường vào 168 giờ ngoài heatmap dock (thứ không phải lúc nào
+       cũng mở). Bước phím theo chuẩn slider: ←/→ một giờ, PageUp/Down một ngày, Home/End
+       hai mút tuần. */
     <div
       ref={el}
+      role="slider"
+      tabIndex={0}
+      aria-label="Giờ trong tuần"
+      aria-valuemin={0}
+      aria-valuemax={HOURS_IN_WEEK - 1}
+      aria-valuenow={t}
+      aria-valuetext={`${DOW_LABELS[dowOf(t)]} ${String(hourOf(t)).padStart(2, "0")}:00`}
       className="relative flex h-5 cursor-pointer touch-none select-none items-stretch"
+      onKeyDown={(e) => {
+        const next = scrubberKeyStep(t, e.key);
+        if (next === null) return; // phím lạ đi tiếp — Tab phải thoát được khỏi track
+        e.preventDefault();
+        onT(next);
+      }}
       onPointerDown={(e) => {
         e.currentTarget.setPointerCapture(e.pointerId);
         pick(e.clientX);

@@ -14,6 +14,7 @@ import type { NullState } from "./null-states";
 import { powerTierOf, type PowerTierId } from "../state/filter";
 import type { OpportunityCommuneRow } from "../viz/chart-models";
 import { BEYOND_2KM_M } from "../domain-thresholds";
+import { makeRequestCache } from "./request-cache";
 
 export { H3_RE };
 export { BEYOND_2KM_M } from "../domain-thresholds";
@@ -217,20 +218,26 @@ async function fetchFieldUncached(meta: FieldMeta): Promise<GridCell[]> {
 
 /**
  * Cache theo dataset-session + field. React render/revisit có thể gọi lại loader, nhưng
- * chỉ lần đầu được phát truy vấn DuckDB. Promise lỗi bị bỏ để retry có chủ ý.
+ * chỉ lần đầu được phát truy vấn DuckDB.
+ *
+ * Trần 4 trường (Phase 10): mỗi entry là rows × 9 thuộc tính — đo được +20,3 MB heap sau
+ * 15 lần đổi lens ở Hà Nội 4.400 ô, và tỉnh 30k ô thì ~×7. Trường vừa đọc luôn được chạm
+ * lên đầu nên không bao giờ bị đuổi; 4 đủ cho một vòng so sánh qua lại, còn "xem lại
+ * trường cũ" chỉ trả giá một truy vấn DuckDB (~trăm ms) thay vì giữ hàng chục MB chết.
+ *
+ * Lifecycle (đang chạy vs đã xong, và luật so identity ở nhánh lỗi) nằm trong
+ * `request-cache.ts` — ở đó nó test được mà không cần dựng DuckDB.
  */
-const fieldRequests = new Map<string, Promise<GridCell[]>>();
+export const FIELD_CACHE_MAX = 4;
+const fieldCache = makeRequestCache<GridCell[]>(FIELD_CACHE_MAX);
 
 export function fetchField(meta: FieldMeta): Promise<GridCell[]> {
-  const key = `${GRID}:${meta.id}`;
-  const cached = fieldRequests.get(key);
-  if (cached) return cached;
-  const request = fetchFieldUncached(meta).catch((error) => {
-    fieldRequests.delete(key);
-    throw error;
-  });
-  fieldRequests.set(key, request);
-  return request;
+  return fieldCache.get(`${GRID}:${meta.id}`, () => fetchFieldUncached(meta));
+}
+
+/** Chỉ cho kiểm/đo: kích thước hai sổ của cache trường. */
+export function fieldCacheSizes(): { inFlight: number; settled: number } {
+  return fieldCache.sizes();
 }
 
 /**

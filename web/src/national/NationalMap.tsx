@@ -10,7 +10,7 @@
  * ổn định nhất trong `MapView`.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import { H3HexagonLayer } from "@deck.gl/geo-layers";
@@ -222,6 +222,10 @@ export function NationalMap(props: NationalMapProps) {
   } = props;
   const zoom = props.view.zoom;
 
+  // Memo NGOÀI effect (Phase 10): 25k icon POI re-upload mỗi lần hover đổi tỉnh/moveend
+  // nếu filter chạy trong effect — identity mảng `data` mới là deck tải lại attribute.
+  const shownPoi = useMemo(() => (poi ? poi.filter((p) => showPoi.has(p.group)) : []), [poi, showPoi]);
+
   useEffect(() => {
     const ov = overlay.current;
     if (!ov) return;
@@ -370,8 +374,8 @@ export function NationalMap(props: NationalMapProps) {
     }
 
     // ── lớp chồng ──────────────────────────────────────────────────────────────
-    if (showPoi.size > 0 && poi && atlas) {
-      const shown = poi.filter((p) => showPoi.has(p.group));
+    if (shownPoi.length > 0 && atlas) {
+      const shown = shownPoi;
       out.push(
         new IconLayer({
           id: "vn-poi",
@@ -426,9 +430,8 @@ export function NationalMap(props: NationalMapProps) {
     provinces,
     rows,
     stations,
-    poi,
+    shownPoi,
     showStations,
-    showPoi,
     mode,
     res,
     hovered,
@@ -453,7 +456,12 @@ export function NationalMap(props: NationalMapProps) {
   useEffect(() => {
     const m = map.current;
     if (!m || !ready) return;
-    m.easeTo({ pitch: wantTilt ? 50 : 0, duration: 500 });
+    // Cùng gate reduced-motion với `flyTo` của MapView — kill-switch CSS toàn cục không
+    // với tới animation camera của maplibre, nên phải hỏi media query bằng tay.
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const pitch = wantTilt ? 50 : 0;
+    if (reduceMotion) m.jumpTo({ pitch });
+    else m.easeTo({ pitch, duration: 500 });
   }, [wantTilt, ready]);
 
   // Nhảy tới khung nhìn từ ngoài (khớp bbox lúc manifest về) — cùng luật với `MapView`:

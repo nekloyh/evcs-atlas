@@ -11,13 +11,12 @@ Ba câu hỏi:
 
 from __future__ import annotations
 
+import _graph
 import numpy as np
 import pandas as pd
+from _common import communes, emit, grid, occupancy, stations
 from scipy.spatial import cKDTree
 from scipy.stats import spearmanr
-
-import _graph
-from _common import communes, emit, grid, occupancy, stations
 
 
 def gini(x):
@@ -30,7 +29,6 @@ def main() -> None:
     st = stations()
     hn = st[st.scope == "HANOI"].copy()
     drop = (st.n_ports == 1) & (st.current_type == "AC")
-    keep = ~drop
     hn_drop = drop.loc[hn.index]
 
     nm = hn.name.fillna("").str.lower()

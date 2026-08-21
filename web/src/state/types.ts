@@ -167,6 +167,37 @@ export const dowOf = (t: number) => Math.floor(t / 24);
 export const hourOf = (t: number) => t % 24;
 export const tOf = (dow: number, hour: number) => dow * 24 + hour;
 
+/**
+ * Bước phím của thanh trượt tuần — §3e, thêm ở Phase 10 cùng `role="slider"`.
+ *
+ * Là HÀM THUẦN ở đây chứ không phải một chuỗi `? :` trong JSX vì đây là chỗ luật "tuần
+ * quay vòng" được viết: ←/→ một giờ, PageUp/PageDown một ngày, Home/End hai mút. Mút phải
+ * là `167` chứ không phải `168` — cùng cái bẫy off-by-one mà `HOURS_IN_WEEK` đã đặt ra ở
+ * trên, và một hàm test được là cách duy nhất chứng minh nó không quay lại.
+ *
+ * Trả `null` nghĩa là phím không thuộc thanh trượt — người gọi phải KHÔNG `preventDefault`
+ * cho những phím đó, nếu không Tab sẽ chết ở đây.
+ */
+export function scrubberKeyStep(t: number, key: string): number | null {
+  const wrap = (v: number) => ((v % HOURS_IN_WEEK) + HOURS_IN_WEEK) % HOURS_IN_WEEK;
+  switch (key) {
+    case "ArrowRight":
+      return wrap(t + 1);
+    case "ArrowLeft":
+      return wrap(t - 1);
+    case "PageUp":
+      return wrap(t + 24);
+    case "PageDown":
+      return wrap(t - 24);
+    case "Home":
+      return 0;
+    case "End":
+      return HOURS_IN_WEEK - 1;
+    default:
+      return null;
+  }
+}
+
 /** Nhãn thứ — dữ liệu gốc `dow = 0` là Thứ Hai (`docs/COT.md`), không phải Chủ Nhật. */
 export const DOW_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"] as const;
 

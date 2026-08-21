@@ -7,13 +7,11 @@ Kiểm: quét ngưỡng, xem hàm số-ô-buildable có "vai" ổn định khôn
 from __future__ import annotations
 
 import numpy as np
-
 from _common import emit, grid
 
 
 def main() -> None:
     g = grid()
-    stn = g.n_stations > 0
     ports = g.n_ports.to_numpy(float)
 
     sweep = []

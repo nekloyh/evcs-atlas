@@ -17,7 +17,6 @@ from __future__ import annotations
 import numpy as np
 import rasterio
 import rasterio.features
-
 from _common import ROOT, emit, grid
 
 M_PER_DEG_LAT = 110_574.0

@@ -72,7 +72,7 @@ export function OpportunityCommuneRankBars({
           <span className="font-mono text-note font-bold text-ink-muted w-4 shrink-0">
             {item.rank ?? "—"}
           </span>
-          <span className="truncate font-semibold text-note text-ink">
+          <span className="truncate font-semibold text-note text-ink" title={item.communeName}>
             {item.communeName}
           </span>
           <span className="shrink-0 text-[10px] font-mono text-ink-muted">

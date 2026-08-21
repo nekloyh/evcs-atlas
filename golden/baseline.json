@@ -91714,6 +91714,16 @@
      "sum": 55960.0,
      "sumsq": 220952304.0
     },
+    "n_ports_missing": {
+     "dtype": "num",
+     "max": 38.0,
+     "min": 0.0,
+     "n_finite": 34,
+     "n_null": 0,
+     "p50": 3.0,
+     "sum": 217.0,
+     "sumsq": 4213.0
+    },
     "n_private_ac_dropped": {
      "dtype": "num",
      "max": 1811.0,
@@ -91806,13 +91816,13 @@
     },
     "pop_beyond_2km_network": {
      "dtype": "num",
-     "max": 3707017.0,
-     "min": 422806.0,
+     "max": 3907728.0,
+     "min": 439417.0,
      "n_finite": 34,
      "n_null": 0,
-     "p50": 2129832.0,
-     "sum": 65974536.0,
-     "sumsq": 157521413805000.0
+     "p50": 2135491.5,
+     "sum": 67332862.0,
+     "sumsq": 163855996643000.0
     },
     "pop_share_communes_zero_poi": {
      "dtype": "num",
@@ -91834,6 +91844,16 @@
      "sum": 113625653.0,
      "sumsq": 605087243413000.0
     },
+    "population_access_within_2km": {
+     "dtype": "num",
+     "max": 0.8175,
+     "min": 0.1311,
+     "n_finite": 34,
+     "n_null": 0,
+     "p50": 0.31435,
+     "sum": 10.9983,
+     "sumsq": 4.35846573
+    },
     "population_grid": {
      "dtype": "num",
      "max": 14690773.8,
@@ -91843,6 +91863,16 @@
      "p50": 3297762.4,
      "sum": 113732607.3,
      "sumsq": 607371741322000.0
+    },
+    "population_within_2km": {
+     "dtype": "num",
+     "max": 12009521.0,
+     "min": 76646.0,
+     "n_finite": 34,
+     "n_null": 0,
+     "p50": 918429.0,
+     "sum": 46399708.0,
+     "sumsq": 217881370164000.0
     },
     "ports_per_10k_pop": {
      "dtype": "num",
@@ -91874,6 +91904,16 @@
      "sum": 8104.8,
      "sumsq": 2020948.6
     },
+    "power_kw_per_urban_km2": {
+     "dtype": "num",
+     "max": 377.05,
+     "min": 71.42,
+     "n_finite": 34,
+     "n_null": 0,
+     "p50": 131.305,
+     "sum": 5043.05,
+     "sumsq": 911388.2465
+    },
     "power_kw_site": {
      "dtype": "num",
      "max": 268214.7,
@@ -91883,6 +91923,16 @@
      "p50": 33935.25,
      "sum": 1611058.6,
      "sumsq": 175598798340.0
+    },
+    "power_missing": {
+     "dtype": "num",
+     "max": 38.0,
+     "min": 0.0,
+     "n_finite": 34,
+     "n_null": 0,
+     "p50": 3.0,
+     "sum": 220.0,
+     "sumsq": 4330.0
     },
     "private_ac_share_ports": {
      "dtype": "num",
@@ -91980,13 +92030,13 @@
     },
     "share_pop_beyond_2km": {
      "dtype": "num",
-     "max": 0.8302,
-     "min": 0.1816,
+     "max": 0.8689,
+     "min": 0.1825,
      "n_finite": 34,
      "n_null": 0,
-     "p50": 0.6809,
-     "sum": 22.3664,
-     "sumsq": 15.39176494
+     "p50": 0.68565,
+     "sum": 23.0017,
+     "sumsq": 16.36186573
     },
     "share_pop_unreachable": {
      "dtype": "num",
@@ -91997,6 +92047,16 @@
      "p50": 0.00885,
      "sum": 0.6355,
      "sumsq": 0.03345925
+    },
+    "share_power_missing": {
+     "dtype": "num",
+     "max": 0.1597,
+     "min": 0.0,
+     "n_finite": 34,
+     "n_null": 0,
+     "p50": 0.0265,
+     "sum": 1.1148,
+     "sumsq": 0.07940848
     },
     "share_stations_measured": {
      "dtype": "num",
@@ -92017,6 +92077,16 @@
      "p50": 5.165,
      "sum": 186.74,
      "sumsq": 1111.9222
+    },
+    "urban_km2": {
+     "dtype": "num",
+     "max": 1006.9948,
+     "min": 30.0839,
+     "n_finite": 34,
+     "n_null": 0,
+     "p50": 325.8082,
+     "sum": 10565.4118,
+     "sumsq": 4617255.15293
     },
     "util_median": {
      "dtype": "num",
@@ -92053,6 +92123,7 @@
     "n_poi_demand",
     "n_poi_visual",
     "n_ports",
+    "n_ports_missing",
     "n_private_ac_dropped",
     "n_road_ways_in_province",
     "n_road_ways_shard",
@@ -92065,11 +92136,15 @@
     "pop_beyond_2km_network",
     "pop_share_communes_zero_poi",
     "population",
+    "population_access_within_2km",
     "population_grid",
+    "population_within_2km",
     "ports_per_10k_pop",
     "ports_per_station",
     "power_kw_per_station",
+    "power_kw_per_urban_km2",
     "power_kw_site",
+    "power_missing",
     "private_ac_share_ports",
     "private_ac_share_power",
     "private_ac_share_stations",
@@ -92083,13 +92158,15 @@
     "share_only_in_secondary",
     "share_pop_beyond_2km",
     "share_pop_unreachable",
+    "share_power_missing",
     "share_stations_measured",
     "stations_per_100k_pop",
+    "urban_km2",
     "util_median",
     "vnsdi_anchor_ratio"
    ],
    "key_hash": "efce0f957ad19fcc",
-   "n_cols": 47,
+   "n_cols": 54,
    "n_rows": 34
   },
   "web/connectors.parquet": {

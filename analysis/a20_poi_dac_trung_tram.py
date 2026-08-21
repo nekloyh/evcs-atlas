@@ -28,14 +28,13 @@ import sys
 import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
+from _common import ROOT, emit
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import dijkstra
 from scipy.spatial import cKDTree
 
-from _common import ROOT, emit
-
 sys.path.insert(0, str(ROOT / "src"))
-from evcs.core import roadgraph as roadnet  # noqa: E402
+from evcs.core import roadgraph as roadnet
 
 BAN_KINH = (300, 500, 1000, 1500)
 LIMIT_M = 1_600.0

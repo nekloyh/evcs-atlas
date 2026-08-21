@@ -262,7 +262,7 @@ function setBuildings3dLayer(m: maplibregl.Map, on: boolean): void {
 }
 
 export function MapView(props: Props) {
-  const { field, cells, communes, boundary, stations, scale, surfaceBreaks, roads, routes, poi, occupancy } = props;
+  const { field, cells, communes, boundary, stations, scale, surfaceBreaks, roads, routes, poi, occupancy, analyticalCells, analyticalStations } = props;
   const container = useRef<HTMLDivElement>(null);
   const overlay = useRef<MapboxOverlay | null>(null);
   const map = useRef<maplibregl.Map | null>(null);
@@ -511,7 +511,19 @@ export function MapView(props: Props) {
     const ov = overlay.current;
     if (!ov) return;
     const built = buildLayers({
-      ...props,
+      field,
+      cells,
+      communes,
+      boundary,
+      stations,
+      scale,
+      surfaceBreaks,
+      roads,
+      routes,
+      poi,
+      occupancy,
+      analyticalCells,
+      analyticalStations,
       selected,
       layersOn,
       zoom,
@@ -552,7 +564,10 @@ export function MapView(props: Props) {
     // tên nơi chốn bên dưới. Nâng lại sau MỖI lượt dựng lớp — lớp deck mới luôn được thêm
     // lên đỉnh, nên một lần nâng lúc khởi tạo sẽ hết tác dụng ở lượt đổi trường kế tiếp.
     raiseLabels(map.current);
-  }, [props, field, cells, communes, boundary, stations, scale, surfaceBreaks, roads, routes, poi, occupancy, selected, layersOn, zoom, mode, paintOn, filter, marks, t, demandRepresentation, scene, ready, candidate, simulationResult, placementMode]);
+    // KHÔNG có `props` trong deps (Phase 10): identity của object props đổi ở MỌI render
+    // của App, nên để nó ở đây là "mọi render App = dựng lại toàn stack deck" — các input
+    // thật đã được liệt kê rời từng cái, kể cả hai trường analytical.
+  }, [field, cells, communes, boundary, stations, scale, surfaceBreaks, roads, routes, poi, occupancy, analyticalCells, analyticalStations, selected, layersOn, zoom, mode, paintOn, filter, marks, t, demandRepresentation, scene, ready, candidate, simulationResult, placementMode]);
 
   // `h-full w-full`, KHÔNG `absolute inset-0`: maplibre-gl.css đặt
   // `.maplibregl-map { position: relative }` và được import SAU tailwind, nên cùng độ ưu
@@ -596,9 +611,16 @@ export function MapView(props: Props) {
  */
 function raiseLabels(m: maplibregl.Map | null): void {
   if (!m || !m.isStyleLoaded()) return;
-  for (const id of labelLayerIds(m.getStyle())) {
-    if (m.getLayer(id)) m.moveLayer(id);
-  }
+  const style = m.getStyle();
+  const labels = labelLayerIds(style).filter((id) => m.getLayer(id));
+  // Guard "đã đúng chỗ rồi thì thôi" (Phase 10): `moveLayer` của maplibre KHÔNG tự no-op —
+  // nó set `_layerOrderChanged` kể cả khi lớp đã ở cuối, kéo theo full symbol placement và
+  // một sự kiện `styledata` mới. Hàm này lại được gọi từ chính `styledata`, nên thiếu guard
+  // là một vòng lặp tiềm tàng (chưa quan sát được trên build thật, nhưng bảo hiểm rẻ).
+  const order = (style.layers ?? []).map((l) => l.id);
+  const tail = order.slice(order.length - labels.length);
+  if (labels.length > 0 && labels.every((id, i) => tail[i] === id)) return;
+  for (const id of labels) m.moveLayer(id);
 }
 
 /**

@@ -69,7 +69,6 @@ export function Legend({
   const floating = variant === "floating";
   const zoom = useStore((s) => s.view.zoom);
   const setView = useStore((s) => s.setView);
-  const view = useStore((s) => s.view);
   const paintOn = useStore((s) => s.paintOn);
   const setPaintOn = useStore((s) => s.setPaintOn);
   const scene = useStore((s) => s.scene);
@@ -157,7 +156,7 @@ export function Legend({
           nên không vẽ. Đó là texture, không phải bản đồ.
         </span>
         <button
-          onClick={() => setView({ ...view, zoom: HEX_MIN_ZOOM })}
+          onClick={() => setView({ ...useStore.getState().view, zoom: HEX_MIN_ZOOM })}
           className="cursor-pointer border border-hairline px-2 py-0.5 hover:bg-basemap"
         >
           phóng tới z{HEX_MIN_ZOOM}
@@ -256,7 +255,7 @@ export function Legend({
         <ClipLines clip={clip} className="w-full" />
         {plan.coarse && (
           <button
-            onClick={() => setView({ ...view, zoom: HEX_MIN_ZOOM })}
+            onClick={() => setView({ ...useStore.getState().view, zoom: HEX_MIN_ZOOM })}
             className="cursor-pointer border border-hairline px-1 text-note text-ink-muted hover:bg-basemap"
           >
             đọc thô · ô ~{Math.round(hexPixelWidth(zoom))} px
@@ -322,7 +321,7 @@ export function Legend({
         <ClipLines clip={clip} />
         {plan.coarse && (
           <button
-            onClick={() => setView({ ...view, zoom: HEX_MIN_ZOOM })}
+            onClick={() => setView({ ...useStore.getState().view, zoom: HEX_MIN_ZOOM })}
             title={`Ô H3 rộng ~${Math.round(hexPixelWidth(zoom))} px ở mức phóng này — thấy được hình dáng chung, không đọc được từng bậc màu. Bấm để phóng tới z${HEX_MIN_ZOOM}.`}
             className="self-start cursor-pointer border border-hairline px-1 text-note text-ink-muted hover:bg-basemap"
           >
@@ -447,7 +446,7 @@ export function Legend({
             được, vì cách sửa duy nhất là phóng gần. */}
         {plan.coarse && (
           <button
-            onClick={() => setView({ ...view, zoom: HEX_MIN_ZOOM })}
+            onClick={() => setView({ ...useStore.getState().view, zoom: HEX_MIN_ZOOM })}
             title={`Ô H3 rộng ~${Math.round(hexPixelWidth(zoom))} px ở mức phóng này — thấy được hình dáng chung, không đọc được từng bậc màu. Bấm để phóng tới z${HEX_MIN_ZOOM}.`}
             className="cursor-pointer border border-hairline px-1 text-note text-ink-muted hover:bg-basemap"
           >

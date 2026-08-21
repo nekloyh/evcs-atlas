@@ -8,13 +8,12 @@ Hỏng nếu: Spearman(0,7× ; 1,3×) < 0,95 hoặc > 10% ô đổi nhóm ngư�
 
 from __future__ import annotations
 
-import numpy as np
-from scipy.spatial import cKDTree
-from scipy.stats import spearmanr
-
 import _graph
+import numpy as np
 from _common import emit
 from _graph import DEFAULT_KPH, LINK_KPH
+from scipy.spatial import cKDTree
+from scipy.stats import spearmanr
 
 BINS = [0, 3, 5, 10, np.inf]
 

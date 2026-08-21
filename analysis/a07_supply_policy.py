@@ -10,9 +10,8 @@ Không "hỏng" theo nghĩa lỗi kỹ thuật — nhưng nếu (b) mạnh hơn 
 from __future__ import annotations
 
 import numpy as np
-from scipy.stats import spearmanr
-
 from _common import communes, emit, stations
+from scipy.stats import spearmanr
 
 # Nhận diện khu đô thị lớn qua CHÍNH TÊN TRẠM trong nguồn evcs (không có lớp ranh giới
 # khu đô thị nào trong bộ dữ liệu). Đây là proxy KHAI BÁO, không phải lớp dữ liệu.

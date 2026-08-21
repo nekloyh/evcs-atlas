@@ -1,4 +1,4 @@
-.PHONY: check-chain setup clean help web vn vn-plan vn-web vn-quocgia poi-proxy golden golden-ghi schema schema-kiem kiem clean-cache
+.PHONY: check-chain setup clean help web vn vn-plan vn-web vn-quocgia poi-proxy golden golden-ghi schema schema-kiem kiem lint clean-cache
 
 help:
 	@echo "make setup    — cài môi trường (uv sync)"
@@ -19,7 +19,8 @@ help:
 	@echo "   đọc trong trình duyệt, không ghi đĩa, mất khi tải lại trang)"
 	@echo ""
 	@echo "  ── cổng chặn (xem docs/adr/) ──"
-	@echo "make kiem      — schema + test Python + test web + golden. Chạy trước mọi commit."
+	@echo "make kiem      — lint + schema + test Python + test web + golden. Chạy trước mọi commit."
+	@echo "make lint      — ruff, phạm vi chốt ở pyproject.toml. PHẢI là 0 lỗi."
 	@echo "make golden    — DỪNG nếu một con số của 863 bảng sản phẩm đổi"
 	@echo "make schema    — sinh lại khai báo cột cho web từ src/evcs/schema/grid.py"
 	@echo ""
@@ -93,7 +94,13 @@ schema:
 schema-kiem:
 	uv run python -m evcs.schema.emit --kiem
 
-kiem: schema-kiem
+# --- lint: phạm vi và tập luật khai ở `pyproject.toml`, không phải mặc định của ruff ---
+# Đứng TRƯỚC test trong `kiem` vì nó rẻ nhất và bắt đúng loại lỗi làm test nói dối
+# (import chết, tên không tồn tại, biến bị shadow).
+lint:
+	uv run ruff check .
+
+kiem: lint schema-kiem
 	uv run pytest
 	cd web && pnpm test
 	$(MAKE) golden

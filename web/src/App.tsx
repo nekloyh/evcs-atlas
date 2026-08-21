@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 
 import { MapView } from "./map/MapView";
 import {
@@ -78,6 +79,12 @@ import { useSimulationController } from "./simulation/use-simulation";
 import type { AppNavMode, HashState } from "./state/types";
 import { readHash } from "./state/hash";
 import { currentDataset, NATIONAL, switchDataset } from "./data/province";
+
+/**
+ * Hằng module thay cho `?? []` (Phase 10): mỗi `[]` mới là một identity mới mỗi render,
+ * và SearchBar memo hoá index theo identity của mảng ô — cùng mẹo với `NationalApp`.
+ */
+const EMPTY_CELLS: never[] = [];
 
 /**
  * Nav — DESIGN.md §3a.
@@ -317,7 +324,7 @@ export default function App() {
   );
 
   const activeCellSnapshot = meta.readAs === "cell" && cellSnapshot?.fieldId === meta.id ? cellSnapshot : null;
-  const cells = meta.readAs === "cell" ? activeCellSnapshot?.rows ?? [] : cellSnapshot?.rows ?? [];
+  const cells = meta.readAs === "cell" ? activeCellSnapshot?.rows ?? EMPTY_CELLS : cellSnapshot?.rows ?? EMPTY_CELLS;
   const baseScale = meta.readAs === "cell"
     ? activeCellSnapshot?.scale ?? null
     : scaleSnapshot?.fieldId === meta.id ? scaleSnapshot.scale : null;
@@ -529,7 +536,6 @@ export default function App() {
     void fetchOccupancy().then(setOccupancy, fail);
   }, [manifest, occupancyUnavailable, needOcc, occupancy]);
 
-  const t = useStore((s) => s.t);
   const analysisFilter = useStore((s) => s.filter.active);
 
   /**
@@ -547,9 +553,13 @@ export default function App() {
    * Nên chúng đi thành một prop RIÊNG tới legend, giữ đúng bất biến ở `viz/occ.ts`:
    * "swatch chấm rỗng hỏi về giờ trên màn hình, và nó PHẢI đổi theo giờ".
    */
-  const occDrawnCount = useMemo(
-    () => (occupancy ? occCountAt(occupancy.profiles, t) : null),
-    [occupancy, t],
+  // KHÔNG subscribe `t` trần ở App (Phase 10): mỗi tick play 4 Hz sẽ render CẢ CÂY.
+  // Selector dẫn xuất chỉ đổi khi con số thật đổi — và chỉ tính khi trường occ đang tô,
+  // là trường duy nhất mà legend cần số đếm theo giờ.
+  const occDrawnCount = useStore(
+    useShallow((s) =>
+      occupancy && meta.id === STATION_OCC_FIELD ? occCountAt(occupancy.profiles, s.t) : null,
+    ),
   );
 
   // Asset supply không phụ thuộc telemetry. Cùng geometry trạm nhưng khác measure, nên
@@ -580,7 +590,7 @@ export default function App() {
    * được (chưa nạp, đối tượng không có trong measure này) — mốc vắng mặt là câu trả lời
    * đúng cho "không biết", không phải 0.
    */
-  const selectedValue = useMemo<number | null>(() => {
+  const selectedValue = useStore<number | null>((s) => {
     if (!cellSel) return null;
     const num = (v: unknown): number | null =>
       typeof v === "number" && Number.isFinite(v) ? v : null;
@@ -598,12 +608,12 @@ export default function App() {
       return num(stations.find((s) => s.id === station)?.nPorts);
     if (station && meta.id === STATION_OCC_FIELD && occupancy) {
       const i = occupancy.stations.findIndex((s) => s.id === station);
-      return i < 0 ? null : num(stationOccAt(occupancy.profiles, i, t));
+      return i < 0 ? null : num(stationOccAt(occupancy.profiles, i, s.t));
     }
     const road = roadIdOf(cellSel);
     if (road && meta.readAs === "road") return num(roads.find((r) => r.id === road)?.dist);
     return null;
-  }, [cellSel, meta, communes, cells, stations, occupancy, roads, t]);
+  });
 
   /**
    * TẬP PHÂN TÍCH — dẫn xuất ĐÚNG MỘT LẦN, ở đây (§5.2, §5.4).

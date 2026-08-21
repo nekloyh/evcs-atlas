@@ -59,12 +59,11 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
-
 from shapely import wkb
 from shapely.geometry import mapping
 
 from evcs.schema import GRID
-from evcs.schema.national import national_table  # noqa: I001 — bậc là tham số, xem `national_table`
+from evcs.schema.national import national_table
 
 from . import admin, paths, qa
 

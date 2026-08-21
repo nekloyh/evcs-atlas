@@ -24,12 +24,11 @@ import math
 import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
+from _common import ROOT, emit, grid, stations
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import connected_components, dijkstra
 from scipy.spatial import cKDTree
 from scipy.stats import spearmanr
-
-from _common import ROOT, emit, grid, stations
 
 M_PER_DEG_LAT = 110_574.0
 M_PER_DEG_LON = 103_940.0
@@ -202,7 +201,6 @@ def main() -> None:
         fin = np.isfinite(d)
         if base is None:
             base = d
-            anchor_full, snodes_full = anchor, snodes
         m = fin & np.isfinite(base)
         variants[name] = {
             "canh_giu": int(keep.sum()),

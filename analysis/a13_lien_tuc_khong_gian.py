@@ -25,7 +25,6 @@ from __future__ import annotations
 import h3
 import numpy as np
 import pandas as pd
-
 from _common import CRITIQUE, ROOT, emit, grid
 
 JUMP_M = 2_000.0

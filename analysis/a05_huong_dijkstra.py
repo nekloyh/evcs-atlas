@@ -16,15 +16,14 @@ Ghi: data/qa/critique/a05.json
 
 from __future__ import annotations
 
+import _graph
 import numpy as np
 import pandas as pd
+from _common import emit, grid
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import dijkstra
 from scipy.spatial import cKDTree
 from scipy.stats import spearmanr
-
-import _graph
-from _common import emit, grid
 
 
 def main() -> None:

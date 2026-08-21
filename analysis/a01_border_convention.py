@@ -14,15 +14,14 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from _common import ROOT, emit, grid, roads
 from shapely import wkb as shwkb
 from shapely.prepared import prep
 from shapely.strtree import STRtree
 
-from _common import ROOT, emit, grid, roads  # noqa: E402
-
-from evcs.core import geo  # noqa: E402
-from evcs.core import grid as gridmod  # noqa: E402
-from vn import admin  # noqa: E402
+from evcs.core import geo
+from evcs.core import grid as gridmod
+from vn import admin
 
 
 def _len_m(geom) -> float:

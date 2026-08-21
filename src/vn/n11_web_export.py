@@ -37,9 +37,9 @@ import pyarrow.parquet as pq
 from shapely import wkb
 from shapely.geometry import mapping
 
-from evcs.schema import COMMUNE, GRID
 from evcs.core.osm import ACCESS_BLOCKED
 from evcs.core.roadgraph import DETOUR_MIN_EUCLID_M
+from evcs.schema import COMMUNE, GRID
 
 from . import admin, paths, qa
 from .n10_quality import MIN_OCC_MEASURED_SHARE

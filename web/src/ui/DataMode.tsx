@@ -66,7 +66,7 @@ import type { StationOccupancy } from "../data/occupancy";
 import { CONSTANTS, constantShort } from "../fields";
 import { shapeDayProfiles, type ShapeProfile } from "../viz/occ";
 import { HAIRLINE_HEX, HATCH_HEX, RAMP_HEX } from "../viz/palette";
-import { formatValue } from "./format";
+import { formatFixed, formatValue } from "./format";
 
 const SERIES = RAMP_HEX[4]!;
 const vn = (n: number) => n.toLocaleString("vi-VN");
@@ -1092,7 +1092,7 @@ function ProvincesBlock({ manifest }: { manifest: Manifest }) {
                       warnAbove={th["POI_ZERO_COMMUNE_MAX"] ?? 0.5}
                     />
                     <td className="py-1.5 pr-3 text-right tabular-nums text-ink-2">
-                      {r.vnsdi_anchor_ratio === null ? "—" : r.vnsdi_anchor_ratio.toFixed(3)}
+                      {r.vnsdi_anchor_ratio === null ? "—" : formatFixed(r.vnsdi_anchor_ratio, 3)}
                     </td>
                     <td className="py-1.5 pr-3">
                       <div className="flex flex-wrap items-center gap-1">
@@ -1317,9 +1317,24 @@ function RawDataTableBlock({ manifest }: { manifest: Manifest }) {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(50);
   const [filter, setFilter] = useState("");
+  // `filter` là thứ đang GÕ; `committedFilter` là thứ các con số đang NÓI VỀ. Chuỗi gõ
+  // trễ 250 ms trước khi thành chuỗi cam kết: mỗi WHERE mới là một cặp query count+page
+  // trượt cache, và hàng đợi DuckDB serial toàn app — gõ "vinfast" không debounce là
+  // ~14 lần quét LIKE xếp hàng trước mọi truy vấn khác (đo Phase 10).
+  //
+  // MỘT chuỗi cam kết cho CẢ BA đường ra — bảng, số đếm, và bản xuất. Bản vá đầu của
+  // Phase 10 chỉ đổi đường bảng, để số đếm và export đọc `filter` tức thời: trong 250 ms
+  // đó nhãn "n / N dòng khớp bộ lọc" trình bày số của bộ lọc CŨ như thể là của bộ lọc
+  // vừa gõ, và một cú bấm Xuất trong cửa sổ ấy ghi ra một tập khác với bảng đang nhìn.
+  // Đó là lỗi trình bày dữ liệu, không phải lỗi hoạt hình.
+  const [committedFilter, setCommittedFilter] = useState("");
   const [visibleCols, setVisibleCols] = useState<string[]>([]);
   const [allCols, setAllCols] = useState<string[]>([]);
   const [data, setData] = useState<TablePage | null>(null);
+  // Bộ lọc mà `data` MÔ TẢ. Đây là mảnh còn thiếu để câu hỏi "số trên màn hình có trả lời
+  // được chuỗi đang gõ không" trả lời được CHÍNH XÁC: `loading` thì cũng bật khi đổi
+  // trang hay đổi cột sắp xếp, mà hai thao tác ấy không làm `total` sai đi tí nào.
+  const [dataFilter, setDataFilter] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [exporting, setExporting] = useState<string | null>(null);
@@ -1327,6 +1342,11 @@ function RawDataTableBlock({ manifest }: { manifest: Manifest }) {
   const [showColPicker, setShowColPicker] = useState(false);
 
   const provCode = manifest.province?.province_code;
+
+  useEffect(() => {
+    const id = setTimeout(() => setCommittedFilter(filter), 250);
+    return () => clearTimeout(id);
+  }, [filter]);
 
   useEffect(() => {
     let dead = false;
@@ -1357,13 +1377,14 @@ function RawDataTableBlock({ manifest }: { manifest: Manifest }) {
       desc,
       offset: page * pageSize,
       limit: pageSize,
-      filter,
+      filter: committedFilter,
       visibleColumns: visibleCols,
       provinceCode: provCode,
     })
       .then((res) => {
         if (cancelled) return;
         setData(res);
+        setDataFilter(committedFilter);
         setLoading(false);
       })
       .catch((e: unknown) => {
@@ -1378,12 +1399,18 @@ function RawDataTableBlock({ manifest }: { manifest: Manifest }) {
     return () => {
       cancelled = true;
     };
-  }, [selectedTable, sort, desc, page, pageSize, filter, visibleCols, provCode, allCols.length]);
+  }, [selectedTable, sort, desc, page, pageSize, committedFilter, visibleCols, provCode, allCols.length]);
 
   const total = data?.total ?? 0;
   const totalUnfiltered = data?.totalUnfiltered ?? 0;
   const lastPage = Math.max(0, Math.ceil(total / pageSize) - 1);
-  const isFiltered = filter.trim().length > 0;
+  // Số đếm và bản xuất mô tả `committedFilter` — KHÔNG phải ô gõ.
+  const isFiltered = committedFilter.trim().length > 0;
+  // "Số trên màn hình KHÔNG trả lời được thứ đang gõ" — một phép so, hai cửa sổ:
+  // trong 250 ms debounce (`filter !== dataFilter` vì chưa cam kết), và trong lúc truy vấn
+  // của chuỗi đã cam kết chưa về (`dataFilter` vẫn là chuỗi cũ). Đổi trang / đổi cột sắp
+  // xếp KHÔNG rơi vào đây: `dataFilter` không đổi, nên `total` vẫn đúng và vẫn được in.
+  const filterPending = data === null || dataFilter !== filter;
 
   const handleExport = useCallback(
     async (format: ExportFormat) => {
@@ -1395,7 +1422,7 @@ function RawDataTableBlock({ manifest }: { manifest: Manifest }) {
           tableId: selectedTable,
           format,
           manifest,
-          filter,
+          filter: committedFilter,
           sortCol: sort,
           sortDesc: desc,
           visibleColumns: visibleCols,
@@ -1413,7 +1440,7 @@ function RawDataTableBlock({ manifest }: { manifest: Manifest }) {
         setExporting(null);
       }
     },
-    [selectedTable, manifest, filter, sort, desc, visibleCols, allCols],
+    [selectedTable, manifest, committedFilter, sort, desc, visibleCols, allCols],
   );
 
   if (!gate.render) return <AbsentBlock title={B10} gate={gate} />;
@@ -1445,16 +1472,24 @@ function RawDataTableBlock({ manifest }: { manifest: Manifest }) {
           <div className="flex items-center gap-1.5">
             {/* §4.4 — nhãn nút nói CẢ HAI con số khi đang lọc, không phải một tử số trần. */}
             <span className="mr-1 text-note font-medium text-ink-muted">
-              {isFiltered
-                ? `Xuất ${vn(total)} / ${vn(totalUnfiltered)} dòng đang lọc:`
-                : `Xuất toàn bộ ${vn(totalUnfiltered)} dòng:`}
+              {filterPending
+                ? data === null
+                  ? "Đang tải bảng…"
+                  : "Đang tính lại theo bộ lọc…"
+                : isFiltered
+                  ? `Xuất ${vn(total)} / ${vn(totalUnfiltered)} dòng đang lọc:`
+                  : `Xuất toàn bộ ${vn(totalUnfiltered)} dòng:`}
             </span>
             {EXPORT_FORMATS.map((fmt) => (
               <button
                 key={fmt}
                 onClick={() => void handleExport(fmt)}
-                disabled={Boolean(exporting)}
-                title={`${fmt.toUpperCase()} — lưu ${fileCountFor(fmt)} file${fileCountFor(fmt) === 2 ? " (dữ liệu + xuất xứ)" : " (xuất xứ nhúng bên trong)"}`}
+                disabled={Boolean(exporting) || filterPending}
+                title={
+                  filterPending
+                    ? "Bộ lọc vừa đổi — chờ bảng tính xong rồi mới xuất được, để bản xuất và bảng nói cùng một tập dòng."
+                    : `${fmt.toUpperCase()} — lưu ${fileCountFor(fmt)} file${fileCountFor(fmt) === 2 ? " (dữ liệu + xuất xứ)" : " (xuất xứ nhúng bên trong)"}`
+                }
                 className="flex cursor-pointer items-center gap-1 rounded border border-hairline bg-basemap px-2.5 py-1 font-mono text-note text-ink hover:border-cold-2 disabled:opacity-50"
               >
                 <Download className="h-3 w-3" />
@@ -1480,7 +1515,7 @@ function RawDataTableBlock({ manifest }: { manifest: Manifest }) {
               setPage(0);
             }}
             placeholder={`Lọc theo ${tableMeta(selectedTable).searchColumns.join(" / ")}…`}
-            className="w-72 rounded border border-hairline bg-basemap px-2.5 py-1 text-ink outline-none placeholder:text-ink-muted/60 focus:border-cold-2"
+            className="w-72 rounded border border-hairline bg-basemap px-2.5 py-1 text-ink placeholder:text-ink-muted/60 focus:border-cold-2"
           />
           <button
             onClick={() => setShowColPicker(!showColPicker)}
@@ -1488,8 +1523,12 @@ function RawDataTableBlock({ manifest }: { manifest: Manifest }) {
           >
             Ẩn/hiện cột ({vn(visibleCols.length)}/{vn(allCols.length)})
           </button>
-          <span className="tabular-nums text-ink">
-            {isFiltered ? (
+          <span className="tabular-nums text-ink" aria-live="polite">
+            {filterPending ? (
+              // KHÔNG in số cũ trong lúc chờ: một con số đứng cạnh ô vừa gõ là một lời
+              // khẳng định về chuỗi trong ô đó.
+              <span className="text-ink-muted">{data === null ? "đang tải…" : "đang lọc…"}</span>
+            ) : isFiltered ? (
               <>
                 {vn(total)} / {vn(totalUnfiltered)} dòng khớp bộ lọc
               </>
@@ -1609,21 +1648,25 @@ function RawDataTableBlock({ manifest }: { manifest: Manifest }) {
                 {data.columns.map((c) => (
                   <th
                     key={c}
-                    onClick={() => {
-                      if (sort === c) setDesc(!desc);
-                      else {
-                        setSort(c);
-                        setDesc(false);
-                      }
-                      setPage(0);
-                    }}
-                    className="cursor-pointer select-none whitespace-nowrap border-r border-hairline px-2.5 py-1.5 font-mono font-semibold hover:bg-basemap"
-                    title={`Sắp xếp theo ${c} — ô trống luôn ở CUỐI theo cả hai chiều`}
+                    aria-sort={sort === c ? (desc ? "descending" : "ascending") : undefined}
+                    className="whitespace-nowrap border-r border-hairline p-0 font-mono font-semibold"
                   >
-                    <div className="flex items-center justify-between gap-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (sort === c) setDesc(!desc);
+                        else {
+                          setSort(c);
+                          setDesc(false);
+                        }
+                        setPage(0);
+                      }}
+                      className="flex w-full cursor-pointer select-none items-center justify-between gap-1 px-2.5 py-1.5 text-left font-mono font-semibold hover:bg-basemap"
+                      title={`Sắp xếp theo ${c} — ô trống luôn ở CUỐI theo cả hai chiều`}
+                    >
                       <span>{c}</span>
                       {sort === c && <span>{desc ? "▼" : "▲"}</span>}
-                    </div>
+                    </button>
                   </th>
                 ))}
               </tr>

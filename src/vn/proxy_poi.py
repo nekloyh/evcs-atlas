@@ -102,13 +102,13 @@ def _feature(row: dict) -> dict | None:
         try:
             m = mapping(wkb.loads(bytes(g)))
             geom = {"type": m["type"], "coordinates": _round_coords(m["coordinates"], GEO_DECIMALS)}
-        except Exception:  # noqa: BLE001 — WKB hỏng là dữ liệu hỏng, không phải lỗi lập trình
+        except Exception:
             geom = None
     elif isinstance(g_wkt, str) and g_wkt:
         try:
             m = mapping(wkt.loads(g_wkt))
             geom = {"type": m["type"], "coordinates": _round_coords(m["coordinates"], GEO_DECIMALS)}
-        except Exception:  # noqa: BLE001 — WKT hỏng là dữ liệu hỏng, không phải lỗi lập trình
+        except Exception:
             geom = None
     lat, lng = _sach(row.get("lat")), _sach(row.get("lng"))
     co_hinh = geom is not None

@@ -45,7 +45,7 @@ ROOT = Path.cwd()
 if ROOT.name == "notebooks":
     ROOT = ROOT.parent
 sys.path.insert(0, str(ROOT / "src"))
-import h3  # noqa: E402
+import h3
 
 plt.rcParams.update({"figure.dpi": 120, "font.size": 9, "axes.grid": True,
                      "grid.alpha": 0.25, "axes.spines.top": False, "axes.spines.right": False})
@@ -179,7 +179,7 @@ def r_voi_mat_do(X):
     return float(np.mean([abs(spearmanr(X[:, j], dens).statistic) for j in range(X.shape[1])]))
 
 print(f"Đơn vị dùng được: {du.sum()}/{len(D)} xã/phường\n")
-print(f"|Spearman| trung bình với TỔNG SỐ POI (tức với công sức bản đồ hoá):")
+print("|Spearman| trung bình với TỔNG SỐ POI (tức với công sức bản đồ hoá):")
 print(f"  đặc trưng SỐ ĐẾM  : {r_voi_mat_do(X_cnt):.3f}   ← dính chặt")
 print(f"  đặc trưng TỈ TRỌNG: {r_voi_mat_do(X_prp):.3f}   ← đã tách ra")
 
@@ -431,7 +431,7 @@ print(f"{len(loi)} lõi · lõi lớn nhất {loi.n.max()} POI · "
 # tôi bịa ra**.
 
 # %%
-from sklearn.mixture import GaussianMixture  # noqa: E402
+from sklearn.mixture import GaussianMixture
 
 P = X_prp.copy()
 zero_share = float((P == 0).mean())
@@ -701,12 +701,12 @@ print("\nLớp POI đẩy mạnh nhất về CỤM 0:"); print(delta.nsmallest(5
 # Bảy hướng tiếp cận bên dưới, xếp theo mức độ trả lời được câu đó.
 
 # %%
-from scipy.spatial import cKDTree  # noqa: E402
-from sklearn.cluster import OPTICS  # noqa: E402
-from sklearn.decomposition import PCA  # noqa: E402
-from sklearn.ensemble import RandomForestRegressor  # noqa: E402
-from sklearn.linear_model import RidgeCV  # noqa: E402
-from sklearn.model_selection import GroupKFold, cross_val_score  # noqa: E402
+from scipy.spatial import cKDTree
+from sklearn.cluster import OPTICS
+from sklearn.decomposition import PCA
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import RidgeCV
+from sklearn.model_selection import GroupKFold, cross_val_score
 
 F = pq.read_table(ROOT / "data/qa/critique/a20_dac_trung_tram.parquet").to_pandas()
 LOP = sorted(poi.poi_class.unique())

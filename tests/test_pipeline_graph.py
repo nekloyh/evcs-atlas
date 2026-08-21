@@ -205,7 +205,7 @@ def test_chay_lai_thuong_nguon_lam_ha_nguon_het_han(tmp_path):
     Ở đây `reads` là bản khai DUY NHẤT, nên bỏ sót không còn là một lựa chọn.
     """
     pl = _pipeline(tmp_path)
-    s1, s2 = pl.steps["s1"], pl.steps["s2"]
+    s2 = pl.steps["s2"]
     for n in ("a", "c", "b"):
         _viet(_reg().get(n).path(pl.roots, "01"))
 

@@ -10,9 +10,8 @@ Hỏng nếu: tồn tại CỤM ô đông dân theo WorldPop mà lớp phủ nó
 from __future__ import annotations
 
 import numpy as np
-from scipy.stats import spearmanr
-
 from _common import emit, grid
+from scipy.stats import spearmanr
 
 
 def main() -> None:

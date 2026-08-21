@@ -26,7 +26,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import TABLES, COMMUNE, GRID, NATIONAL_R6
+from . import GRID, TABLES
 from .column import Table
 
 ROOT = Path(__file__).resolve().parents[3]

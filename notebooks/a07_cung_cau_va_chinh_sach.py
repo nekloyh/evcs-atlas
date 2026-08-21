@@ -47,7 +47,7 @@ if ROOT.name == "notebooks":
 import sys
 
 sys.path.insert(0, str(ROOT / "src"))
-from vn import admin, paths  # noqa: E402
+from vn import admin, paths
 
 P = ROOT / "data/processed"
 grid = pq.read_table(P / "grid_h3_r8.parquet").to_pandas()
@@ -626,6 +626,7 @@ display(pd.DataFrame({
 
 # %%
 import sys
+
 sys.path.insert(0, str(ROOT / "analysis"))
 import _graph
 from scipy.spatial import cKDTree

@@ -10,7 +10,6 @@ Hỏng nếu: overlap coefficient thấp / AUC phân biệt cao — miền giá 
 from __future__ import annotations
 
 import numpy as np
-
 from _common import emit, grid
 
 VARS = [

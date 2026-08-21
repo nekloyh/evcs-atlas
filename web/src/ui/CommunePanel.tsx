@@ -10,7 +10,7 @@ import * as React from "react";
 import type { CommuneViewModel } from "../components/atlas/inspector-types";
 import type { EntitySelection } from "../state/selection";
 import { FIELD_BY_ID, type FieldMeta } from "../fields";
-import { formatValue } from "./format";
+import { formatFixed, formatValue } from "./format";
 import { baseUnitPhrase } from "../units";
 import { SourceBlock } from "./Source";
 import { Copy, Check } from "lucide-react";
@@ -204,7 +204,7 @@ export function CommunePanel(props: CommunePanelProps) {
             </p>
             {p["population_wp"] !== null && p["population_wp"] !== undefined && (
               <p className="text-ink-muted text-note">
-                Dân số WorldPop ước tính: {formatValue(p["population_wp"])} người (tỉ lệ đối chiếu anchor: {p["anchor_ratio"] ? Number(p["anchor_ratio"]).toFixed(2) : "—"}).
+                Dân số WorldPop ước tính: {formatValue(p["population_wp"])} người (tỉ lệ đối chiếu anchor: {p["anchor_ratio"] ? formatFixed(Number(p["anchor_ratio"]), 2) : "—"}).
               </p>
             )}
           </div>
@@ -242,7 +242,7 @@ export function CommunePanel(props: CommunePanelProps) {
             <p>
               <strong>Mức sử dụng gia quyền số cổng:</strong>{" "}
               {p["util_mean_port_weighted"] !== null && p["util_mean_port_weighted"] !== undefined
-                ? `${(Number(p["util_mean_port_weighted"]) * 100).toFixed(1)}%`
+                ? `${formatFixed(Number(p["util_mean_port_weighted"]) * 100, 1)}%`
                 : "Không có trạm đo lường nào trong xã"}.
             </p>
             <p className="text-ink-muted text-note">
@@ -313,7 +313,7 @@ export function CommunePanel(props: CommunePanelProps) {
             <div className="divide-y divide-hairline text-body">
               <TechRow k="Dân số chính thức (VNSDI)" v={p["population"]?.toString()} />
               <TechRow k="Dân số WorldPop ước tính" v={p["population_wp"]?.toString()} />
-              <TechRow k="Tỉ lệ đối chiếu (anchor_ratio)" v={p["anchor_ratio"] != null ? Number(p["anchor_ratio"]).toFixed(3) : null} />
+              <TechRow k="Tỉ lệ đối chiếu (anchor_ratio)" v={p["anchor_ratio"] != null ? formatFixed(Number(p["anchor_ratio"]), 3) : null} />
               <TechRow k="Nguồn dân số" v={str(p["pop_source"])} />
             </div>
           </div>
@@ -428,7 +428,7 @@ function getCommuneSupportingFacts(lens: string | null, activeColumn: string | u
     if (activeColumn !== "util_mean_port_weighted") {
       facts.push({
         label: "Util xã",
-        value: p["util_mean_port_weighted"] != null ? `${(Number(p["util_mean_port_weighted"]) * 100).toFixed(1)}%` : null,
+        value: p["util_mean_port_weighted"] != null ? `${formatFixed(Number(p["util_mean_port_weighted"]) * 100, 1)}%` : null,
         missingText: "—",
         hint: "Mức sử dụng trung bình các trạm trong xã",
       });

@@ -34,7 +34,8 @@ from shapely.geometry import LineString, Point
 from shapely.prepared import prep
 from shapely.strtree import STRtree
 
-from evcs.core import geo, grid as cgrid
+from evcs.core import geo
+from evcs.core import grid as cgrid
 from evcs.core.grid import RES, cell_polygon
 from evcs.core.osm import POI_CLASSES, ROAD_CLASS
 

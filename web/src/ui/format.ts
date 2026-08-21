@@ -42,6 +42,16 @@ export function formatPop(v: number): string {
   return Math.round(v).toLocaleString("vi-VN");
 }
 
+
+/**
+ * `toFixed` bản vi-VN: cùng số chữ số thập phân cố định, nhưng dấu phẩy. Phase 10 gom về
+ * đây vì "1.85" đứng cạnh "12,3%" trong CÙNG panel bị đọc thành một nghìn tám trăm năm
+ * mươi — toFixed trần là lỗi locale, không phải lựa chọn trình bày.
+ */
+export function formatFixed(v: number, digits: number): string {
+  return v.toLocaleString("vi-VN", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+}
+
 /**
  * Giá trị một ô thành chữ. `null` KHÔNG BAO GIỜ thành `0` hay `—` trần: nó thành một câu
  * nói rõ đây là "không biết" hay "biết là không" — ràng buộc 1 ở tầng chữ.

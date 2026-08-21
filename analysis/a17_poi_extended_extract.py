@@ -15,12 +15,12 @@ import osmium
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
+from _common import CRITIQUE
 from shapely.geometry import LineString, Point
 from shapely.prepared import prep
 
-from _common import CRITIQUE
-from vn import admin, paths
 from evcs.core.osm import classify_poi
+from vn import admin, paths
 
 # Nhóm mở rộng. Giữ RIÊNG lớp gốc ở cột `poi_class` để so được với bản hiện hành.
 EXT = [
@@ -87,6 +87,7 @@ def main() -> None:
 
     df = pd.DataFrame(rows)
     import h3
+
     from evcs.core import grid as gridmod
 
     df["h3_r8"] = [h3.latlng_to_cell(a, b, gridmod.RES) for a, b in zip(df.lat, df.lng)]

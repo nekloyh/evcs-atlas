@@ -9,11 +9,12 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
 
-from vn.n15_sim_calibration import compute_calibration, _get_band_name, BAND_DEFS
+from vn.n15_sim_calibration import BAND_DEFS, _get_band_name, compute_calibration
 
 
 def test_band_definitions():
@@ -71,9 +72,9 @@ def test_hanoi_calibration_file_contract():
 
 # ── T18 + integration check gói 01 (bổ sung theo QA Phase 6) ───────────────────────────
 
-import h3
-import numpy as np
-from vn.n15_sim_calibration import calibrate_frame, MIN_RING_VALUES
+import h3  # noqa: E402  — tiết bổ sung đặt cạnh phần nó phục vụ, không gom lên đầu
+
+from vn.n15_sim_calibration import MIN_RING_VALUES, calibrate_frame  # noqa: E402
 
 _CENTER = h3.latlng_to_cell(21.0285, 105.8542, 8)
 

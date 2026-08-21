@@ -11,18 +11,16 @@ from __future__ import annotations
 
 import math
 import os
+import sys
 from pathlib import Path
 
 import numpy as np
 import pyarrow.parquet as pq
+from _common import ROOT
 from scipy.spatial import cKDTree
 
-from _common import ROOT
-
-import sys
-
 sys.path.insert(0, str(ROOT / "src"))
-from evcs.core import grid as gridmod  # noqa: E402
+from evcs.core import grid as gridmod
 
 # Bảng tốc độ giả định CŨ, giữ lại ở ĐÂY chứ không ở `src/hanoi/`.
 #

@@ -115,7 +115,7 @@ export function EvidenceCard({
         if (focusOrigin && document.body.contains(focusOrigin)) {
           focusOrigin.focus();
         } else {
-          const mapContainer = document.querySelector('[role="region"][aria-label*="Bản đồ"]') as HTMLElement | null;
+          const mapContainer = document.querySelector('main[aria-label="Không gian bản đồ chính"]') as HTMLElement | null;
           mapContainer?.focus();
         }
       });
