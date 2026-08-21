@@ -1,0 +1,136 @@
+{
+ "vintage": {
+  "name": "VNSDI 2025-07 (sau cải cách 01/7/2025)",
+  "source": "VNSDI qua aGiang-evcs data/interim/vnsdi/communes.parquet",
+  "valid_from": "16/6/2025",
+  "published": "13/07/2025",
+  "levels": [
+   "tỉnh/thành phố",
+   "phường/xã/đặc khu"
+  ],
+  "n_provinces": 34,
+  "n_communes": 3321,
+  "province_key": "province_code (2 ký tự, = VNSDI matinh)",
+  "commune_key": "commune_code (5 ký tự, = VNSDI maxa)",
+  "rejected": {
+   "evcs-dataset data/ref/vn_admin/valid_from=2025-07-01": "ranh giới dựng từ OSM adm6 — 3.930 đơn vị so với 3.321 chính thức (lệch 609). Chính báo cáo của nó ghi 'KHÔNG coi là danh mục HC chuẩn'. Thêm nữa nó là dẫn xuất ODbL, ràng buộc phát hành khác với dữ liệu nhà nước.",
+   "cấu trúc 63 tỉnh trước sáp nhập": "hết hiệu lực 01/7/2025. Còn tồn tại như khoá phân mảnh của bảng canonical; xem crosswalk_legacy — và crosswalk chỉ để ĐỌC di sản, không để gán địa bàn."
+  }
+ },
+ "resolution": 6,
+ "bbox": [
+  102.1433929384005,
+  6.930017473184509,
+  117.83534998250828,
+  23.392339255908023
+ ],
+ "view_bbox": [
+  103.0078,
+  8.8891,
+  109.3084,
+  23.0517
+ ],
+ "n_cells": 9813,
+ "n_stations": 6380,
+ "n_poi": 25220,
+ "n_provinces": 34,
+ "available_columns": [
+  "apartment_levels_sum",
+  "area_km2",
+  "built_frac",
+  "crop_frac",
+  "h3_r6",
+  "lat",
+  "lng",
+  "n_apartment",
+  "n_cells_r8",
+  "n_dept_store",
+  "n_fuel",
+  "n_mall",
+  "n_market",
+  "n_parking_off",
+  "n_parking_street",
+  "n_poi_total",
+  "n_ports",
+  "n_provinces",
+  "n_stations",
+  "n_stations_operational",
+  "n_supermarket",
+  "pop_density_ppkm2",
+  "population",
+  "population_wp",
+  "power_kw_site",
+  "province_code",
+  "road_len_arterial_m",
+  "road_len_in_province_m",
+  "tree_frac",
+  "water_frac"
+ ],
+ "poi_groups": {
+  "apartment": {
+   "file": "vn/poi/apartment.geojson",
+   "n": 5962,
+   "n_polygon": 5766,
+   "bytes": 3278824
+  },
+  "edu_health": {
+   "file": "vn/poi/edu_health.geojson",
+   "n": 10867,
+   "n_polygon": 9141,
+   "bytes": 5918507
+  },
+  "mall": {
+   "file": "vn/poi/mall.geojson",
+   "n": 1377,
+   "n_polygon": 238,
+   "bytes": 523564
+  },
+  "public": {
+   "file": "vn/poi/public.geojson",
+   "n": 7014,
+   "n_polygon": 6327,
+   "bytes": 4123548
+  }
+ },
+ "files": {
+  "grid_h3_r6.parquet": 464197,
+  "grid_h3_r7.parquet": 2138189,
+  "stations.parquet": 269437,
+  "poi.parquet": 777397,
+  "provinces.json": 61357
+ },
+ "bytes_total": 3710577,
+ "bytes_first_load": 525554,
+ "lazy_files": [
+  "stations.parquet",
+  "poi.parquet",
+  "grid_h3_r7.parquet"
+ ],
+ "grids": {
+  "6": {
+   "file": "grid_h3_r6.parquet",
+   "key": "h3_r6",
+   "n_cells": 9813,
+   "cell_km2_median": 40.1,
+   "bytes": 464197
+  },
+  "7": {
+   "file": "grid_h3_r7.parquet",
+   "key": "h3_r7",
+   "n_cells": 62219,
+   "cell_km2_median": 5.8,
+   "bytes": 2138189
+  }
+ },
+ "resolution_zoom": 7,
+ "cell_km2_median": 40.1,
+ "totals": {
+  "population": 113732608,
+  "n_stations": 6380,
+  "n_ports": 55960,
+  "power_mw": 1611.1,
+  "n_apartment": 6024,
+  "n_poi_total": 17879,
+  "area_km2": 335017
+ }
+}

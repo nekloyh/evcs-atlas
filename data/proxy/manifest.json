@@ -1,0 +1,2343 @@
+{
+ "xuat_utc": "2026-08-09T08:59:10+00:00",
+ "tap": [
+  {
+   "key": "poi_9lop_vn",
+   "file": "poi_9lop_vn.geojson",
+   "nguon": "data/qa/eda/export/poi_9lop_vn.parquet",
+   "n": 98835,
+   "n_bo_qua": 0,
+   "n_hinh": 69573,
+   "bytes": 64432051,
+   "bbox": [
+    101.77806074868249,
+    7.891795147973475,
+    114.3544245,
+    23.383349852666356
+   ],
+   "cot": [
+    "uid",
+    "lop",
+    "nhan_chinh",
+    "nhan_phu",
+    "name",
+    "lat",
+    "lng",
+    "la_co_so",
+    "container_uid",
+    "province_code",
+    "province_name",
+    "area_m2",
+    "is_area"
+   ],
+   "diem_nhay": [
+    {
+     "ten": "Thành phố Hà Nội",
+     "n": 18567,
+     "bbox": [
+      105.30113490299567,
+      20.5784413,
+      106.0142167886727,
+      21.375571073609056
+     ]
+    },
+    {
+     "ten": "Thành phố Hồ Chí Minh",
+     "n": 17259,
+     "bbox": [
+      106.3474233,
+      8.629052748616758,
+      107.5664909,
+      11.452762854799303
+     ]
+    },
+    {
+     "ten": "Thành phố Đà Nẵng",
+     "n": 5655,
+     "bbox": [
+      107.24829885224676,
+      14.962893404142429,
+      108.7191553,
+      16.2178013
+     ]
+    },
+    {
+     "ten": "Tỉnh Bắc Ninh",
+     "n": 4864,
+     "bbox": [
+      105.9156856,
+      20.97768628167932,
+      107.0079791,
+      21.476123398061606
+     ]
+    },
+    {
+     "ten": "Tỉnh An Giang",
+     "n": 3786,
+     "bbox": [
+      103.45066233325298,
+      9.2887944,
+      105.5609536,
+      10.966525323341335
+     ]
+    },
+    {
+     "ten": "Tỉnh Lâm Đồng",
+     "n": 3660,
+     "bbox": [
+      107.2247896,
+      10.486338596176765,
+      108.96506800356607,
+      12.8074663
+     ]
+    },
+    {
+     "ten": "Tỉnh Đồng Nai",
+     "n": 3515,
+     "bbox": [
+      106.4342083,
+      10.656962669761896,
+      107.53488343456564,
+      12.189201655678353
+     ]
+    },
+    {
+     "ten": "Tỉnh Khánh Hòa",
+     "n": 3374,
+     "bbox": [
+      108.65249485,
+      7.891795147973475,
+      114.3544245,
+      12.8647726342673
+     ]
+    },
+    {
+     "ten": "Thành phố Cần Thơ",
+     "n": 2998,
+     "bbox": [
+      105.23713579854522,
+      9.30238415739015,
+      106.24788452531858,
+      10.31458669376109
+     ]
+    },
+    {
+     "ten": "Tỉnh Quảng Trị",
+     "n": 2575,
+     "bbox": [
+      105.69805844704817,
+      16.292241655258582,
+      107.38084018771758,
+      18.061564171232487
+     ]
+    },
+    {
+     "ten": "Thành phố Hải Phòng",
+     "n": 2472,
+     "bbox": [
+      106.1477085643176,
+      20.129518969106417,
+      107.72849024772009,
+      21.164921166609464
+     ]
+    },
+    {
+     "ten": "Thành phố Huế",
+     "n": 2471,
+     "bbox": [
+      107.04026230050827,
+      16.0363032,
+      108.1409835,
+      16.722580588005652
+     ]
+    },
+    {
+     "ten": "Tỉnh Hưng Yên",
+     "n": 2265,
+     "bbox": [
+      105.90218126015317,
+      20.256659057325226,
+      106.6238501613069,
+      20.99987003106453
+     ]
+    },
+    {
+     "ten": "Tỉnh Quảng Ngãi",
+     "n": 2262,
+     "bbox": [
+      107.34789900945201,
+      13.96870623406887,
+      109.1464126,
+      15.43192108142059
+     ]
+    },
+    {
+     "ten": "Tỉnh Tây Ninh",
+     "n": 1961,
+     "bbox": [
+      105.5453267,
+      10.427738167588132,
+      106.73062674809941,
+      11.782050315343206
+     ]
+    },
+    {
+     "ten": "Tỉnh Ninh Bình",
+     "n": 1939,
+     "bbox": [
+      105.5922099,
+      19.8730129384934,
+      106.54630510803523,
+      20.6685585
+     ]
+    },
+    {
+     "ten": "Tỉnh Phú Thọ",
+     "n": 1761,
+     "bbox": [
+      104.8977257,
+      20.34040592693057,
+      105.79613783539055,
+      21.6819616
+     ]
+    },
+    {
+     "ten": "Tỉnh Quảng Ninh",
+     "n": 1467,
+     "bbox": [
+      106.4550226,
+      20.71835075463955,
+      108.0691767,
+      21.685740805629553
+     ]
+    },
+    {
+     "ten": "Tỉnh Tuyên Quang",
+     "n": 1435,
+     "bbox": [
+      104.30931891745705,
+      21.5156025,
+      105.60989304278392,
+      23.383349852666356
+     ]
+    },
+    {
+     "ten": "Tỉnh Lào Cai",
+     "n": 1424,
+     "bbox": [
+      103.52512072412486,
+      21.410370569751166,
+      105.03606885785456,
+      22.84672324817746
+     ]
+    },
+    {
+     "ten": "Tỉnh Gia Lai",
+     "n": 1417,
+     "bbox": [
+      107.46062518972168,
+      13.18830357185815,
+      109.35774383039698,
+      14.678478896245755
+     ]
+    },
+    {
+     "ten": "Tỉnh Đồng Tháp",
+     "n": 1413,
+     "bbox": [
+      105.18027491603485,
+      10.16190495571546,
+      106.83599099999998,
+      10.967694150811898
+     ]
+    },
+    {
+     "ten": "Tỉnh Thái Nguyên",
+     "n": 1341,
+     "bbox": [
+      105.45265,
+      21.331807,
+      106.19013657803828,
+      22.71667550334112
+     ]
+    },
+    {
+     "ten": "Tỉnh Đắk Lắk",
+     "n": 1221,
+     "bbox": [
+      107.49784046178438,
+      12.18402918867456,
+      109.45700722148584,
+      13.68185048976976
+     ]
+    },
+    {
+     "ten": "Tỉnh Vĩnh Long",
+     "n": 1170,
+     "bbox": [
+      105.71446387560964,
+      9.531070150000001,
+      106.7081258,
+      10.3361825
+     ]
+    },
+    {
+     "ten": "Tỉnh Nghệ An",
+     "n": 1112,
+     "bbox": [
+      103.92897018348586,
+      18.57679066805908,
+      105.96156654686271,
+      19.8925154
+     ]
+    },
+    {
+     "ten": "Tỉnh Thanh Hóa",
+     "n": 1042,
+     "bbox": [
+      104.34530298450008,
+      19.30652419088601,
+      105.9987917,
+      20.6202807
+     ]
+    },
+    {
+     "ten": "Tỉnh Cao Bằng",
+     "n": 926,
+     "bbox": [
+      105.4628014,
+      22.3967254,
+      106.83008121537449,
+      23.105239663778008
+     ]
+    },
+    {
+     "ten": "Tỉnh Sơn La",
+     "n": 644,
+     "bbox": [
+      103.20645086562934,
+      20.684916104977123,
+      104.99078,
+      21.85794287664975
+     ]
+    },
+    {
+     "ten": "Tỉnh Hà Tĩnh",
+     "n": 614,
+     "bbox": [
+      105.12356473531007,
+      17.9563451,
+      106.48847222461873,
+      18.75138573352791
+     ]
+    },
+    {
+     "ten": "Tỉnh Lai Châu",
+     "n": 614,
+     "bbox": [
+      102.287288190705,
+      21.754709074216432,
+      103.9156759,
+      22.8106514
+     ]
+    },
+    {
+     "ten": "Tỉnh Cà Mau",
+     "n": 485,
+     "bbox": [
+      104.52555728633364,
+      8.417059065521032,
+      105.83001280766246,
+      9.561371475514367
+     ]
+    },
+    {
+     "ten": "Tỉnh Điện Biên",
+     "n": 465,
+     "bbox": [
+      102.14188955214047,
+      20.868485821259494,
+      103.5193162,
+      22.5024105
+     ]
+    },
+    {
+     "ten": "Tỉnh Lạng Sơn",
+     "n": 449,
+     "bbox": [
+      106.1842357,
+      21.4231998,
+      107.38451566248573,
+      22.387527928013732
+     ]
+    }
+   ],
+   "xuat_utc": "2026-08-09T08:59:09+00:00"
+  },
+  {
+   "key": "poi_hanhchinh_7tinh_final",
+   "file": "poi_hanhchinh_7tinh_final.geojson",
+   "nguon": "data/qa/eda/poi_hanhchinh_7tinh_final.parquet",
+   "n": 4120,
+   "n_bo_qua": 0,
+   "n_hinh": 3220,
+   "bytes": 5465276,
+   "bbox": [
+    105.30503178432926,
+    8.660940581721164,
+    108.68804038795767,
+    21.641833421870952
+   ],
+   "cot": [
+    "osm_type",
+    "osm_id",
+    "is_area",
+    "lat",
+    "lng",
+    "area_m2",
+    "n_tags",
+    "tags",
+    "name",
+    "shop",
+    "amenity",
+    "tourism",
+    "leisure",
+    "office",
+    "building",
+    "healthcare",
+    "railway",
+    "highway",
+    "power",
+    "landuse",
+    "public_transport",
+    "is_boundary",
+    "area_outlier",
+    "dup_coord",
+    "province_code",
+    "province_name",
+    "h3_r8",
+    "uid",
+    "residential",
+    "construction",
+    "place",
+    "levels",
+    "rooms",
+    "stars",
+    "operator",
+    "brand",
+    "name_norm",
+    "is_housing",
+    "lifecycle_lodging",
+    "is_lodging",
+    "sport",
+    "natural",
+    "historic",
+    "man_made",
+    "aeroway",
+    "waterway",
+    "barrier",
+    "craft",
+    "military",
+    "name_dau",
+    "is_gt",
+    "gt_chi_ten",
+    "religion",
+    "denomination",
+    "n_lang",
+    "co_wiki",
+    "co_heritage",
+    "ten_khong_dau",
+    "religion_that",
+    "tag_ho_tro_tq",
+    "is_tq",
+    "education",
+    "grades",
+    "isced_level",
+    "operator_type",
+    "is_th",
+    "emergency",
+    "social_facility",
+    "healthcare_speciality",
+    "beds",
+    "capacity",
+    "is_yt",
+    "government",
+    "boundary",
+    "admin_level",
+    "is_hc",
+    "cap_hc",
+    "nganh_hc",
+    "mixed_use",
+    "container_uid",
+    "fragment_group"
+   ],
+   "diem_nhay": [
+    {
+     "ten": "Thành phố Hà Nội",
+     "n": 1540,
+     "bbox": [
+      105.30503178432926,
+      20.6142261991731,
+      106.00083955157484,
+      21.362560986954186
+     ]
+    },
+    {
+     "ten": "Thành phố Hồ Chí Minh",
+     "n": 1377,
+     "bbox": [
+      106.3617302,
+      8.660940581721164,
+      107.54411077328376,
+      11.452762854799303
+     ]
+    },
+    {
+     "ten": "Tỉnh Đồng Nai",
+     "n": 379,
+     "bbox": [
+      106.4342083,
+      10.6796237,
+      107.49483797943829,
+      12.189201655678353
+     ]
+    },
+    {
+     "ten": "Thành phố Cần Thơ",
+     "n": 291,
+     "bbox": [
+      105.4248798,
+      9.309002978443617,
+      106.20243288601212,
+      10.306854174636017
+     ]
+    },
+    {
+     "ten": "Thành phố Đà Nẵng",
+     "n": 219,
+     "bbox": [
+      107.30665815000002,
+      15.272442571026906,
+      108.68804038795767,
+      16.188183391984477
+     ]
+    },
+    {
+     "ten": "Thành phố Hải Phòng",
+     "n": 182,
+     "bbox": [
+      106.20291204081143,
+      20.129518969106417,
+      107.72691262254547,
+      21.15718697740494
+     ]
+    },
+    {
+     "ten": "Tỉnh Quảng Ninh",
+     "n": 132,
+     "bbox": [
+      106.5108368,
+      20.940761916738627,
+      108.06716261470743,
+      21.641833421870952
+     ]
+    }
+   ],
+   "xuat_utc": "2026-08-09T06:28:33+00:00"
+  },
+  {
+   "key": "poi_vanphong_7tinh_final",
+   "file": "poi_vanphong_7tinh_final.geojson",
+   "nguon": "data/qa/eda/poi_vanphong_7tinh_final.parquet",
+   "n": 2690,
+   "n_bo_qua": 0,
+   "n_hinh": 1626,
+   "bytes": 3310813,
+   "bbox": [
+    105.3561282,
+    8.682251186540094,
+    108.510093,
+    21.642084753630687
+   ],
+   "cot": [
+    "osm_type",
+    "osm_id",
+    "is_area",
+    "lat",
+    "lng",
+    "area_m2",
+    "n_tags",
+    "tags",
+    "name",
+    "shop",
+    "amenity",
+    "tourism",
+    "leisure",
+    "office",
+    "building",
+    "healthcare",
+    "railway",
+    "highway",
+    "power",
+    "landuse",
+    "public_transport",
+    "is_boundary",
+    "area_outlier",
+    "dup_coord",
+    "province_code",
+    "province_name",
+    "h3_r8",
+    "uid",
+    "residential",
+    "construction",
+    "place",
+    "levels",
+    "rooms",
+    "stars",
+    "operator",
+    "brand",
+    "name_norm",
+    "is_housing",
+    "lifecycle_lodging",
+    "is_lodging",
+    "sport",
+    "natural",
+    "historic",
+    "man_made",
+    "aeroway",
+    "waterway",
+    "barrier",
+    "craft",
+    "military",
+    "name_dau",
+    "is_gt",
+    "gt_chi_ten",
+    "religion",
+    "denomination",
+    "n_lang",
+    "co_wiki",
+    "co_heritage",
+    "ten_khong_dau",
+    "religion_that",
+    "tag_ho_tro_tq",
+    "is_tq",
+    "education",
+    "grades",
+    "isced_level",
+    "operator_type",
+    "is_th",
+    "emergency",
+    "social_facility",
+    "healthcare_speciality",
+    "beds",
+    "capacity",
+    "is_yt",
+    "government",
+    "boundary",
+    "admin_level",
+    "is_hc",
+    "industrial",
+    "is_vp",
+    "cao_tang",
+    "mixed_use",
+    "hang_vp",
+    "no_tu_lop_nha_o",
+    "container_uid",
+    "fragment_group"
+   ],
+   "diem_nhay": [
+    {
+     "ten": "Thành phố Hà Nội",
+     "n": 1025,
+     "bbox": [
+      105.3561282,
+      20.6860173,
+      105.95588015498072,
+      21.28725963228404
+     ]
+    },
+    {
+     "ten": "Thành phố Hồ Chí Minh",
+     "n": 1008,
+     "bbox": [
+      106.45980645000002,
+      8.682251186540094,
+      107.50072325010505,
+      11.3370655
+     ]
+    },
+    {
+     "ten": "Thành phố Đà Nẵng",
+     "n": 187,
+     "bbox": [
+      107.3739244,
+      15.540980099999999,
+      108.510093,
+      16.107471209276028
+     ]
+    },
+    {
+     "ten": "Thành phố Cần Thơ",
+     "n": 155,
+     "bbox": [
+      105.4480536,
+      9.598685504662855,
+      106.08156199999999,
+      10.292292349186274
+     ]
+    },
+    {
+     "ten": "Tỉnh Đồng Nai",
+     "n": 144,
+     "bbox": [
+      106.5790606,
+      10.6786638,
+      107.4288891,
+      12.110820702233461
+     ]
+    },
+    {
+     "ten": "Thành phố Hải Phòng",
+     "n": 121,
+     "bbox": [
+      106.2059623,
+      20.7258995,
+      107.0533312,
+      21.13051040698288
+     ]
+    },
+    {
+     "ten": "Tỉnh Quảng Ninh",
+     "n": 50,
+     "bbox": [
+      106.72819772873606,
+      20.9248313,
+      107.97363524242289,
+      21.642084753630687
+     ]
+    }
+   ],
+   "xuat_utc": "2026-08-09T06:28:33+00:00"
+  },
+  {
+   "key": "poi_truonghoc_7tinh_final",
+   "file": "poi_truonghoc_7tinh_final.geojson",
+   "nguon": "data/qa/eda/poi_truonghoc_7tinh_final.parquet",
+   "n": 11957,
+   "n_bo_qua": 0,
+   "n_hinh": 10574,
+   "bytes": 15961740,
+   "bbox": [
+    105.28288899278299,
+    8.683496238378348,
+    108.66824849929569,
+    21.640048763721534
+   ],
+   "cot": [
+    "osm_type",
+    "osm_id",
+    "is_area",
+    "lat",
+    "lng",
+    "area_m2",
+    "n_tags",
+    "tags",
+    "name",
+    "shop",
+    "amenity",
+    "tourism",
+    "leisure",
+    "office",
+    "building",
+    "healthcare",
+    "railway",
+    "highway",
+    "power",
+    "landuse",
+    "public_transport",
+    "is_boundary",
+    "area_outlier",
+    "dup_coord",
+    "province_code",
+    "province_name",
+    "h3_r8",
+    "uid",
+    "residential",
+    "construction",
+    "place",
+    "levels",
+    "rooms",
+    "stars",
+    "operator",
+    "brand",
+    "name_norm",
+    "is_housing",
+    "lifecycle_lodging",
+    "is_lodging",
+    "sport",
+    "natural",
+    "historic",
+    "man_made",
+    "aeroway",
+    "waterway",
+    "barrier",
+    "craft",
+    "military",
+    "name_dau",
+    "is_gt",
+    "gt_chi_ten",
+    "religion",
+    "denomination",
+    "n_lang",
+    "co_wiki",
+    "co_heritage",
+    "ten_khong_dau",
+    "religion_that",
+    "tag_ho_tro_tq",
+    "is_tq",
+    "education",
+    "grades",
+    "isced_level",
+    "operator_type",
+    "is_th",
+    "cap_ten",
+    "cap_tag",
+    "cap_xung_dot",
+    "cap_tag_manh",
+    "cap_chot",
+    "mixed_use",
+    "container_uid",
+    "vai_tro",
+    "fragment_group",
+    "cap_hieu_luc",
+    "cap_nguon",
+    "hang_th"
+   ],
+   "diem_nhay": [
+    {
+     "ten": "Thành phố Hà Nội",
+     "n": 5291,
+     "bbox": [
+      105.30113490299567,
+      20.609515926244427,
+      106.01172047688718,
+      21.31762099119126
+     ]
+    },
+    {
+     "ten": "Thành phố Hồ Chí Minh",
+     "n": 3592,
+     "bbox": [
+      106.3613933,
+      8.683496238378348,
+      107.5599859,
+      11.44588653842041
+     ]
+    },
+    {
+     "ten": "Tỉnh Đồng Nai",
+     "n": 1172,
+     "bbox": [
+      106.5580392,
+      10.673933325489427,
+      107.49991621018995,
+      11.990486762578637
+     ]
+    },
+    {
+     "ten": "Thành phố Cần Thơ",
+     "n": 648,
+     "bbox": [
+      105.28288899278299,
+      9.313784321713113,
+      106.1985113699559,
+      10.309083
+     ]
+    },
+    {
+     "ten": "Thành phố Đà Nẵng",
+     "n": 502,
+     "bbox": [
+      107.30520041357964,
+      15.272778537651318,
+      108.66824849929569,
+      16.13509526951778
+     ]
+    },
+    {
+     "ten": "Thành phố Hải Phòng",
+     "n": 465,
+     "bbox": [
+      106.15539105966671,
+      20.638381241147968,
+      107.05204998615075,
+      21.164921166609464
+     ]
+    },
+    {
+     "ten": "Tỉnh Quảng Ninh",
+     "n": 287,
+     "bbox": [
+      106.51646332867512,
+      20.9007788,
+      108.05322007664022,
+      21.640048763721534
+     ]
+    }
+   ],
+   "xuat_utc": "2026-08-09T06:28:32+00:00"
+  },
+  {
+   "key": "poi_benhvien_7tinh_final",
+   "file": "poi_benhvien_7tinh_final.geojson",
+   "nguon": "data/qa/eda/poi_benhvien_7tinh_final.parquet",
+   "n": 2765,
+   "n_bo_qua": 0,
+   "n_hinh": 2035,
+   "bytes": 3767699,
+   "bbox": [
+    105.3572543,
+    8.660772846780768,
+    108.64229097983718,
+    21.645712248458114
+   ],
+   "cot": [
+    "osm_type",
+    "osm_id",
+    "is_area",
+    "lat",
+    "lng",
+    "area_m2",
+    "n_tags",
+    "tags",
+    "name",
+    "shop",
+    "amenity",
+    "tourism",
+    "leisure",
+    "office",
+    "building",
+    "healthcare",
+    "railway",
+    "highway",
+    "power",
+    "landuse",
+    "public_transport",
+    "is_boundary",
+    "area_outlier",
+    "dup_coord",
+    "province_code",
+    "province_name",
+    "h3_r8",
+    "uid",
+    "residential",
+    "construction",
+    "place",
+    "levels",
+    "rooms",
+    "stars",
+    "operator",
+    "brand",
+    "name_norm",
+    "is_housing",
+    "lifecycle_lodging",
+    "is_lodging",
+    "sport",
+    "natural",
+    "historic",
+    "man_made",
+    "aeroway",
+    "waterway",
+    "barrier",
+    "craft",
+    "military",
+    "name_dau",
+    "is_gt",
+    "gt_chi_ten",
+    "religion",
+    "denomination",
+    "n_lang",
+    "co_wiki",
+    "co_heritage",
+    "ten_khong_dau",
+    "religion_that",
+    "tag_ho_tro_tq",
+    "is_tq",
+    "education",
+    "grades",
+    "isced_level",
+    "operator_type",
+    "is_th",
+    "emergency",
+    "social_facility",
+    "healthcare_speciality",
+    "beds",
+    "capacity",
+    "is_yt",
+    "loai_amenity",
+    "loai_healthcare",
+    "loai_xung_dot",
+    "loai_yt",
+    "tuyen_yt",
+    "mixed_use",
+    "quy_mo_yt",
+    "quy_mo_nguon",
+    "phi_lam_sang",
+    "tham_my",
+    "container_uid",
+    "vai_tro",
+    "fragment_group"
+   ],
+   "diem_nhay": [
+    {
+     "ten": "Thành phố Hà Nội",
+     "n": 1083,
+     "bbox": [
+      105.3572543,
+      20.677744428115474,
+      105.9875913763846,
+      21.31693262888674
+     ]
+    },
+    {
+     "ten": "Thành phố Hồ Chí Minh",
+     "n": 812,
+     "bbox": [
+      106.3631954755235,
+      8.660772846780768,
+      107.54141885537051,
+      11.3590399
+     ]
+    },
+    {
+     "ten": "Thành phố Cần Thơ",
+     "n": 280,
+     "bbox": [
+      105.38781219737221,
+      9.323569219357486,
+      106.1977169523107,
+      10.265625755773383
+     ]
+    },
+    {
+     "ten": "Tỉnh Đồng Nai",
+     "n": 222,
+     "bbox": [
+      106.5882423020632,
+      10.6798522,
+      107.44083545046993,
+      12.1126996
+     ]
+    },
+    {
+     "ten": "Thành phố Hải Phòng",
+     "n": 156,
+     "bbox": [
+      106.18874225259492,
+      20.643334373693378,
+      107.0480696,
+      21.1144786
+     ]
+    },
+    {
+     "ten": "Thành phố Đà Nẵng",
+     "n": 147,
+     "bbox": [
+      107.49305279115825,
+      15.0423086,
+      108.64229097983718,
+      16.1016726
+     ]
+    },
+    {
+     "ten": "Tỉnh Quảng Ninh",
+     "n": 65,
+     "bbox": [
+      106.5224035871517,
+      20.938861890924276,
+      108.01725305000004,
+      21.645712248458114
+     ]
+    }
+   ],
+   "xuat_utc": "2026-08-09T06:28:32+00:00"
+  },
+  {
+   "key": "poi_thamquan_7tinh_final",
+   "file": "poi_thamquan_7tinh_final.geojson",
+   "nguon": "data/qa/eda/poi_thamquan_7tinh_final.parquet",
+   "n": 8559,
+   "n_bo_qua": 0,
+   "n_hinh": 5470,
+   "bytes": 10791108,
+   "bbox": [
+    105.23713579854522,
+    8.629052748616758,
+    108.7191553,
+    21.6265281
+   ],
+   "cot": [
+    "osm_type",
+    "osm_id",
+    "is_area",
+    "lat",
+    "lng",
+    "area_m2",
+    "n_tags",
+    "tags",
+    "name",
+    "shop",
+    "amenity",
+    "tourism",
+    "leisure",
+    "office",
+    "building",
+    "healthcare",
+    "railway",
+    "highway",
+    "power",
+    "landuse",
+    "public_transport",
+    "is_boundary",
+    "area_outlier",
+    "dup_coord",
+    "province_code",
+    "province_name",
+    "h3_r8",
+    "uid",
+    "residential",
+    "construction",
+    "place",
+    "levels",
+    "rooms",
+    "stars",
+    "operator",
+    "brand",
+    "name_norm",
+    "is_housing",
+    "lifecycle_lodging",
+    "is_lodging",
+    "sport",
+    "natural",
+    "historic",
+    "man_made",
+    "aeroway",
+    "waterway",
+    "barrier",
+    "craft",
+    "military",
+    "name_dau",
+    "is_gt",
+    "gt_chi_ten",
+    "religion",
+    "denomination",
+    "n_lang",
+    "co_wiki",
+    "co_heritage",
+    "ten_khong_dau",
+    "religion_that",
+    "tag_ho_tro_tq",
+    "is_tq",
+    "suc_hut_tri_thuc",
+    "suc_hut",
+    "suc_hut_nguon",
+    "mixed_use",
+    "hang_tq",
+    "loai_tho_tu",
+    "container_uid",
+    "fragment_group"
+   ],
+   "diem_nhay": [
+    {
+     "ten": "Thành phố Hồ Chí Minh",
+     "n": 3240,
+     "bbox": [
+      106.3474233,
+      8.629052748616758,
+      107.5664909,
+      11.441188872550484
+     ]
+    },
+    {
+     "ten": "Thành phố Hà Nội",
+     "n": 2211,
+     "bbox": [
+      105.3047912,
+      20.5784413,
+      106.00013179499759,
+      21.3446622
+     ]
+    },
+    {
+     "ten": "Tỉnh Đồng Nai",
+     "n": 976,
+     "bbox": [
+      106.4462768,
+      10.656962669761896,
+      107.53488343456564,
+      12.1145943
+     ]
+    },
+    {
+     "ten": "Thành phố Đà Nẵng",
+     "n": 884,
+     "bbox": [
+      107.3716683,
+      15.295371595905118,
+      108.7191553,
+      16.2178013
+     ]
+    },
+    {
+     "ten": "Thành phố Cần Thơ",
+     "n": 510,
+     "bbox": [
+      105.23713579854522,
+      9.30238415739015,
+      106.24788452531858,
+      10.312614013453949
+     ]
+    },
+    {
+     "ten": "Thành phố Hải Phòng",
+     "n": 472,
+     "bbox": [
+      106.1571572,
+      20.62311838735495,
+      107.1593053457409,
+      21.157190988544343
+     ]
+    },
+    {
+     "ten": "Tỉnh Quảng Ninh",
+     "n": 266,
+     "bbox": [
+      106.4550226,
+      20.71835075463955,
+      108.0691767,
+      21.6265281
+     ]
+    }
+   ],
+   "xuat_utc": "2026-08-09T06:28:31+00:00"
+  },
+  {
+   "key": "poi_giaitri_7tinh_final",
+   "file": "poi_giaitri_7tinh_final.geojson",
+   "nguon": "data/qa/eda/poi_giaitri_7tinh_final.parquet",
+   "n": 5391,
+   "n_bo_qua": 0,
+   "n_hinh": 4635,
+   "bytes": 6932135,
+   "bbox": [
+    105.2565105457546,
+    8.6784374,
+    108.62408635394797,
+    21.637702280738022
+   ],
+   "cot": [
+    "osm_type",
+    "osm_id",
+    "is_area",
+    "lat",
+    "lng",
+    "area_m2",
+    "n_tags",
+    "tags",
+    "name",
+    "shop",
+    "amenity",
+    "tourism",
+    "leisure",
+    "office",
+    "building",
+    "healthcare",
+    "railway",
+    "highway",
+    "power",
+    "landuse",
+    "public_transport",
+    "is_boundary",
+    "area_outlier",
+    "dup_coord",
+    "province_code",
+    "province_name",
+    "h3_r8",
+    "uid",
+    "residential",
+    "construction",
+    "place",
+    "levels",
+    "rooms",
+    "stars",
+    "operator",
+    "brand",
+    "name_norm",
+    "is_housing",
+    "lifecycle_lodging",
+    "is_lodging",
+    "sport",
+    "natural",
+    "historic",
+    "man_made",
+    "aeroway",
+    "waterway",
+    "barrier",
+    "craft",
+    "military",
+    "name_dau",
+    "is_gt",
+    "gt_chi_ten",
+    "ben_trong_uid",
+    "ben_trong_loai",
+    "mixed_use",
+    "hang_gt",
+    "vai_tro",
+    "quy_mo_gt",
+    "container_uid",
+    "fragment_group"
+   ],
+   "diem_nhay": [
+    {
+     "ten": "Thành phố Hồ Chí Minh",
+     "n": 2014,
+     "bbox": [
+      106.36246728136993,
+      8.6784374,
+      107.53831876517833,
+      11.4406145
+     ]
+    },
+    {
+     "ten": "Thành phố Hà Nội",
+     "n": 1896,
+     "bbox": [
+      105.32097378048859,
+      20.611404365917345,
+      105.9703265319943,
+      21.3411532
+     ]
+    },
+    {
+     "ten": "Thành phố Đà Nẵng",
+     "n": 481,
+     "bbox": [
+      107.48836681526255,
+      15.335606100635985,
+      108.62408635394797,
+      16.1313154079574
+     ]
+    },
+    {
+     "ten": "Thành phố Hải Phòng",
+     "n": 336,
+     "bbox": [
+      106.1980558,
+      20.131559320284477,
+      107.72849024772009,
+      21.15665087151112
+     ]
+    },
+    {
+     "ten": "Thành phố Cần Thơ",
+     "n": 262,
+     "bbox": [
+      105.2565105457546,
+      9.320394995851611,
+      106.20112916724432,
+      10.31458669376109
+     ]
+    },
+    {
+     "ten": "Tỉnh Đồng Nai",
+     "n": 238,
+     "bbox": [
+      106.57424265468148,
+      10.6709083,
+      107.44285788093397,
+      12.178371614532107
+     ]
+    },
+    {
+     "ten": "Tỉnh Quảng Ninh",
+     "n": 164,
+     "bbox": [
+      106.47010589722265,
+      20.920516464161732,
+      108.06710981496012,
+      21.637702280738022
+     ]
+    }
+   ],
+   "xuat_utc": "2026-08-09T06:28:30+00:00"
+  },
+  {
+   "key": "poi_chungcu_7tinh_final",
+   "file": "poi_chungcu_7tinh_final.geojson",
+   "nguon": "data/qa/eda/poi_chungcu_7tinh_final.parquet",
+   "n": 9613,
+   "n_bo_qua": 0,
+   "n_hinh": 9270,
+   "bytes": 11036535,
+   "bbox": [
+    105.30786797748223,
+    8.688417431862478,
+    108.67883278975066,
+    21.685740805629553
+   ],
+   "cot": [
+    "uid",
+    "osm_type",
+    "osm_id",
+    "is_area",
+    "lat",
+    "lng",
+    "area_m2",
+    "h3_r8",
+    "name",
+    "name_norm",
+    "building",
+    "residential",
+    "construction",
+    "landuse",
+    "place",
+    "amenity",
+    "shop",
+    "office",
+    "tourism",
+    "leisure",
+    "levels",
+    "operator",
+    "brand",
+    "area_outlier",
+    "dup_coord",
+    "province_code",
+    "province_name",
+    "label",
+    "evidence",
+    "src_tag",
+    "src_name",
+    "src_code",
+    "src_kdt",
+    "src_shape",
+    "src_manual",
+    "n_tags",
+    "tags",
+    "highway",
+    "public_transport",
+    "man_made",
+    "historic",
+    "natural",
+    "waterway",
+    "power",
+    "aeroway",
+    "railway",
+    "barrier",
+    "craft",
+    "mixed_use",
+    "verdict",
+    "area_band",
+    "name_group",
+    "status",
+    "kdt_class",
+    "n_building",
+    "n_service",
+    "container_uid",
+    "context_host_uid",
+    "fragment_group"
+   ],
+   "diem_nhay": [
+    {
+     "ten": "Thành phố Hà Nội",
+     "n": 3938,
+     "bbox": [
+      105.30786797748223,
+      20.67134771429235,
+      106.0142167886727,
+      21.375571073609056
+     ]
+    },
+    {
+     "ten": "Thành phố Hồ Chí Minh",
+     "n": 3046,
+     "bbox": [
+      106.47552866068419,
+      8.688417431862478,
+      107.43125932516611,
+      11.347118463609398
+     ]
+    },
+    {
+     "ten": "Thành phố Đà Nẵng",
+     "n": 1514,
+     "bbox": [
+      107.24829885224676,
+      14.962893404142429,
+      108.67883278975066,
+      16.105315194776537
+     ]
+    },
+    {
+     "ten": "Thành phố Cần Thơ",
+     "n": 414,
+     "bbox": [
+      105.4529330295015,
+      9.304210196712944,
+      105.99753222704871,
+      10.298318748864677
+     ]
+    },
+    {
+     "ten": "Thành phố Hải Phòng",
+     "n": 282,
+     "bbox": [
+      106.1477085643176,
+      20.130263878122037,
+      107.72753696163097,
+      21.111863888010312
+     ]
+    },
+    {
+     "ten": "Tỉnh Quảng Ninh",
+     "n": 228,
+     "bbox": [
+      106.74453047840876,
+      20.87768517796647,
+      107.99680643434655,
+      21.685740805629553
+     ]
+    },
+    {
+     "ten": "Tỉnh Đồng Nai",
+     "n": 191,
+     "bbox": [
+      106.61417104544715,
+      10.67052245,
+      107.2486232083457,
+      12.11339873534971
+     ]
+    }
+   ],
+   "xuat_utc": "2026-08-09T06:28:29+00:00"
+  },
+  {
+   "key": "poi_luutru_7tinh_final",
+   "file": "poi_luutru_7tinh_final.geojson",
+   "nguon": "data/qa/eda/poi_luutru_7tinh_final.parquet",
+   "n": 5216,
+   "n_bo_qua": 0,
+   "n_hinh": 1414,
+   "bytes": 4679562,
+   "bbox": [
+    105.315696,
+    8.6469442,
+    108.6970223,
+    21.53884370953789
+   ],
+   "cot": [
+    "osm_type",
+    "osm_id",
+    "is_area",
+    "lat",
+    "lng",
+    "area_m2",
+    "n_tags",
+    "tags",
+    "name",
+    "shop",
+    "amenity",
+    "tourism",
+    "leisure",
+    "office",
+    "building",
+    "healthcare",
+    "railway",
+    "highway",
+    "power",
+    "landuse",
+    "public_transport",
+    "is_boundary",
+    "area_outlier",
+    "dup_coord",
+    "province_code",
+    "province_name",
+    "h3_r8",
+    "uid",
+    "residential",
+    "construction",
+    "place",
+    "levels",
+    "rooms",
+    "stars",
+    "operator",
+    "brand",
+    "name_norm",
+    "is_housing",
+    "lifecycle_lodging",
+    "is_lodging",
+    "hang_ten",
+    "stars_n",
+    "n_lang",
+    "co_web",
+    "co_addr",
+    "aeroway",
+    "man_made",
+    "historic",
+    "natural",
+    "waterway",
+    "barrier",
+    "craft",
+    "sport",
+    "mixed_use",
+    "quy_mo",
+    "quy_mo_nguon",
+    "container_uid",
+    "fragment_group",
+    "verdict"
+   ],
+   "diem_nhay": [
+    {
+     "ten": "Thành phố Đà Nẵng",
+     "n": 1638,
+     "bbox": [
+      107.4906188,
+      15.1487921,
+      108.6970223,
+      16.1883561
+     ]
+    },
+    {
+     "ten": "Thành phố Hồ Chí Minh",
+     "n": 1516,
+     "bbox": [
+      106.4477319,
+      8.6469442,
+      107.5612436,
+      11.3626409
+     ]
+    },
+    {
+     "ten": "Thành phố Hà Nội",
+     "n": 1106,
+     "bbox": [
+      105.3276883,
+      20.6091738435279,
+      105.9465466,
+      21.3309491872126
+     ]
+    },
+    {
+     "ten": "Thành phố Hải Phòng",
+     "n": 375,
+     "bbox": [
+      106.1530836,
+      20.6619246,
+      107.0790287,
+      21.1227918
+     ]
+    },
+    {
+     "ten": "Thành phố Cần Thơ",
+     "n": 319,
+     "bbox": [
+      105.315696,
+      9.3214603,
+      106.2012565,
+      10.2715198
+     ]
+    },
+    {
+     "ten": "Tỉnh Quảng Ninh",
+     "n": 189,
+     "bbox": [
+      106.46930332537568,
+      20.7989278,
+      108.03051043174203,
+      21.53884370953789
+     ]
+    },
+    {
+     "ten": "Tỉnh Đồng Nai",
+     "n": 73,
+     "bbox": [
+      106.5233864,
+      10.6597755,
+      107.4501116,
+      12.1128501
+     ]
+    }
+   ],
+   "xuat_utc": "2026-08-09T06:28:29+00:00"
+  },
+  {
+   "key": "poi_thuongmai_7tinh_final",
+   "file": "poi_thuongmai_7tinh_final.geojson",
+   "nguon": "data/qa/eda/poi_thuongmai_7tinh_final.parquet",
+   "n": 2065,
+   "n_bo_qua": 0,
+   "n_hinh": 1182,
+   "bytes": 2314270,
+   "bbox": [
+    105.34436889176754,
+    8.686068870447874,
+    108.5516361,
+    21.64236085787412
+   ],
+   "cot": [
+    "osm_type",
+    "osm_id",
+    "is_area",
+    "lat",
+    "lng",
+    "area_m2",
+    "n_tags",
+    "tags",
+    "name",
+    "shop",
+    "amenity",
+    "tourism",
+    "leisure",
+    "office",
+    "building",
+    "healthcare",
+    "railway",
+    "highway",
+    "power",
+    "landuse",
+    "public_transport",
+    "is_boundary",
+    "area_outlier",
+    "dup_coord",
+    "province_code",
+    "province_name",
+    "h3_r8",
+    "uid",
+    "residential",
+    "construction",
+    "place",
+    "levels",
+    "rooms",
+    "stars",
+    "operator",
+    "brand",
+    "name_norm",
+    "is_housing",
+    "lifecycle_lodging",
+    "is_lodging",
+    "craft",
+    "aeroway",
+    "man_made",
+    "historic",
+    "natural",
+    "waterway",
+    "barrier",
+    "military",
+    "name_dau",
+    "is_tm",
+    "brand_tier",
+    "brand_n",
+    "brand_dt",
+    "la_chuoi_nho",
+    "la_chuoi_lon",
+    "dinh_dang_nho",
+    "mixed_use",
+    "hang_tm",
+    "quy_mo_tm",
+    "quy_mo_nguon",
+    "container_uid",
+    "fragment_group",
+    "d_tram",
+    "near_tram",
+    "ky_vong_o"
+   ],
+   "diem_nhay": [
+    {
+     "ten": "Thành phố Hồ Chí Minh",
+     "n": 824,
+     "bbox": [
+      106.35731420000002,
+      8.686068870447874,
+      107.54877418188327,
+      11.3849554
+     ]
+    },
+    {
+     "ten": "Thành phố Hà Nội",
+     "n": 613,
+     "bbox": [
+      105.34436889176754,
+      20.613753832609486,
+      105.9911384,
+      21.29003760529801
+     ]
+    },
+    {
+     "ten": "Thành phố Đà Nẵng",
+     "n": 163,
+     "bbox": [
+      107.4906139,
+      15.338150854364871,
+      108.5516361,
+      16.1243642
+     ]
+    },
+    {
+     "ten": "Thành phố Cần Thơ",
+     "n": 137,
+     "bbox": [
+      105.43110658177007,
+      9.313430887430599,
+      106.20274874470958,
+      10.300143637723746
+     ]
+    },
+    {
+     "ten": "Tỉnh Đồng Nai",
+     "n": 128,
+     "bbox": [
+      106.57965357896833,
+      10.659928,
+      107.4884473,
+      11.984864631415592
+     ]
+    },
+    {
+     "ten": "Thành phố Hải Phòng",
+     "n": 110,
+     "bbox": [
+      106.2491153,
+      20.65531975,
+      107.0546887,
+      21.13186717097074
+     ]
+    },
+    {
+     "ten": "Tỉnh Quảng Ninh",
+     "n": 90,
+     "bbox": [
+      106.51224411218043,
+      20.939038615428277,
+      107.9765001,
+      21.64236085787412
+     ]
+    }
+   ],
+   "xuat_utc": "2026-08-09T06:28:29+00:00"
+  },
+  {
+   "key": "poi_morph_review_7tinh",
+   "file": "poi_morph_review_7tinh.geojson",
+   "nguon": "data/qa/eda/poi_morph_review_7tinh.parquet",
+   "n": 104,
+   "n_bo_qua": 0,
+   "n_hinh": 104,
+   "bytes": 93045,
+   "bbox": [
+    105.7357784731189,
+    10.009382266335084,
+    108.25023265,
+    21.53884370953789
+   ],
+   "cot": [
+    "osm_type",
+    "osm_id",
+    "is_area",
+    "lat",
+    "lng",
+    "area_m2",
+    "n_tags",
+    "tags",
+    "name",
+    "shop",
+    "amenity",
+    "tourism",
+    "leisure",
+    "office",
+    "building",
+    "healthcare",
+    "railway",
+    "highway",
+    "power",
+    "landuse",
+    "public_transport",
+    "is_boundary",
+    "area_outlier",
+    "dup_coord",
+    "province_code",
+    "province_name",
+    "h3_r8",
+    "uid",
+    "residential",
+    "place",
+    "levels",
+    "rooms",
+    "stars",
+    "operator",
+    "brand",
+    "name_norm",
+    "is_housing"
+   ],
+   "diem_nhay": [
+    {
+     "ten": "Thành phố Hà Nội",
+     "n": 62,
+     "bbox": [
+      105.7357784731189,
+      20.95209875973117,
+      105.8796669066681,
+      21.079683059799393
+     ]
+    },
+    {
+     "ten": "Thành phố Hồ Chí Minh",
+     "n": 26,
+     "bbox": [
+      106.59311306131956,
+      10.343593265757852,
+      107.09408855641861,
+      11.108648224530652
+     ]
+    },
+    {
+     "ten": "Thành phố Đà Nẵng",
+     "n": 8,
+     "bbox": [
+      108.21441979794385,
+      16.03204029234124,
+      108.25023265,
+      16.07226682270729
+     ]
+    },
+    {
+     "ten": "Thành phố Hải Phòng",
+     "n": 5,
+     "bbox": [
+      106.70034313138474,
+      20.71941426794962,
+      107.0537544970946,
+      20.84768284581141
+     ]
+    },
+    {
+     "ten": "Tỉnh Quảng Ninh",
+     "n": 2,
+     "bbox": [
+      107.0844712066291,
+      20.951347446034966,
+      107.96882076561343,
+      21.53884370953789
+     ]
+    },
+    {
+     "ten": "Thành phố Cần Thơ",
+     "n": 1,
+     "bbox": [
+      105.75213419797973,
+      10.009382266335084,
+      105.75213419797973,
+      10.009382266335084
+     ]
+    }
+   ],
+   "xuat_utc": "2026-08-08T20:53:31+00:00"
+  },
+  {
+   "key": "poi_chungcu_7tinh_b3_bi_xoa",
+   "file": "poi_chungcu_7tinh_b3_bi_xoa.geojson",
+   "nguon": "data/qa/eda/poi_chungcu_7tinh_b3_bi_xoa.parquet",
+   "n": 1726,
+   "n_bo_qua": 0,
+   "n_hinh": 787,
+   "bytes": 2510560,
+   "bbox": [
+    105.3992441,
+    8.6819305,
+    108.65943161901293,
+    21.53370335
+   ],
+   "cot": [
+    "uid",
+    "osm_type",
+    "osm_id",
+    "is_area",
+    "lat",
+    "lng",
+    "area_m2",
+    "h3_r8",
+    "name",
+    "name_norm",
+    "building",
+    "residential",
+    "landuse",
+    "place",
+    "amenity",
+    "shop",
+    "office",
+    "tourism",
+    "leisure",
+    "levels",
+    "operator",
+    "brand",
+    "area_outlier",
+    "dup_coord",
+    "province_code",
+    "province_name",
+    "label",
+    "evidence",
+    "src_tag",
+    "src_name",
+    "src_code",
+    "src_kdt",
+    "src_shape",
+    "n_tags",
+    "tags",
+    "highway",
+    "public_transport",
+    "man_made",
+    "historic",
+    "natural",
+    "waterway",
+    "power",
+    "aeroway",
+    "railway",
+    "barrier",
+    "craft",
+    "drop_reason"
+   ],
+   "diem_nhay": [
+    {
+     "ten": "Thành phố Hà Nội",
+     "n": 732,
+     "bbox": [
+      105.4201871,
+      20.747458671451195,
+      105.9979559,
+      21.3386218
+     ]
+    },
+    {
+     "ten": "Thành phố Hồ Chí Minh",
+     "n": 689,
+     "bbox": [
+      106.3698208,
+      8.6819305,
+      107.3793205,
+      11.4089944
+     ]
+    },
+    {
+     "ten": "Thành phố Đà Nẵng",
+     "n": 150,
+     "bbox": [
+      107.49188800000002,
+      15.01621301160843,
+      108.65943161901293,
+      16.1084388
+     ]
+    },
+    {
+     "ten": "Thành phố Hải Phòng",
+     "n": 58,
+     "bbox": [
+      106.32882137917285,
+      20.623641645452793,
+      107.20294689613726,
+      21.10859140958721
+     ]
+    },
+    {
+     "ten": "Thành phố Cần Thơ",
+     "n": 49,
+     "bbox": [
+      105.3992441,
+      9.3132704,
+      106.01816765,
+      10.2781466
+     ]
+    },
+    {
+     "ten": "Tỉnh Đồng Nai",
+     "n": 32,
+     "bbox": [
+      106.8053211,
+      10.687050217856326,
+      107.3915995,
+      11.854542804413729
+     ]
+    },
+    {
+     "ten": "Tỉnh Quảng Ninh",
+     "n": 16,
+     "bbox": [
+      106.50838198692465,
+      20.94590401612865,
+      107.98066837298195,
+      21.53370335
+     ]
+    }
+   ],
+   "xuat_utc": "2026-08-08T20:09:49+00:00"
+  },
+  {
+   "key": "poi_chungcu_7tinh_b3",
+   "file": "poi_chungcu_7tinh_b3.geojson",
+   "nguon": "data/qa/eda/poi_chungcu_7tinh_b3.parquet",
+   "n": 9605,
+   "n_bo_qua": 0,
+   "n_hinh": 9262,
+   "bytes": 10064601,
+   "bbox": [
+    105.30786797748223,
+    8.688417431862478,
+    108.67883278975066,
+    21.685740805629553
+   ],
+   "cot": [
+    "uid",
+    "osm_type",
+    "osm_id",
+    "is_area",
+    "lat",
+    "lng",
+    "area_m2",
+    "h3_r8",
+    "name",
+    "name_norm",
+    "building",
+    "residential",
+    "landuse",
+    "place",
+    "amenity",
+    "shop",
+    "office",
+    "tourism",
+    "leisure",
+    "levels",
+    "operator",
+    "brand",
+    "area_outlier",
+    "dup_coord",
+    "province_code",
+    "province_name",
+    "label",
+    "evidence",
+    "src_tag",
+    "src_name",
+    "src_code",
+    "src_kdt",
+    "src_shape",
+    "n_tags",
+    "tags",
+    "highway",
+    "public_transport",
+    "man_made",
+    "historic",
+    "natural",
+    "waterway",
+    "power",
+    "aeroway",
+    "railway",
+    "barrier",
+    "craft"
+   ],
+   "diem_nhay": [
+    {
+     "ten": "Thành phố Hà Nội",
+     "n": 3936,
+     "bbox": [
+      105.30786797748223,
+      20.67134771429235,
+      106.0142167886727,
+      21.375571073609056
+     ]
+    },
+    {
+     "ten": "Thành phố Hồ Chí Minh",
+     "n": 3044,
+     "bbox": [
+      106.47552866068419,
+      8.688417431862478,
+      107.43125932516611,
+      11.347118463609398
+     ]
+    },
+    {
+     "ten": "Thành phố Đà Nẵng",
+     "n": 1514,
+     "bbox": [
+      107.24829885224676,
+      14.962893404142429,
+      108.67883278975066,
+      16.105315194776537
+     ]
+    },
+    {
+     "ten": "Thành phố Cần Thơ",
+     "n": 410,
+     "bbox": [
+      105.4529330295015,
+      9.304210196712944,
+      105.99753222704871,
+      10.298318748864677
+     ]
+    },
+    {
+     "ten": "Thành phố Hải Phòng",
+     "n": 282,
+     "bbox": [
+      106.1477085643176,
+      20.130263878122037,
+      107.72753696163097,
+      21.111863888010312
+     ]
+    },
+    {
+     "ten": "Tỉnh Quảng Ninh",
+     "n": 228,
+     "bbox": [
+      106.74453047840876,
+      20.87768517796647,
+      107.99680643434655,
+      21.685740805629553
+     ]
+    },
+    {
+     "ten": "Tỉnh Đồng Nai",
+     "n": 191,
+     "bbox": [
+      106.61417104544715,
+      10.67052245,
+      107.2486232083457,
+      12.11339873534971
+     ]
+    }
+   ],
+   "xuat_utc": "2026-08-08T20:09:48+00:00"
+  },
+  {
+   "key": "poi_chungcu_7tinh",
+   "file": "poi_chungcu_7tinh.geojson",
+   "nguon": "data/qa/eda/poi_chungcu_7tinh.parquet",
+   "n": 11331,
+   "n_bo_qua": 0,
+   "n_hinh": 10049,
+   "bytes": 12493500,
+   "bbox": [
+    105.30786797748223,
+    8.6819305,
+    108.67883278975066,
+    21.685740805629553
+   ],
+   "cot": [
+    "uid",
+    "osm_type",
+    "osm_id",
+    "is_area",
+    "lat",
+    "lng",
+    "area_m2",
+    "h3_r8",
+    "name",
+    "name_norm",
+    "building",
+    "residential",
+    "landuse",
+    "place",
+    "amenity",
+    "shop",
+    "office",
+    "tourism",
+    "leisure",
+    "levels",
+    "operator",
+    "brand",
+    "area_outlier",
+    "dup_coord",
+    "province_code",
+    "province_name",
+    "label",
+    "evidence",
+    "src_tag",
+    "src_name",
+    "src_code",
+    "src_kdt",
+    "src_shape",
+    "n_tags",
+    "tags"
+   ],
+   "diem_nhay": [
+    {
+     "ten": "Thành phố Hà Nội",
+     "n": 4668,
+     "bbox": [
+      105.30786797748223,
+      20.67134771429235,
+      106.0142167886727,
+      21.375571073609056
+     ]
+    },
+    {
+     "ten": "Thành phố Hồ Chí Minh",
+     "n": 3733,
+     "bbox": [
+      106.3698208,
+      8.6819305,
+      107.43125932516611,
+      11.4089944
+     ]
+    },
+    {
+     "ten": "Thành phố Đà Nẵng",
+     "n": 1664,
+     "bbox": [
+      107.24829885224676,
+      14.962893404142429,
+      108.67883278975066,
+      16.1084388
+     ]
+    },
+    {
+     "ten": "Thành phố Cần Thơ",
+     "n": 459,
+     "bbox": [
+      105.3992441,
+      9.304210196712944,
+      106.01816765,
+      10.298318748864677
+     ]
+    },
+    {
+     "ten": "Thành phố Hải Phòng",
+     "n": 340,
+     "bbox": [
+      106.1477085643176,
+      20.130263878122037,
+      107.72753696163097,
+      21.111863888010312
+     ]
+    },
+    {
+     "ten": "Tỉnh Quảng Ninh",
+     "n": 244,
+     "bbox": [
+      106.50838198692465,
+      20.87768517796647,
+      107.99680643434655,
+      21.685740805629553
+     ]
+    },
+    {
+     "ten": "Tỉnh Đồng Nai",
+     "n": 223,
+     "bbox": [
+      106.61417104544715,
+      10.67052245,
+      107.3915995,
+      12.11339873534971
+     ]
+    }
+   ],
+   "xuat_utc": "2026-08-08T20:09:47+00:00"
+  }
+ ]
+}

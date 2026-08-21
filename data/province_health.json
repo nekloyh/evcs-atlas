@@ -1,0 +1,581 @@
+{
+ "thresholds": {
+  "MIN_STATIONS": 30,
+  "MIN_OCC_MEASURED_SHARE": 0.5,
+  "POI_ZERO_COMMUNE_MAX": 0.5
+ },
+ "source": "store/qa/provinces.parquet + store/qa/exclusions.json",
+ "provinces": [
+  {
+   "province_code": "01",
+   "province_name": "Thành phố Hà Nội",
+   "n_stations": 710,
+   "quality_flags": [
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.9993,
+   "share_pop_unreachable": 0.0011,
+   "share_stations_measured": 0.9521,
+   "share_communes_zero_poi": 0.0714,
+   "vnsdi_anchor_ratio": 0.9519,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "04",
+   "province_name": "Tỉnh Cao Bằng",
+   "n_stations": 30,
+   "quality_flags": [
+    "KHONG_DO_DUOC_SU_DUNG",
+    "DAN_KHONG_TOI_DUOC_BANG_DUONG"
+   ],
+   "share_cells_reachable": 0.8419,
+   "share_pop_unreachable": 0.0863,
+   "share_stations_measured": 0.1,
+   "share_communes_zero_poi": 0.4821,
+   "vnsdi_anchor_ratio": 1.0805,
+   "excluded": true,
+   "exclusion_reasons": [
+    "KHONG_DO_DUOC_SU_DUNG"
+   ],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "08",
+   "province_name": "Tỉnh Tuyên Quang",
+   "n_stations": 101,
+   "quality_flags": [
+    "POI_KHONG_DIEN_GIAI_DUOC",
+    "DAN_KHONG_TOI_DUOC_BANG_DUONG",
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.856,
+   "share_pop_unreachable": 0.0388,
+   "share_stations_measured": 0.8119,
+   "share_communes_zero_poi": 0.5565,
+   "vnsdi_anchor_ratio": 1.0563,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": true
+  },
+  {
+   "province_code": "11",
+   "province_name": "Tỉnh Điện Biên",
+   "n_stations": 39,
+   "quality_flags": [
+    "KHONG_DO_DUOC_SU_DUNG",
+    "POI_KHONG_DIEN_GIAI_DUOC",
+    "DAN_KHONG_TOI_DUOC_BANG_DUONG",
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.722,
+   "share_pop_unreachable": 0.0693,
+   "share_stations_measured": 0.0,
+   "share_communes_zero_poi": 0.6444,
+   "vnsdi_anchor_ratio": 0.9973,
+   "excluded": true,
+   "exclusion_reasons": [
+    "KHONG_DO_DUOC_SU_DUNG"
+   ],
+   "poi_not_interpretable": true
+  },
+  {
+   "province_code": "12",
+   "province_name": "Tỉnh Lai Châu",
+   "n_stations": 24,
+   "quality_flags": [
+    "QUA_IT_TRAM",
+    "KHONG_DO_DUOC_SU_DUNG",
+    "DAN_KHONG_TOI_DUOC_BANG_DUONG",
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.6747,
+   "share_pop_unreachable": 0.0284,
+   "share_stations_measured": 0.1667,
+   "share_communes_zero_poi": 0.4737,
+   "vnsdi_anchor_ratio": 0.9786,
+   "excluded": true,
+   "exclusion_reasons": [
+    "KHONG_DO_DUOC_SU_DUNG",
+    "QUA_IT_TRAM"
+   ],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "14",
+   "province_name": "Tỉnh Sơn La",
+   "n_stations": 64,
+   "quality_flags": [
+    "KHONG_DO_DUOC_SU_DUNG",
+    "POI_KHONG_DIEN_GIAI_DUOC",
+    "DAN_KHONG_TOI_DUOC_BANG_DUONG",
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.8248,
+   "share_pop_unreachable": 0.0414,
+   "share_stations_measured": 0.0469,
+   "share_communes_zero_poi": 0.6267,
+   "vnsdi_anchor_ratio": 1.0181,
+   "excluded": true,
+   "exclusion_reasons": [
+    "KHONG_DO_DUOC_SU_DUNG"
+   ],
+   "poi_not_interpretable": true
+  },
+  {
+   "province_code": "15",
+   "province_name": "Tỉnh Lào Cai",
+   "n_stations": 87,
+   "quality_flags": [
+    "POI_KHONG_DIEN_GIAI_DUOC",
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.8061,
+   "share_pop_unreachable": 0.0146,
+   "share_stations_measured": 0.7816,
+   "share_communes_zero_poi": 0.5354,
+   "vnsdi_anchor_ratio": 1.0554,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": true
+  },
+  {
+   "province_code": "19",
+   "province_name": "Tỉnh Thái Nguyên",
+   "n_stations": 136,
+   "quality_flags": [
+    "POI_KHONG_DIEN_GIAI_DUOC"
+   ],
+   "share_cells_reachable": 0.8702,
+   "share_pop_unreachable": 0.019,
+   "share_stations_measured": 0.6103,
+   "share_communes_zero_poi": 0.5978,
+   "vnsdi_anchor_ratio": 1.0551,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": true
+  },
+  {
+   "province_code": "20",
+   "province_name": "Tỉnh Lạng Sơn",
+   "n_stations": 40,
+   "quality_flags": [
+    "POI_KHONG_DIEN_GIAI_DUOC",
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.8894,
+   "share_pop_unreachable": 0.0145,
+   "share_stations_measured": 0.95,
+   "share_communes_zero_poi": 0.5385,
+   "vnsdi_anchor_ratio": 1.0925,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": true
+  },
+  {
+   "province_code": "22",
+   "province_name": "Tỉnh Quảng Ninh",
+   "n_stations": 142,
+   "quality_flags": [
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.7536,
+   "share_pop_unreachable": 0.0164,
+   "share_stations_measured": 0.9437,
+   "share_communes_zero_poi": 0.3148,
+   "vnsdi_anchor_ratio": 1.0409,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "24",
+   "province_name": "Tỉnh Bắc Ninh",
+   "n_stations": 238,
+   "quality_flags": [],
+   "share_cells_reachable": 0.9616,
+   "share_pop_unreachable": 0.0001,
+   "share_stations_measured": 0.7647,
+   "share_communes_zero_poi": 0.3636,
+   "vnsdi_anchor_ratio": 1.013,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "25",
+   "province_name": "Tỉnh Phú Thọ",
+   "n_stations": 329,
+   "quality_flags": [
+    "POI_KHONG_DIEN_GIAI_DUOC",
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.9695,
+   "share_pop_unreachable": 0.0004,
+   "share_stations_measured": 0.769,
+   "share_communes_zero_poi": 0.5541,
+   "vnsdi_anchor_ratio": 1.0879,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": true
+  },
+  {
+   "province_code": "31",
+   "province_name": "Thành phố Hải Phòng",
+   "n_stations": 238,
+   "quality_flags": [
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.9538,
+   "share_pop_unreachable": 0.0004,
+   "share_stations_measured": 0.937,
+   "share_communes_zero_poi": 0.4912,
+   "vnsdi_anchor_ratio": 1.1268,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "33",
+   "province_name": "Tỉnh Hưng Yên",
+   "n_stations": 231,
+   "quality_flags": [
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.9985,
+   "share_pop_unreachable": 0.0,
+   "share_stations_measured": 0.8788,
+   "share_communes_zero_poi": 0.4904,
+   "vnsdi_anchor_ratio": 1.104,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "37",
+   "province_name": "Tỉnh Ninh Bình",
+   "n_stations": 220,
+   "quality_flags": [
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.9836,
+   "share_pop_unreachable": 0.0001,
+   "share_stations_measured": 0.9545,
+   "share_communes_zero_poi": 0.4806,
+   "vnsdi_anchor_ratio": 1.2606,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "38",
+   "province_name": "Tỉnh Thanh Hóa",
+   "n_stations": 188,
+   "quality_flags": [
+    "POI_KHONG_DIEN_GIAI_DUOC",
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.8922,
+   "share_pop_unreachable": 0.0015,
+   "share_stations_measured": 0.883,
+   "share_communes_zero_poi": 0.5723,
+   "vnsdi_anchor_ratio": 1.1772,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": true
+  },
+  {
+   "province_code": "40",
+   "province_name": "Tỉnh Nghệ An",
+   "n_stations": 118,
+   "quality_flags": [
+    "POI_KHONG_DIEN_GIAI_DUOC",
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.6907,
+   "share_pop_unreachable": 0.0069,
+   "share_stations_measured": 0.8305,
+   "share_communes_zero_poi": 0.5231,
+   "vnsdi_anchor_ratio": 1.0589,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": true
+  },
+  {
+   "province_code": "42",
+   "province_name": "Tỉnh Hà Tĩnh",
+   "n_stations": 99,
+   "quality_flags": [],
+   "share_cells_reachable": 0.7141,
+   "share_pop_unreachable": 0.0014,
+   "share_stations_measured": 0.6869,
+   "share_communes_zero_poi": 0.4348,
+   "vnsdi_anchor_ratio": 1.2539,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "44",
+   "province_name": "Tỉnh Quảng Trị",
+   "n_stations": 153,
+   "quality_flags": [
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.6581,
+   "share_pop_unreachable": 0.0031,
+   "share_stations_measured": 0.732,
+   "share_communes_zero_poi": 0.2564,
+   "vnsdi_anchor_ratio": 1.2083,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "46",
+   "province_name": "Thành phố Huế",
+   "n_stations": 64,
+   "quality_flags": [
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.6162,
+   "share_pop_unreachable": 0.0013,
+   "share_stations_measured": 0.8594,
+   "share_communes_zero_poi": 0.3,
+   "vnsdi_anchor_ratio": 1.2673,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "48",
+   "province_name": "Thành phố Đà Nẵng",
+   "n_stations": 191,
+   "quality_flags": [
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.5896,
+   "share_pop_unreachable": 0.009,
+   "share_stations_measured": 0.8534,
+   "share_communes_zero_poi": 0.4255,
+   "vnsdi_anchor_ratio": 1.1198,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "51",
+   "province_name": "Tỉnh Quảng Ngãi",
+   "n_stations": 82,
+   "quality_flags": [
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.7747,
+   "share_pop_unreachable": 0.0146,
+   "share_stations_measured": 0.7195,
+   "share_communes_zero_poi": 0.4896,
+   "vnsdi_anchor_ratio": 1.2038,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "52",
+   "province_name": "Tỉnh Gia Lai",
+   "n_stations": 169,
+   "quality_flags": [
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.6862,
+   "share_pop_unreachable": 0.0083,
+   "share_stations_measured": 0.7692,
+   "share_communes_zero_poi": 0.4963,
+   "vnsdi_anchor_ratio": 1.153,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "56",
+   "province_name": "Tỉnh Khánh Hòa",
+   "n_stations": 111,
+   "quality_flags": [
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.3341,
+   "share_pop_unreachable": 0.0087,
+   "share_stations_measured": 0.9279,
+   "share_communes_zero_poi": 0.1385,
+   "vnsdi_anchor_ratio": 1.193,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "66",
+   "province_name": "Tỉnh Đắk Lắk",
+   "n_stations": 234,
+   "quality_flags": [
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.7355,
+   "share_pop_unreachable": 0.0033,
+   "share_stations_measured": 0.7051,
+   "share_communes_zero_poi": 0.3235,
+   "vnsdi_anchor_ratio": 1.2042,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "68",
+   "province_name": "Tỉnh Lâm Đồng",
+   "n_stations": 237,
+   "quality_flags": [
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.7042,
+   "share_pop_unreachable": 0.016,
+   "share_stations_measured": 0.9198,
+   "share_communes_zero_poi": 0.2016,
+   "vnsdi_anchor_ratio": 1.1659,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "75",
+   "province_name": "Tỉnh Đồng Nai",
+   "n_stations": 318,
+   "quality_flags": [
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.8853,
+   "share_pop_unreachable": 0.0025,
+   "share_stations_measured": 0.9686,
+   "share_communes_zero_poi": 0.2632,
+   "vnsdi_anchor_ratio": 0.9961,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "79",
+   "province_name": "Thành phố Hồ Chí Minh",
+   "n_stations": 926,
+   "quality_flags": [
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.9289,
+   "share_pop_unreachable": 0.0009,
+   "share_stations_measured": 0.9417,
+   "share_communes_zero_poi": 0.0357,
+   "vnsdi_anchor_ratio": 1.0135,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "80",
+   "province_name": "Tỉnh Tây Ninh",
+   "n_stations": 177,
+   "quality_flags": [],
+   "share_cells_reachable": 0.971,
+   "share_pop_unreachable": 0.0012,
+   "share_stations_measured": 0.8136,
+   "share_communes_zero_poi": 0.3229,
+   "vnsdi_anchor_ratio": 1.0586,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "82",
+   "province_name": "Tỉnh Đồng Tháp",
+   "n_stations": 149,
+   "quality_flags": [
+    "DAN_KHONG_TOI_DUOC_BANG_DUONG",
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.9643,
+   "share_pop_unreachable": 0.0303,
+   "share_stations_measured": 0.8658,
+   "share_communes_zero_poi": 0.3824,
+   "vnsdi_anchor_ratio": 1.3398,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "86",
+   "province_name": "Tỉnh Vĩnh Long",
+   "n_stations": 146,
+   "quality_flags": [
+    "POI_KHONG_DIEN_GIAI_DUOC",
+    "DAN_KHONG_TOI_DUOC_BANG_DUONG",
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.9121,
+   "share_pop_unreachable": 0.0358,
+   "share_stations_measured": 0.7877,
+   "share_communes_zero_poi": 0.5403,
+   "vnsdi_anchor_ratio": 1.3408,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": true
+  },
+  {
+   "province_code": "91",
+   "province_name": "Tỉnh An Giang",
+   "n_stations": 187,
+   "quality_flags": [
+    "DAN_KHONG_TOI_DUOC_BANG_DUONG",
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.8783,
+   "share_pop_unreachable": 0.0402,
+   "share_stations_measured": 0.8182,
+   "share_communes_zero_poi": 0.4216,
+   "vnsdi_anchor_ratio": 1.6072,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": false
+  },
+  {
+   "province_code": "92",
+   "province_name": "Thành phố Cần Thơ",
+   "n_stations": 126,
+   "quality_flags": [
+    "POI_KHONG_DIEN_GIAI_DUOC",
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.9837,
+   "share_pop_unreachable": 0.0131,
+   "share_stations_measured": 0.9127,
+   "share_communes_zero_poi": 0.5534,
+   "vnsdi_anchor_ratio": 1.4509,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": true
+  },
+  {
+   "province_code": "96",
+   "province_name": "Tỉnh Cà Mau",
+   "n_stations": 76,
+   "quality_flags": [
+    "POI_KHONG_DIEN_GIAI_DUOC",
+    "DAN_KHONG_TOI_DUOC_BANG_DUONG",
+    "DIA_GIOI_CO_SO_CONG_BO_HONG"
+   ],
+   "share_cells_reachable": 0.8017,
+   "share_pop_unreachable": 0.1066,
+   "share_stations_measured": 0.8158,
+   "share_communes_zero_poi": 0.7656,
+   "vnsdi_anchor_ratio": 0.976,
+   "excluded": false,
+   "exclusion_reasons": [],
+   "poi_not_interpretable": true
+  }
+ ]
+}

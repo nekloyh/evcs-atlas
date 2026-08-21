@@ -1,0 +1,1283 @@
+{
+ "exported_utc": "2026-08-21T03:27:54+00:00",
+ "vintage": {
+  "name": "VNSDI 2025-07 (sau cải cách 01/7/2025)",
+  "source": "VNSDI qua aGiang-evcs data/interim/vnsdi/communes.parquet",
+  "valid_from": "16/6/2025",
+  "published": "13/07/2025",
+  "levels": [
+   "tỉnh/thành phố",
+   "phường/xã/đặc khu"
+  ],
+  "n_provinces": 34,
+  "n_communes": 3321,
+  "province_key": "province_code (2 ký tự, = VNSDI matinh)",
+  "commune_key": "commune_code (5 ký tự, = VNSDI maxa)",
+  "rejected": {
+   "evcs-dataset data/ref/vn_admin/valid_from=2025-07-01": "ranh giới dựng từ OSM adm6 — 3.930 đơn vị so với 3.321 chính thức (lệch 609). Chính báo cáo của nó ghi 'KHÔNG coi là danh mục HC chuẩn'. Thêm nữa nó là dẫn xuất ODbL, ràng buộc phát hành khác với dữ liệu nhà nước.",
+   "cấu trúc 63 tỉnh trước sáp nhập": "hết hiệu lực 01/7/2025. Còn tồn tại như khoá phân mảnh của bảng canonical; xem crosswalk_legacy — và crosswalk chỉ để ĐỌC di sản, không để gán địa bàn."
+  }
+ },
+ "province": {
+  "province_code": "22",
+  "province_name": "Tỉnh Quảng Ninh",
+  "n_communes": 54,
+  "n_dac_khu": 2,
+  "bbox": [
+   106.4391417249993,
+   20.685197663414105,
+   108.08771679745273,
+   21.663777645194372
+  ],
+  "center": [
+   107.25864054855536,
+   21.23675509777556
+  ]
+ },
+ "n_cells": 8640,
+ "files": {
+  "grid_h3_r8.parquet": {
+   "bytes": 1379024,
+   "rows": 8640
+  },
+  "stations.parquet": {
+   "bytes": 35062,
+   "rows": 181
+  },
+  "connectors.parquet": {
+   "bytes": 10887,
+   "rows": 306
+  },
+  "station_occupancy.parquet": {
+   "bytes": 24810,
+   "rows": 141
+  },
+  "station_occupancy_profile_168h.parquet": {
+   "bytes": 81834,
+   "rows": 23315
+  },
+  "commune.geojson": {
+   "bytes": 998590,
+   "rows": 54
+  },
+  "admin_boundary.geojson": {
+   "bytes": 177995,
+   "rows": 2
+  },
+  "poi.geojson": {
+   "bytes": 218037,
+   "rows": 415
+  },
+  "roads.parquet": {
+   "bytes": 1151409,
+   "rows": 31220
+  },
+  "sim_calibration.json": {
+   "bytes": 663,
+   "rows": null
+  }
+ },
+ "available_columns": [
+  "apartment_levels_sum",
+  "area_frac",
+  "area_km2",
+  "bare_frac",
+  "built_frac",
+  "cell_state",
+  "commune_area_frac",
+  "commune_code",
+  "commune_name",
+  "crop_frac",
+  "detour_ratio",
+  "dist_station_asym_m",
+  "dist_station_euclid_m",
+  "dist_station_network_m",
+  "evidence_grade_distance",
+  "grass_frac",
+  "h3_r8",
+  "lat",
+  "lng",
+  "mangrove_frac",
+  "moss_frac",
+  "n_apartment",
+  "n_dept_store",
+  "n_fuel",
+  "n_mall",
+  "n_market",
+  "n_parking_off",
+  "n_parking_street",
+  "n_poi_1km",
+  "n_poi_total",
+  "n_ports",
+  "n_stations",
+  "n_stations_measured",
+  "n_stations_operational",
+  "n_supermarket",
+  "network_reachable",
+  "pop_density_ppkm2",
+  "pop_source",
+  "population",
+  "population_wp",
+  "power_kw_site",
+  "province_code",
+  "road_access_offset_m",
+  "road_len_arterial_m",
+  "road_len_in_province_m",
+  "road_len_local_m",
+  "road_len_m",
+  "road_len_motorway_m",
+  "road_len_primary_m",
+  "road_len_secondary_m",
+  "road_len_service_m",
+  "road_len_tertiary_m",
+  "road_len_trunk_m",
+  "screen_decision",
+  "screen_margin_m",
+  "shrub_frac",
+  "snow_frac",
+  "tree_frac",
+  "util_cell",
+  "water_frac",
+  "wetland_frac"
+ ],
+ "available_commune_columns": [
+  "anchor_ratio",
+  "area_km2",
+  "area_km2_geom",
+  "commune_code",
+  "commune_kind",
+  "commune_name",
+  "dist_station_m_pop_weighted",
+  "n_ports",
+  "n_stations",
+  "pop_density_ppkm2",
+  "pop_source",
+  "population",
+  "population_wp",
+  "ports_per_10k_pop",
+  "power_kw_site",
+  "province_code",
+  "province_name",
+  "published",
+  "quality_flag",
+  "util_mean_port_weighted",
+  "valid_from"
+ ],
+ "source_metrics": {
+  "poi_empty_1km": {
+   "n_cells": 8640,
+   "n_cells_zero": 8220,
+   "share_cells": 0.951389,
+   "share_pop": 0.506599
+  }
+ },
+ "available_road_columns": [
+  "bridge",
+  "coords",
+  "dist_station_m",
+  "osm_id",
+  "road_class"
+ ],
+ "available_station_columns": [
+  "access",
+  "address",
+  "commune_code",
+  "commune_kind",
+  "commune_name",
+  "current_type",
+  "freshness",
+  "h3_r8",
+  "has_timeseries",
+  "lat",
+  "lng",
+  "n_guns_imputed",
+  "n_ports",
+  "name",
+  "op_status",
+  "operator",
+  "port_config_source",
+  "power_kw_max_port",
+  "power_kw_site",
+  "province_code",
+  "scope",
+  "station_code",
+  "station_id",
+  "station_type",
+  "vehicle_class",
+  "verified_official"
+ ],
+ "missing_layers": {
+  "reason": "cột có ở bộ Hà Nội đầy đủ nhưng chưa dựng cho tỉnh này (xem DECISIONS.md §7)",
+  "columns": []
+ },
+ "coverage": {
+  "h3_r8": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "province_code": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "lat": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "lng": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "area_km2": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "area_frac": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "cell_state": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "commune_code": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "commune_name": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "commune_area_frac": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "population": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "pop_density_ppkm2": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "pop_source": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "n_stations": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "n_stations_operational": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "n_ports": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "power_kw_site": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "n_fuel": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "n_parking_off": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "n_parking_street": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "n_mall": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "n_dept_store": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "n_supermarket": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "n_market": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "n_apartment": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "n_poi_total": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "road_len_local_m": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "road_len_motorway_m": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "road_len_primary_m": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "road_len_secondary_m": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "road_len_service_m": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "road_len_tertiary_m": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "road_len_trunk_m": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "road_len_m": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "road_len_arterial_m": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "road_len_in_province_m": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "n_poi_1km": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "apartment_levels_sum": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "population_wp": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "tree_frac": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "shrub_frac": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "grass_frac": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "crop_frac": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "built_frac": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "bare_frac": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "snow_frac": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "water_frac": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "wetland_frac": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "mangrove_frac": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "moss_frac": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "dist_station_network_m": {
+   "n_present": 6511,
+   "cell_share": 0.753588,
+   "pop_share": 0.98363
+  },
+  "dist_station_euclid_m": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "detour_ratio": {
+   "n_present": 6488,
+   "cell_share": 0.750926,
+   "pop_share": 0.932928
+  },
+  "dist_station_asym_m": {
+   "n_present": 6511,
+   "cell_share": 0.753588,
+   "pop_share": 0.98363
+  },
+  "road_access_offset_m": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "network_reachable": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "evidence_grade_distance": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "screen_margin_m": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "screen_decision": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  },
+  "util_cell": {
+   "n_present": 107,
+   "cell_share": 0.012384,
+   "pop_share": 0.205717,
+   "cells_with_station": 107,
+   "share_measured_among_cells_with_station": 1.0
+  },
+  "n_stations_measured": {
+   "n_present": 8640,
+   "cell_share": 1.0,
+   "pop_share": 1.0
+  }
+ },
+ "null_states": {
+  "grid": {
+   "dist_station_network_m": {
+    "n_rows": 8640,
+    "n_present": 6511,
+    "share_rows": 0.753588,
+    "states": {
+     "NOT_APPLICABLE": {
+      "n": 2129,
+      "state": "NOT_APPLICABLE",
+      "rule": "evidence_grade_distance IN ('UNREACHABLE_NO_PATH', 'UNREACHABLE_NO_ROAD_ACCESS')",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 6511,
+    "share_of_applicable": 1.0,
+    "pop_share": 0.98363
+   },
+   "dist_station_asym_m": {
+    "n_rows": 8640,
+    "n_present": 6511,
+    "share_rows": 0.753588,
+    "states": {
+     "NOT_APPLICABLE": {
+      "n": 2129,
+      "state": "NOT_APPLICABLE",
+      "rule": "evidence_grade_distance IN ('UNREACHABLE_NO_PATH', 'UNREACHABLE_NO_ROAD_ACCESS')",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 6511,
+    "share_of_applicable": 1.0,
+    "pop_share": 0.98363
+   },
+   "detour_ratio": {
+    "n_rows": 8640,
+    "n_present": 6488,
+    "share_rows": 0.750926,
+    "states": {
+     "NOT_APPLICABLE": {
+      "n": 2129,
+      "state": "NOT_APPLICABLE",
+      "rule": "evidence_grade_distance IN ('UNREACHABLE_NO_PATH', 'UNREACHABLE_NO_ROAD_ACCESS')",
+      "basis": "row_predicate"
+     },
+     "FILTERED": {
+      "n": 23,
+      "state": "FILTERED",
+      "rule": "dist_station_euclid_m < 200.0",
+      "basis": "row_predicate",
+      "threshold": {
+       "name": "DETOUR_MIN_EUCLID_M",
+       "value": 200.0,
+       "source": "src/evcs/core/roadgraph.py"
+      }
+     }
+    },
+    "n_applicable": 6511,
+    "share_of_applicable": 0.996468,
+    "pop_share": 0.932928
+   },
+   "util_cell": {
+    "n_rows": 8640,
+    "n_present": 107,
+    "share_rows": 0.012384,
+    "states": {
+     "NOT_APPLICABLE": {
+      "n": 8533,
+      "state": "NOT_APPLICABLE",
+      "rule": "n_stations = 0",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 107,
+    "share_of_applicable": 1.0,
+    "pop_share": 0.205717
+   }
+  },
+  "stations": {
+   "commune_code": {
+    "n_rows": 181,
+    "n_present": 142,
+    "share_rows": 0.78453,
+    "states": {
+     "NOT_APPLICABLE": {
+      "n": 39,
+      "state": "NOT_APPLICABLE",
+      "rule": "scope = 'BUFFER'",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 142,
+    "share_of_applicable": 1.0
+   },
+   "commune_name": {
+    "n_rows": 181,
+    "n_present": 142,
+    "share_rows": 0.78453,
+    "states": {
+     "NOT_APPLICABLE": {
+      "n": 39,
+      "state": "NOT_APPLICABLE",
+      "rule": "scope = 'BUFFER'",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 142,
+    "share_of_applicable": 1.0
+   },
+   "commune_kind": {
+    "n_rows": 181,
+    "n_present": 142,
+    "share_rows": 0.78453,
+    "states": {
+     "NOT_APPLICABLE": {
+      "n": 39,
+      "state": "NOT_APPLICABLE",
+      "rule": "scope = 'BUFFER'",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 142,
+    "share_of_applicable": 1.0
+   },
+   "n_ports": {
+    "n_rows": 181,
+    "n_present": 178,
+    "share_rows": 0.983425,
+    "states": {
+     "MISSING@unknown_port_config": {
+      "n": 3,
+      "state": "MISSING",
+      "rule": "port_config_source = 'UNKNOWN'",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 181,
+    "share_of_applicable": 0.983425
+   },
+   "n_guns_imputed": {
+    "n_rows": 181,
+    "n_present": 3,
+    "share_rows": 0.016575,
+    "states": {
+     "NOT_APPLICABLE": {
+      "n": 178,
+      "state": "NOT_APPLICABLE",
+      "rule": "port_config_source <> 'UNKNOWN'",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 3,
+    "share_of_applicable": 1.0
+   },
+   "current_type": {
+    "n_rows": 181,
+    "n_present": 178,
+    "share_rows": 0.983425,
+    "states": {
+     "MISSING@unknown_port_config": {
+      "n": 3,
+      "state": "MISSING",
+      "rule": "port_config_source = 'UNKNOWN'",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 181,
+    "share_of_applicable": 0.983425
+   },
+   "power_kw_max_port": {
+    "n_rows": 181,
+    "n_present": 178,
+    "share_rows": 0.983425,
+    "states": {
+     "MISSING@unknown_port_config": {
+      "n": 3,
+      "state": "MISSING",
+      "rule": "port_config_source = 'UNKNOWN'",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 181,
+    "share_of_applicable": 0.983425
+   },
+   "power_kw_site": {
+    "n_rows": 181,
+    "n_present": 178,
+    "share_rows": 0.983425,
+    "states": {
+     "MISSING@unknown_port_config": {
+      "n": 3,
+      "state": "MISSING",
+      "rule": "port_config_source = 'UNKNOWN'",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 181,
+    "share_of_applicable": 0.983425
+   },
+   "freshness": {
+    "n_rows": 181,
+    "n_present": 180,
+    "share_rows": 0.994475,
+    "states": {
+     "NOT_APPLICABLE": {
+      "n": 1,
+      "state": "NOT_APPLICABLE",
+      "rule": "has_timeseries = false",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 180,
+    "share_of_applicable": 1.0
+   }
+  },
+  "station_occupancy": {
+   "util": {
+    "n_rows": 141,
+    "n_present": 140,
+    "share_rows": 0.992908,
+    "states": {
+     "NOT_MEASURED": {
+      "n": 1,
+      "state": "NOT_MEASURED",
+      "rule": "util_reportable = false",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 141,
+    "share_of_applicable": 0.992908
+   },
+   "util_p95": {
+    "n_rows": 141,
+    "n_present": 140,
+    "share_rows": 0.992908,
+    "states": {
+     "NOT_MEASURED": {
+      "n": 1,
+      "state": "NOT_MEASURED",
+      "rule": "util_reportable = false",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 141,
+    "share_of_applicable": 0.992908
+   },
+   "util_denominator_ports": {
+    "n_rows": 141,
+    "n_present": 140,
+    "share_rows": 0.992908,
+    "states": {
+     "NOT_MEASURED": {
+      "n": 1,
+      "state": "NOT_MEASURED",
+      "rule": "util_reportable = false",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 141,
+    "share_of_applicable": 0.992908
+   },
+   "current_type": {
+    "n_rows": 141,
+    "n_present": 140,
+    "share_rows": 0.992908,
+    "states": {
+     "NOT_MEASURED": {
+      "n": 1,
+      "state": "NOT_MEASURED",
+      "rule": "util_reportable = false",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 141,
+    "share_of_applicable": 0.992908
+   },
+   "night_share": {
+    "n_rows": 141,
+    "n_present": 135,
+    "share_rows": 0.957447,
+    "states": {
+     "NOT_APPLICABLE": {
+      "n": 6,
+      "state": "NOT_APPLICABLE",
+      "rule": "ever_active = false",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 135,
+    "share_of_applicable": 1.0
+   },
+   "weekend_ratio": {
+    "n_rows": 141,
+    "n_present": 135,
+    "share_rows": 0.957447,
+    "states": {
+     "NOT_APPLICABLE": {
+      "n": 6,
+      "state": "NOT_APPLICABLE",
+      "rule": "ever_active = false",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 135,
+    "share_of_applicable": 1.0
+   },
+   "util_pctl": {
+    "n_rows": 141,
+    "n_present": 134,
+    "share_rows": 0.950355,
+    "states": {
+     "NOT_APPLICABLE": {
+      "n": 1,
+      "state": "NOT_APPLICABLE",
+      "rule": "util IS NULL",
+      "basis": "row_predicate"
+     },
+     "FILTERED": {
+      "n": 6,
+      "state": "FILTERED",
+      "rule": "occ_status = 'THIEU_COVERAGE'",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 140,
+    "share_of_applicable": 0.957143
+   },
+   "util_pctl_peer": {
+    "n_rows": 141,
+    "n_present": 134,
+    "share_rows": 0.950355,
+    "states": {
+     "NOT_APPLICABLE": {
+      "n": 1,
+      "state": "NOT_APPLICABLE",
+      "rule": "util IS NULL",
+      "basis": "row_predicate"
+     },
+     "FILTERED": {
+      "n": 6,
+      "state": "FILTERED",
+      "rule": "occ_status = 'THIEU_COVERAGE'",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 140,
+    "share_of_applicable": 0.957143
+   }
+  },
+  "roads": {
+   "dist_station_m": {
+    "n_rows": 31220,
+    "n_present": 30751,
+    "share_rows": 0.984978,
+    "states": {
+     "NOT_APPLICABLE": {
+      "n": 469,
+      "state": "NOT_APPLICABLE",
+      "rule": "đoạn đường không nối được tới trạm nào trong đồ thị dẫn đường",
+      "basis": "table_invariant",
+      "verified_by": "roads.ways_unreachable_null_dist"
+     }
+    },
+    "n_applicable": 30751,
+    "share_of_applicable": 1.0
+   }
+  },
+  "commune": {
+   "quality_flag": {
+    "n_rows": 54,
+    "n_present": 13,
+    "share_rows": 0.240741,
+    "states": {
+     "NOT_APPLICABLE": {
+      "n": 41,
+      "state": "NOT_APPLICABLE",
+      "rule": "xã không phát sinh cờ chất lượng nào",
+      "basis": "table_invariant",
+      "verified_by": "quality.n_communes_flagged"
+     }
+    },
+    "n_applicable": 13,
+    "share_of_applicable": 1.0
+   },
+   "util_mean_port_weighted": {
+    "n_rows": 54,
+    "n_present": 41,
+    "share_rows": 0.759259,
+    "states": {
+     "NOT_APPLICABLE": {
+      "n": 13,
+      "state": "NOT_APPLICABLE",
+      "rule": "n_stations = 0",
+      "basis": "row_predicate"
+     }
+    },
+    "n_applicable": 41,
+    "share_of_applicable": 1.0
+   }
+  },
+  "poi": {
+   "levels": {
+    "n_rows": 415,
+    "n_present": 7,
+    "share_rows": 0.016867,
+    "states": {
+     "MISSING": {
+      "n": 408,
+      "state": "MISSING",
+      "rule": "OSM không có thẻ building:levels",
+      "basis": "table_invariant",
+      "verified_by": "poi.n_visual"
+     }
+    },
+    "n_applicable": 415,
+    "share_of_applicable": 0.016867
+   },
+   "name": {
+    "n_rows": 415,
+    "n_present": 241,
+    "share_rows": 0.580723,
+    "states": {
+     "MISSING": {
+      "n": 174,
+      "state": "MISSING",
+      "rule": "OSM không có thẻ name",
+      "basis": "table_invariant",
+      "verified_by": "poi.n_visual"
+     }
+    },
+    "n_applicable": 415,
+    "share_of_applicable": 0.580723
+   }
+  },
+  "provinces": {
+   "quality_flags": {
+    "n_rows": 34,
+    "n_present": 31,
+    "share_rows": 0.911765,
+    "states": {
+     "NOT_APPLICABLE": {
+      "n": 3,
+      "state": "NOT_APPLICABLE",
+      "rule": "tỉnh không phát sinh cờ chất lượng nào",
+      "basis": "table_invariant",
+      "verified_by": "vintage.n_provinces"
+     }
+    },
+    "n_applicable": 31,
+    "share_of_applicable": 1.0
+   }
+  }
+ },
+ "not_measured": {
+  "quality.n_only_in_secondary": {
+   "reason": "phép đối chiếu nhà vận hành thứ cấp chưa từng chạy",
+   "consequence": "cờ THIEU_NHA_VAN_HANH_KHAC do đó KHÔNG THỂ nổ ở bất kỳ tỉnh nào (src/vn/n10_quality.py) — một cờ không tới được về mặt cấu trúc",
+   "upstream_ask": "§10-2"
+  },
+  "quality.share_only_in_secondary": {
+   "reason": "phép đối chiếu nhà vận hành thứ cấp chưa từng chạy",
+   "consequence": "không có mẫu số để tính tỉ lệ",
+   "upstream_ask": "§10-2"
+  }
+ },
+ "invalid_values": {
+  "grid.population@zero_no_weight": {
+   "n": 3460,
+   "share_rows": 0.400463,
+   "rule": "pop_source = 'ZERO_NO_WEIGHT'",
+   "disposition": "shipped-with-label"
+  }
+ },
+ "degenerate_columns": {
+  "snow_frac": 0.0,
+  "moss_frac": 0.0
+ },
+ "filters": {
+  "private_ac_charge_points": {
+   "kind": "removal",
+   "name": "Điểm sạc cá nhân AC (1 súng AC)",
+   "rule_const": "is_private_ac(n_guns_installed, current_type_asset)",
+   "source_file": "src/evcs/core/supply.py:16",
+   "before": 582,
+   "removed": 440,
+   "after": 142,
+   "denominator": "trạm trong ranh giới (in_scope)",
+   "share_removed_stations": 0.756,
+   "share_removed_ports": 0.2833,
+   "share_removed_power": 0.105
+  },
+  "road_ways": {
+   "kind": "removal",
+   "name": "Đoạn đường không phải xe công cộng đi được",
+   "rule_const": "in_province & ~road_class.isin(SERVICE) & ~access.isin(ACCESS_BLOCKED)",
+   "source_file": "src/vn/n11_web_export.py:164",
+   "before": 53994,
+   "removed": 22774,
+   "after": 31220,
+   "denominator": "đoạn đường trong shard OSM"
+  },
+  "peer_ranking_exclusion": {
+   "kind": "removal",
+   "name": "Loại khỏi xếp hạng phân vị do thiếu quan sát",
+   "rule_const": "occ_status = 'THIEU_COVERAGE'",
+   "source_file": "src/vn/n10_quality.py",
+   "before": 140,
+   "removed": 6,
+   "after": 134,
+   "denominator": "trạm có đo mức sử dụng"
+  },
+  "detour_suppression": {
+   "kind": "removal",
+   "name": "Triệt tiêu hệ số đi vòng khi chim bay < 200 m",
+   "rule_const": "dist_station_euclid_m < 200.0",
+   "source_file": "src/evcs/core/roadgraph.py:51",
+   "before": 6511,
+   "removed": 23,
+   "after": 6488,
+   "denominator": "ô tiếp cận được"
+  },
+  "poi_demand_vs_visual": {
+   "kind": "two_sets",
+   "name": "POI nhu cầu sạc vs POI bối cảnh trực quan",
+   "rule_const": "demand_classes ∩ visual_classes ≠ ∅, KHÔNG lồng nhau",
+   "source_file": "src/evcs/core/osm.py",
+   "before": 415,
+   "removed": null,
+   "after": 286,
+   "denominator": "hai tập độc lập; không tập nào là mẫu số của tập kia",
+   "n_visual": 415,
+   "n_demand": 286,
+   "n_both": 104,
+   "n_visual_only": 311,
+   "n_demand_only": 182
+  }
+ },
+ "exclusions": {
+  "thresholds": {
+   "MIN_STATIONS": 30,
+   "MIN_OCC_MEASURED_SHARE": 0.5,
+   "POI_ZERO_COMMUNE_MAX": 0.5
+  },
+  "excluded": false,
+  "exclusion_reasons": [],
+  "exclusion_flags": [],
+  "poi_not_interpretable": false,
+  "poi_details": {}
+ },
+ "freshness": {
+  "exported_utc": "2026-08-21T03:27:54+00:00",
+  "inputs": {
+   "osm_pbf": "2026-07-28",
+   "stations_canonical": "2026-07-29",
+   "vnsdi_valid_from": "2025-06-16",
+   "occupancy_window": [
+    "2026-06-29T04:45:00+00:00",
+    "2026-07-29T07:00:00+00:00"
+   ]
+  },
+  "row_level": {
+   "column": "stations.freshness",
+   "unit": null,
+   "note": "0–1, nhỏ là mới; định nghĩa chưa có ở thượng nguồn",
+   "p50": 0.02,
+   "p90": 0.061,
+   "max": 0.17,
+   "n_present": 180,
+   "n_rows": 181
+  }
+ },
+ "categories": {
+  "cell_state": {
+   "values": {
+    "INSIDE": 6189,
+    "BORDER": 2451
+   },
+   "n_null": 0
+  },
+  "pop_source": {
+   "values": {
+    "WORLDPOP2025_ANCHORED_VNSDI": 5180,
+    "ZERO_NO_WEIGHT": 3460
+   },
+   "n_null": 0
+  },
+  "evidence_grade_distance": {
+   "values": {
+    "OSM_NETWORK": 6511,
+    "UNREACHABLE_NO_ROAD_ACCESS": 1666,
+    "UNREACHABLE_NO_PATH": 463
+   },
+   "n_null": 0
+  },
+  "screen_decision": {
+   "values": {
+    "DE_XUAT": 8295,
+    "TU_CHOI": 325,
+    "DE_XUAT_NEU_CO_DC": 20
+   },
+   "n_null": 0
+  }
+ },
+ "totals": {
+  "all": {
+   "n_stations": 181,
+   "n_ports": 1817,
+   "n_ports_missing": 3,
+   "power_mw": 56.161,
+   "power_missing": 3
+  },
+  "in_scope": {
+   "n_stations": 142,
+   "n_ports": 1113,
+   "n_ports_missing": 1,
+   "power_mw": 36.29,
+   "power_missing": 1
+  },
+  "buffer": {
+   "n_stations": 39,
+   "n_ports": 704,
+   "n_ports_missing": 2,
+   "power_mw": 19.871,
+   "power_missing": 2
+  },
+  "op_status": {
+   "OPERATIONAL": 165,
+   "MAINTENANCE": 13,
+   "OUT_OF_SERVICE": 3
+  },
+  "connectors": {
+   "by_standard": {
+    "CCS2": {
+     "n_rows": 223,
+     "n_guns": 1132
+    },
+    "TYPE2": {
+     "n_rows": 83,
+     "n_guns": 466
+    }
+   },
+   "n_guns": 1598,
+   "n_stations_with_connectors": 178
+  },
+  "occ_status_ok": {
+   "n_total": 141,
+   "n_ok": 134,
+   "share": 0.950355
+  },
+  "occ_status_counts": {
+   "OK": 134,
+   "THIEU_COVERAGE": 7
+  },
+  "private_ac_dropped": {
+   "n": 440,
+   "share_stations": 0.756,
+   "share_ports": 0.2833,
+   "share_power": 0.105
+  }
+ },
+ "poi": {
+  "groups": {
+   "apartment": {
+    "n": 91,
+    "n_polygon": 91,
+    "share_polygon": 1.0
+   },
+   "edu_health": {
+    "n": 190,
+    "n_polygon": 186,
+    "share_polygon": 0.978947
+   },
+   "mall": {
+    "n": 15,
+    "n_polygon": 12,
+    "share_polygon": 0.8
+   },
+   "public": {
+    "n": 119,
+    "n_polygon": 114,
+    "share_polygon": 0.957983
+   }
+  }
+ },
+ "roads": {
+  "ways_in_shard": 53994,
+  "ways_shipped": 31220,
+  "ways_dropped_buffer_copy": 15150,
+  "ways_dropped_service": 7497,
+  "ways_dropped_access_blocked": 127,
+  "bridge_ways_shipped": 1388,
+  "ways_unreachable_null_dist": 469
+ },
+ "quality": {
+  "province_code": "22",
+  "province_name": "Tỉnh Quảng Ninh",
+  "population": 1497447,
+  "area_km2_geom": 5674.0,
+  "n_communes": 54,
+  "n_dac_khu": 2,
+  "n_cells": 8640,
+  "n_stations": 142,
+  "n_stations_buffer": 39,
+  "n_ports": 1113,
+  "power_kw_site": 36289.9,
+  "power_kw_per_station": 255.6,
+  "ports_per_station": 7.84,
+  "stations_per_100k_pop": 9.48,
+  "ports_per_10k_pop": 7.43,
+  "kw_per_1k_pop": 24.2,
+  "n_ports_missing": 1,
+  "power_missing": 1,
+  "share_power_missing": 0.007,
+  "private_ac_share_stations": 0.756,
+  "private_ac_share_ports": 0.2833,
+  "private_ac_share_power": 0.105,
+  "n_private_ac_dropped": 440,
+  "n_stations_with_occ": 141,
+  "share_stations_measured": 0.9437,
+  "util_median": 0.2076,
+  "n_poi_demand": 286,
+  "n_poi_visual": 415,
+  "poi_visual_share_polygon": 0.9711,
+  "poi_per_100k_pop": 19.1,
+  "share_communes_zero_poi": 0.3148,
+  "pop_share_communes_zero_poi": 0.168,
+  "share_communes_zero_market": 0.5926,
+  "poi_bias_phuong_vs_xa": 18.7,
+  "n_road_ways_in_province": 38844,
+  "n_road_ways_shard": 53994,
+  "n_only_in_secondary": null,
+  "share_only_in_secondary": null,
+  "population_grid": 1497445.6,
+  "population_within_2km": 797535,
+  "population_access_within_2km": 0.5326,
+  "pop_beyond_2km_network": 699910,
+  "share_pop_beyond_2km": 0.4674,
+  "dist_station_network_median_m": 8352.4,
+  "detour_ratio_median": 1.562,
+  "built_frac_mean": 0.0281,
+  "urban_km2": 182.9022,
+  "power_kw_per_urban_km2": 198.41,
+  "share_cells_reachable": 0.7536,
+  "share_pop_unreachable": 0.0164,
+  "share_cells_de_xuat": 0.9601,
+  "vnsdi_anchor_ratio": 1.0409,
+  "n_communes_flagged": 13,
+  "quality_flags": "DIA_GIOI_CO_SO_CONG_BO_HONG"
+ },
+ "story_enabled": true,
+ "unusable_layers": [],
+ "snapshots": {
+  "occupancy_snapshot_id": "evcs_vn_2026-07-29-full",
+  "occupancy_window": [
+   "2026-06-29T04:45:00+00:00",
+   "2026-07-29T07:00:00+00:00"
+  ],
+  "vnsdi_valid_from": "16/6/2025",
+  "osm_pbf": "28/07/2026",
+  "stations_canonical": "29/07/2026"
+ }
+}
