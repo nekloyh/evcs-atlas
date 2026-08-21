@@ -1,0 +1,915 @@
+{
+  "app": "http://127.0.0.1:5175/",
+  "mode": "local",
+  "viewports": {
+    "1280x800": {
+      "card": {
+        "w": 320,
+        "h": 576
+      },
+      "mapH": 800,
+      "heightFrac": 0.72,
+      "scroller": {
+        "scrollW": 308,
+        "clientW": 308,
+        "scrollH": 756,
+        "clientH": 522
+      },
+      "docScrollW": 1280,
+      "innerW": 1280,
+      "h1": 1,
+      "locality": "Xã Tây Phương · Thành phố Hà Nội",
+      "headings": [
+        "Kết quả ước lượng",
+        "Cự ly tới trạm gần nhất: Trước và Sau",
+        "Bối cảnh mạng trạm trong 5 km"
+      ],
+      "outcomeText": "Ước tính ~31.746 người trong 12 ô được rút ngắn cự ly rõ rệt. ~2.947 người trong 6 ô khác có thể cải thiện, nhưng còn trong biên sai số.",
+      "blocks": {
+        "v1": {
+          "top": 103,
+          "bottom": 218,
+          "inFold": true
+        },
+        "v2": {
+          "top": 218,
+          "bottom": 337,
+          "inFold": true
+        },
+        "v3": {
+          "top": 337,
+          "bottom": 536,
+          "inFold": true
+        },
+        "v4": {
+          "top": 536,
+          "bottom": 669,
+          "inFold": false
+        }
+      },
+      "segments": [
+        {
+          "key": "high",
+          "label": "",
+          "w": 130
+        },
+        {
+          "key": "low",
+          "label": "",
+          "w": 152
+        }
+      ],
+      "segbarAria": "Bối cảnh mạng trạm 5 km: 13 trạm đủ điều kiện; 13 có phép đo hợp lệ, gồm 6 cao tải từ 40% trở lên và 7 dưới 40%; 0 chưa đánh giá được.",
+      "detailsOpen": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "barWidths": [
+        244,
+        244,
+        244,
+        244
+      ],
+      "compression": {
+        "badgeLines": 1,
+        "medianLines": 4,
+        "medianOverflow": false,
+        "deltaOverflow": false,
+        "deltaMinGap": 8
+      },
+      "h3Visible": false,
+      "coordVisible": false,
+      "dotDecimals": [],
+      "forbidden": [],
+      "badContrast": [],
+      "minTextContrast": 4.64,
+      "colorSurfaces": {
+        "banner": {
+          "background": "rgba(30, 116, 43, 0.09)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 16.48
+        },
+        "heroReadout": {
+          "background": "rgb(242, 243, 240)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 17.67
+        },
+        "heroUncertain": {
+          "background": "rgba(0, 0, 0, 0)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 18.67
+        },
+        "nearest": {
+          "background": "rgba(0, 0, 0, 0)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 18.67
+        }
+      },
+      "nTexts": 225
+    },
+    "1280x800-scrolled": {
+      "card": {
+        "w": 320,
+        "h": 576
+      },
+      "mapH": 800,
+      "heightFrac": 0.72,
+      "scroller": {
+        "scrollW": 308,
+        "clientW": 308,
+        "scrollH": 756,
+        "clientH": 522
+      },
+      "docScrollW": 1280,
+      "innerW": 1280,
+      "h1": 1,
+      "locality": "Xã Tây Phương · Thành phố Hà Nội",
+      "headings": [
+        "Kết quả ước lượng",
+        "Cự ly tới trạm gần nhất: Trước và Sau",
+        "Bối cảnh mạng trạm trong 5 km"
+      ],
+      "outcomeText": "Ước tính ~31.746 người trong 12 ô được rút ngắn cự ly rõ rệt. ~2.947 người trong 6 ô khác có thể cải thiện, nhưng còn trong biên sai số.",
+      "blocks": {
+        "v1": {
+          "top": -131,
+          "bottom": -16,
+          "inFold": true
+        },
+        "v2": {
+          "top": -16,
+          "bottom": 103,
+          "inFold": true
+        },
+        "v3": {
+          "top": 103,
+          "bottom": 302,
+          "inFold": true
+        },
+        "v4": {
+          "top": 302,
+          "bottom": 435,
+          "inFold": true
+        }
+      },
+      "segments": [
+        {
+          "key": "high",
+          "label": "",
+          "w": 130
+        },
+        {
+          "key": "low",
+          "label": "",
+          "w": 152
+        }
+      ],
+      "segbarAria": "Bối cảnh mạng trạm 5 km: 13 trạm đủ điều kiện; 13 có phép đo hợp lệ, gồm 6 cao tải từ 40% trở lên và 7 dưới 40%; 0 chưa đánh giá được.",
+      "detailsOpen": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "barWidths": [
+        244,
+        244,
+        244,
+        244
+      ],
+      "compression": {
+        "badgeLines": 1,
+        "medianLines": 4,
+        "medianOverflow": false,
+        "deltaOverflow": false,
+        "deltaMinGap": 8
+      },
+      "h3Visible": false,
+      "coordVisible": false,
+      "dotDecimals": [],
+      "forbidden": [],
+      "badContrast": [],
+      "minTextContrast": 4.64,
+      "colorSurfaces": {
+        "banner": {
+          "background": "rgba(30, 116, 43, 0.09)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 16.48
+        },
+        "heroReadout": {
+          "background": "rgb(242, 243, 240)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 17.67
+        },
+        "heroUncertain": {
+          "background": "rgba(0, 0, 0, 0)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 18.67
+        },
+        "nearest": {
+          "background": "rgba(0, 0, 0, 0)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 18.67
+        }
+      },
+      "nTexts": 225
+    },
+    "1280x800-locality-click": {
+      "label": "Xem Xã Tây Phương trên bản đồ: ước tính ~31.746 ng",
+      "hashBefore": "#tinh=01&m=2d&f=population&v=105.6545,20.9735,9.10,0,0&sim=21.05239,105.61395",
+      "focusedRow": true,
+      "stillSim": true,
+      "focusStillOnRow": true,
+      "focusStillInPanel": true,
+      "hashAfter": "#tinh=01&m=2d&f=population&v=105.6027,21.0564,13.40,0,0&sim=21.05239,105.61395"
+    },
+    "1440x900": {
+      "card": {
+        "w": 340,
+        "h": 648
+      },
+      "mapH": 900,
+      "heightFrac": 0.72,
+      "scroller": {
+        "scrollW": 328,
+        "clientW": 328,
+        "scrollH": 699,
+        "clientH": 594
+      },
+      "docScrollW": 1440,
+      "innerW": 1440,
+      "h1": 1,
+      "locality": "Xã Tây Phương · Thành phố Hà Nội",
+      "headings": [
+        "Kết quả ước lượng",
+        "Cự ly tới trạm gần nhất: Trước và Sau",
+        "Bối cảnh mạng trạm trong 5 km"
+      ],
+      "outcomeText": "Ước tính ~31.746 người trong 12 ô được rút ngắn cự ly rõ rệt. ~2.947 người trong 6 ô khác có thể cải thiện, nhưng còn trong biên sai số.",
+      "blocks": {
+        "v1": {
+          "top": 103,
+          "bottom": 218,
+          "inFold": true
+        },
+        "v2": {
+          "top": 218,
+          "bottom": 309,
+          "inFold": true
+        },
+        "v3": {
+          "top": 309,
+          "bottom": 495,
+          "inFold": true
+        },
+        "v4": {
+          "top": 495,
+          "bottom": 628,
+          "inFold": true
+        }
+      },
+      "segments": [
+        {
+          "key": "high",
+          "label": "",
+          "w": 139
+        },
+        {
+          "key": "low",
+          "label": "",
+          "w": 163
+        }
+      ],
+      "segbarAria": "Bối cảnh mạng trạm 5 km: 13 trạm đủ điều kiện; 13 có phép đo hợp lệ, gồm 6 cao tải từ 40% trở lên và 7 dưới 40%; 0 chưa đánh giá được.",
+      "detailsOpen": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "barWidths": [
+        264,
+        264,
+        264,
+        264
+      ],
+      "compression": {
+        "badgeLines": 1,
+        "medianLines": 4,
+        "medianOverflow": false,
+        "deltaOverflow": false,
+        "deltaMinGap": 8
+      },
+      "h3Visible": false,
+      "coordVisible": false,
+      "dotDecimals": [],
+      "forbidden": [],
+      "badContrast": [],
+      "minTextContrast": 4.64,
+      "colorSurfaces": {
+        "banner": {
+          "background": "rgba(30, 116, 43, 0.09)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 16.48
+        },
+        "heroReadout": {
+          "background": "rgb(242, 243, 240)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 17.67
+        },
+        "heroUncertain": {
+          "background": "rgba(0, 0, 0, 0)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 18.67
+        },
+        "nearest": {
+          "background": "rgba(0, 0, 0, 0)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 18.67
+        }
+      },
+      "nTexts": 225
+    },
+    "1440x900-scrolled": {
+      "card": {
+        "w": 340,
+        "h": 648
+      },
+      "mapH": 900,
+      "heightFrac": 0.72,
+      "scroller": {
+        "scrollW": 328,
+        "clientW": 328,
+        "scrollH": 699,
+        "clientH": 594
+      },
+      "docScrollW": 1440,
+      "innerW": 1440,
+      "h1": 1,
+      "locality": "Xã Tây Phương · Thành phố Hà Nội",
+      "headings": [
+        "Kết quả ước lượng",
+        "Cự ly tới trạm gần nhất: Trước và Sau",
+        "Bối cảnh mạng trạm trong 5 km"
+      ],
+      "outcomeText": "Ước tính ~31.746 người trong 12 ô được rút ngắn cự ly rõ rệt. ~2.947 người trong 6 ô khác có thể cải thiện, nhưng còn trong biên sai số.",
+      "blocks": {
+        "v1": {
+          "top": -2,
+          "bottom": 113,
+          "inFold": true
+        },
+        "v2": {
+          "top": 113,
+          "bottom": 204,
+          "inFold": true
+        },
+        "v3": {
+          "top": 204,
+          "bottom": 390,
+          "inFold": true
+        },
+        "v4": {
+          "top": 390,
+          "bottom": 523,
+          "inFold": true
+        }
+      },
+      "segments": [
+        {
+          "key": "high",
+          "label": "",
+          "w": 139
+        },
+        {
+          "key": "low",
+          "label": "",
+          "w": 163
+        }
+      ],
+      "segbarAria": "Bối cảnh mạng trạm 5 km: 13 trạm đủ điều kiện; 13 có phép đo hợp lệ, gồm 6 cao tải từ 40% trở lên và 7 dưới 40%; 0 chưa đánh giá được.",
+      "detailsOpen": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "barWidths": [
+        264,
+        264,
+        264,
+        264
+      ],
+      "compression": {
+        "badgeLines": 1,
+        "medianLines": 4,
+        "medianOverflow": false,
+        "deltaOverflow": false,
+        "deltaMinGap": 8
+      },
+      "h3Visible": false,
+      "coordVisible": false,
+      "dotDecimals": [],
+      "forbidden": [],
+      "badContrast": [],
+      "minTextContrast": 4.64,
+      "colorSurfaces": {
+        "banner": {
+          "background": "rgba(30, 116, 43, 0.09)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 16.48
+        },
+        "heroReadout": {
+          "background": "rgb(242, 243, 240)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 17.67
+        },
+        "heroUncertain": {
+          "background": "rgba(0, 0, 0, 0)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 18.67
+        },
+        "nearest": {
+          "background": "rgba(0, 0, 0, 0)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 18.67
+        }
+      },
+      "nTexts": 225
+    },
+    "1440x900-locality-click": {
+      "label": "Xem Xã Tây Phương trên bản đồ: ước tính ~31.746 ng",
+      "hashBefore": "#tinh=01&m=2d&f=population&v=105.6545,20.9735,9.10,0,0&sim=21.05239,105.61395",
+      "focusedRow": true,
+      "stillSim": true,
+      "focusStillOnRow": true,
+      "focusStillInPanel": true,
+      "hashAfter": "#tinh=01&m=2d&f=population&v=105.6033,21.0564,13.60,0,0&sim=21.05239,105.61395"
+    },
+    "1920x1080": {
+      "card": {
+        "w": 340,
+        "h": 738
+      },
+      "mapH": 1080,
+      "heightFrac": 0.684,
+      "scroller": {
+        "scrollW": 338,
+        "clientW": 338,
+        "scrollH": 685,
+        "clientH": 685
+      },
+      "docScrollW": 1920,
+      "innerW": 1920,
+      "h1": 1,
+      "locality": "Xã Tây Phương · Thành phố Hà Nội",
+      "headings": [
+        "Kết quả ước lượng",
+        "Cự ly tới trạm gần nhất: Trước và Sau",
+        "Bối cảnh mạng trạm trong 5 km"
+      ],
+      "outcomeText": "Ước tính ~31.746 người trong 12 ô được rút ngắn cự ly rõ rệt. ~2.947 người trong 6 ô khác có thể cải thiện, nhưng còn trong biên sai số.",
+      "blocks": {
+        "v1": {
+          "top": 89,
+          "bottom": 204,
+          "inFold": true
+        },
+        "v2": {
+          "top": 204,
+          "bottom": 295,
+          "inFold": true
+        },
+        "v3": {
+          "top": 295,
+          "bottom": 481,
+          "inFold": true
+        },
+        "v4": {
+          "top": 481,
+          "bottom": 614,
+          "inFold": true
+        }
+      },
+      "segments": [
+        {
+          "key": "high",
+          "label": "",
+          "w": 144
+        },
+        {
+          "key": "low",
+          "label": "",
+          "w": 168
+        }
+      ],
+      "segbarAria": "Bối cảnh mạng trạm 5 km: 13 trạm đủ điều kiện; 13 có phép đo hợp lệ, gồm 6 cao tải từ 40% trở lên và 7 dưới 40%; 0 chưa đánh giá được.",
+      "detailsOpen": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "barWidths": [
+        274,
+        274,
+        274,
+        274
+      ],
+      "compression": {
+        "badgeLines": 1,
+        "medianLines": 4,
+        "medianOverflow": false,
+        "deltaOverflow": false,
+        "deltaMinGap": 8
+      },
+      "h3Visible": false,
+      "coordVisible": false,
+      "dotDecimals": [],
+      "forbidden": [],
+      "badContrast": [],
+      "minTextContrast": 4.64,
+      "colorSurfaces": {
+        "banner": {
+          "background": "rgba(30, 116, 43, 0.09)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 16.48
+        },
+        "heroReadout": {
+          "background": "rgb(242, 243, 240)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 17.67
+        },
+        "heroUncertain": {
+          "background": "rgba(0, 0, 0, 0)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 18.67
+        },
+        "nearest": {
+          "background": "rgba(0, 0, 0, 0)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 18.67
+        }
+      },
+      "nTexts": 225
+    },
+    "1920x1080-scrolled": {
+      "card": {
+        "w": 340,
+        "h": 738
+      },
+      "mapH": 1080,
+      "heightFrac": 0.684,
+      "scroller": {
+        "scrollW": 338,
+        "clientW": 338,
+        "scrollH": 685,
+        "clientH": 685
+      },
+      "docScrollW": 1920,
+      "innerW": 1920,
+      "h1": 1,
+      "locality": "Xã Tây Phương · Thành phố Hà Nội",
+      "headings": [
+        "Kết quả ước lượng",
+        "Cự ly tới trạm gần nhất: Trước và Sau",
+        "Bối cảnh mạng trạm trong 5 km"
+      ],
+      "outcomeText": "Ước tính ~31.746 người trong 12 ô được rút ngắn cự ly rõ rệt. ~2.947 người trong 6 ô khác có thể cải thiện, nhưng còn trong biên sai số.",
+      "blocks": {
+        "v1": {
+          "top": 89,
+          "bottom": 204,
+          "inFold": true
+        },
+        "v2": {
+          "top": 204,
+          "bottom": 295,
+          "inFold": true
+        },
+        "v3": {
+          "top": 295,
+          "bottom": 481,
+          "inFold": true
+        },
+        "v4": {
+          "top": 481,
+          "bottom": 614,
+          "inFold": true
+        }
+      },
+      "segments": [
+        {
+          "key": "high",
+          "label": "",
+          "w": 144
+        },
+        {
+          "key": "low",
+          "label": "",
+          "w": 168
+        }
+      ],
+      "segbarAria": "Bối cảnh mạng trạm 5 km: 13 trạm đủ điều kiện; 13 có phép đo hợp lệ, gồm 6 cao tải từ 40% trở lên và 7 dưới 40%; 0 chưa đánh giá được.",
+      "detailsOpen": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "barWidths": [
+        274,
+        274,
+        274,
+        274
+      ],
+      "compression": {
+        "badgeLines": 1,
+        "medianLines": 4,
+        "medianOverflow": false,
+        "deltaOverflow": false,
+        "deltaMinGap": 8
+      },
+      "h3Visible": false,
+      "coordVisible": false,
+      "dotDecimals": [],
+      "forbidden": [],
+      "badContrast": [],
+      "minTextContrast": 4.64,
+      "colorSurfaces": {
+        "banner": {
+          "background": "rgba(30, 116, 43, 0.09)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 16.48
+        },
+        "heroReadout": {
+          "background": "rgb(242, 243, 240)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 17.67
+        },
+        "heroUncertain": {
+          "background": "rgba(0, 0, 0, 0)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 18.67
+        },
+        "nearest": {
+          "background": "rgba(0, 0, 0, 0)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 18.67
+        }
+      },
+      "nTexts": 225
+    },
+    "1920x1080-locality-click": {
+      "label": "Xem Xã Tây Phương trên bản đồ: ước tính ~31.746 ng",
+      "hashBefore": "#tinh=01&m=2d&f=population&v=105.6545,20.9735,9.10,0,0&sim=21.05239,105.61395",
+      "focusedRow": true,
+      "stillSim": true,
+      "focusStillOnRow": true,
+      "focusStillInPanel": true,
+      "hashAfter": "#tinh=01&m=2d&f=population&v=105.6050,21.0564,13.90,0,0&sim=21.05239,105.61395"
+    },
+    "1920x1200": {
+      "card": {
+        "w": 340,
+        "h": 738
+      },
+      "mapH": 1200,
+      "heightFrac": 0.615,
+      "scroller": {
+        "scrollW": 338,
+        "clientW": 338,
+        "scrollH": 685,
+        "clientH": 685
+      },
+      "docScrollW": 1920,
+      "innerW": 1920,
+      "h1": 1,
+      "locality": "Xã Tây Phương · Thành phố Hà Nội",
+      "headings": [
+        "Kết quả ước lượng",
+        "Cự ly tới trạm gần nhất: Trước và Sau",
+        "Bối cảnh mạng trạm trong 5 km"
+      ],
+      "outcomeText": "Ước tính ~31.746 người trong 12 ô được rút ngắn cự ly rõ rệt. ~2.947 người trong 6 ô khác có thể cải thiện, nhưng còn trong biên sai số.",
+      "blocks": {
+        "v1": {
+          "top": 89,
+          "bottom": 204,
+          "inFold": true
+        },
+        "v2": {
+          "top": 204,
+          "bottom": 295,
+          "inFold": true
+        },
+        "v3": {
+          "top": 295,
+          "bottom": 481,
+          "inFold": true
+        },
+        "v4": {
+          "top": 481,
+          "bottom": 614,
+          "inFold": true
+        }
+      },
+      "segments": [
+        {
+          "key": "high",
+          "label": "",
+          "w": 144
+        },
+        {
+          "key": "low",
+          "label": "",
+          "w": 168
+        }
+      ],
+      "segbarAria": "Bối cảnh mạng trạm 5 km: 13 trạm đủ điều kiện; 13 có phép đo hợp lệ, gồm 6 cao tải từ 40% trở lên và 7 dưới 40%; 0 chưa đánh giá được.",
+      "detailsOpen": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "barWidths": [
+        274,
+        274,
+        274,
+        274
+      ],
+      "compression": {
+        "badgeLines": 1,
+        "medianLines": 4,
+        "medianOverflow": false,
+        "deltaOverflow": false,
+        "deltaMinGap": 8
+      },
+      "h3Visible": false,
+      "coordVisible": false,
+      "dotDecimals": [],
+      "forbidden": [],
+      "badContrast": [],
+      "minTextContrast": 4.64,
+      "colorSurfaces": {
+        "banner": {
+          "background": "rgba(30, 116, 43, 0.09)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 16.48
+        },
+        "heroReadout": {
+          "background": "rgb(242, 243, 240)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 17.67
+        },
+        "heroUncertain": {
+          "background": "rgba(0, 0, 0, 0)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 18.67
+        },
+        "nearest": {
+          "background": "rgba(0, 0, 0, 0)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 18.67
+        }
+      },
+      "nTexts": 225
+    },
+    "1920x1200-scrolled": {
+      "card": {
+        "w": 340,
+        "h": 738
+      },
+      "mapH": 1200,
+      "heightFrac": 0.615,
+      "scroller": {
+        "scrollW": 338,
+        "clientW": 338,
+        "scrollH": 685,
+        "clientH": 685
+      },
+      "docScrollW": 1920,
+      "innerW": 1920,
+      "h1": 1,
+      "locality": "Xã Tây Phương · Thành phố Hà Nội",
+      "headings": [
+        "Kết quả ước lượng",
+        "Cự ly tới trạm gần nhất: Trước và Sau",
+        "Bối cảnh mạng trạm trong 5 km"
+      ],
+      "outcomeText": "Ước tính ~31.746 người trong 12 ô được rút ngắn cự ly rõ rệt. ~2.947 người trong 6 ô khác có thể cải thiện, nhưng còn trong biên sai số.",
+      "blocks": {
+        "v1": {
+          "top": 89,
+          "bottom": 204,
+          "inFold": true
+        },
+        "v2": {
+          "top": 204,
+          "bottom": 295,
+          "inFold": true
+        },
+        "v3": {
+          "top": 295,
+          "bottom": 481,
+          "inFold": true
+        },
+        "v4": {
+          "top": 481,
+          "bottom": 614,
+          "inFold": true
+        }
+      },
+      "segments": [
+        {
+          "key": "high",
+          "label": "",
+          "w": 144
+        },
+        {
+          "key": "low",
+          "label": "",
+          "w": 168
+        }
+      ],
+      "segbarAria": "Bối cảnh mạng trạm 5 km: 13 trạm đủ điều kiện; 13 có phép đo hợp lệ, gồm 6 cao tải từ 40% trở lên và 7 dưới 40%; 0 chưa đánh giá được.",
+      "detailsOpen": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "barWidths": [
+        274,
+        274,
+        274,
+        274
+      ],
+      "compression": {
+        "badgeLines": 1,
+        "medianLines": 4,
+        "medianOverflow": false,
+        "deltaOverflow": false,
+        "deltaMinGap": 8
+      },
+      "h3Visible": false,
+      "coordVisible": false,
+      "dotDecimals": [],
+      "forbidden": [],
+      "badContrast": [],
+      "minTextContrast": 4.64,
+      "colorSurfaces": {
+        "banner": {
+          "background": "rgba(30, 116, 43, 0.09)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 16.48
+        },
+        "heroReadout": {
+          "background": "rgb(242, 243, 240)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 17.67
+        },
+        "heroUncertain": {
+          "background": "rgba(0, 0, 0, 0)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 18.67
+        },
+        "nearest": {
+          "background": "rgba(0, 0, 0, 0)",
+          "foreground": "rgb(11, 11, 11)",
+          "contrast": 18.67
+        }
+      },
+      "nTexts": 225
+    },
+    "1920x1200-locality-click": {
+      "label": "Xem Xã Tây Phương trên bản đồ: ước tính ~31.746 ng",
+      "hashBefore": "#tinh=01&m=2d&f=population&v=105.6545,20.9735,9.10,0,0&sim=21.05239,105.61395",
+      "focusedRow": true,
+      "stillSim": true,
+      "focusStillOnRow": true,
+      "focusStillInPanel": true,
+      "hashAfter": "#tinh=01&m=2d&f=population&v=105.6054,21.0564,14.00,0,0&sim=21.05239,105.61395"
+    }
+  },
+  "failures": []
+}

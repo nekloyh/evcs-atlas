@@ -227,6 +227,15 @@ Chart ID: `access-population-curve`
 The missing cross-geometry interaction is deliberate. A later phase may add it only after
 declaring a Road↔Cell mapping and testing that both sides answer the same predicate.
 
+> **SUPERSEDED (21/8/2026) — lens Sử dụng.** Phần trực quan hoá của lens này được thay bởi
+> [`docs/UX_UTILIZATION_VISUALIZATION_SPEC.md`](UX_UTILIZATION_VISUALIZATION_SPEC.md) và
+> [`web/DESIGN.md` §16](../web/DESIGN.md). Cụ thể: `utilization-week-heatmap` →
+> `utilization-day-profiles` (7 hồ sơ ngày, trục tuyệt đối 0–100%); `Heatmap168` và
+> `HourProfile` đã bị **xoá**; thang phân vị theo gói → thang tuyệt đối bảy khoảng
+> (`utilizationScale`); nhãn giờ → "ô giờ" cho tới khi `snapshots.occupancy_hour_tz` được
+> phát. Mục dưới đây giữ nguyên làm **hồ sơ lịch sử** của quyết định Phase 4 — đừng đọc nó
+> như hợp đồng đang chạy, và đừng sửa nghĩa của nó.
+
 ### 1.5 Utilization → Heatmap 7×24
 
 Chart ID: `utilization-week-heatmap`

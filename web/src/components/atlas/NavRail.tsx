@@ -17,6 +17,7 @@ import type { AppNavMode } from "../../state/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { useIsDesktop } from "./use-desktop";
+import { navTriggerCopy } from "../../simulation/presenter";
 
 export interface NavRailProps {
   manifest: Manifest | null;
@@ -219,32 +220,37 @@ export function NavRail({
             </PopoverContent>
           </Popover>}
 
-          {/* Trạm giả định (Phase 6, §3.1) */}
+          {/* Trạm giả định (Phase 6 §3.1; copy và trạng thái theo UX §10.1).
+
+              Ba trạng thái, ba câu — và câu của trạng thái "đã có vị trí" nói ĐỔI chứ
+              không nói XOÁ: nút này không còn xoá ứng viên (§10.1), xoá chỉ đi qua nút có
+              nhãn rõ trong panel.
+
+              Màu lấy từ đúng bộ token mực/nền như mọi nút khác của rail. Bộ emerald cũ là
+              một hệ màu riêng cho một nút, và trên vỏ SÁNG của AtlasSurface thì nền
+              `emerald-950/60` cho chữ `emerald-300` một tương phản không đo được. */}
           {activeMode === "map" && onTogglePlacement && (
             <Tooltip>
               <TooltipTrigger
-                aria-label="Trạm giả định"
+                id="simulation-placement-trigger"
+                aria-label={navTriggerCopy(Boolean(placementMode), Boolean(candidateActive)).label}
                 aria-pressed={placementMode || candidateActive}
                 onClick={onTogglePlacement}
                 className={`relative grid h-9 w-9 place-items-center rounded border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                   placementMode
-                    ? "border-emerald-400 bg-emerald-950/60 text-emerald-300 font-semibold ring-2 ring-emerald-500/50"
+                    ? "border-ink bg-ink font-semibold text-panel"
                     : candidateActive
-                    ? "border-emerald-500 bg-emerald-950/30 text-emerald-400"
+                    ? "border-ink bg-basemap text-ink"
                     : "border-transparent text-ink-2 hover:border-hairline hover:text-ink"
                 }`}
               >
                 <Crosshair className="h-4 w-4" />
-                {candidateActive && (
-                  <span className="absolute -right-0.5 -top-0.5 grid h-2 w-2 rounded-full bg-emerald-400" />
+                {candidateActive && !placementMode && (
+                  <span className="absolute -right-0.5 -top-0.5 grid h-2 w-2 rounded-full bg-ink" />
                 )}
               </TooltipTrigger>
               <TooltipContent side={tooltipSide}>
-                {placementMode
-                  ? "Bấm vào bản đồ để đặt trạm (Esc để huỷ)"
-                  : candidateActive
-                  ? "Đang xem trạm giả định (bấm để xoá)"
-                  : "Đặt trạm giả định (Mô phỏng)"}
+                {navTriggerCopy(Boolean(placementMode), Boolean(candidateActive)).tooltip}
               </TooltipContent>
             </Tooltip>
           )}

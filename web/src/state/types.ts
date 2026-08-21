@@ -83,6 +83,35 @@ export function representationFits(r: DemandRepresentation, mode: Mode): boolean
 }
 
 /**
+ * Đơn vị đọc KHÔNG GIAN của lens Sử dụng — `Vùng tải` hay `Trạm` (spec §11.1).
+ *
+ * Đây KHÔNG phải một trường thứ hai và không phải một overlay: `station:occ` vẫn là trường
+ * duy nhất đang tô, và cả hai chế độ đều mã hoá **cùng một đại lượng** trên **cùng một
+ * thang tuyệt đối**. Cái đổi là đơn vị mà đại lượng ấy được gộp về — vùng thống kê, hay
+ * từng trạm. Đó là lý do nó là một `Mode`-like chứ không phải một `DemandRepresentation`
+ * mới: nó không đổi nghĩa của màu, chỉ đổi hình học mang màu.
+ *
+ * `region` là mặc định vì ở mức phóng overview, chấm trạm gần như luôn chồng nhau —
+ * 98,45% ở z8 Hà Nội, 72,68% ở z10. `station` là lối ép chấm ở mọi mức phóng, cho người
+ * muốn kiểm từng trạm.
+ */
+export const UTIL_REPRESENTATIONS = ["region", "station"] as const;
+export type UtilRepresentation = (typeof UTIL_REPRESENTATIONS)[number];
+export const DEFAULT_UTIL_REPRESENTATION: UtilRepresentation = "region";
+
+/** Giá trị trong hash — chữ tiếng Việt không dấu, cùng khuôn với `sc=g`. */
+export const UTIL_REPRESENTATION_WIRE: Record<UtilRepresentation, string> = {
+  region: "vung",
+  station: "tram",
+};
+
+export function parseUtilRepresentation(raw: string | null | undefined): UtilRepresentation | null {
+  if (!raw) return null;
+  for (const r of UTIL_REPRESENTATIONS) if (UTIL_REPRESENTATION_WIRE[r] === raw) return r;
+  return null;
+}
+
+/**
  * Một compare view trả lời **một** câu hỏi — không có dashboard đa-biểu-đồ (§0, §3d).
  *
  * Sáu câu, và câu nào dựng được trên measure đang tô là do `compareViewsFor()` quyết định.
@@ -281,6 +310,15 @@ export interface HashState {
   paintOn: boolean;
   /** Vị trí scrubber — khoá `t`, 0–167 (§3e). `t = dow × 24 + hour`, `dow = 0` là Thứ Hai. */
   t: number;
+  /**
+   * Đơn vị đọc không gian của lens Sử dụng — khoá `ur`.
+   *
+   * **Tuỳ chọn**, cùng lý do với `beat` và `candidate`: vắng nghĩa là "hash này không nói
+   * gì về nó", và người đọc rơi về `DEFAULT_UTIL_REPRESENTATION`. Bắt buộc nó sẽ khiến mọi
+   * hash cũ — và mọi fixture đang mô tả một hash cũ — thành không hợp kiểu, tức mô tả sai
+   * chính thứ hợp đồng migration §23.2 đang hứa là vẫn đọc được.
+   */
+  utilRepresentation?: UtilRepresentation;
   /**
    * Khoá `b` — ĐÚNG MỘT analytical SUBSET filter (PHASE4_VISUALIZATION.md §2).
    *

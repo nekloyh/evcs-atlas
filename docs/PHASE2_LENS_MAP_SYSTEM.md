@@ -42,6 +42,20 @@ and percentages continue to come from the loaded manifest/scale.
 
 ## 3. Implementation-ready Lens Matrix
 
+> **SUPERSEDED một phần (21/8/2026) — hàng `Utilization`.** Ba điều trong bảng dưới đã đổi,
+> xem [`docs/UX_UTILIZATION_VISUALIZATION_SPEC.md`](UX_UTILIZATION_VISUALIZATION_SPEC.md)
+> và [`web/DESIGN.md` §16](../web/DESIGN.md):
+>
+> 1. **Mark mặc định** không còn là chấm trạm mà là **vùng H3** (r6/r7/r8 theo zoom); chấm
+>    trạm là drill-down từ `z ≥ 13`. Lý do đo được: z8 Hà Nội 98,45% chấm bị che.
+> 2. **"One quantile scale computed once … for the loaded dataset"** → thang **TUYỆT ĐỐI**
+>    `0·5·10·20·35·55·75%` (`sqrt`), dùng chung cho mọi gói. Phân vị theo gói giữ được
+>    "không đổi khi scrub" nhưng vẫn đổi nghĩa giữa hai tỉnh.
+> 3. **Nhãn giờ** dùng "ô giờ 0…23" cho tới khi `snapshots.occupancy_hour_tz` được phát.
+>
+> Ba điều KHÔNG đổi và vẫn là hợp đồng: `stationOccAt()` là đường duy nhất, ngưỡng
+> `observed_h >= 1 h`, và **40% không bao giờ là một break của lens này**.
+
 | Lens | Primary field | Unit | Null semantics | Map encoding | Scale type | Thresholds and provenance | Legend | Overlays | Inspectable entities |
 |---|---|---|---|---|---|---|---|---|---|
 | Demand | `population` | persons per H3 r8 cell (~0.74 km²) | Current export has no null. Zero means measured/allocated zero population. | H3 fill with one sequential Demand ramp. Demand representations are view modes, not lenses; any secondary supply mark in a hybrid view is a declared overlay, not another analytical ramp. | Equal-cell quantile classes for H3, with a separate zero class when the presentation rule fires. The optional continuous surface uses its separately declared equal-population contour classing. | Quantile breaks and `ZERO_SHARE_THRESHOLD = 0.05` are **presentation** thresholds. No demand adequacy threshold exists. | “Population”; persons/cell; true break values; explicit `{0}` class; open-ended last class; no null swatch while `nNull = 0`. | Stations, communes, `beyond2km`, POI/context, boundary. Overlays retain cold/ink semantics. | Primary: H3 cell, commune. Contextual selection retained for station, road, and POI. Evidence: population, density, apartments. |

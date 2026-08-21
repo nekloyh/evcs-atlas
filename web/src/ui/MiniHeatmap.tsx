@@ -17,11 +17,26 @@
  * SVG thuần chứ không Observable Plot: hình 296×92 px với 168 ô không cần trục, không cần
  * thang, không cần lề — thứ Plot mang lại ở đây chỉ là ba lớp `<g>` thừa và một pattern
  * phải chèn tay y như cũ.
+ *
+ * ── Bàn phím và AT, thêm ở bản redesign lens Sử dụng (spec §20, §17) ─────────────────
+ *
+ * Trước bản này 168 ô chỉ nghe `onClick`: người dùng bàn phím không có đường nào tới điều
+ * khiển này, và `role="img"` + một `aria-label` duy nhất khiến trình đọc màn hình công bố
+ * "nhịp 168 giờ của trạm" rồi hết — 168 giá trị bên trong không tồn tại với AT.
+ *
+ * Nay nó dùng đúng khuôn của biểu đồ chính: **một** chặng Tab vào hình, roving tabindex ở
+ * ô đang chọn, mũi tên đi trong lưới, và mỗi ô có tên đọc được mang GIÁ TRỊ hoặc chữ "chưa
+ * quan sát đủ". Hai hình cùng nói về một khái niệm thì phải điều khiển được bằng cùng một
+ * bộ phím — nếu không, người dùng bàn phím phải học hai lần cho một thứ.
  */
 
-import { DOW_LABELS, dowOf, hourOf, tOf } from "../state/types";
+import { useRef } from "react";
+import type { KeyboardEvent } from "react";
+
+import { DOW_FULL, DOW_LABELS, dowOf, hourOf, scrubberKeyStep, tOf } from "../state/types";
 import { HATCH_HEX, INK_MUTED_HEX, colorFor, type RGB, type Scale } from "../viz/palette";
 import type { AnalysisTheme } from "../viz/theme";
+import { OCC_TZ_UNKNOWN, hourBucketLabel, type OccTimezoneState } from "../viz/occ-time";
 import { CHART_W } from "./chart-size";
 
 const W = CHART_W;
@@ -40,6 +55,7 @@ export function MiniHeatmap({
   theme,
   t,
   onT,
+  timezone = OCC_TZ_UNKNOWN,
 }: {
   /** 168 giá trị theo `t`; `null` = một trong ba đường "không biết" của `stationOccAt` */
   values: (number | null)[];
@@ -49,11 +65,33 @@ export function MiniHeatmap({
   theme: AnalysisTheme;
   t: number;
   onT: (t: number) => void;
+  /** Trục giờ được phép gọi là gì (§16). Mặc định: chưa công bố ⇒ "ô giờ". */
+  timezone?: OccTimezoneState;
 }) {
+  const cellRefs = useRef<Array<HTMLButtonElement | null>>([]);
   if (!scale) return null;
 
+  const move = (event: KeyboardEvent<HTMLButtonElement>) => {
+    // ↑/↓ = cùng giờ, ngày khác (±24) — cùng ánh xạ mà `UtilizationDayProfiles` dùng, và
+    // cùng hàm. Phím lạ KHÔNG `preventDefault`, nếu không Tab chết trong hình.
+    const key =
+      event.key === "ArrowUp" ? "PageUp" : event.key === "ArrowDown" ? "PageDown" : event.key;
+    const next = scrubberKeyStep(t, key);
+    if (next === null) return;
+    event.preventDefault();
+    onT(next);
+    cellRefs.current[next]?.focus();
+  };
+
   return (
-    <svg width={W} height={H} className="block" role="img" aria-label="nhịp 168 giờ của trạm">
+    <div className="relative" style={{ width: W, height: H }}>
+    <svg
+      width={W}
+      height={H}
+      className="block"
+      aria-hidden
+      focusable="false"
+    >
       <defs>
         {/* Vân 45° cùng góc và cùng mực với ô null trên bản đồ (§4b) — một chất liệu cho
             một khái niệm, bất kể hình học. */}
@@ -88,15 +126,7 @@ export function MiniHeatmap({
             width={CELL_W - 0.4}
             height={CELL_H - 0.4}
             fill={fill}
-            className="cursor-pointer"
-            onClick={() => onT(tOf(d, h))}
-          >
-            {/* `<title>` là tooltip GỐC của SVG: không dựng thẻ nổi, không phá luật §3
-                ("không thẻ nổi nào"), và nó đọc được bằng trình đọc màn hình. */}
-            <title>
-              {`${DOW_LABELS[d]} ${h}h — ${v === null ? "chưa quan sát đủ" : pctOf(v)}`}
-            </title>
-          </rect>
+          />
         );
       })}
 
@@ -112,6 +142,35 @@ export function MiniHeatmap({
         pointerEvents="none"
       />
     </svg>
+
+    {/* 168 hit target thật, roving tabindex — cùng khuôn với biểu đồ chính. */}
+    {values.map((v, i) => (
+      <button
+        key={i}
+        ref={(node) => {
+          cellRefs.current[i] = node;
+        }}
+        type="button"
+        tabIndex={i === t ? 0 : -1}
+        aria-pressed={i === t}
+        aria-label={`${DOW_FULL[dowOf(i)]}, ${hourBucketLabel(hourOf(i), timezone)}; ${
+          v === null ? "chưa quan sát đủ" : pctOf(v)
+        }`}
+        onClick={() => onT(tOf(dowOf(i), hourOf(i)))}
+        onKeyDown={move}
+        title={`${DOW_LABELS[dowOf(i)]} ${hourBucketLabel(hourOf(i), timezone)} — ${
+          v === null ? "chưa quan sát đủ" : pctOf(v)
+        }`}
+        className="absolute z-[1] cursor-pointer border-0 bg-transparent p-0 outline-offset-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink"
+        style={{
+          left: LEFT + hourOf(i) * CELL_W,
+          top: TOP + dowOf(i) * CELL_H,
+          width: CELL_W,
+          height: CELL_H,
+        }}
+      />
+    ))}
+    </div>
   );
 }
 

@@ -1159,6 +1159,90 @@ export function buildScale(
   };
 }
 
+// ── Thang TUYỆT ĐỐI của lens Sử dụng ───────────────────────────────────────────
+//
+// `docs/UX_UTILIZATION_VISUALIZATION_SPEC.md` §12.2.
+//
+// ── Vì sao thang này KHÔNG dựng từ dữ liệu ────────────────────────────────────────────
+//
+// Bản trước chia bậc theo PHÂN VỊ trên toàn bộ station-hour của gói đang mở. Nó đứng yên
+// trong một phiên — đủ để scrub không đổi nghĩa màu — nhưng nó **không có nghĩa tuyệt đối
+// xuyên tỉnh**, và điều đó đo được: cùng thuật toán cho Hà Nội các ngưỡng
+// `0 · 0,015 · 8,3 · 16,7 · 25,8 · 36,8 · 52,4%` còn Lâm Đồng
+// `0 · 0,036 · 2,6 · 5,6 · 10 · 16 · 26%`. Một vùng 20% là bậc c4 ở Hà Nội và bậc c6 ở Lâm
+// Đồng. Với `Vùng tải` — nơi câu hỏi là "vùng nào có tỉ lệ cổng bận cao hơn" — một thang
+// đổi nghĩa theo gói biến mọi so sánh giữa hai tỉnh thành sai.
+//
+// Hệ quả phải nói ra: **pixel màu đổi so với bản cũ**. Đó là migration có chủ ý (§23.3),
+// không phải một lần tái sử dụng âm thầm ngưỡng phân vị cũ.
+//
+// ── Vì sao SQRT ──────────────────────────────────────────────────────────────────────
+//
+// Phân phối thật dồn về dải thấp: trung vị station-hour là 20,5% ở Hà Nội và 6,9% ở Lâm
+// Đồng, còn aggregate vùng thì hầu như không bao giờ vượt 40%. Trên một thang tuyến tính
+// `[0,1]`, hơn ba phần tư dữ liệu chen vào một phần ba đầu dải màu. `sqrt` dành nhiều
+// khoảng cách tri giác hơn cho đúng dải phổ biến ấy, và nó là một phép ĐƠN ĐIỆU cố định —
+// giá trị lớn hơn luôn cho màu đậm hơn, ở mọi giờ, mọi tỉnh, mọi mức phân giải.
+//
+// Nhãn tick vì thế đặt theo GIÁ TRỊ THÔ, không chia đều: chia đều nhãn trên một trục sqrt
+// là in một trục tuyến tính lên một dải phi tuyến.
+
+/**
+ * Bảy khoảng TUYỆT ĐỐI. `breaks[i]` là ngưỡng DƯỚI của bậc `i`, bậc cuối là khoảng mở.
+ *
+ * `[0,5) [5,10) [10,20) [20,35) [35,55) [55,75) [75,100+]`
+ *
+ * Đây là **thang bản đồ cố định, không phải ngưỡng tốt/xấu.** 40% không có vị trí nào đặc
+ * biệt ở đây và không được cấp một: ngưỡng sàng lọc 40% trả lời một câu hỏi khác
+ * (`domain-thresholds.ts`), và mượn nó làm ngưỡng quá tải là khẳng định một điều mà dữ
+ * liệu này — không có hàng đợi, không có thời gian chờ, không có SLA — không nói được.
+ */
+export const UTILIZATION_BREAKS: readonly number[] = [0, 0.05, 0.1, 0.2, 0.35, 0.55, 0.75];
+
+/** Tick của dải gradient, theo giá trị THÔ. `sqrt` làm chúng KHÔNG cách đều trên dải. */
+export const UTILIZATION_TICKS: readonly number[] = [0, 0.05, 0.1, 0.2, 0.35, 0.55, 0.75, 1];
+
+/**
+ * Thang tỉ lệ cổng bận — **hằng số của cách vẽ**, không phải dẫn xuất của gói đang mở.
+ *
+ * `values` chỉ dùng để ĐẾM (`counts`, `n`, `max`) cho legend nói được "≈ bao nhiêu
+ * trạm-giờ mỗi bậc" và "bậc cuối thật ra chạy tới đâu". Chúng **không** đụng tới `breaks`
+ * hay `domain`: bỏ hẳn `values` đi thì màu của mọi giá trị vẫn y nguyên.
+ */
+export function utilizationScale(values: readonly number[] = []): NumericScale {
+  const present = values.filter((v) => Number.isFinite(v));
+  const breaks = [...UTILIZATION_BREAKS];
+  return {
+    kind: "numeric",
+    mode: "binned",
+    // `lo: 0`/`hi: 1` là miền TUYỆT ĐỐI. Không `p99`, không `min`: nếu miền co theo dữ
+    // liệu thì `sequentialPosition` sẽ trả về hai màu khác nhau cho cùng một tỉ lệ ở hai
+    // gói, và cả lý do dựng thang này biến mất.
+    domain: {
+      lo: 0,
+      hi: 1,
+      median: present.length ? quantile([...present].sort((a, b) => a - b), 0.5) : 0,
+      min: present.length ? Math.min(...present) : 0,
+      max: present.length ? Math.max(...present) : 0,
+      nClippedLow: 0,
+      // Giá trị vượt 100% (không có trong ba gói đã audit) bị KẸP về endpoint khi tô, và
+      // đếm ở đây để chỗ đọc số công bố được cờ `vượt mẫu số` thay vì im lặng sửa số.
+      nClippedHigh: present.reduce((n, v) => n + (v > 1 ? 1 : 0), 0),
+    },
+    transform: "sqrt",
+    breaks,
+    // KHÔNG có bậc {0} riêng: `0` là một giá trị ĐO ĐƯỢC ("biết là không ai sạc"), và nó
+    // đã khác `null` bằng chất liệu (vân xám) chứ không cần khác bằng một bậc màu. Tách
+    // bậc {0} ra sẽ tiêu một trong bảy bậc cho một điểm duy nhất của trục.
+    zeroClass: false,
+    max: present.length ? Math.max(...present) : null,
+    counts: tally(present, breaks),
+    n: present.length,
+    nNull: 0,
+    diverge: null,
+  };
+}
+
 /** Số bậc thật của một scale — legend hiện đúng chừng này swatch, không độn (§6a-3). */
 export function classCount(s: Scale): number {
   return s.kind === "numeric" ? s.breaks.length : s.kind === "bool" ? 2 : s.categories.length;

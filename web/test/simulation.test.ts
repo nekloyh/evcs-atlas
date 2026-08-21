@@ -414,6 +414,33 @@ test("Hash: serializeHash preserves candidate in sim parameter", () => {
   assert.match(hash, /sim=21\.02851,105\.85422/);
 });
 
+test("Hash regression: entity selection và candidate không bao giờ round-trip cùng nhau", () => {
+  const selected = latLngToCell(21.0285, 105.8542, 8);
+  const state = {
+    field: "population",
+    scaleMode: "binned" as const,
+    mode: "2d" as const,
+    view: { lng: 105.85, lat: 21.02, zoom: 12, pitch: 0, bearing: 0 },
+    layers: [],
+    cell: selected,
+    selection: null,
+    scene: null,
+    dataMode: false,
+    nationalMode: false,
+    paintOn: true,
+    t: 0,
+    filter: null,
+    candidate: { lat: 21.02851, lng: 105.85422 },
+  };
+  const serialized = serializeHash(state);
+  assert.match(serialized, new RegExp(`(?:^|&)c=${selected}(?:&|$)`));
+  assert.doesNotMatch(serialized, /(?:^|&)sim=/);
+
+  const parsed = parseHash(`#c=${selected}&sim=21.02851,105.85422&m=2d`);
+  assert.equal(parsed.cell, selected);
+  assert.equal(parsed.candidate, undefined);
+});
+
 // ── 8. End-to-End Simulation Engine Integration (T26, F4) ────────────────────
 
 test("Engine: runSimulation calculates deterministic output for candidate placement", () => {
@@ -790,7 +817,9 @@ test("QA-3: xuất xứ nằm TRONG kiểu kết quả — Trước TÍNH TOÁN,
   assert.equal(r.screening.tag, "RULE");
   assert.equal(SIM_TAG_LABEL[r.before.tag], "TÍNH TOÁN");
   assert.equal(SIM_TAG_LABEL[r.after.tag], "ƯỚC LƯỢNG");
-  assert.equal(SIM_TAG_LABEL[r.screening.tag], "RULE");
+  // UX §7.1 — khoá cấu trúc vẫn là `RULE`, nhưng NHÃN màn hình là tiếng Việt: người đọc
+  // không có neo nào cho chữ "RULE", và spec cấm nó xuất hiện trên UI.
+  assert.equal(SIM_TAG_LABEL[r.screening.tag], "QUY TẮC");
   assert.equal(SIM_TAG_SHORT[r.before.tag], "Tính");
   assert.equal(SIM_TAG_SHORT[r.after.tag], "Ước");
 });
@@ -811,10 +840,9 @@ test("QA-3 mutation: component chỉ render provenance qua tag của kết quả
     />\s*ƯỚC LƯỢNG\s*</,
     "badge provenance không được viết tay trong JSX",
   );
-  assert.match(src, /SIM_TAG_LABEL\[before\.tag\]/);
-  assert.match(src, /SIM_TAG_LABEL\[after\.tag\]/);
-  assert.match(src, /SIM_TAG_LABEL\[screening\.tag\]/);
-  assert.match(src, /SIM_TAG_SHORT\[after\.tag\]/);
+  assert.match(src, /SIM_TAG_LABEL\[result\.before\.tag\]/);
+  assert.match(src, /SIM_TAG_LABEL\[result\.after\.tag\]/);
+  assert.match(src, /SIM_TAG_LABEL\[result\.screening\.tag\]/);
 });
 
 test("QA-4: trạm thiếu n_ports/power_kw_site GIỮ null trong context — không bịa '0 cổng · 0 kW'", () => {
@@ -865,6 +893,44 @@ test("QA-4: trạm thiếu n_ports/power_kw_site GIỮ null trong context — kh
   assert.equal(byCode.get("S_NULL")!.powerKw, null);
   assert.equal(byCode.get("S_FULL")!.nPorts, 6);
   assert.equal(byCode.get("S_FULL")!.powerKw, 180);
+});
+
+test("QA-4 regression: util BAD/unreportable không được trình bày như phép đo hợp lệ", () => {
+  const loc = { lat: 21.0285, lng: 105.8542 };
+  const cell = latLngToCell(loc.lat, loc.lng, 8);
+  const station = (code: string, offset: number) => ({
+    station_code: code,
+    name: code,
+    lat: loc.lat + offset,
+    lng: loc.lng + offset,
+    op_status: "OPERATIONAL",
+    access: "PUBLIC",
+  });
+  const r = runSimulation({
+    candidate: loc,
+    candidateCell: cell,
+    communeKind: "PHUONG",
+    gridCells: [{
+      h3_r8: cell,
+      lat: loc.lat,
+      lng: loc.lng,
+      population: 100,
+      dist_station_network_m: 900,
+      detour_ratio: 1.4,
+      evidence_grade_distance: "GOOD",
+    }],
+    stations: [station("GOOD", 0.001), station("BAD", 0.002), station("HIDDEN", 0.003)],
+    occupancyMap: new Map([
+      ["GOOD", { util: 0.42, grade: "GOOD", util_reportable: true }],
+      ["BAD", { util: 0.81, grade: "BAD", util_reportable: true }],
+      ["HIDDEN", { util: 0.63, grade: "GOOD", util_reportable: false }],
+    ]),
+    calibration: HANOI_CALIBRATION,
+  });
+  const byCode = new Map(r.context.stationsWithin5km.map((s) => [s.code, s.util]));
+  assert.equal(byCode.get("GOOD"), 0.42);
+  assert.equal(byCode.get("BAD"), null);
+  assert.equal(byCode.get("HIDDEN"), null);
 });
 
 test("QA-5 end-to-end: vùng toàn ô 0 dân ⇒ trung vị theo dân của Trước/Sau đều null", () => {

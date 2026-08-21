@@ -20,10 +20,12 @@ import type { Manifest } from "../../data/manifest";
 import type { CommuneCollection, GridCell, RoadSeg } from "../../data/queries";
 import type { PoiCollection } from "../../data/poi";
 import type { StationOccupancy } from "../../data/occupancy";
+import { UTIL_STATION_MIN_ZOOM, type UtilRegionIndex } from "../../viz/util-regions";
+import { OCC_TZ_UNKNOWN, type OccTimezoneState } from "../../viz/occ-time";
 import type { Scale } from "../../viz/palette";
 import { FIELD_BY_ID, DEFAULT_FIELD } from "../../fields";
 import { useStore } from "../../state/store";
-import { useSimulationStore } from "../../simulation/store";
+import { candidateKeyOf, useSimulationStore } from "../../simulation/store";
 import { SimulationPanel } from "../../ui/SimulationPanel";
 import { AtlasSurface, AtlasSurfaceHeader } from "./AtlasSurface";
 import { EvidenceSection, selectionKindLabel } from "./EvidenceSection";
@@ -38,6 +40,10 @@ export interface EvidenceCardProps {
   poi?: PoiCollection | null;
   occupancy: StationOccupancy | null;
   occScale: Scale | null;
+  /** Chỉ mục VÙNG TẢI dựng ở App — Inspector vùng đọc nó, không tự dựng bản thứ hai. */
+  utilRegions?: UtilRegionIndex | null;
+  /** Trục giờ được phép gọi là gì (§16) — panel không suy từ cửa sổ UTC. */
+  occTimezone?: OccTimezoneState;
   roads?: RoadSeg[];
   roadsLoading?: boolean;
   cells?: GridCell[];
@@ -57,6 +63,8 @@ export function EvidenceCard({
   communes,
   occupancy,
   occScale,
+  utilRegions = null,
+  occTimezone = OCC_TZ_UNKNOWN,
   cells = [],
   scale = null,
   outsideActiveSubset = false,
@@ -72,8 +80,22 @@ export function EvidenceCard({
 
   const candidate = useSimulationStore((s) => s.candidate);
   const simResult = useSimulationStore((s) => s.result);
+  const simResultKey = useSimulationStore((s) => s.resultKey);
   const simError = useSimulationStore((s) => s.error);
+  const simErrorKind = useSimulationStore((s) => s.errorKind);
+  const simOrigin = useSimulationStore((s) => s.candidateOrigin);
   const clearCandidate = useSimulationStore((s) => s.clearCandidate);
+  const simRetry = useSimulationStore((s) => s.retry);
+
+  /**
+   * UX §14.2 — bất biến ràng buộc: chỉ in số khi kết quả thuộc về ĐÚNG ứng viên hiện tại.
+   *
+   * Store đã xoá `result` ngay lúc ứng viên đổi, nên đây là lớp gác thứ hai: nếu một lượt
+   * tính cũ có kịp ghi vào store sau khi ứng viên đã đổi, panel vẫn không được phép gắn
+   * con số ấy dưới cái tiêu đề mới. Không có khung hình nào lai giữa hai vị trí.
+   */
+  const coherentResult =
+    simResult && simResultKey === candidateKeyOf(candidate) ? simResult : null;
 
   // Single attention rule (§3.1): selecting any entity clears the candidate
   React.useEffect(() => {
@@ -83,6 +105,22 @@ export function EvidenceCard({
   }, [selection, candidate, clearCandidate]);
 
   const field = FIELD_BY_ID.get(fieldId) ?? FIELD_BY_ID.get(DEFAULT_FIELD)!;
+
+  /**
+   * "Xem từng trạm trong vùng" — §14.2.
+   *
+   * Hai phép, và cả hai đều cần. Zoom tới `UTIL_STATION_MIN_ZOOM` là đủ để LOD tự chuyển
+   * sang chấm trạm ngay bây giờ; ghim `utilRepresentation` là để nó **ở lại** chấm trạm
+   * khi người xem lùi mức phóng ra để nhìn quanh. Chỉ làm phép thứ nhất thì nút này giữ
+   * lời hứa đúng một lần rồi tự huỷ.
+   */
+  const drillToStations = React.useCallback(
+    ({ lng, lat }: { lng: number; lat: number }) => {
+      useStore.getState().setUtilRepresentation("station");
+      flyTo({ lng, lat, zoom: UTIL_STATION_MIN_ZOOM, pitch: 0, bearing: 0 });
+    },
+    [flyTo],
+  );
 
   const route = useInspectorLoader({
     selection,
@@ -94,11 +132,15 @@ export function EvidenceCard({
     occScale,
     cells,
     scale,
+    utilRegions,
+    timezone: occTimezone,
   });
 
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const headingRef = React.useRef<HTMLHeadingElement>(null);
+  const simHeadingRef = React.useRef<HTMLHeadingElement>(null);
   const prevSelectionKey = React.useRef<string | null>(null);
+  const prevSimKey = React.useRef<string | null>(null);
   const focusOriginRef = React.useRef<HTMLElement | null>(null);
   const skipInitialUrlFocus = React.useRef(selection !== null);
 
@@ -106,13 +148,19 @@ export function EvidenceCard({
   const handleClose = React.useCallback(
     (reason: string = "button") => {
       const focusOrigin = focusOriginRef.current;
-      if (candidate || simError) {
+      const closingSimulation = Boolean(candidate || simError);
+      if (closingSimulation) {
         clearCandidate();
       } else {
         clearSelection(reason);
       }
       window.requestAnimationFrame(() => {
-        if (focusOrigin && document.body.contains(focusOrigin)) {
+        const simulationTrigger = closingSimulation
+          ? document.getElementById("simulation-placement-trigger")
+          : null;
+        if (simulationTrigger instanceof HTMLElement) {
+          simulationTrigger.focus();
+        } else if (focusOrigin && document.body.contains(focusOrigin)) {
           focusOrigin.focus();
         } else {
           const mapContainer = document.querySelector('main[aria-label="Không gian bản đồ chính"]') as HTMLElement | null;
@@ -173,38 +221,71 @@ export function EvidenceCard({
     }
   }, [selection]);
 
+  /**
+   * UX §14.6 — tiêu điểm của thẻ MÔ PHỎNG.
+   *
+   * Ba luật, và cả ba đều nằm ở cùng một chỗ để chúng không trôi khỏi nhau:
+   *  · chỉ đưa tiêu điểm khi ứng viên do NGƯỜI đặt (`origin === "user"`) — deep link lúc
+   *    boot phải mở panel mà không cướp tiêu điểm của trang;
+   *  · chỉ đưa khi kết quả đã KHỚP ứng viên hiện tại, để trình đọc màn hình không đọc
+   *    một câu của vị trí cũ dưới tiêu đề mới (§14.2);
+   *  · bắt `focusOrigin` đúng một lần cho mỗi lượt mở, để nút đóng trả tiêu điểm về nơi
+   *    thao tác bắt đầu chứ không về một hàng vừa unmount.
+   */
+  React.useEffect(() => {
+    if (!candidate || selection) {
+      prevSimKey.current = null;
+      return;
+    }
+    const key = candidateKeyOf(candidate);
+    if (!key || !coherentResult || prevSimKey.current === key) return;
+    const isFirstOpen = prevSimKey.current === null;
+    prevSimKey.current = key;
+
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    if (simOrigin !== "user") return;
+    if (isFirstOpen) {
+      focusOriginRef.current = document.activeElement as HTMLElement | null;
+    }
+    simHeadingRef.current?.focus();
+  }, [candidate, coherentResult, selection, simOrigin]);
+
   if ((candidate || simError) && !selection) {
     const simContent = (
       <SimulationPanel
-        result={simResult}
+        result={coherentResult}
         error={simError}
+        errorKind={simErrorKind}
+        provinceName={manifest?.province?.province_name ?? null}
         onClose={() => handleClose("button")}
+        onRetry={simRetry}
+        headingRef={simHeadingRef}
+        scrollRef={scrollRef}
+        showCloseButton={isDesktop}
       />
     );
 
     if (!isDesktop) {
       return (
         <Sheet open onOpenChange={(open) => !open && handleClose("sheet")}>
-          <SheetContent side="bottom" className="bg-panel p-0 text-ink">
+          <SheetContent side="bottom" className="flex flex-col bg-panel p-0 text-ink max-h-[85vh]">
             <SheetHeader className="sr-only">
               <SheetTitle>Mô phỏng trạm giả định</SheetTitle>
             </SheetHeader>
-            <div ref={scrollRef} className="custom-scrollbar min-h-0 flex-1 overflow-y-auto max-h-[80vh]">
-              {simContent}
-            </div>
+            {simContent}
           </SheetContent>
         </Sheet>
       );
     }
 
     return (
+      // QA vòng 2.1: giữ bề rộng chung 320/340 px, nhưng nới riêng trần dọc lên 72% để
+      // V4 + disclosure không bị ép trong cửa sổ 60% trên desktop 16:9/16:10.
       <AtlasSurface
-        className="pointer-events-auto absolute right-3 top-3 z-20 flex w-[340px] max-h-[75%] flex-col min-[1440px]:w-[380px]"
-        aria-label="Mô phỏng trạm giả định"
+        className="pointer-events-auto absolute right-3 top-3 z-20 flex w-[320px] max-h-[72%] flex-col min-[1440px]:w-[340px]"
+        aria-labelledby="sim-panel-title"
       >
-        <div ref={scrollRef} className="custom-scrollbar min-h-0 flex-1 overflow-y-auto">
-          {simContent}
-        </div>
+        {simContent}
       </AtlasSurface>
     );
   }
@@ -254,6 +335,7 @@ export function EvidenceCard({
           onSelectEntity={selectEntity}
           onFlyTo={flyTo}
           onT={setT}
+          onDrillToStations={drillToStations}
         />
       </div>
     </>
@@ -294,5 +376,7 @@ function inspectorEntityLabel(route: NonNullable<ReturnType<typeof useInspectorL
       const name = route.model.feature?.properties["commune_name"];
       return typeof name === "string" && name.length > 0 ? name : null;
     }
+    case "util-region":
+      return `Vùng H3 r${route.model.resolution}`;
   }
 }

@@ -60,7 +60,7 @@ test("SQL của biểu đồ nằm ở tầng dữ liệu, không nằm trong co
     "ui/PopulationHistogram.tsx",
     "ui/PowerTierBreakdown.tsx",
     "ui/AccessCurve.tsx",
-    "ui/Heatmap168.tsx",
+    "ui/UtilizationDayProfiles.tsx",
     "ui/OpportunityCommuneRankBars.tsx",
   ]) {
     const src = code(rel);
@@ -107,10 +107,10 @@ test("mỗi biểu đồ chỉ nhận đúng callback nó được phép phát (
   const router = code("components/atlas/PrimaryLensChart.tsx");
   assert.match(router, /PopulationHistogram[\s\S]{0,120}onFilterIntent/);
   assert.match(router, /PowerTierBreakdown[\s\S]{0,120}onFilterIntent/);
-  assert.match(router, /Heatmap168[\s\S]{0,200}onTimeIntent/);
+  assert.match(router, /UtilizationDayProfiles[\s\S]{0,200}onTimeIntent/);
   assert.match(router, /OpportunityCommuneRankBars[\s\S]{0,120}onEntityIntent/);
 
-  // Heatmap KHÔNG được nhận quyền lọc, Rank KHÔNG được nhận quyền đổi giờ.
-  assert.doesNotMatch(router, /Heatmap168[\s\S]{0,200}onFilterIntent/);
+  // Hồ sơ ngày KHÔNG được nhận quyền lọc, Rank KHÔNG được nhận quyền đổi giờ.
+  assert.doesNotMatch(router, /UtilizationDayProfiles[\s\S]{0,200}onFilterIntent/);
   assert.doesNotMatch(router, /OpportunityCommuneRankBars[\s\S]{0,160}onFilterIntent/);
 });

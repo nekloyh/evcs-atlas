@@ -709,6 +709,14 @@ problem, which is why the tool for it is a map and not a shortlist."
 ---
 
 ### 2.5 Scene 5 — `nhip-tuan` · "Nhịp của một tuần"
+> **SUPERSEDED một phần (21/8/2026).** Hình của cảnh này nay là `UtilizationDayProfiles`,
+> không phải `Heatmap168` (đã xoá) — xem
+> [`docs/UX_UTILIZATION_VISUALIZATION_SPEC.md`](UX_UTILIZATION_VISUALIZATION_SPEC.md) §23.4
+> và [`web/DESIGN.md` §16](../web/DESIGN.md). Hai hệ quả: cảnh **không còn nhận `Scale`**
+> (giá trị mã hoá bằng vị trí, nên chế độ hỏng "khung có trục mà không có ô" của RF-2 nay
+> bất khả biểu diễn thay vì bị canh), và cảnh báo E2 dưới đây **đã được thi hành** — mọi
+> nhãn giờ in ra là "ô giờ", không phải nhãn đồng hồ. Các claim E1/E3–E6 không đổi.
+
 
 **CLAIM**
 The busiest hour of the week runs **3,3× the quietest** (36,2 % of installed ports busy against

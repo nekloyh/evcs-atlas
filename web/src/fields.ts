@@ -255,11 +255,20 @@ const TOGGLE_SQRT_ZERO_P99: ScaleContract = {
 const TOGGLE_SQRT_MIN_P99: ScaleContract = {
   color: "toggle", transform: "sqrt", clip: { lo: "min", hi: "p99" },
 };
-const TOGGLE_LINEAR_ZERO_NONE: ScaleContract = {
-  color: "toggle", transform: "linear", clip: { lo: 0, hi: "none" },
-};
 const TOGGLE_LINEAR_MIN_P99: ScaleContract = {
   color: "toggle", transform: "linear", clip: { lo: "min", hi: "p99" },
+};
+/**
+ * Tỉ lệ cổng bận — miền TUYỆT ĐỐI `[0,1]`, biến đổi `sqrt`.
+ *
+ * `clip.hi: "none"` ở đây không có nghĩa "lấy max của dữ liệu": thang của trường này do
+ * `utilizationScale()` dựng cứng ở `[0,1]` (`viz/palette.ts` §12.2), nên hợp đồng này chỉ
+ * còn khai HAI điều mà phần còn lại của app đọc — gradient được phép bật, và đường cong là
+ * `sqrt`. Đó là lý do nó không dùng chung với `TOGGLE_SQRT_ZERO_P99`: `p99` sẽ co miền theo
+ * gói đang mở, đúng thứ thang tuyệt đối tồn tại để bỏ.
+ */
+const UTILIZATION_ABSOLUTE: ScaleContract = {
+  color: "toggle", transform: "sqrt", clip: { lo: 0, hi: "none" },
 };
 const SUPPLY_FIXED: ScaleContract = {
   color: "fixed-binned", transform: "sqrt", clip: { lo: 0, hi: "p99" },
@@ -1072,12 +1081,14 @@ const STATION_SPECS: Spec[] = [
     id: "occ",
     group: "sosanh",
     label: "Nhịp trạm tại giờ đang xem",
-    desc: "Tỉ lệ cổng đang bận của từng trạm tại một ô giờ của tuần (7 thứ × 24 giờ). Kéo scrubber ở đáy để đổi giờ. Trạm chưa quan sát đủ ở giờ đó vẽ CHẤM RỖNG, không tô bậc nhạt — “chưa biết” không được đọc thành “vắng khách”.",
+    desc: "Tỉ lệ cổng đang bận của từng trạm tại một ô giờ của tuần (7 thứ × 24 giờ). Kéo scrubber ở đáy để đổi giờ. Màu đậm nghĩa là TỈ LỆ CỔNG BẬN CAO HƠN — không phải “quá tải”. Trạm chưa quan sát đủ ở giờ đó vẽ CHẤM RỖNG, không tô bậc nhạt — “chưa biết” không được đọc thành “vắng khách”.",
     unit: { kind: "ratio", note: `cổng bận ÷ cổng lắp đặt tại giờ đang xem · dưới ${OBSERVED_H_MIN} h quan sát thì không tô` },
     kind: "numeric",
-    scaleContract: TOGGLE_LINEAR_ZERO_NONE,
-    // Thang chia bậc trên MỌI ô giờ đọc được của mọi trạm IN, không trên danh sách trạm —
-    // xem `allOccValues`. Hai tập khác nhau nên legend phải gọi đúng tên tập của mình.
+    scaleContract: UTILIZATION_ABSOLUTE,
+    // Thang là TUYỆT ĐỐI `[0,1]` với bảy khoảng cố định (`utilizationScale`), không phải
+    // phân vị theo gói. `classingNoun` vẫn cần vì `counts` của legend đếm trên tập
+    // TRẠM-GIỜ (`allOccValues`), không trên danh sách trạm — hai tập khác nhau nên legend
+    // phải gọi đúng tên tập của mình.
     classingNoun: "trạm-giờ",
     // Không phải một cột — §13c-1. Công thức KHÔNG chạy trong SQL như các trường phái sinh
     // khác: nó phụ thuộc `t`, thứ đổi 4 lần mỗi giây khi play. Một truy vấn DuckDB mỗi
@@ -1190,9 +1201,9 @@ export const LENSES: readonly LensMeta[] = [
     id: "utilization",
     label: "SỬ DỤNG",
     hint: "bận lúc nào",
-    businessQuestion: "Trạm sạc nào đang bị quá tải hoặc thiếu tải trong từng khung giờ tuần?",
+    businessQuestion: "Tỉ lệ cổng bận của từng vùng và từng trạm thay đổi thế nào qua 168 ô giờ của tuần?",
     defaultField: "station:occ",
-    primaryChart: "utilization-week-heatmap",
+    primaryChart: "utilization-day-profiles",
     fieldKeys: UTILIZATION_FIELDS,
     defaultOverlays: ["stations", "station_status"],
     cellEvidence: ["util_cell", "n_stations_measured", "util_pctl_cell"],
@@ -1365,6 +1376,11 @@ function inUnusableLayer(id: string): boolean {
 
 /** Trường này dựng được trên dữ liệu đang mở chưa? */
 export function fieldAvailable(f: FieldMeta): boolean {
+  // `station:occ` là lối vào của cả LENS, nên một package bị quality gate không được làm
+  // lối vào ấy biến mất. Người đọc vẫn phải mở được lens để thấy lý do manifest và phân
+  // biệt "không đo được" với "mức sử dụng thấp". Các consumer dữ liệu vẫn bị chặn bởi
+  // `layerUsable("occupancy")`; riêng field shell này tồn tại để render disabled state.
+  if (f.id === STATION_OCC_FIELD) return true;
   if (inUnusableLayer(f.id)) return false;
   const co = AVAILABLE[f.readAs];
   if (!co) return true;
@@ -1373,7 +1389,6 @@ export function fieldAvailable(f: FieldMeta): boolean {
   // và được chặn riêng bởi `inUnusableLayer`. Nếu kiểm tra mù `co.has(f.column)`, hai nút
   // này luôn bị tắt dù bộ Hà Nội có đủ dữ liệu.
   if (f.id === STATION_PORTS_FIELD) return co.has("n_ports");
-  if (f.id === STATION_OCC_FIELD) return true;
   // Trường phái sinh (`expr`) có thể chạm nhiều cột; nó chỉ dựng được khi CÓ ĐỦ. Không có
   // cách nào biết chắc từ đây, nên luật là: cột trần phải có mặt, biểu thức thì bỏ qua nếu
   // cột cùng tên không có. Thà giấu một trường dựng được còn hơn hiện một trường sẽ nổ.

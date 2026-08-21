@@ -16,10 +16,8 @@ import { parseHash, serializeHash } from "../src/state/hash.ts";
 import { HOURS_IN_WEEK, tOf } from "../src/state/types.ts";
 import type { HashState } from "../src/state/types.ts";
 import {
-  hourProfile,
   shapeDayProfiles,
   stationSeries,
-  type CityHour,
   type OccProfiles,
 } from "../src/viz/occ.ts";
 import { isAbnormal, statusIconSize, statusRingRadius } from "../src/viz/station-status.ts";
@@ -202,44 +200,13 @@ test("trạm khuyết `n_ports` cho 168 ô null — không có mẫu số thì k
 
 // ── Hồ sơ biên 24 giờ — mục 10 ─────────────────────────────────────────────────
 
-const city = (t: number, value: number | null): CityHour => ({
-  t,
-  value,
-  observedH: 3,
-  nStations: 10,
-});
-
-test("`hourProfile` gộp 7 thứ thành 24 cột, và `null` KHÔNG kéo trung bình xuống", () => {
-  const cells: CityHour[] = [];
-  for (let d = 0; d < 7; d++) cells.push(city(tOf(d, 9), d === 0 ? null : 0.4));
-  const bands = hourProfile(cells);
-  assert.equal(bands.length, 24);
-  const at9 = bands[9]!;
-  // 6 thứ có giá trị 0,4; thứ thiếu KHÔNG được tính là 0 (nếu tính thì trung bình ra 0,343).
-  assert.equal(at9.n, 6);
-  // So bằng sai số: trung bình là một phép chia dấu phẩy động, và con số SAI mà test này
-  // chặn (0,343 — nếu thứ thiếu bị tính là 0) cách 0,4 xa hơn sai số nhiều bậc.
-  assert.ok(Math.abs(at9.mid! - 0.4) < 1e-9, `mid = ${at9.mid}`);
-  assert.equal(at9.lo, 0.4);
-  assert.equal(at9.hi, 0.4);
-});
-
-test("dải lo–hi là thấp nhất và cao nhất THẬT trong tuần tại giờ đó", () => {
-  const cells = [city(tOf(0, 22), 0.1), city(tOf(3, 22), 0.5), city(tOf(6, 22), 0.3)];
-  const b = hourProfile(cells)[22]!;
-  assert.equal(b.lo, 0.1);
-  assert.equal(b.hi, 0.5);
-  assert.equal(b.n, 3);
-  assert.ok(Math.abs(b.mid! - 0.3) < 1e-9);
-});
-
-test("giờ không có giá trị nào giữ `mid`/`lo`/`hi` là null — không thành 0", () => {
-  const b = hourProfile([city(tOf(0, 5), null)])[5]!;
-  assert.equal(b.mid, null);
-  assert.equal(b.lo, null);
-  assert.equal(b.hi, null);
-  assert.equal(b.n, 0);
-});
+// `hourProfile`/`HourBand` đã bị XOÁ cùng `HourProfile.tsx` ở bản redesign lens Sử dụng.
+//
+// Hình ấy tồn tại để nói NHỊP NGÀY bằng độ cao, thứ tấm nhiệt đồ 168 ô không nói được bằng
+// màu. `UtilizationDayProfiles` nói cả nhịp ngày lẫn khác biệt giữa các thứ bằng cùng một
+// kênh vị trí, nên hình thứ hai không còn việc — và §23.4 cấm để hai biểu đồ chính cùng
+// tồn tại. Luật "null KHÔNG bị tính thành 0 khi gộp" mà bộ test cũ canh vẫn được canh, ở
+// `utilization-model.test.ts` (tầng gộp) và ở phần `shapeDayProfiles` ngay dưới.
 
 // ── Hồ sơ ngày theo `shape_class` — §3f-5 ──────────────────────────────────────
 

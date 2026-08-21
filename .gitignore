@@ -49,8 +49,18 @@ web/tsconfig.tsbuildinfo
 !web/DESIGN.md
 !docs/visual-research.md
 !docs/COT.md
+!docs/UX_SIMULATION_REDESIGN_SPEC.md
+!docs/UX_UTILIZATION_VISUALIZATION_SPEC.md
 !store/qa/*.md
 *.parquet
+
+# Ảnh chụp màn hình QA tự động — không vào git, chỉ giữ các ảnh minh hoạ nhúng trong spec
+docs/qa/**/*.png
+!docs/qa/phase41/w1-utilization-gradient.png
+!docs/qa/phase41/w2-utilization-binned.png
+!docs/qa/phase41/w4-station-panel-hatch-gradient.png
+!docs/qa/phase41/w8-lens-utilization.png
+!docs/qa/phase10/at10-6-scrubber-end.png
 
 # Gói giao nộp POI (toạ độ OSM) — gửi file trực tiếp, không qua git.
 data/qa/eda/export/

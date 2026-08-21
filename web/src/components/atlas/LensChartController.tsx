@@ -11,6 +11,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { StationOccupancy } from "../../data/occupancy";
+import type { Manifest } from "../../data/manifest";
 import type { GridCell, StationPoint } from "../../data/queries";
 import { loadOpportunityCommunes } from "../../data/chart-session";
 import { FIELD_BY_ID, LENSES, gridColumnAvailable, lensOfField, type FieldMeta } from "../../fields";
@@ -28,12 +29,12 @@ import {
   buildDemandPopulationHistogram,
   buildSupplyPowerTierBreakdown,
   buildAccessPopulationCurve,
-  buildUtilizationWeekHeatmap,
+  buildUtilizationWeekModel,
   buildOpportunityCommuneRank,
   memoizeByReference,
   type OpportunityCommuneRow,
 } from "../../viz/chart-models";
-import type { Scale } from "../../viz/palette";
+import { occTimezoneOf } from "../../viz/occ-time";
 import { FilterClearedNotice, FilterSummary, type FilterCounts } from "../../ui/FilterSummary";
 import { Scatter } from "../../ui/Scatter";
 import { SCATTER_STATE_COPY } from "../../ui/scatter-copy";
@@ -44,22 +45,21 @@ const SCATTER_DIST_FIELD = "dist_station_network_m";
 
 export function LensChartController({
   field,
-  scale,
   filterCounts = null,
   cells = [],
   stations = [],
   occupancy = null,
-  utilizationScale = null,
+  manifest = null,
   utilizationUnavailableReason,
 }: {
   field: FieldMeta;
-  scale: Scale | null;
   /** kept/eligible/total — tính ở App, không tính lại trong render này (§5.2). */
   filterCounts?: FilterCounts | null;
   cells?: GridCell[];
   stations?: StationPoint[];
   occupancy?: StationOccupancy | null;
-  utilizationScale?: Scale | null;
+  /** Chỉ để đọc `snapshots.occupancy_hour_tz` — biểu đồ không đọc gì khác từ manifest. */
+  manifest?: Manifest | null;
   utilizationUnavailableReason?: string;
 }) {
   const filter = useStore((s) => s.filter);
@@ -129,14 +129,18 @@ export function LensChartController({
   }, [primaryChartId, cells]);
 
   const utilizationModel = useMemo(() => {
-    if (primaryChartId !== "utilization-week-heatmap") return undefined;
+    if (primaryChartId !== "utilization-day-profiles") return undefined;
     if (utilizationUnavailableReason) {
-      return buildUtilizationWeekHeatmap(null, utilizationUnavailableReason);
+      return buildUtilizationWeekModel(null, utilizationUnavailableReason);
     }
     if (!occupancy) return undefined;
-    // 168 số gộp không phụ thuộc con trỏ giờ; chỉ viền và dòng readout đọc `t`.
-    return buildUtilizationWeekHeatmap(occupancy);
+    // 168 số gộp không phụ thuộc con trỏ giờ; chỉ đường dẫn dọc và dòng đọc số đọc `t`.
+    // Memo KHÔNG có `t` trong deps, và đó là điều kiện để scrub 4 Hz không dựng lại model.
+    return buildUtilizationWeekModel(occupancy);
   }, [primaryChartId, occupancy, utilizationUnavailableReason]);
+
+  // Trục giờ được phép gọi là gì — đọc MỘT lần từ manifest, không suy từ cửa sổ UTC (§16).
+  const occTimezone = useMemo(() => occTimezoneOf(manifest?.snapshots), [manifest?.snapshots]);
 
   const opportunityModel = useMemo(() => {
     if (primaryChartId !== "opportunity-commune-rank" || opportunityLoad.status !== "ready") return undefined;
@@ -236,7 +240,7 @@ export function LensChartController({
         </div>
       ) : primaryChartId === "opportunity-commune-rank" && opportunityLoad.status !== "ready" ? (
         <p className="py-4 text-center text-note text-ink-muted" role="status">Đang tính xếp hạng xã…</p>
-      ) : primaryChartId === "utilization-week-heatmap" && !utilizationModel ? (
+      ) : primaryChartId === "utilization-day-profiles" && !utilizationModel ? (
         <p className="py-4 text-center text-note text-ink-muted" role="status">Đang đọc hồ sơ vận hành…</p>
       ) : unavailableReason ? (
         // §6.1 mục 4: phụ thuộc thiếu phải nói ra LÝ DO. Trả `null` sẽ để lại một khe trống
@@ -253,7 +257,7 @@ export function LensChartController({
           utilizationModel={utilizationModel}
           opportunityModel={opportunityModel}
           t={t}
-          scale={primaryChartId === "utilization-week-heatmap" ? utilizationScale : scale}
+          timezone={occTimezone}
           theme={theme}
           sink={sink}
         />

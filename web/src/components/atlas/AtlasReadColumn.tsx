@@ -10,16 +10,20 @@ import {
   lensOfField,
   mapFieldsOfLens,
   scaleControlFor,
+  STATION_OCC_FIELD,
   unitNoun,
   type FieldMeta,
   type LensId,
   type RuntimeCoverage,
 } from "../../fields";
 import type { PresetStats } from "../../state/presets";
+import { OCC_TZ_UNKNOWN, type OccTimezoneState } from "../../viz/occ-time";
 import { selectionWireOf, useStore } from "../../state/store";
 import { scaleUnit, unitPhrase } from "../../units";
 import { Badge } from "../../ui/Badge";
 import { DemandModes } from "../../ui/DemandModes";
+import { UtilModes } from "../../ui/UtilModes";
+import { UtilizationLegendNote } from "../../ui/UtilizationLegendNote";
 import { LensChartController } from "./LensChartController";
 import type { FilterCounts } from "../../ui/FilterSummary";
 import { Legend } from "../../ui/Legend";
@@ -56,8 +60,9 @@ export interface AtlasReadColumnProps {
   stations?: StationPoint[];
   cells?: GridCell[];
   occupancy?: StationOccupancy | null;
-  utilizationScale?: Scale | null;
   utilizationUnavailableReason?: string;
+  /** Trục giờ được phép gọi là gì (§16). */
+  occTimezone?: OccTimezoneState;
   /**
    * Số mark ĐANG VẼ ở giờ đang xem — chỉ trường theo giờ (`station:occ`) mới có. Tách khỏi
    * `Scale` vì thang đếm TRẠM-GIỜ của cả tuần còn cặp này đếm TRẠM ở một giờ (CR 4.1 §C1).
@@ -107,8 +112,8 @@ export function AtlasReadColumn({
   stations = [],
   cells = [],
   occupancy = null,
-  utilizationScale = null,
   utilizationUnavailableReason,
+  occTimezone = OCC_TZ_UNKNOWN,
   drawnCount = null,
   presetStats,
 }: AtlasReadColumnProps) {
@@ -189,13 +194,29 @@ export function AtlasReadColumn({
             title={paintOn ? "Tắt mặt tô, chỉ còn nền và overlay" : "Bật lại mặt tô"}
             aria-label={paintOn ? "Tắt mặt tô" : "Bật mặt tô"}
             aria-pressed={paintOn}
-            className="grid h-5 w-5 cursor-pointer place-items-center rounded-xs border border-transparent text-ink-2 hover:border-hairline hover:text-ink"
+            className="grid h-6 w-6 cursor-pointer place-items-center rounded-xs border border-transparent text-ink-2 hover:border-hairline hover:text-ink"
           >
             {paintOn ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
           </button>
         ),
         question: (
           <>
+            {/* Với Sử dụng, đây là visualization CHÍNH trả lời chính câu hỏi "bận lúc
+                nào". Nó đứng trước chrome cấu hình để metric và extrema còn trong fold
+                1280×800; title trực tiếp bên trong chart gọi rõ metric và trục. */}
+            {field.id === STATION_OCC_FIELD && (
+              <div className="mb-3">
+                <LensChartController
+                  field={field}
+                  filterCounts={filterCounts}
+                  cells={cells}
+                  stations={stations}
+                  occupancy={occupancy}
+                  manifest={manifest}
+                  utilizationUnavailableReason={utilizationUnavailableReason}
+                />
+              </div>
+            )}
             <div className="flex items-baseline gap-1.5">
               <h3 className="min-w-0 flex-1 truncate text-heading font-semibold text-ink">{field.label}</h3>
               <span className="shrink-0 border border-hairline px-1 font-mono text-note text-ink-2">
@@ -227,6 +248,18 @@ export function AtlasReadColumn({
               {scaleControl.reason && <span className="truncate text-note text-ink-muted" title={scaleControl.reason}>· {scaleControl.reason}</span>}
             </div>
             {paintOn && hasDemandRepresentations(field) && <div className="mt-3"><DemandModes /></div>}
+            {/*
+              Cùng khe, cùng idiom với `DemandModes` — xem chú thích đầu `UtilModes`.
+
+              Cổng `!utilizationUnavailableReason` KHÔNG thừa: ở một gói bị tắt lớp
+              occupancy (Điện Biên: 0% trạm đo được), khe biểu đồ ngay trên đã in "Dữ liệu
+              vận hành chưa khả dụng", và một bộ chọn `Vùng tải | Trạm` đứng cạnh câu ấy là
+              một điều khiển không điều khiển được gì — đúng cái §3a cấm, và đúng lý do
+              scrubber tự ẩn trong cùng hoàn cảnh. Ảnh chụp trình duyệt bắt được nó.
+            */}
+            {paintOn && field.id === STATION_OCC_FIELD && !utilizationUnavailableReason && (
+              <div className="mt-3"><UtilModes /></div>
+            )}
           </>
         ),
         legend: (
@@ -242,20 +275,27 @@ export function AtlasReadColumn({
               drawnCount={drawnCount}
               variant="floating"
             />
+            {/* Hợp đồng ngữ nghĩa của lens Sử dụng — §12.3. Ngay dưới dải màu vì nó nói về
+                cùng một thứ mà dải màu đang mã hoá, nhưng nó nói về PHÉP ĐO chứ không về
+                thang, nên nó không thuộc về bên trong `Legend`. */}
+            {field.id === STATION_OCC_FIELD && !utilizationUnavailableReason && (
+              <UtilizationLegendNote profiles={occupancy?.profiles ?? null} timezone={occTimezone} />
+            )}
           </LegendSlot>
         ),
         contextualChart: (
           <ContextualChartSlot>
-            <LensChartController
-              field={field}
-              scale={scale}
-              filterCounts={filterCounts}
-              cells={cells}
-              stations={stations}
-              occupancy={occupancy}
-              utilizationScale={utilizationScale}
-              utilizationUnavailableReason={utilizationUnavailableReason}
-            />
+            {field.id === STATION_OCC_FIELD ? null : (
+              <LensChartController
+                field={field}
+                filterCounts={filterCounts}
+                cells={cells}
+                stations={stations}
+                occupancy={occupancy}
+                manifest={manifest}
+                utilizationUnavailableReason={utilizationUnavailableReason}
+              />
+            )}
           </ContextualChartSlot>
         ),
         limits: (

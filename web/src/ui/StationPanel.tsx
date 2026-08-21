@@ -11,7 +11,8 @@ import type { StationViewModel } from "../components/atlas/inspector-types";
 import { cellSelection, communeSelection, type EntitySelection } from "../state/selection";
 import { isInScope } from "../data/scope";
 import { CONSTANTS, FIELD_BY_ID, STATION_OCC_FIELD, constantShort } from "../fields";
-import { DOW_FULL } from "../state/types";
+import { DOW_FULL, hourOf } from "../state/types";
+import { OCC_TZ_UNKNOWN, hourBucketLabel, occTimezoneDisclosure } from "../viz/occ-time";
 import type { Scale } from "../viz/palette";
 import { themeFor } from "../viz/theme";
 import { MiniHeatmap } from "./MiniHeatmap";
@@ -52,6 +53,8 @@ export function StationPanel(props: StationPanelProps) {
   const series = model ? model.series : props.series;
   const scale = model ? model.occScale : props.scale;
   const t = model ? model.t : (props.t ?? 0);
+  // Không có model (đường gọi legacy) ⇒ trạng thái KHÔNG khẳng định gì về múi giờ.
+  const timezone = model ? model.timezone : OCC_TZ_UNKNOWN;
   const onT = props.onT ?? (() => {});
   const onSelectEntity = props.onSelectEntity ?? (() => {});
   const datasetName = model ? model.datasetName : "Hà Nội";
@@ -174,7 +177,11 @@ export function StationPanel(props: StationPanelProps) {
       <div className="border-b border-hairline px-3 py-3">
         {isOccActive ? (
           <div>
-            <div className="text-body font-medium text-ink-2">Nhịp sử dụng tại giờ {t % 24}h ({DOW_FULL[Math.floor(t / 24)]})</div>
+            {/* `{t % 24}h` cũ là một nhãn ĐỒNG HỒ trên một trục chưa công bố múi giờ (§16).
+                Thứ giữ nguyên — `docs/COT.md` chốt `dow = 0` là Thứ Hai. */}
+            <div className="text-body font-medium text-ink-2">
+              Tỉ lệ cổng bận tại {hourBucketLabel(hourOf(t), timezone)} ({DOW_FULL[Math.floor(t / 24)]})
+            </div>
             <div className="text-readout font-semibold leading-none pt-1">
               {occAtT === null || occAtT === undefined ? (
                 <span className="text-heading italic text-ink-muted">không đủ quan sát</span>
@@ -289,7 +296,7 @@ export function StationPanel(props: StationPanelProps) {
         {/* Mini-Heatmap 7x24 */}
         <div className="px-3 pt-2">
           {series && scale ? (
-            <MiniHeatmap values={series} scale={scale} theme={OCC_THEME} t={t} onT={onT} />
+            <MiniHeatmap values={series} scale={scale} theme={OCC_THEME} t={t} onT={onT} timezone={timezone} />
           ) : (
             <p className="py-2 text-body text-ink-muted">
               {detail.occStatus === "unavailable"
@@ -301,7 +308,9 @@ export function StationPanel(props: StationPanelProps) {
           )}
         </div>
         <p className="px-3 pb-2 pt-1 text-note leading-snug text-ink-muted">
-          Cùng thang chia bậc với lớp trạm trên bản đồ. Ô vân xám = chưa quan sát đủ 1 giờ. Bấm ô để chuyển giờ xem.
+          Cùng thang TUYỆT ĐỐI 0–100% với lớp trạm và lớp vùng trên bản đồ. Ô vân xám = chưa
+          quan sát đủ 1 giờ (khác 0). Bấm một ô — hoặc Tab vào rồi dùng ←/→ và ↑/↓ — để chuyển
+          giờ xem.{occTimezoneDisclosure(timezone) ? ` ${occTimezoneDisclosure(timezone)}.` : ""}
         </p>
 
         {/* Shape Pattern Translation Sentence */}
@@ -497,7 +506,9 @@ function shapeSentence(o: Record<string, unknown>): string {
   const night = num(o["night_share"]);
   const parts: string[] = [];
   if (label) parts.push(`Dạng nhịp: ${label}`);
-  if (h !== null) parts.push(`đỉnh ${h}h${d !== null ? ` ${DOW_FULL[d] ?? ""}` : ""}`.trim());
+  // `peak_hour` là một chỉ số ô giờ của nguồn, cùng trục với `dow`/`hour` của hồ sơ 168h —
+  // nên nó chịu đúng luật múi giờ ấy (§16), không được in như một nhãn đồng hồ.
+  if (h !== null) parts.push(`đỉnh ô giờ ${h}${d !== null ? ` ${DOW_FULL[d] ?? ""}` : ""}`.trim());
   if (night !== null) parts.push(`${pct1(night)} lượng bận rơi vào ban đêm`);
   return parts.length > 0 ? `${parts.join(" · ")}.` : "Không có nhãn dạng nhịp cho trạm này.";
 }

@@ -2,14 +2,15 @@ import type { ReactNode } from "react";
 
 import { formatNumber, pctOne } from "../ui/format";
 import { AccessCurve } from "../ui/AccessCurve";
-import { Heatmap168 } from "../ui/Heatmap168";
+import { UtilizationDayProfiles } from "../ui/UtilizationDayProfiles";
 import { OpportunityCommuneRankBars } from "../ui/OpportunityCommuneRankBars";
 import { PowerTierBreakdown } from "../ui/PowerTierBreakdown";
 import { RoutePairs } from "../ui/RoutePairs";
 import { StructureSweep } from "../ui/StructureSweep";
 import { SupplyLorenz } from "../ui/SupplyLorenz";
 import { themeOfLens } from "../viz/theme";
-import type { Scale } from "../viz/palette";
+import { occTimezoneOf } from "../viz/occ-time";
+import type { UtilizationWeekModel } from "../viz/chart-models";
 import { LorenzChart } from "./LorenzChart";
 import { Figure, Para, Pending, SoWhat, Stat } from "./parts";
 import { ASSUMPTIONS, resolveMetric, type ResolveContext } from "./resolve";
@@ -138,7 +139,7 @@ const STORY_REPRESENTATION = "hex" as const;
  * được thì khe **trống**, không phải một khung rỗng có trục — một biểu đồ rỗng đọc thành
  * "đo rồi, không có gì", mà sự thật là "chưa đo".
  */
-function FigureSlot({ id, ctx, occScale }: { id: SharedFigureId; ctx: ResolveContext; occScale: Scale | null }) {
+function FigureSlot({ id, ctx }: { id: SharedFigureId; ctx: ResolveContext }) {
   const models = ctx.models;
   switch (id) {
     case "lorenz-area-pop": {
@@ -168,23 +169,22 @@ function FigureSlot({ id, ctx, occScale }: { id: SharedFigureId; ctx: ResolveCon
     case "utilization-week": {
       const m = models["utilization-week"];
       if (!m) return null;
-      const heat = m["model"] as { cells: never[] } | undefined;
+      const model = m["model"] as UtilizationWeekModel | undefined;
       const t = m["peakT"];
-      // `scale` là ĐIỀU KIỆN VẼ của `Heatmap168`, không phải một tuỳ chọn: thiếu nó thì
-      // effect thoát sớm và tấm nhiệt đồ ra một khung có nhãn trục mà KHÔNG một ô nào được
-      // tô (RF-2 — cảnh 5 đã ở trạng thái đó từ Phase 7, và witness của CR 4.1 đã ghi nhận
-      // `heatmapPainted: false`). Một khung rỗng có trục đọc thành "đo rồi, không có gì",
-      // đúng cái nghĩa mà luật khe trống của `FigureSlot` tồn tại để cấm.
+      // RF-2 CHẾT HẲN ở đây, không phải được canh chặt hơn. Bản cũ nhận `scale` làm ĐIỀU
+      // KIỆN VẼ: thiếu thang thì `Heatmap168` thoát sớm và cảnh 5 ra một khung có nhãn trục
+      // mà không một ô nào được tô — witness của CR 4.1 đã ghi `heatmapPainted: false`.
+      // Bảy hồ sơ ngày mã hoá giá trị bằng VỊ TRÍ, nên nó không có thang màu để mà thiếu;
+      // điều kiện vẽ còn đúng một thứ, và đó là có dữ liệu hay không.
       //
-      // Nên: chưa có thang ⇒ **khe trống hẳn**, cùng luật với chưa có model. Có thang ⇒ vẽ
-      // bằng chính object mà bản đồ đang dùng, nên "cùng giá trị thì cùng màu" là một tính
-      // chất của mã chứ không phải một lời hứa.
-      return heat && heat.cells.length > 0 && occScale ? (
-        <Heatmap168
-          cells={heat.cells}
-          scale={occScale}
+      // Cảnh sở hữu `t` (§2.6) ⇒ KHÔNG truyền `onTimeIntent`: ô giờ hiện hình nhưng không
+      // bấm được, đúng như bản cũ.
+      return model && model.cells.length > 0 ? (
+        <UtilizationDayProfiles
+          model={model}
           theme={themeOfLens("utilization", STORY_REPRESENTATION)}
           t={typeof t === "number" ? t : 0}
+          timezone={occTimezoneOf(ctx.pkg.manifest?.snapshots)}
         />
       ) : null;
     }
@@ -238,7 +238,7 @@ function SubjectCard({
 
 // ── Khối ────────────────────────────────────────────────────────────────────
 
-function Block({ block, ctx, occScale, k }: { block: BlockSpec; ctx: ResolveContext; occScale: Scale | null; k: string }) {
+function Block({ block, ctx, k }: { block: BlockSpec; ctx: ResolveContext; k: string }) {
   switch (block.kind) {
     case "figure": {
       const v = resolveMetric(block.value, ctx);
@@ -316,7 +316,7 @@ function Block({ block, ctx, occScale, k }: { block: BlockSpec; ctx: ResolveCont
         <SubjectCard which={block.which} why={block.why} rows={block.rows} ctx={ctx} />
       );
     case "figure-slot":
-      return <FigureSlot id={block.id} ctx={ctx} occScale={occScale} />;
+      return <FigureSlot id={block.id} ctx={ctx} />;
     case "heading":
       return (
         <h3 className="border-y border-hairline bg-basemap px-4 py-1 text-body tracking-[0.1em] text-ink-2">
@@ -331,13 +331,10 @@ function Block({ block, ctx, occScale, k }: { block: BlockSpec; ctx: ResolveCont
 export function BeatBody({
   beat,
   ctx,
-  occScale,
   loading,
 }: {
   beat: BeatSpec;
   ctx: ResolveContext | null;
-  /** Xem `StoryColumn` — thang của `station:occ`, đi kèm props chứ không nằm trong gói. */
-  occScale: Scale | null;
   loading: string | null;
 }) {
   // Chưa có bối cảnh = chưa có gói. Không khối nào render, và dòng "đang đo" là toàn bộ
@@ -350,7 +347,7 @@ export function BeatBody({
           thành một cảnh đầy đủ. Dòng này biến mất ngay khi dữ liệu của nhịp về đủ. */}
       {loading && <Pending label={loading} />}
       {beat.blocks.map((b, i) => (
-        <Block key={`${beat.id}-${i}`} block={b} ctx={ctx} occScale={occScale} k={`${beat.id}-${i}`} />
+        <Block key={`${beat.id}-${i}`} block={b} ctx={ctx} k={`${beat.id}-${i}`} />
       ))}
     </>
   );

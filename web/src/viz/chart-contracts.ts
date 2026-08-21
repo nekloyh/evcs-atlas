@@ -10,7 +10,7 @@ export const PRIMARY_CHART_IDS = [
   "demand-population-histogram",
   "supply-power-tier-breakdown",
   "access-population-curve",
-  "utilization-week-heatmap",
+  "utilization-day-profiles",
   "opportunity-commune-rank",
 ] as const;
 
@@ -20,7 +20,7 @@ export const LENS_PRIMARY_CHARTS: Record<LensId, PrimaryChartId> = {
   demand: "demand-population-histogram",
   supply: "supply-power-tier-breakdown",
   access: "access-population-curve",
-  utilization: "utilization-week-heatmap",
+  utilization: "utilization-day-profiles",
   opportunity: "opportunity-commune-rank",
 } as const;
 
@@ -62,11 +62,11 @@ export const PRIMARY_CHART_REGISTRY: Record<PrimaryChartId, PrimaryChartMeta> = 
     emitsTime: false,
     emitsEntity: false,
   },
-  "utilization-week-heatmap": {
-    id: "utilization-week-heatmap",
+  "utilization-day-profiles": {
+    id: "utilization-day-profiles",
     lens: "utilization",
-    title: "Nhịp tải 168 giờ trong tuần",
-    unitNoun: "khung giờ",
+    title: "Bảy hồ sơ ngày · tỉ lệ cổng bận",
+    unitNoun: "ô giờ",
     emitsFilter: false,
     emitsTime: true,
     emitsEntity: false,

@@ -18,23 +18,42 @@ import { STATION_OCC_FIELD } from "../fields";
 import { useStore } from "../state/store";
 import { DOW_LABELS, HOURS_IN_WEEK, dowOf, hourOf, scrubberKeyStep } from "../state/types";
 import { HAIRLINE_HEX, RAMP_HEX } from "../viz/palette";
+import { OCC_TZ_UNKNOWN, hourBucketShort, occTimezoneDisclosure, type OccTimezoneState } from "../viz/occ-time";
 
 /** Tốc độ mặc định — §3e. */
 const HOURS_PER_SEC = 4;
 
 const MARK = RAMP_HEX[4];
 
-/** Snapshot presets complement playback; each is a real `(dow, hour)` in the 168h source. */
-const PRESETS = [
-  { label: "đêm", t: 1 },
-  { label: "sáng", t: 8 },
-  { label: "trưa", t: 12 },
-  { label: "tối", t: 18 },
+/**
+ * Snapshot preset — mỗi cái là một `(dow, hour)` THẬT trong hồ sơ 168 giờ.
+ *
+ * ── Vì sao nhãn đổi theo múi giờ ──────────────────────────────────────────────────────
+ *
+ * `đêm · sáng · trưa · tối` là những **claim về đồng hồ**: chúng khẳng định ô giờ 1 rơi vào
+ * đêm và ô giờ 12 rơi vào trưa. Ba manifest đang ship chưa phát
+ * `snapshots.occupancy_hour_tz`, nên không có gì đỡ được các claim ấy — dưới cách đọc UTC
+ * thì "ô giờ 12" là 19:00 giờ Việt Nam, tức chiều tối, không phải trưa (spec §15, §16).
+ *
+ * Nên nhãn tự đổi: chưa công bố múi giờ ⇒ `ô 01 · ô 08 · ô 12 · ô 18`, một chỉ số dữ liệu
+ * và không khẳng định gì. Công bố rồi ⇒ nhãn buổi quay lại.
+ *
+ * `T2`/`T7` KHÔNG chịu luật này: `dow = 0` là Thứ Hai được `docs/COT.md` chốt ở tầng dữ
+ * liệu, nên thứ là một sự thật đọc được, không phải một suy đoán về múi giờ.
+ */
+const HOUR_PRESETS = [
+  { clock: "đêm", t: 1 },
+  { clock: "sáng", t: 8 },
+  { clock: "trưa", t: 12 },
+  { clock: "tối", t: 18 },
+] as const;
+
+const DAY_PRESETS = [
   { label: "T2", t: 8 },
   { label: "T7", t: 5 * 24 + 8 },
 ] as const;
 
-export function Scrubber({ field }: { field: string }) {
+export function Scrubber({ field, timezone = OCC_TZ_UNKNOWN }: { field: string; timezone?: OccTimezoneState }) {
   const t = useStore((s) => s.t);
   const setT = useStore((s) => s.setT);
   const playing = useStore((s) => s.playing);
@@ -42,6 +61,22 @@ export function Scrubber({ field }: { field: string }) {
   const stepT = useStore((s) => s.stepT);
   const setField = useStore((s) => s.setField);
   const isOcc = field === STATION_OCC_FIELD;
+  const tzKnown = timezone.kind === "declared";
+  const tzNote = occTimezoneDisclosure(timezone);
+  const presets = [
+    ...HOUR_PRESETS.map((p) => ({
+      label: tzKnown ? p.clock : `ô ${String(hourOf(p.t)).padStart(2, "0")}`,
+      t: p.t,
+      hint: tzKnown
+        ? `đặt ${p.clock} — snapshot tĩnh, không phải trung bình`
+        : `đặt ô giờ ${hourOf(p.t)} — snapshot tĩnh, không phải trung bình. Múi giờ chưa công bố nên đây KHÔNG phải nhãn buổi.`,
+    })),
+    ...DAY_PRESETS.map((p) => ({
+      label: p.label,
+      t: p.t,
+      hint: `đặt ${p.label} — thứ đọc từ dữ liệu (dow = 0 là Thứ Hai)`,
+    })),
+  ];
 
   // Vòng play. `acc` cộng dồn thời gian THẬT giữa hai khung hình rồi rút ra từng giờ một,
   // nên một khung hình bị bỏ lỡ không làm scrubber chậm lại — nó nhảy đúng số giờ đã trôi.
@@ -82,9 +117,17 @@ export function Scrubber({ field }: { field: string }) {
 
       <div className="flex min-w-0 flex-1 flex-col justify-center px-3 py-2">
         <div className="flex items-baseline gap-2 pb-1">
+          {/* `08:00` cũ là một nhãn ĐỒNG HỒ trên một trục chưa công bố múi giờ. Thứ giữ
+              nguyên (`docs/COT.md` chốt `dow = 0` là Thứ Hai); giờ thành "ô giờ" cho tới khi
+              manifest phát `occupancy_hour_tz` (§16). */}
           <span className="tabular-nums font-semibold">
-            {DOW_LABELS[dowOf(t)]} {String(hourOf(t)).padStart(2, "0")}:00
+            {DOW_LABELS[dowOf(t)]} {hourBucketShort(hourOf(t), timezone)}
           </span>
+          {tzNote && (
+            <span className="text-note font-normal text-ink-muted" title={tzNote}>
+              · múi giờ chưa công bố
+            </span>
+          )}
           {/* Chế độ chưa tác động phải TRÔNG như chưa tác động — cùng luật §3a. Kèm nút đi
               thẳng tới trường đó: một bước, không bắt người xem tự tìm trong 46 dòng radio. */}
           {!isOcc && (
@@ -102,7 +145,7 @@ export function Scrubber({ field }: { field: string }) {
 
         <div className="flex items-center gap-1 pb-1 text-note text-ink-muted">
           <span>snapshot:</span>
-          {PRESETS.map((p) => (
+          {presets.map((p) => (
             <button
               key={p.label}
               onClick={() => {
@@ -110,15 +153,19 @@ export function Scrubber({ field }: { field: string }) {
                 setT(p.t);
               }}
               className="cursor-pointer border border-hairline px-1 hover:bg-basemap"
-              title={`đặt ${p.label} — snapshot tĩnh, không phải trung bình`}
+              title={p.hint}
             >
               {p.label}
             </button>
           ))}
-          <span className="pl-1">heatmap/hồ sơ 24h trong dock là comparison tĩnh.</span>
+          <span className="pl-1">bảy hồ sơ ngày trong cột đọc là comparison tĩnh.</span>
         </div>
 
-        <Track t={t} onT={setT} />
+        <Track
+          t={t}
+          onT={setT}
+          ariaValueText={`${DOW_LABELS[dowOf(t)]} ${hourBucketShort(hourOf(t), timezone)}`}
+        />
       </div>
     </div>
   );
@@ -134,9 +181,12 @@ export function Scrubber({ field }: { field: string }) {
 function Track({
   t,
   onT,
+  ariaValueText,
 }: {
   t: number;
   onT: (t: number) => void;
+  /** Dựng ở người gọi vì chỉ ở đó mới biết múi giờ đã công bố hay chưa (§16). */
+  ariaValueText: string;
 }) {
   const el = useRef<HTMLDivElement>(null);
 
@@ -159,7 +209,7 @@ function Track({
       aria-valuemin={0}
       aria-valuemax={HOURS_IN_WEEK - 1}
       aria-valuenow={t}
-      aria-valuetext={`${DOW_LABELS[dowOf(t)]} ${String(hourOf(t)).padStart(2, "0")}:00`}
+      aria-valuetext={ariaValueText}
       className="relative flex h-5 cursor-pointer touch-none select-none items-stretch"
       onKeyDown={(e) => {
         const next = scrubberKeyStep(t, e.key);

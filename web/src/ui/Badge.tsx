@@ -10,7 +10,7 @@ export function Badge({ badge }: { badge: BadgeData }) {
       className="inline-flex shrink-0 items-center gap-1 border border-warn/60 px-1 text-note leading-4 text-ink-2 tabular-nums"
       title={badge.explain}
     >
-      <span aria-hidden className="text-warn">
+      <span aria-hidden className="text-ink-2">
         ⚠
       </span>
       {/* Nghĩa của badge nằm ngay trong chữ: "30% ô · 65% dân" (phủ ô) so với

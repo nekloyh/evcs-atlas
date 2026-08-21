@@ -18,7 +18,7 @@ import type {
   StationPoint,
 } from "../data/queries";
 import { SURFACE_CELL_M } from "../data/queries";
-import { STATION_PORTS_FIELD, hasDemandRepresentations, scaleControlFor, unitNoun, type FieldMeta } from "../fields";
+import { STATION_OCC_FIELD, STATION_PORTS_FIELD, hasDemandRepresentations, scaleControlFor, unitNoun, type FieldMeta } from "../fields";
 import { selectionWireOf, useStore } from "../state/store";
 import {
   SCENE_BY_ID,
@@ -37,7 +37,7 @@ import { cellToBoundary } from "h3-js";
 import { HatchExtension } from "../viz/hatch-extension";
 import { NULL_STATE_HATCH_DEG, type NullState } from "../data/null-states";
 import { planFor } from "../viz/render-plan";
-import { cellIdOf, communeCodeOf, poiRefOf, roadIdOf, serializeSelection, stationIdOf } from "../data/h3";
+import { cellIdOf, communeCodeOf, poiRefOf, roadIdOf, serializeSelection, stationIdOf, utilRegionOf } from "../data/h3";
 import { dacKhuLabels, type DacKhuLabel } from "../data/dackhu";
 import { useSimulationStore } from "../simulation/store";
 import type { CandidatePoint, SimulationResult } from "../simulation/types";
@@ -62,6 +62,7 @@ import { buildPoiIconAtlas, iconId, type IconEntry } from "../viz/poi-icons";
 import {
   BASEMAP_RGB,
   COLD_HEX,
+  INK_HEX,
   COLD_RGB,
   HATCH_RGB,
   RAMP_RGB,
@@ -71,6 +72,7 @@ import {
   SELECT_RGB,
   colorFor,
   gradientAvailability,
+  hexToRgb,
   type RGB,
   type Scale,
 } from "../viz/palette";
@@ -78,6 +80,15 @@ import { elevationFor, MAX_ELEV_R8_M } from "../national/elevation";
 import { EXTRUSION_MATERIAL, PROVINCE_LIGHTING } from "../viz/lighting";
 import type { StationOccupancy } from "../data/occupancy";
 import { stationOccAt } from "../viz/occ";
+import {
+  isLowPortCoverage,
+  regionsAt,
+  utilResolutionForZoom,
+  type UtilRegionIndex,
+  type UtilRegionReadout,
+} from "../viz/util-regions";
+import type { UtilRepresentation } from "../state/types";
+import { OCC_TZ_UNKNOWN, type OccTimezoneState } from "../viz/occ-time";
 import { DEMAND_SUPPLY_RGB, bivariateAxes, tertileClass } from "../viz/demand";
 import { themeFor, type AnalysisTheme } from "../viz/theme";
 import { clipDisclosure } from "../viz/scale-readout";
@@ -101,6 +112,22 @@ interface Props {
   /** 939 trạm × 168 giờ — đơn vị đọc `station` (M4), nạp lười. `null` = chưa nạp. */
   occupancy: StationOccupancy | null;
   /**
+   * Chỉ mục VÙNG TẢI — membership H3 + thống kê đủ cho 3 mức × 168 giờ, dựng MỘT LẦN ở App.
+   *
+   * Dựng ở App chứ không ở đây vì Inspector vùng cũng đọc nó: hai bản dựng là hai lần
+   * quét 168 × n trạm cho cùng một câu trả lời, và tệ hơn — hai object khác nhau, nên
+   * "tooltip và panel nói cùng một số" lại thành một lời hứa thay vì một tính chất.
+   */
+  utilRegions?: UtilRegionIndex | null;
+  /**
+   * Trục giờ được phép gọi là gì (§16) — đọc từ `manifest.snapshots`, không suy ở đây.
+   *
+   * Bản đồ không nạp manifest, và nó KHÔNG được đoán từ `occupancy_window` (cửa sổ là UTC;
+   * cửa sổ không nói gì về múi giờ đã dùng để bucket 168 ô). Nên nó nhận câu trả lời đã
+   * phân giải, không nhận nguyên liệu để tự phân giải.
+   */
+  occTimezone?: OccTimezoneState;
+  /**
    * Tập PHÂN TÍCH đã áp SUBSET, dẫn xuất ở App (§5.4).
    *
    * `cells`/`stations` ở trên vẫn là tập ĐẦY ĐỦ và vẫn phải như vậy: lớp bối cảnh, overlay,
@@ -112,6 +139,15 @@ interface Props {
 
 /** Vân của overlay VÙNG — 135°, nghiêng ngược vân null 45°. §4d-1. */
 const OVERLAY_HATCH = new HatchExtension({ angle: 135 });
+
+/**
+ * Nét ĐỨT của cảnh báo coverage vùng — một instance ở module scope, không dựng mỗi lượt.
+ *
+ * `new PathStyleExtension(...)` trong thân hàm dựng lớp sẽ cho một extension MỚI ở mỗi
+ * lượt vẽ, và deck coi đó là đổi shader ⇒ biên dịch lại pipeline. Với một lớp cập nhật
+ * 4 lần/giây khi scrubber chạy thì đó là đúng thứ cổng hiệu năng §18.2 cấm.
+ */
+const REGION_DASH = new PathStyleExtension({ dash: true });
 
 /**
  * Một vân cho MỖI trạng thái ô trống — §6.4, góc lấy từ `NULL_STATE_HATCH_DEG` chứ không gõ
@@ -262,7 +298,7 @@ function setBuildings3dLayer(m: maplibregl.Map, on: boolean): void {
 }
 
 export function MapView(props: Props) {
-  const { field, cells, communes, boundary, stations, scale, surfaceBreaks, roads, routes, poi, occupancy, analyticalCells, analyticalStations } = props;
+  const { field, cells, communes, boundary, stations, scale, surfaceBreaks, roads, routes, poi, occupancy, utilRegions, analyticalCells, analyticalStations } = props;
   const container = useRef<HTMLDivElement>(null);
   const overlay = useRef<MapboxOverlay | null>(null);
   const map = useRef<maplibregl.Map | null>(null);
@@ -344,7 +380,12 @@ export function MapView(props: Props) {
             // pickable. onClick của lớp đã kịp chọn đối tượng trước khi handler này chạy,
             // nên phải bỏ chọn lại, nếu không luật một-tiêu-điểm xoá ngay P vừa đặt.
             useStore.getState().selectCell(null);
-            simStore.setCandidate({ lat: info.coordinate[1]!, lng: info.coordinate[0]! });
+            // `"user"` là cổng của §14.6: chỉ lượt đặt do NGƯỜI bấm mới được đưa tiêu
+            // điểm về heading khi kết quả sẵn sàng; hash lúc boot thì không.
+            simStore.setCandidate(
+              { lat: info.coordinate[1]!, lng: info.coordinate[0]! },
+              "user",
+            );
             return;
           }
           if (!info.picked) useStore.getState().selectCell(null);
@@ -466,9 +507,12 @@ export function MapView(props: Props) {
   // một đường vẽ riêng cho "lúc đang chạy" là hai đường vẽ cho cùng một bản đồ.
   const t = useStore((s) => s.t);
   const demandRepresentation = useStore((s) => s.demandRepresentation);
+  const utilRepresentation = useStore((s) => s.utilRepresentation);
   const candidate = useSimulationStore((s) => s.candidate);
   const simulationResult = useSimulationStore((s) => s.result);
   const placementMode = useSimulationStore((s) => s.placementMode);
+  /** UX §14.4 — xã đang được trỏ trong panel mô phỏng. Chỉ đổi lớp mô phỏng, không đụng field. */
+  const focusedCommune = useSimulationStore((s) => s.focusedCommune);
   const theme = themeFor(field, demandRepresentation);
   // Cùng đường mà cột đọc dùng để dựng nút Bậc/Gradient (`scaleControlFor` + cổng bảng màu),
   // nên câu khai của cảnh không thể lệch khỏi câu mà workspace in cho cùng trường ấy.
@@ -522,6 +566,8 @@ export function MapView(props: Props) {
       routes,
       poi,
       occupancy,
+      utilRegions,
+      utilRepresentation,
       analyticalCells,
       analyticalStations,
       selected,
@@ -537,6 +583,7 @@ export function MapView(props: Props) {
       inStory: scene !== null,
       candidate,
       simulationResult,
+      focusedCommune,
     });
     ov.setProps({
       // Chế độ ĐẶT TRẠM (§3.1): tắt picking TOÀN stack. onClick của một lớp trả truthy
@@ -557,6 +604,7 @@ export function MapView(props: Props) {
           scale,
           stations,
           communes,
+          timezone: props.occTimezone ?? OCC_TZ_UNKNOWN,
         }),
     });
     // Nhãn định vị phải nằm TRÊN mặt tô, nếu không giữ lại chúng cũng vô nghĩa: `interleaved`
@@ -567,7 +615,7 @@ export function MapView(props: Props) {
     // KHÔNG có `props` trong deps (Phase 10): identity của object props đổi ở MỌI render
     // của App, nên để nó ở đây là "mọi render App = dựng lại toàn stack deck" — các input
     // thật đã được liệt kê rời từng cái, kể cả hai trường analytical.
-  }, [field, cells, communes, boundary, stations, scale, surfaceBreaks, roads, routes, poi, occupancy, analyticalCells, analyticalStations, selected, layersOn, zoom, mode, paintOn, filter, marks, t, demandRepresentation, scene, ready, candidate, simulationResult, placementMode]);
+  }, [field, cells, communes, boundary, stations, scale, surfaceBreaks, roads, routes, poi, occupancy, analyticalCells, analyticalStations, selected, layersOn, zoom, mode, paintOn, filter, marks, t, demandRepresentation, scene, ready, candidate, simulationResult, placementMode, focusedCommune]);
 
   // `h-full w-full`, KHÔNG `absolute inset-0`: maplibre-gl.css đặt
   // `.maplibregl-map { position: relative }` và được import SAU tailwind, nên cùng độ ưu
@@ -681,10 +729,14 @@ interface BuildInput extends Props {
   /** vị trí scrubber 0–167 — §3e */
   t: number;
   demandRepresentation: DemandRepresentation;
+  utilRegions?: UtilRegionIndex | null;
+  utilRepresentation?: UtilRepresentation;
   /** đang ở trong một cảnh CÂU CHUYỆN — xem `PlanInput.inStory` */
   inStory: boolean;
   candidate?: CandidatePoint | null;
   simulationResult?: SimulationResult | null;
+  /** UX §14.4 — mã xã đang được trỏ trong danh sách địa danh của panel mô phỏng. */
+  focusedCommune?: string | null;
 }
 
 /**
@@ -706,6 +758,8 @@ export function buildLayers({
   routes,
   poi,
   occupancy,
+  utilRegions = null,
+  utilRepresentation = "region",
   selected,
   layersOn,
   zoom,
@@ -721,6 +775,7 @@ export function buildLayers({
   analyticalStations: analyticalStationRows,
   candidate,
   simulationResult,
+  focusedCommune = null,
 }: BuildInput): Layer[] {
   // `inStory` KHÔNG suy từ `marks`: cảnh A không có mark riêng nào, nên `marks` rỗng ở
   // đúng cảnh duy nhất mà cờ này quan trọng.
@@ -778,6 +833,24 @@ export function buildLayers({
       if (scale && plan.paint === "road") out.push(...roadLayers(roads, scale, field, zoom, activeTheme));
       if (scale && plan.paint === "station" && field.id === STATION_PORTS_FIELD)
         out.push(...stationPortsLayers(analyticalStations, scale, field, zoom, activeTheme));
+      // ── Lens SỬ DỤNG: VÙNG TẢI hay chấm trạm ────────────────────────────────
+      //
+      // Cùng trường, cùng thang tuyệt đối, hai đơn vị gộp. LOD chọn mức phân giải; chế độ
+      // `station` ép chấm ở mọi mức phóng (spec §11.1). `utilRegionResolution` trả `null`
+      // ở `zoom >= 13` — đó là DRILL-DOWN, không phải một lỗi tra bảng.
+      else if (scale && plan.paint === "station" && field.id === STATION_OCC_FIELD && occupancy)
+        out.push(
+          ...(utilRegionResolutionFor(zoom, utilRepresentation, utilRegions) === null
+            ? stationFieldLayers(occupancy, scale, field, zoom, t, activeTheme)
+            : utilRegionLayers(
+                utilRegions!,
+                utilRegionResolutionFor(zoom, utilRepresentation, utilRegions)!,
+                scale,
+                t,
+                activeTheme,
+                selected,
+              )),
+        );
       else if (scale && plan.paint === "station" && occupancy)
         out.push(...stationFieldLayers(occupancy, scale, field, zoom, t, activeTheme));
       if (plan.paint === "surface") out.push(surfaceLayer(analyticalCells, surfaceBreaks));
@@ -1067,6 +1140,31 @@ export function buildLayers({
               extensions: [DASH],
               getDashArray: dashed,
               dashJustified: true,
+            }),
+          );
+        }
+      }
+
+      // UX §14.4 — nhóm địa danh đang được trỏ trong panel: TĂNG NÉT bằng đúng idiom
+      // `SELECT_PASSES` (một lượt casing + một lượt lõi, dày hơn một bậc). Không hue mới,
+      // không `OverlayId` mới, không đụng mặt tô của trường đang mở.
+      const focusArea = focusedCommune
+        ? simulationResult.areas?.named.find((a) => a.communeCode === focusedCommune)
+        : undefined;
+      if (focusArea && focusArea.h3s.length > 0) {
+        const focusPaths = focusArea.h3s.map((h3) => ({ path: boundaryOf(h3) }));
+        for (const [suffix, color, width] of SELECT_PASSES) {
+          out.push(
+            new PathLayer({
+              id: `sim-cells-focus-${suffix}`,
+              data: focusPaths,
+              getPath: (d: { path: [number, number][] }) => d.path,
+              getColor: color,
+              widthUnits: "pixels",
+              getWidth: width + 2,
+              widthMinPixels: width + 2,
+              jointRounded: true,
+              pickable: false,
             }),
           );
         }
@@ -1469,6 +1567,142 @@ function stationPortsLayers(
       updateTriggers: { getFillColor: [scale, field.id, theme], getRadius: r },
     }),
   ];
+}
+
+/**
+ * Mức phân giải vùng cho một lượt vẽ, hoặc `null` khi phải vẽ CHẤM TRẠM.
+ *
+ * Ba đường về `null`, và cả ba là "đơn vị đọc ở đây là trạm", không phải "hỏng":
+ *   · người xem chọn `Trạm` ở segmented control;
+ *   · mức phóng đã tới ngưỡng drill-down (`>= 13`);
+ *   · chỉ mục vùng chưa dựng xong (gói vừa nạp, hoặc lens khác đang mở).
+ */
+function utilRegionResolutionFor(
+  zoom: number,
+  representation: UtilRepresentation,
+  index: UtilRegionIndex | null,
+): 6 | 7 | 8 | null {
+  if (!index || representation === "station") return null;
+  return utilResolutionForZoom(zoom);
+}
+
+/**
+ * VÙNG TẢI — `Σocc / Σn_ports` của một ô H3 tại giờ `t`.
+ *
+ * `docs/UX_UTILIZATION_VISUALIZATION_SPEC.md` §10.3, §11, §13, §14.
+ *
+ * ── Bốn luật mã hoá ──────────────────────────────────────────────────────────────────
+ *
+ *   1. **Fill là kênh định lượng DUY NHẤT**, và nó mang đúng một đại lượng: tỉ lệ cổng
+ *      bận của vùng. Không radius, không height, không opacity theo coverage — dùng
+ *      opacity cho coverage sẽ làm một vùng dữ liệu mỏng trông như một vùng **tải thấp**,
+ *      tức mã hoá "không biết" bằng cùng kênh với "biết là ít".
+ *   2. **Ô không có contributor nào KHÔNG được tô ratio.** Nó nhận vân xám — cùng chất
+ *      liệu, cùng góc với ô null của lưới và của MiniHeatmap.
+ *   3. **Coverage cổng < 50% chỉ thêm NÉT ĐỨT**, không đụng vào màu và không đụng vào giá
+ *      trị. Nét đứt là "đọc con số chính xác trong tooltip trước khi tin", không phải
+ *      "vùng này hỏng" — và phần trên 50% tuyệt đối không được gọi là "đủ" (§24-3).
+ *   4. **Vùng bấm được, kể cả vùng null.** Cùng lý do chấm rỗng bấm được từ M4.1: một
+ *      vùng không đủ quan sát ở giờ NÀY vẫn có trạm thật, cổng thật, và 167 giờ khác.
+ */
+function utilRegionLayers(
+  index: UtilRegionIndex,
+  resolution: 6 | 7 | 8,
+  scale: Scale,
+  t: number,
+  theme: AnalysisTheme,
+  selected: string | null,
+): Layer[] {
+  const rows = regionsAt(index, resolution, t);
+  const valued = rows.filter((r) => r.utilization !== null);
+  const missing = rows.filter((r) => r.utilization === null);
+  const lowCoverage = valued.filter((r) => isLowPortCoverage(r.portCoverage));
+
+  const common = {
+    getHexagon: (d: UtilRegionReadout) => d.h3,
+    stroked: false,
+    filled: true,
+    extruded: false,
+    pickable: true,
+    onClick: (info: { object?: UtilRegionReadout }) => {
+      if (!info.object) return false;
+      useStore.getState().selectCell(
+        serializeSelection({ kind: "util-region", id: info.object.h3, resolution }),
+      );
+      return true;
+    },
+  } as const;
+
+  const out: Layer[] = [
+    new H3HexagonLayer<UtilRegionReadout>({
+      ...common,
+      id: `util-region-r${resolution}-null`,
+      data: missing,
+      getFillColor: () => rgba(HATCH_RGB, 255),
+      extensions: [NULL_HATCH],
+    }),
+    new H3HexagonLayer<UtilRegionReadout>({
+      ...common,
+      id: `util-region-r${resolution}-value`,
+      data: valued,
+      getFillColor: (d) => {
+        const color = colorFor(d.utilization, scale, theme);
+        return rgba(color ?? FAIL_VISIBLE_RGB, 205);
+      },
+      updateTriggers: { getFillColor: [scale, t, theme, resolution] },
+    }),
+  ];
+
+  // Nét đứt cảnh báo coverage — `PathLayer` vì `H3HexagonLayer` không vẽ được nét đứt
+  // (cùng lý do đã ghi ở lớp viền ô của mô phỏng).
+  if (lowCoverage.length > 0) {
+    out.push(
+      // Không đặt generic cho lớp này: `getDashArray`/`dashJustified` là prop do
+      // `PathStyleExtension` thêm vào, và kiểu `_PathLayerProps<T>` không khai chúng —
+      // cùng lý do các lớp nét đứt sẵn có trong file này cũng để `PathLayer` không generic.
+      new PathLayer({
+        id: `util-region-r${resolution}-lowcov`,
+        data: lowCoverage.map((r) => ({ path: closedRing(r.h3) })),
+        getPath: (d: { path: [number, number][] }) => d.path,
+        widthUnits: "pixels",
+        getWidth: 1.25,
+        widthMinPixels: 1.25,
+        getColor: rgba(hexToRgb(INK_HEX), 190),
+        pickable: false,
+        extensions: [REGION_DASH],
+        getDashArray: [4, 3],
+        dashJustified: true,
+      }),
+    );
+  }
+
+  // Vùng ĐANG CHỌN — hai lượt nét, cùng ký hiệu mà ô/xã/trạm/đường/POI đang dùng.
+  const sel = utilRegionOf(selected);
+  if (sel && sel.resolution === resolution && index.levels[resolution].byId.has(sel.id)) {
+    for (const [suffix, color, width] of SELECT_PASSES) {
+      out.push(
+        new PathLayer<{ path: [number, number][] }>({
+          id: `util-region-selected-${suffix}`,
+          data: [{ path: closedRing(sel.id) }],
+          getPath: (d) => d.path,
+          widthUnits: "pixels",
+          getWidth: width,
+          widthMinPixels: width,
+          getColor: color,
+          pickable: false,
+        }),
+      );
+    }
+  }
+
+  return out;
+}
+
+/** Đường bao H3 đã ĐÓNG VÒNG — `PathLayer` vẽ đường mở, thiếu điểm cuối thì hở một cạnh. */
+function closedRing(h3: string): [number, number][] {
+  const ring = cellToBoundary(h3, true) as [number, number][];
+  if (ring.length > 0) ring.push(ring[0]!);
+  return ring;
 }
 
 /**

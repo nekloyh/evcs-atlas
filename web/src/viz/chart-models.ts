@@ -12,7 +12,7 @@ import { BEYOND_2KM_M } from "../domain-thresholds";
 import type { StationOccupancy } from "../data/occupancy";
 import type { AccessCurve } from "./access";
 import type { OccProfiles } from "./occ";
-import { OBSERVED_H_MIN } from "./occ";
+import { inScopeIndices, occGroupTotals, occStatsAt, utilizationOf } from "./occ";
 import { HOURS_IN_WEEK, dowOf, hourOf } from "../state/types";
 
 // ── 1. Demand: Population Histogram ─────────────────────────────────────────
@@ -530,106 +530,116 @@ export function buildAccessPopulationCurve(
   };
 }
 
-// ── 4. Utilization: Week Heatmap 7x24 ───────────────────────────────────────
+// ── 4. Utilization: 7 hồ sơ ngày × 24 ô giờ ─────────────────────────────────
+//
+// `docs/UX_UTILIZATION_VISUALIZATION_SPEC.md` §8, §9, §22.1–§22.3.
+//
+// Model KHÔNG đổi hình dạng khi biểu đồ đổi: vẫn là 168 số gộp `Σocc / Σn_ports`. Cái đổi
+// là **kênh** chúng được vẽ ra — trước là màu (heatmap 168 ô), nay là VỊ TRÍ (7 hàng
+// step-line trên cùng trục 0–100%). Lý do đo được: 168 ô aggregate của Hà Nội chỉ chiếm
+// 11,0–36,2% của thang, và trên thang ấy trough→peak chỉ cách nhau ΔE 13,08 — mắt không
+// đọc nổi nhịp 25 điểm % qua ba sắc tím gần nhau, nhưng đọc rất rõ qua 25% chiều cao.
+//
+// Model vẫn KHÔNG nhận `t`: giờ đang xem là trạng thái ĐIỀU KHIỂN của người trình bày,
+// không phải dữ liệu (§1.5). Trộn nó vào từng khiến `cells[0]` mang cờ "giờ hiện tại"
+// vĩnh viễn vì controller luôn dựng model với `t = 0`.
 
 export interface UtilizationHourCell {
   t: number;
   dow: number;
   hour: number;
-  value: number | null;
+  /** `Σocc / Σn_ports` trên trạm IN đủ quan sát; `null` khi mẫu số bằng 0 — KHÔNG phải 0. */
   utilization: number | null;
+  /** `Σocc` — số cổng bận TRUNG BÌNH QUAN SÁT. Số lẻ là thật; đừng làm tròn thành count. */
+  busyPortsAvg: number;
+  /** `Σn_ports` của CHÍNH các trạm đã góp tử số. Mẫu số của tỉ lệ ngay bên trên. */
+  observedPorts: number;
   contributingStations: number;
-  contributingPorts: number;
-  allInPorts: number;
-  portWeightedObsHours: number;
+  /** `observed_ports / all_installed_ports`; `null` khi tỉnh không có cổng nào biết được. */
+  portCoverage: number | null;
+  /** `|E(t)| / all_stations` — coverage theo TRẠM, câu hỏi khác coverage theo CỔNG. */
+  stationCoverage: number | null;
+  /** `Σ observed_h × n_ports / all_installed_ports` — giờ quan sát trên mỗi cổng lắp đặt. */
+  observedHoursPerPort: number;
 }
 
-export interface UtilizationHeatmapModel {
+/** Một hàng của small multiples: 24 ô giờ của cùng một thứ. */
+export interface UtilizationDayRow {
+  dow: number;
+  hours: UtilizationHourCell[];
+}
+
+export interface UtilizationWeekModel {
   cells: UtilizationHourCell[];
-  allInInstalledPorts: number;
+  /** Cùng 168 ô, nhóm theo `dow`. Bảy hàng là BỐ CỤC, nên phép nhóm sống ở model. */
+  days: UtilizationDayRow[];
+  /** `all_installed_ports` toàn tỉnh — mẫu số ổn định của coverage. */
+  allInstalledPorts: number;
+  /** `all_stations` toàn tỉnh (IN), kể cả trạm khuyết `n_ports`. */
+  allStations: number;
+  /** Trạm IN khuyết `n_ports`: không bao giờ vào mẫu số cổng, luôn vào mẫu số trạm. */
+  stationsWithoutPorts: number;
   disabledReason?: string;
 }
 
 /**
- * 168 ô của tuần. KHÔNG nhận `t`: giờ đang xem là trạng thái ĐIỀU KHIỂN của người trình
- * bày, không phải dữ liệu của mô hình (§1.5). Trộn nó vào đây từng khiến `cells[0]` mang
- * cờ "giờ hiện tại" vĩnh viễn vì controller luôn dựng model với `t = 0`, và bất kỳ ai đọc
- * trường ấy về sau đều nhận một câu trả lời sai.
+ * 168 ô gộp của cả tuần, nhóm sẵn thành 7 hàng.
+ *
+ * Mọi điều kiện hợp lệ đi qua `occStatsAt` → `eligibleStationHour` → `stationOccAt`. File
+ * này KHÔNG chép lại ngưỡng `observed_h`, phép kiểm `n_ports` hay luật IN nữa: bản chép cũ
+ * ở đây là một trong ba bản của cùng một luật, và ba bản là ba chỗ để chúng trôi khỏi nhau
+ * (spec §22.4).
  */
-export function buildUtilizationWeekHeatmap(
+export function buildUtilizationWeekModel(
   occupancy: StationOccupancy | OccProfiles | null | undefined,
   disabledReason?: string,
-): UtilizationHeatmapModel {
+): UtilizationWeekModel {
   if (!occupancy || disabledReason) {
     return {
       cells: [],
-      allInInstalledPorts: 0,
+      days: [],
+      allInstalledPorts: 0,
+      allStations: 0,
+      stationsWithoutPorts: 0,
       disabledReason: disabledReason ?? "Dữ liệu vận hành chưa khả dụng",
     };
   }
 
-  const isOccProfiles = "occ" in occupancy && "nPorts" in occupancy;
-  const profiles: OccProfiles = isOccProfiles ? occupancy : occupancy.profiles;
-  const stations = !isOccProfiles && "stations" in occupancy ? occupancy.stations : null;
+  const profiles: OccProfiles =
+    "occ" in occupancy && "nPorts" in occupancy ? occupancy : occupancy.profiles;
 
-  const inIndices: number[] = [];
-  let allInPortsSum = 0;
-  const n = profiles.n;
-
-  for (let s = 0; s < n; s++) {
-    const isIn = stations ? stations[s]?.inScope : profiles.inScope ? profiles.inScope[s] : true;
-    if (isIn) {
-      inIndices.push(s);
-      const p = profiles.nPorts[s];
-      if (p !== undefined && Number.isFinite(p) && p > 0) {
-        allInPortsSum += p;
-      }
-    }
-  }
+  const members = inScopeIndices(profiles);
+  const totals = occGroupTotals(profiles, members);
 
   const cells: UtilizationHourCell[] = new Array(HOURS_IN_WEEK);
-
   for (let t = 0; t < HOURS_IN_WEEK; t++) {
-    let occSum = 0;
-    let portSum = 0;
-    let obsWeightedSum = 0;
-    let contributingCount = 0;
-
-    for (const s of inIndices) {
-      const ports = profiles.nPorts[s];
-      if (ports === undefined || !Number.isFinite(ports) || ports <= 0) continue;
-
-      const idx = s * HOURS_IN_WEEK + t;
-      const obs = profiles.observed[idx];
-      if (obs === undefined || !Number.isFinite(obs)) continue;
-      obsWeightedSum += obs * ports;
-
-      if (obs < OBSERVED_H_MIN) continue;
-      const occ = profiles.occ[idx];
-      if (occ === undefined || !Number.isFinite(occ)) continue;
-
-      occSum += occ;
-      portSum += ports;
-      contributingCount++;
-    }
-
-    const rate = portSum > 0 ? occSum / portSum : null;
+    const stats = occStatsAt(profiles, members, t);
     cells[t] = {
       t,
       dow: dowOf(t),
       hour: hourOf(t),
-      value: rate,
-      utilization: rate,
-      contributingStations: contributingCount,
-      contributingPorts: portSum,
-      allInPorts: allInPortsSum,
-      portWeightedObsHours: allInPortsSum > 0 ? obsWeightedSum / allInPortsSum : 0,
+      utilization: utilizationOf(stats),
+      busyPortsAvg: stats.busyPortsAvg,
+      observedPorts: stats.observedPorts,
+      contributingStations: stats.contributingStations,
+      portCoverage: totals.installedPorts > 0 ? stats.observedPorts / totals.installedPorts : null,
+      stationCoverage: totals.stations > 0 ? stats.contributingStations / totals.stations : null,
+      observedHoursPerPort:
+        totals.installedPorts > 0 ? stats.observedHourPorts / totals.installedPorts : 0,
     };
   }
 
+  const days: UtilizationDayRow[] = Array.from({ length: 7 }, (_, dow) => ({
+    dow,
+    hours: cells.slice(dow * 24, dow * 24 + 24),
+  }));
+
   return {
     cells,
-    allInInstalledPorts: allInPortsSum,
+    days,
+    allInstalledPorts: totals.installedPorts,
+    allStations: totals.stations,
+    stationsWithoutPorts: totals.stationsWithoutPorts,
     disabledReason: undefined,
   };
 }

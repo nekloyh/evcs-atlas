@@ -18,14 +18,23 @@ export interface GridCellLookup {
   h3: string;
   evidenceGrade?: string | null;
   communeCode?: string | null;
+  communeName?: string | null;
 }
 
 export interface CommuneFeature {
   properties: {
     commune_code?: unknown;
     commune_kind?: unknown;
+    commune_name?: unknown;
   };
   geometry: unknown;
+}
+
+/** UX §7.4 — danh tính xã/phường của P, cả ba trường cùng một lượt phân giải. */
+export interface ResolvedCommune {
+  kind: CommuneKind | null;
+  code: string | null;
+  name: string | null;
 }
 
 const F1_MESSAGE = "Ngoài phạm vi gói dữ liệu tỉnh — không có ô lưới để mô phỏng.";
@@ -34,21 +43,40 @@ function asKind(k: unknown): CommuneKind | null {
   return k === "PHUONG" || k === "XA" || k === "DAC_KHU" ? k : null;
 }
 
+function asName(v: unknown): string | null {
+  return typeof v === "string" && v.trim().length > 0 ? v : null;
+}
+
+function asCode(v: unknown): string | null {
+  return typeof v === "string" && v.length > 0 ? v : null;
+}
+
 /**
- * §1.9 — loại xã của P: point-in-polygon trên `commune.geojson`; TRƯỢT thì fallback về
- * `commune_code` của ô chứa P (mỗi ô lưới đều mang mã xã), KHÔNG mặc định lặng về XA —
- * một mặc định lặng đổi ngưỡng 500 m thành 2 000 m mà không ai thấy.
+ * §1.9 + UX §7.4 — xã/phường của P: point-in-polygon trên `commune.geojson`; TRƯỢT thì
+ * fallback về `commune_code` của ô chứa P (mỗi ô lưới đều mang mã xã), KHÔNG mặc định lặng
+ * về XA — một mặc định lặng đổi ngưỡng 500 m thành 2 000 m mà không ai thấy.
+ *
+ * Tên đi cùng LOẠI trong đúng một lượt: nếu tách làm hai lượt thì có thể lấy tên của xã A
+ * và ngưỡng của xã B ở một điểm sát ranh, và không ai nhìn thấy sự lệch ấy trên màn hình.
+ * Khi PIP trượt mà mã ô không tra được feature nào, tên vẫn được lấy từ CHÍNH hàng lưới —
+ * đó là cùng một nguồn `commune_name` của `docs/COT.md`, chỉ khác cửa đọc.
  */
-export function resolveCommuneKind(
+export function resolveCommune(
   candidate: CandidatePoint,
   cell: GridCellLookup | undefined,
   communesGeoJson?: { features?: CommuneFeature[] } | null,
-): CommuneKind | null {
+): ResolvedCommune {
   if (communesGeoJson?.features) {
     for (const f of communesGeoJson.features) {
       if (isPointInGeoJson(candidate.lng, candidate.lat, f)) {
         const k = asKind(f.properties?.commune_kind);
-        if (k) return k;
+        if (k) {
+          return {
+            kind: k,
+            code: asCode(f.properties?.commune_code),
+            name: asName(f.properties?.commune_name),
+          };
+        }
       }
     }
     const code = cell?.communeCode;
@@ -56,12 +84,33 @@ export function resolveCommuneKind(
       for (const f of communesGeoJson.features) {
         if (f.properties?.commune_code === code) {
           const k = asKind(f.properties?.commune_kind);
-          if (k) return k;
+          if (k) {
+            return {
+              kind: k,
+              code,
+              name: asName(f.properties?.commune_name) ?? asName(cell?.communeName),
+            };
+          }
         }
       }
     }
   }
-  return null;
+  // Không có loại ⇒ không có ngưỡng ⇒ rule "không tính được". Tên/mã vẫn trả về nếu ô có,
+  // vì gọi tên vị trí không phụ thuộc vào việc có ngưỡng hay không.
+  return {
+    kind: null,
+    code: asCode(cell?.communeCode),
+    name: asName(cell?.communeName),
+  };
+}
+
+/** Giữ nguyên chữ ký cũ cho phần chỉ cần NGƯỠNG (§1.9). */
+export function resolveCommuneKind(
+  candidate: CandidatePoint,
+  cell: GridCellLookup | undefined,
+  communesGeoJson?: { features?: CommuneFeature[] } | null,
+): CommuneKind | null {
+  return resolveCommune(candidate, cell, communesGeoJson).kind;
 }
 
 export function checkAdmission(
@@ -115,9 +164,12 @@ export function checkAdmission(
     };
   }
 
+  const commune = resolveCommune(candidate, cell, communesGeoJson);
   return {
     ok: true,
     candidateCell: cellH3,
-    communeKind: resolveCommuneKind(candidate, cell, communesGeoJson),
+    communeKind: commune.kind,
+    communeCode: commune.code,
+    communeName: commune.name,
   };
 }

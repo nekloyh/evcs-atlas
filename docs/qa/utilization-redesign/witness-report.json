@@ -1,0 +1,1519 @@
+{
+  "app": "http://127.0.0.1:4173/",
+  "dpr": 1,
+  "mobile": "out-of-scope",
+  "renderer": "headless swiftshader (software) — frame timings not comparable to Phase 10 GPU baseline",
+  "states": {
+    "peak-1280x800": {
+      "hash": "#tinh=01&m=2d&f=station:occ&v=105.6545,20.9735,9.10,0,0&t=167",
+      "chart": {
+        "x": 68,
+        "y": 531.6,
+        "w": 285,
+        "h": 32,
+        "visible": true
+      },
+      "chartCells": 168,
+      "selectedName": "Chủ Nhật, ô giờ 23; 36,2% cổng bận, 2.805,3 trên 7.753 cổng; coverage cổng 100%, 686 trạm đóng góp",
+      "selectedRect": {
+        "x": 349,
+        "y": 769.6,
+        "w": 11,
+        "h": 24,
+        "visible": true
+      },
+      "hasSharedAxis": true,
+      "hasMetricDefinition": true,
+      "hasOverloadDisclaimer": true,
+      "hasTimezoneDisclosure": true,
+      "hasRegionMode": true,
+      "hasStationMode": true,
+      "hasCoverage": true,
+      "hasMissingLegend": true,
+      "hasExtremaReadout": true,
+      "horizontalOverflow": false,
+      "badContrast": [],
+      "tooSmall": [
+        {
+          "label": "Thứ Hai, ô giờ 0; 31,8% cổng bận, 2.435,8 trên 7.666 cổng; c",
+          "x": 96,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 1; 22,4% cổng bận, 1.670,9 trên 7.463 cổng; c",
+          "x": 107,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 2; 15,9% cổng bận, 1.163,9 trên 7.336 cổng; c",
+          "x": 118,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 3; 13% cổng bận, 935,4 trên 7.210 cổng; cover",
+          "x": 129,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 4; 14,4% cổng bận, 1.088,2 trên 7.538 cổng; c",
+          "x": 140,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 5; 26,5% cổng bận, 2.055,9 trên 7.758 cổng; c",
+          "x": 151,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 6; 26,6% cổng bận, 2.064,5 trên 7.763 cổng; c",
+          "x": 162,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 7; 21% cổng bận, 1.628 trên 7.753 cổng; cover",
+          "x": 173,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 8; 24,3% cổng bận, 1.886,8 trên 7.761 cổng; c",
+          "x": 184,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 9; 26,9% cổng bận, 2.090,1 trên 7.763 cổng; c",
+          "x": 195,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 10; 26,9% cổng bận, 2.084,1 trên 7.761 cổng; ",
+          "x": 206,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 11; 25,7% cổng bận, 1.996,4 trên 7.763 cổng; ",
+          "x": 217,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 12; 26% cổng bận, 2.017,1 trên 7.767 cổng; co",
+          "x": 228,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 13; 26,7% cổng bận, 2.070,5 trên 7.765 cổng; ",
+          "x": 239,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 14; 26% cổng bận, 2.019,8 trên 7.767 cổng; co",
+          "x": 250,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 15; 26,5% cổng bận, 2.056,3 trên 7.767 cổng; ",
+          "x": 261,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 16; 26,9% cổng bận, 2.092,3 trên 7.765 cổng; ",
+          "x": 272,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 17; 27% cổng bận, 2.100,6 trên 7.769 cổng; co",
+          "x": 283,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 18; 26,7% cổng bận, 2.075,4 trên 7.769 cổng; ",
+          "x": 294,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 19; 25,3% cổng bận, 1.965,1 trên 7.767 cổng; ",
+          "x": 305,
+          "y": 601.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        }
+      ],
+      "bodyExcerpt": "HN\n/\n10% ô đông dân nhất\n4.450–46.232 người\nÔ có dân số bằng 0\n= 0 người\nCổng mạnh nhất ≥ 61 kW\nCổng mạnh nhất ≤ 22 kW\nChưa rõ công suất cổng\nTỔNG QUAN\nÔ H3\n4.400\nTrạm\n710\nCổng\n7.785\nCông suất\n232,8 MW\nLENS\ngóc nhìn phân tích\nCẦU\nai cần sạc\nCUNG\nđã có gì\nTIẾP CẬN\nđi xa ở đâu\nSỬ DỤNG\nbận lúc nào\nCƠ HỘI\nkhoảng trống ưu tiên\nCÂU HỎI\nSỬ DỤNG\nBảy hồ sơ ngày · tỉ lệ cổng bận\ntỉ lệ cổng bận theo ô giờ\ntrục 0–100% chung cho cả 7 ngày\n\nCao nhất CN · ô giờ 23 · 36,2% · thấp nhất T4 · ô giờ 3 · 11%\n\n100%\n0\nT2\nT3\nT4\nT5\nT6\nT7\nCN\n0\n6\n12\n18\n23\nChủ Nhật · ô giờ 23 · 36,2% cổng bận\n2.805,3 / 7.753 cổng · 686/710 trạm\ncoverage cổng 99,6% · 3,9 giờ quan sát/cổng\nMúi giờ của profile chưa được công bố\n\nBấm một ô giờ để chuyển scrubber · ←/→ đổi giờ, ↑/↓ đổi ngày. Đậm hơn = tỉ lệ cổng bận cao hơn, không phải “quá tải”.\n\nNhịp trạm tại giờ đang xem\nTRẠM\n\n%, cổng bận ÷ cổng lắp đặt tại giờ đang xem · dưới 1 h quan sát thì không tô\n\nBậc\nGradient\n\ncùng tỉ lệ cổng bận, khác đơn vị gộp\n\nVÙNG TẢI\nTRẠM\n\nMức phân giải theo zoom: r6 dưới 9.5 · r7 · r8 · chấm trạm từ 13. Đổi mức không đổi giá trị, chỉ đổi đơn vị đọc.\n\nTÍN HIỆU\nmàu trên bản đồ nghĩa là gì\n0\n5\n10\n20\n35\n55\n75\n%\nchưa đủ quan sát ở giờ này\n(24 trạm)\nĐơn vị và cách chia bậc ▸\n\nTỉ lệ cổng bận = Σ cổng bận trung bình ÷ Σ cổng lắp đặt tại các trạm đủ quan sát.\n\nMàu đậm = tỉ lệ cao hơn, không phải “quá tải”. Thang tuyệt đối 0–100% (0 · 5 · 10 · 20 · 35 · 55 · 75 · 100%), không đổi theo giờ, theo tỉnh hay theo mức phóng.\n\nGiờ đang xem: Chủ Nhật · ô giờ 23 · múi giờ của profile chưa được công bố\n\nCoverage toàn tỉnh ở giờ này: 7.753/7.785 cổng (99,6%) · 686/710 trạm (96,6%)\n\nNét đứt: coverage cổng dưới 50% · vân xám: không có giá trị ở ô giờ này (khác 0).\n\nGIỚI HẠN\nđọc trước khi tin\n\nTỉ lệ cổng đang bận của từng trạm tại một ô giờ của tuần (7 thứ × "
+    },
+    "peak-1440x900": {
+      "hash": "#tinh=01&m=2d&f=station:occ&v=105.6545,20.9735,9.30,0,0&t=167",
+      "chart": {
+        "x": 68,
+        "y": 531.6,
+        "w": 305,
+        "h": 18,
+        "visible": true
+      },
+      "chartCells": 168,
+      "selectedName": "Chủ Nhật, ô giờ 23; 36,2% cổng bận, 2.805,3 trên 7.753 cổng; coverage cổng 100%, 686 trạm đóng góp",
+      "selectedRect": {
+        "x": 349,
+        "y": 742.6,
+        "w": 11,
+        "h": 24,
+        "visible": true
+      },
+      "hasSharedAxis": true,
+      "hasMetricDefinition": true,
+      "hasOverloadDisclaimer": true,
+      "hasTimezoneDisclosure": true,
+      "hasRegionMode": true,
+      "hasStationMode": true,
+      "hasCoverage": true,
+      "hasMissingLegend": true,
+      "hasExtremaReadout": true,
+      "horizontalOverflow": false,
+      "badContrast": [],
+      "tooSmall": [
+        {
+          "label": "Thứ Hai, ô giờ 0; 31,8% cổng bận, 2.435,8 trên 7.666 cổng; c",
+          "x": 96,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 1; 22,4% cổng bận, 1.670,9 trên 7.463 cổng; c",
+          "x": 107,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 2; 15,9% cổng bận, 1.163,9 trên 7.336 cổng; c",
+          "x": 118,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 3; 13% cổng bận, 935,4 trên 7.210 cổng; cover",
+          "x": 129,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 4; 14,4% cổng bận, 1.088,2 trên 7.538 cổng; c",
+          "x": 140,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 5; 26,5% cổng bận, 2.055,9 trên 7.758 cổng; c",
+          "x": 151,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 6; 26,6% cổng bận, 2.064,5 trên 7.763 cổng; c",
+          "x": 162,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 7; 21% cổng bận, 1.628 trên 7.753 cổng; cover",
+          "x": 173,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 8; 24,3% cổng bận, 1.886,8 trên 7.761 cổng; c",
+          "x": 184,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 9; 26,9% cổng bận, 2.090,1 trên 7.763 cổng; c",
+          "x": 195,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 10; 26,9% cổng bận, 2.084,1 trên 7.761 cổng; ",
+          "x": 206,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 11; 25,7% cổng bận, 1.996,4 trên 7.763 cổng; ",
+          "x": 217,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 12; 26% cổng bận, 2.017,1 trên 7.767 cổng; co",
+          "x": 228,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 13; 26,7% cổng bận, 2.070,5 trên 7.765 cổng; ",
+          "x": 239,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 14; 26% cổng bận, 2.019,8 trên 7.767 cổng; co",
+          "x": 250,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 15; 26,5% cổng bận, 2.056,3 trên 7.767 cổng; ",
+          "x": 261,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 16; 26,9% cổng bận, 2.092,3 trên 7.765 cổng; ",
+          "x": 272,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 17; 27% cổng bận, 2.100,6 trên 7.769 cổng; co",
+          "x": 283,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 18; 26,7% cổng bận, 2.075,4 trên 7.769 cổng; ",
+          "x": 294,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 19; 25,3% cổng bận, 1.965,1 trên 7.767 cổng; ",
+          "x": 305,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        }
+      ],
+      "bodyExcerpt": "HN\n/\n10% ô đông dân nhất\n4.450–46.232 người\nÔ có dân số bằng 0\n= 0 người\nCổng mạnh nhất ≥ 61 kW\nCổng mạnh nhất ≤ 22 kW\nChưa rõ công suất cổng\nTỔNG QUAN\nÔ H3\n4.400\nTrạm\n710\nCổng\n7.785\nCông suất\n232,8 MW\nLENS\ngóc nhìn phân tích\nCẦU\nai cần sạc\nCUNG\nđã có gì\nTIẾP CẬN\nđi xa ở đâu\nSỬ DỤNG\nbận lúc nào\nCƠ HỘI\nkhoảng trống ưu tiên\nCÂU HỎI\nSỬ DỤNG\nBảy hồ sơ ngày · tỉ lệ cổng bận\ntỉ lệ cổng bận theo ô giờ\ntrục 0–100% chung cho cả 7 ngày\n\nCao nhất CN · ô giờ 23 · 36,2% · thấp nhất T4 · ô giờ 3 · 11%\n\n100%\n0\nT2\nT3\nT4\nT5\nT6\nT7\nCN\n0\n6\n12\n18\n23\nChủ Nhật · ô giờ 23 · 36,2% cổng bận\n2.805,3 / 7.753 cổng · 686/710 trạm\ncoverage cổng 99,6% · 3,9 giờ quan sát/cổng\nMúi giờ của profile chưa được công bố\n\nBấm một ô giờ để chuyển scrubber · ←/→ đổi giờ, ↑/↓ đổi ngày. Đậm hơn = tỉ lệ cổng bận cao hơn, không phải “quá tải”.\n\nNhịp trạm tại giờ đang xem\nTRẠM\n\n%, cổng bận ÷ cổng lắp đặt tại giờ đang xem · dưới 1 h quan sát thì không tô\n\nBậc\nGradient\n\ncùng tỉ lệ cổng bận, khác đơn vị gộp\n\nVÙNG TẢI\nTRẠM\n\nMức phân giải theo zoom: r6 dưới 9.5 · r7 · r8 · chấm trạm từ 13. Đổi mức không đổi giá trị, chỉ đổi đơn vị đọc.\n\nTÍN HIỆU\nmàu trên bản đồ nghĩa là gì\n0\n5\n10\n20\n35\n55\n75\n%\nchưa đủ quan sát ở giờ này\n(24 trạm)\nĐơn vị và cách chia bậc ▸\n\nTỉ lệ cổng bận = Σ cổng bận trung bình ÷ Σ cổng lắp đặt tại các trạm đủ quan sát.\n\nMàu đậm = tỉ lệ cao hơn, không phải “quá tải”. Thang tuyệt đối 0–100% (0 · 5 · 10 · 20 · 35 · 55 · 75 · 100%), không đổi theo giờ, theo tỉnh hay theo mức phóng.\n\nGiờ đang xem: Chủ Nhật · ô giờ 23 · múi giờ của profile chưa được công bố\n\nCoverage toàn tỉnh ở giờ này: 7.753/7.785 cổng (99,6%) · 686/710 trạm (96,6%)\n\nNét đứt: coverage cổng dưới 50% · vân xám: không có giá trị ở ô giờ này (khác 0).\n\nGIỚI HẠN\nđọc trước khi tin\n\nTỉ lệ cổng đang bận của từng trạm tại một ô giờ của tuần (7 thứ × "
+    },
+    "peak-1600x1000": {
+      "hash": "#tinh=01&m=2d&f=station:occ&v=105.6545,20.9735,9.40,0,0&t=167",
+      "chart": {
+        "x": 68,
+        "y": 531.6,
+        "w": 305,
+        "h": 18,
+        "visible": true
+      },
+      "chartCells": 168,
+      "selectedName": "Chủ Nhật, ô giờ 23; 36,2% cổng bận, 2.805,3 trên 7.753 cổng; coverage cổng 100%, 686 trạm đóng góp",
+      "selectedRect": {
+        "x": 349,
+        "y": 742.6,
+        "w": 11,
+        "h": 24,
+        "visible": true
+      },
+      "hasSharedAxis": true,
+      "hasMetricDefinition": true,
+      "hasOverloadDisclaimer": true,
+      "hasTimezoneDisclosure": true,
+      "hasRegionMode": true,
+      "hasStationMode": true,
+      "hasCoverage": true,
+      "hasMissingLegend": true,
+      "hasExtremaReadout": true,
+      "horizontalOverflow": false,
+      "badContrast": [],
+      "tooSmall": [
+        {
+          "label": "Thứ Hai, ô giờ 0; 31,8% cổng bận, 2.435,8 trên 7.666 cổng; c",
+          "x": 96,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 1; 22,4% cổng bận, 1.670,9 trên 7.463 cổng; c",
+          "x": 107,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 2; 15,9% cổng bận, 1.163,9 trên 7.336 cổng; c",
+          "x": 118,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 3; 13% cổng bận, 935,4 trên 7.210 cổng; cover",
+          "x": 129,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 4; 14,4% cổng bận, 1.088,2 trên 7.538 cổng; c",
+          "x": 140,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 5; 26,5% cổng bận, 2.055,9 trên 7.758 cổng; c",
+          "x": 151,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 6; 26,6% cổng bận, 2.064,5 trên 7.763 cổng; c",
+          "x": 162,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 7; 21% cổng bận, 1.628 trên 7.753 cổng; cover",
+          "x": 173,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 8; 24,3% cổng bận, 1.886,8 trên 7.761 cổng; c",
+          "x": 184,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 9; 26,9% cổng bận, 2.090,1 trên 7.763 cổng; c",
+          "x": 195,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 10; 26,9% cổng bận, 2.084,1 trên 7.761 cổng; ",
+          "x": 206,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 11; 25,7% cổng bận, 1.996,4 trên 7.763 cổng; ",
+          "x": 217,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 12; 26% cổng bận, 2.017,1 trên 7.767 cổng; co",
+          "x": 228,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 13; 26,7% cổng bận, 2.070,5 trên 7.765 cổng; ",
+          "x": 239,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 14; 26% cổng bận, 2.019,8 trên 7.767 cổng; co",
+          "x": 250,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 15; 26,5% cổng bận, 2.056,3 trên 7.767 cổng; ",
+          "x": 261,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 16; 26,9% cổng bận, 2.092,3 trên 7.765 cổng; ",
+          "x": 272,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 17; 27% cổng bận, 2.100,6 trên 7.769 cổng; co",
+          "x": 283,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 18; 26,7% cổng bận, 2.075,4 trên 7.769 cổng; ",
+          "x": 294,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 19; 25,3% cổng bận, 1.965,1 trên 7.767 cổng; ",
+          "x": 305,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        }
+      ],
+      "bodyExcerpt": "HN\n/\n10% ô đông dân nhất\n4.450–46.232 người\nÔ có dân số bằng 0\n= 0 người\nCổng mạnh nhất ≥ 61 kW\nCổng mạnh nhất ≤ 22 kW\nChưa rõ công suất cổng\nTỔNG QUAN\nÔ H3\n4.400\nTrạm\n710\nCổng\n7.785\nCông suất\n232,8 MW\nLENS\ngóc nhìn phân tích\nCẦU\nai cần sạc\nCUNG\nđã có gì\nTIẾP CẬN\nđi xa ở đâu\nSỬ DỤNG\nbận lúc nào\nCƠ HỘI\nkhoảng trống ưu tiên\nCÂU HỎI\nSỬ DỤNG\nBảy hồ sơ ngày · tỉ lệ cổng bận\ntỉ lệ cổng bận theo ô giờ\ntrục 0–100% chung cho cả 7 ngày\n\nCao nhất CN · ô giờ 23 · 36,2% · thấp nhất T4 · ô giờ 3 · 11%\n\n100%\n0\nT2\nT3\nT4\nT5\nT6\nT7\nCN\n0\n6\n12\n18\n23\nChủ Nhật · ô giờ 23 · 36,2% cổng bận\n2.805,3 / 7.753 cổng · 686/710 trạm\ncoverage cổng 99,6% · 3,9 giờ quan sát/cổng\nMúi giờ của profile chưa được công bố\n\nBấm một ô giờ để chuyển scrubber · ←/→ đổi giờ, ↑/↓ đổi ngày. Đậm hơn = tỉ lệ cổng bận cao hơn, không phải “quá tải”.\n\nNhịp trạm tại giờ đang xem\nTRẠM\n\n%, cổng bận ÷ cổng lắp đặt tại giờ đang xem · dưới 1 h quan sát thì không tô\n\nBậc\nGradient\n\ncùng tỉ lệ cổng bận, khác đơn vị gộp\n\nVÙNG TẢI\nTRẠM\n\nMức phân giải theo zoom: r6 dưới 9.5 · r7 · r8 · chấm trạm từ 13. Đổi mức không đổi giá trị, chỉ đổi đơn vị đọc.\n\nTÍN HIỆU\nmàu trên bản đồ nghĩa là gì\n0\n5\n10\n20\n35\n55\n75\n%\nchưa đủ quan sát ở giờ này\n(24 trạm)\nĐơn vị và cách chia bậc ▸\n\nTỉ lệ cổng bận = Σ cổng bận trung bình ÷ Σ cổng lắp đặt tại các trạm đủ quan sát.\n\nMàu đậm = tỉ lệ cao hơn, không phải “quá tải”. Thang tuyệt đối 0–100% (0 · 5 · 10 · 20 · 35 · 55 · 75 · 100%), không đổi theo giờ, theo tỉnh hay theo mức phóng.\n\nGiờ đang xem: Chủ Nhật · ô giờ 23 · múi giờ của profile chưa được công bố\n\nCoverage toàn tỉnh ở giờ này: 7.753/7.785 cổng (99,6%) · 686/710 trạm (96,6%)\n\nNét đứt: coverage cổng dưới 50% · vân xám: không có giá trị ở ô giờ này (khác 0).\n\nGIỚI HẠN\nđọc trước khi tin\n\nTỉ lệ cổng đang bận của từng trạm tại một ô giờ của tuần (7 thứ × "
+    },
+    "trough": {
+      "hash": "#tinh=01&m=2d&f=station:occ&v=105.6545,20.9735,9.30,0,0&t=51",
+      "chart": {
+        "x": 68,
+        "y": 531.6,
+        "w": 305,
+        "h": 18,
+        "visible": true
+      },
+      "chartCells": 168,
+      "selectedName": "Thứ Tư, ô giờ 3; 11% cổng bận, 758,6 trên 6.893 cổng; coverage cổng 89%, 564 trạm đóng góp",
+      "selectedRect": {
+        "x": 129,
+        "y": 630.6,
+        "w": 11,
+        "h": 24,
+        "visible": true
+      },
+      "hasSharedAxis": true,
+      "hasMetricDefinition": true,
+      "hasOverloadDisclaimer": true,
+      "hasTimezoneDisclosure": true,
+      "hasRegionMode": true,
+      "hasStationMode": true,
+      "hasCoverage": true,
+      "hasMissingLegend": true,
+      "hasExtremaReadout": true,
+      "horizontalOverflow": false,
+      "badContrast": [],
+      "tooSmall": [
+        {
+          "label": "Thứ Hai, ô giờ 0; 31,8% cổng bận, 2.435,8 trên 7.666 cổng; c",
+          "x": 96,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 1; 22,4% cổng bận, 1.670,9 trên 7.463 cổng; c",
+          "x": 107,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 2; 15,9% cổng bận, 1.163,9 trên 7.336 cổng; c",
+          "x": 118,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 3; 13% cổng bận, 935,4 trên 7.210 cổng; cover",
+          "x": 129,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 4; 14,4% cổng bận, 1.088,2 trên 7.538 cổng; c",
+          "x": 140,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 5; 26,5% cổng bận, 2.055,9 trên 7.758 cổng; c",
+          "x": 151,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 6; 26,6% cổng bận, 2.064,5 trên 7.763 cổng; c",
+          "x": 162,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 7; 21% cổng bận, 1.628 trên 7.753 cổng; cover",
+          "x": 173,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 8; 24,3% cổng bận, 1.886,8 trên 7.761 cổng; c",
+          "x": 184,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 9; 26,9% cổng bận, 2.090,1 trên 7.763 cổng; c",
+          "x": 195,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 10; 26,9% cổng bận, 2.084,1 trên 7.761 cổng; ",
+          "x": 206,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 11; 25,7% cổng bận, 1.996,4 trên 7.763 cổng; ",
+          "x": 217,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 12; 26% cổng bận, 2.017,1 trên 7.767 cổng; co",
+          "x": 228,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 13; 26,7% cổng bận, 2.070,5 trên 7.765 cổng; ",
+          "x": 239,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 14; 26% cổng bận, 2.019,8 trên 7.767 cổng; co",
+          "x": 250,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 15; 26,5% cổng bận, 2.056,3 trên 7.767 cổng; ",
+          "x": 261,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 16; 26,9% cổng bận, 2.092,3 trên 7.765 cổng; ",
+          "x": 272,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 17; 27% cổng bận, 2.100,6 trên 7.769 cổng; co",
+          "x": 283,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 18; 26,7% cổng bận, 2.075,4 trên 7.769 cổng; ",
+          "x": 294,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 19; 25,3% cổng bận, 1.965,1 trên 7.767 cổng; ",
+          "x": 305,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        }
+      ],
+      "bodyExcerpt": "HN\n/\n10% ô đông dân nhất\n4.450–46.232 người\nÔ có dân số bằng 0\n= 0 người\nCổng mạnh nhất ≥ 61 kW\nCổng mạnh nhất ≤ 22 kW\nChưa rõ công suất cổng\nTỔNG QUAN\nÔ H3\n4.400\nTrạm\n710\nCổng\n7.785\nCông suất\n232,8 MW\nLENS\ngóc nhìn phân tích\nCẦU\nai cần sạc\nCUNG\nđã có gì\nTIẾP CẬN\nđi xa ở đâu\nSỬ DỤNG\nbận lúc nào\nCƠ HỘI\nkhoảng trống ưu tiên\nCÂU HỎI\nSỬ DỤNG\nBảy hồ sơ ngày · tỉ lệ cổng bận\ntỉ lệ cổng bận theo ô giờ\ntrục 0–100% chung cho cả 7 ngày\n\nCao nhất CN · ô giờ 23 · 36,2% · thấp nhất T4 · ô giờ 3 · 11%\n\n100%\n0\nT2\nT3\nT4\nT5\nT6\nT7\nCN\n0\n6\n12\n18\n23\nThứ Tư · ô giờ 3 · 11% cổng bận\n758,6 / 6.893 cổng · 564/710 trạm\ncoverage cổng 88,5% · 3,2 giờ quan sát/cổng\nMúi giờ của profile chưa được công bố\n\nBấm một ô giờ để chuyển scrubber · ←/→ đổi giờ, ↑/↓ đổi ngày. Đậm hơn = tỉ lệ cổng bận cao hơn, không phải “quá tải”.\n\nNhịp trạm tại giờ đang xem\nTRẠM\n\n%, cổng bận ÷ cổng lắp đặt tại giờ đang xem · dưới 1 h quan sát thì không tô\n\nBậc\nGradient\n\ncùng tỉ lệ cổng bận, khác đơn vị gộp\n\nVÙNG TẢI\nTRẠM\n\nMức phân giải theo zoom: r6 dưới 9.5 · r7 · r8 · chấm trạm từ 13. Đổi mức không đổi giá trị, chỉ đổi đơn vị đọc.\n\nTÍN HIỆU\nmàu trên bản đồ nghĩa là gì\n0\n5\n10\n20\n35\n55\n75\n%\nchưa đủ quan sát ở giờ này\n(146 trạm)\nĐơn vị và cách chia bậc ▸\n\nTỉ lệ cổng bận = Σ cổng bận trung bình ÷ Σ cổng lắp đặt tại các trạm đủ quan sát.\n\nMàu đậm = tỉ lệ cao hơn, không phải “quá tải”. Thang tuyệt đối 0–100% (0 · 5 · 10 · 20 · 35 · 55 · 75 · 100%), không đổi theo giờ, theo tỉnh hay theo mức phóng.\n\nGiờ đang xem: Thứ Tư · ô giờ 3 · múi giờ của profile chưa được công bố\n\nCoverage toàn tỉnh ở giờ này: 6.893/7.785 cổng (88,5%) · 564/710 trạm (79,4%)\n\nNét đứt: coverage cổng dưới 50% · vân xám: không có giá trị ở ô giờ này (khác 0).\n\nGIỚI HẠN\nđọc trước khi tin\n\nTỉ lệ cổng đang bận của từng trạm tại một ô giờ của tuần (7 thứ × 24 giờ). "
+    },
+    "selected-zero-station": {
+      "hash": "#tinh=01&m=2d&f=station:occ&v=105.6545,20.9735,9.30,0,0&t=51&c=station:vn-c-hno0001",
+      "chart": {
+        "x": 68,
+        "y": 531.6,
+        "w": 305,
+        "h": 18,
+        "visible": true
+      },
+      "chartCells": 336,
+      "selectedName": "Thứ Tư, ô giờ 3; 11% cổng bận, 758,6 trên 6.893 cổng; coverage cổng 89%, 564 trạm đóng góp",
+      "selectedRect": {
+        "x": 129,
+        "y": 630.6,
+        "w": 11,
+        "h": 24,
+        "visible": true
+      },
+      "hasSharedAxis": true,
+      "hasMetricDefinition": true,
+      "hasOverloadDisclaimer": true,
+      "hasTimezoneDisclosure": true,
+      "hasRegionMode": true,
+      "hasStationMode": true,
+      "hasCoverage": true,
+      "hasMissingLegend": true,
+      "hasExtremaReadout": true,
+      "horizontalOverflow": false,
+      "badContrast": [],
+      "tooSmall": [
+        {
+          "label": "Thứ Hai, ô giờ 0; 31,8% cổng bận, 2.435,8 trên 7.666 cổng; c",
+          "x": 96,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 1; 22,4% cổng bận, 1.670,9 trên 7.463 cổng; c",
+          "x": 107,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 2; 15,9% cổng bận, 1.163,9 trên 7.336 cổng; c",
+          "x": 118,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 3; 13% cổng bận, 935,4 trên 7.210 cổng; cover",
+          "x": 129,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 4; 14,4% cổng bận, 1.088,2 trên 7.538 cổng; c",
+          "x": 140,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 5; 26,5% cổng bận, 2.055,9 trên 7.758 cổng; c",
+          "x": 151,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 6; 26,6% cổng bận, 2.064,5 trên 7.763 cổng; c",
+          "x": 162,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 7; 21% cổng bận, 1.628 trên 7.753 cổng; cover",
+          "x": 173,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 8; 24,3% cổng bận, 1.886,8 trên 7.761 cổng; c",
+          "x": 184,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 9; 26,9% cổng bận, 2.090,1 trên 7.763 cổng; c",
+          "x": 195,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 10; 26,9% cổng bận, 2.084,1 trên 7.761 cổng; ",
+          "x": 206,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 11; 25,7% cổng bận, 1.996,4 trên 7.763 cổng; ",
+          "x": 217,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 12; 26% cổng bận, 2.017,1 trên 7.767 cổng; co",
+          "x": 228,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 13; 26,7% cổng bận, 2.070,5 trên 7.765 cổng; ",
+          "x": 239,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 14; 26% cổng bận, 2.019,8 trên 7.767 cổng; co",
+          "x": 250,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 15; 26,5% cổng bận, 2.056,3 trên 7.767 cổng; ",
+          "x": 261,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 16; 26,9% cổng bận, 2.092,3 trên 7.765 cổng; ",
+          "x": 272,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 17; 27% cổng bận, 2.100,6 trên 7.769 cổng; co",
+          "x": 283,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 18; 26,7% cổng bận, 2.075,4 trên 7.769 cổng; ",
+          "x": 294,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 19; 25,3% cổng bận, 1.965,1 trên 7.767 cổng; ",
+          "x": 305,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        }
+      ],
+      "bodyExcerpt": "HN\n/\n10% ô đông dân nhất\n4.450–46.232 người\nÔ có dân số bằng 0\n= 0 người\nCổng mạnh nhất ≥ 61 kW\nCổng mạnh nhất ≤ 22 kW\nChưa rõ công suất cổng\nTỔNG QUAN\nÔ H3\n4.400\nTrạm\n710\nCổng\n7.785\nCông suất\n232,8 MW\nLENS\ngóc nhìn phân tích\nCẦU\nai cần sạc\nCUNG\nđã có gì\nTIẾP CẬN\nđi xa ở đâu\nSỬ DỤNG\nbận lúc nào\nCƠ HỘI\nkhoảng trống ưu tiên\nCÂU HỎI\nSỬ DỤNG\nBảy hồ sơ ngày · tỉ lệ cổng bận\ntỉ lệ cổng bận theo ô giờ\ntrục 0–100% chung cho cả 7 ngày\n\nCao nhất CN · ô giờ 23 · 36,2% · thấp nhất T4 · ô giờ 3 · 11%\n\n100%\n0\nT2\nT3\nT4\nT5\nT6\nT7\nCN\n0\n6\n12\n18\n23\nThứ Tư · ô giờ 3 · 11% cổng bận\n758,6 / 6.893 cổng · 564/710 trạm\ncoverage cổng 88,5% · 3,2 giờ quan sát/cổng\nMúi giờ của profile chưa được công bố\n\nBấm một ô giờ để chuyển scrubber · ←/→ đổi giờ, ↑/↓ đổi ngày. Đậm hơn = tỉ lệ cổng bận cao hơn, không phải “quá tải”.\n\nNhịp trạm tại giờ đang xem\nTRẠM\n\n%, cổng bận ÷ cổng lắp đặt tại giờ đang xem · dưới 1 h quan sát thì không tô\n\nBậc\nGradient\n\ncùng tỉ lệ cổng bận, khác đơn vị gộp\n\nVÙNG TẢI\nTRẠM\n\nMức phân giải theo zoom: r6 dưới 9.5 · r7 · r8 · chấm trạm từ 13. Đổi mức không đổi giá trị, chỉ đổi đơn vị đọc.\n\nTÍN HIỆU\nmàu trên bản đồ nghĩa là gì\n0\n0\n5\n10\n20\n35\n55\n75\n%\nchưa đủ quan sát ở giờ này\n(146 trạm)\nĐơn vị và cách chia bậc ▸\n\nTỉ lệ cổng bận = Σ cổng bận trung bình ÷ Σ cổng lắp đặt tại các trạm đủ quan sát.\n\nMàu đậm = tỉ lệ cao hơn, không phải “quá tải”. Thang tuyệt đối 0–100% (0 · 5 · 10 · 20 · 35 · 55 · 75 · 100%), không đổi theo giờ, theo tỉnh hay theo mức phóng.\n\nGiờ đang xem: Thứ Tư · ô giờ 3 · múi giờ của profile chưa được công bố\n\nCoverage toàn tỉnh ở giờ này: 6.893/7.785 cổng (88,5%) · 564/710 trạm (79,4%)\n\nNét đứt: coverage cổng dưới 50% · vân xám: không có giá trị ở ô giờ này (khác 0).\n\nGIỚI HẠN\nđọc trước khi tin\n\nTỉ lệ cổng đang bận của từng trạm tại một ô giờ của tuần (7 thứ × 24 giờ)"
+    },
+    "selected-region": {
+      "hash": "#tinh=01&m=2d&f=station:occ&v=105.6545,20.9735,9.30,0,0&t=51&c=ur1:6:86415ca57ffffff",
+      "chart": {
+        "x": 68,
+        "y": 531.6,
+        "w": 305,
+        "h": 18,
+        "visible": true
+      },
+      "chartCells": 168,
+      "selectedName": "Thứ Tư, ô giờ 3; 11% cổng bận, 758,6 trên 6.893 cổng; coverage cổng 89%, 564 trạm đóng góp",
+      "selectedRect": {
+        "x": 129,
+        "y": 630.6,
+        "w": 11,
+        "h": 24,
+        "visible": true
+      },
+      "hasSharedAxis": true,
+      "hasMetricDefinition": true,
+      "hasOverloadDisclaimer": true,
+      "hasTimezoneDisclosure": true,
+      "hasRegionMode": true,
+      "hasStationMode": true,
+      "hasCoverage": true,
+      "hasMissingLegend": true,
+      "hasExtremaReadout": true,
+      "horizontalOverflow": false,
+      "badContrast": [],
+      "tooSmall": [
+        {
+          "label": "Thứ Hai, ô giờ 0; 31,8% cổng bận, 2.435,8 trên 7.666 cổng; c",
+          "x": 96,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 1; 22,4% cổng bận, 1.670,9 trên 7.463 cổng; c",
+          "x": 107,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 2; 15,9% cổng bận, 1.163,9 trên 7.336 cổng; c",
+          "x": 118,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 3; 13% cổng bận, 935,4 trên 7.210 cổng; cover",
+          "x": 129,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 4; 14,4% cổng bận, 1.088,2 trên 7.538 cổng; c",
+          "x": 140,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 5; 26,5% cổng bận, 2.055,9 trên 7.758 cổng; c",
+          "x": 151,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 6; 26,6% cổng bận, 2.064,5 trên 7.763 cổng; c",
+          "x": 162,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 7; 21% cổng bận, 1.628 trên 7.753 cổng; cover",
+          "x": 173,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 8; 24,3% cổng bận, 1.886,8 trên 7.761 cổng; c",
+          "x": 184,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 9; 26,9% cổng bận, 2.090,1 trên 7.763 cổng; c",
+          "x": 195,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 10; 26,9% cổng bận, 2.084,1 trên 7.761 cổng; ",
+          "x": 206,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 11; 25,7% cổng bận, 1.996,4 trên 7.763 cổng; ",
+          "x": 217,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 12; 26% cổng bận, 2.017,1 trên 7.767 cổng; co",
+          "x": 228,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 13; 26,7% cổng bận, 2.070,5 trên 7.765 cổng; ",
+          "x": 239,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 14; 26% cổng bận, 2.019,8 trên 7.767 cổng; co",
+          "x": 250,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 15; 26,5% cổng bận, 2.056,3 trên 7.767 cổng; ",
+          "x": 261,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 16; 26,9% cổng bận, 2.092,3 trên 7.765 cổng; ",
+          "x": 272,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 17; 27% cổng bận, 2.100,6 trên 7.769 cổng; co",
+          "x": 283,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 18; 26,7% cổng bận, 2.075,4 trên 7.769 cổng; ",
+          "x": 294,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 19; 25,3% cổng bận, 1.965,1 trên 7.767 cổng; ",
+          "x": 305,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        }
+      ],
+      "bodyExcerpt": "HN\n/\n10% ô đông dân nhất\n4.450–46.232 người\nÔ có dân số bằng 0\n= 0 người\nCổng mạnh nhất ≥ 61 kW\nCổng mạnh nhất ≤ 22 kW\nChưa rõ công suất cổng\nTỔNG QUAN\nÔ H3\n4.400\nTrạm\n710\nCổng\n7.785\nCông suất\n232,8 MW\nLENS\ngóc nhìn phân tích\nCẦU\nai cần sạc\nCUNG\nđã có gì\nTIẾP CẬN\nđi xa ở đâu\nSỬ DỤNG\nbận lúc nào\nCƠ HỘI\nkhoảng trống ưu tiên\nCÂU HỎI\nSỬ DỤNG\nBảy hồ sơ ngày · tỉ lệ cổng bận\ntỉ lệ cổng bận theo ô giờ\ntrục 0–100% chung cho cả 7 ngày\n\nCao nhất CN · ô giờ 23 · 36,2% · thấp nhất T4 · ô giờ 3 · 11%\n\n100%\n0\nT2\nT3\nT4\nT5\nT6\nT7\nCN\n0\n6\n12\n18\n23\nThứ Tư · ô giờ 3 · 11% cổng bận\n758,6 / 6.893 cổng · 564/710 trạm\ncoverage cổng 88,5% · 3,2 giờ quan sát/cổng\nMúi giờ của profile chưa được công bố\n\nBấm một ô giờ để chuyển scrubber · ←/→ đổi giờ, ↑/↓ đổi ngày. Đậm hơn = tỉ lệ cổng bận cao hơn, không phải “quá tải”.\n\nNhịp trạm tại giờ đang xem\nTRẠM\n\n%, cổng bận ÷ cổng lắp đặt tại giờ đang xem · dưới 1 h quan sát thì không tô\n\nBậc\nGradient\n\ncùng tỉ lệ cổng bận, khác đơn vị gộp\n\nVÙNG TẢI\nTRẠM\n\nMức phân giải theo zoom: r6 dưới 9.5 · r7 · r8 · chấm trạm từ 13. Đổi mức không đổi giá trị, chỉ đổi đơn vị đọc.\n\nTÍN HIỆU\nmàu trên bản đồ nghĩa là gì\n0\n5\n10\n20\n35\n55\n75\n%\nchưa đủ quan sát ở giờ này\n(146 trạm)\nĐơn vị và cách chia bậc ▸\n\nTỉ lệ cổng bận = Σ cổng bận trung bình ÷ Σ cổng lắp đặt tại các trạm đủ quan sát.\n\nMàu đậm = tỉ lệ cao hơn, không phải “quá tải”. Thang tuyệt đối 0–100% (0 · 5 · 10 · 20 · 35 · 55 · 75 · 100%), không đổi theo giờ, theo tỉnh hay theo mức phóng.\n\nGiờ đang xem: Thứ Tư · ô giờ 3 · múi giờ của profile chưa được công bố\n\nCoverage toàn tỉnh ở giờ này: 6.893/7.785 cổng (88,5%) · 564/710 trạm (79,4%)\n\nNét đứt: coverage cổng dưới 50% · vân xám: không có giá trị ở ô giờ này (khác 0).\n\nGIỚI HẠN\nđọc trước khi tin\n\nTỉ lệ cổng đang bận của từng trạm tại một ô giờ của tuần (7 thứ × 24 giờ). "
+    },
+    "missing-heavy": {
+      "hash": "#tinh=68&m=2d&f=station:occ&v=108.0880,11.6461,7.80,0,0&t=99",
+      "chart": {
+        "x": 68,
+        "y": 531.6,
+        "w": 305,
+        "h": 18,
+        "visible": true
+      },
+      "chartCells": 168,
+      "selectedName": "Thứ Sáu, ô giờ 3; 3,8% cổng bận, 36,6 trên 957 cổng; coverage cổng 41%, 93 trạm đóng góp",
+      "selectedRect": {
+        "x": 129,
+        "y": 686.6,
+        "w": 11,
+        "h": 24,
+        "visible": true
+      },
+      "hasSharedAxis": true,
+      "hasMetricDefinition": true,
+      "hasOverloadDisclaimer": true,
+      "hasTimezoneDisclosure": true,
+      "hasRegionMode": true,
+      "hasStationMode": true,
+      "hasCoverage": true,
+      "hasMissingLegend": true,
+      "hasExtremaReadout": true,
+      "horizontalOverflow": false,
+      "badContrast": [],
+      "tooSmall": [
+        {
+          "label": "Thứ Hai, ô giờ 0; 7,2% cổng bận, 143,7 trên 2.005 cổng; cove",
+          "x": 96,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 1; 5,5% cổng bận, 70,8 trên 1.276 cổng; cover",
+          "x": 107,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 2; 3,1% cổng bận, 52,3 trên 1.664 cổng; cover",
+          "x": 118,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 3; 2,7% cổng bận, 43,4 trên 1.601 cổng; cover",
+          "x": 129,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 4; 2,7% cổng bận, 46,1 trên 1.686 cổng; cover",
+          "x": 140,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 5; 3,9% cổng bận, 81 trên 2.052 cổng; coverag",
+          "x": 151,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 6; 5,4% cổng bận, 109,3 trên 2.031 cổng; cove",
+          "x": 162,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 7; 7,3% cổng bận, 165,7 trên 2.270 cổng; cove",
+          "x": 173,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 8; 9,6% cổng bận, 219,8 trên 2.284 cổng; cove",
+          "x": 184,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 9; 10,2% cổng bận, 233,2 trên 2.290 cổng; cov",
+          "x": 195,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 10; 10,4% cổng bận, 237,2 trên 2.290 cổng; co",
+          "x": 206,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 11; 10,1% cổng bận, 231,4 trên 2.290 cổng; co",
+          "x": 217,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 12; 10,8% cổng bận, 246,7 trên 2.290 cổng; co",
+          "x": 228,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 13; 10,5% cổng bận, 239,6 trên 2.290 cổng; co",
+          "x": 239,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 14; 10,5% cổng bận, 234,8 trên 2.246 cổng; co",
+          "x": 250,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 15; 11% cổng bận, 251,2 trên 2.290 cổng; cove",
+          "x": 261,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 16; 11,3% cổng bận, 259,7 trên 2.290 cổng; co",
+          "x": 272,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 17; 10,9% cổng bận, 250,3 trên 2.290 cổng; co",
+          "x": 283,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 18; 10,4% cổng bận, 237,2 trên 2.290 cổng; co",
+          "x": 294,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        },
+        {
+          "label": "Thứ Hai, ô giờ 19; 9,8% cổng bận, 221,8 trên 2.270 cổng; cov",
+          "x": 305,
+          "y": 574.6,
+          "w": 11,
+          "h": 24,
+          "visible": true
+        }
+      ],
+      "bodyExcerpt": "LĐ\n/\n10% ô đông dân nhất\n243–20.534 người\nÔ có dân số bằng 0\n= 0 người\nCổng mạnh nhất ≥ 61 kW\nCổng mạnh nhất ≤ 22 kW\nChưa rõ công suất cổng\nTỔNG QUAN\nÔ H3\n29.763\nTrạm\n237\nCổng\n2.358\nCông suất\n64,7 MW\nLENS\ngóc nhìn phân tích\nCẦU\nai cần sạc\nCUNG\nđã có gì\nTIẾP CẬN\nđi xa ở đâu\nSỬ DỤNG\nbận lúc nào\nCƠ HỘI\nkhoảng trống ưu tiên\nCÂU HỎI\nSỬ DỤNG\nBảy hồ sơ ngày · tỉ lệ cổng bận\ntỉ lệ cổng bận theo ô giờ\ntrục 0–100% chung cho cả 7 ngày\n\nCao nhất CN · ô giờ 15 · 13,9% · thấp nhất T3 · ô giờ 3 · 2,3%\n\n100%\n0\nT2\nT3\nT4\nT5\nT6\nT7\nCN\n0\n6\n12\n18\n23\nThứ Sáu · ô giờ 3 · 3,8% cổng bận\n36,6 / 957 cổng · 93/237 trạm\ncoverage cổng 40,6% · 1,1 giờ quan sát/cổng\nMúi giờ của profile chưa được công bố\n\nBấm một ô giờ để chuyển scrubber · ←/→ đổi giờ, ↑/↓ đổi ngày. Đậm hơn = tỉ lệ cổng bận cao hơn, không phải “quá tải”.\n\nNhịp trạm tại giờ đang xem\nTRẠM\n\n%, cổng bận ÷ cổng lắp đặt tại giờ đang xem · dưới 1 h quan sát thì không tô\n\nBậc\nGradient\n\ncùng tỉ lệ cổng bận, khác đơn vị gộp\n\nVÙNG TẢI\nTRẠM\n\nMức phân giải theo zoom: r6 dưới 9.5 · r7 · r8 · chấm trạm từ 13. Đổi mức không đổi giá trị, chỉ đổi đơn vị đọc.\n\nTÍN HIỆU\nmàu trên bản đồ nghĩa là gì\n0\n5\n10\n20\n35\n55\n75\n%\nchưa đủ quan sát ở giờ này\n(144 trạm)\nĐơn vị và cách chia bậc ▸\n\nTỉ lệ cổng bận = Σ cổng bận trung bình ÷ Σ cổng lắp đặt tại các trạm đủ quan sát.\n\nMàu đậm = tỉ lệ cao hơn, không phải “quá tải”. Thang tuyệt đối 0–100% (0 · 5 · 10 · 20 · 35 · 55 · 75 · 100%), không đổi theo giờ, theo tỉnh hay theo mức phóng.\n\nGiờ đang xem: Thứ Sáu · ô giờ 3 · múi giờ của profile chưa được công bố\n\nCoverage toàn tỉnh ở giờ này: 957/2.358 cổng (40,6%) · 93/237 trạm (39,2%)\n\nNét đứt: coverage cổng dưới 50% · vân xám: không có giá trị ở ô giờ này (khác 0).\n\nGIỚI HẠN\nđọc trước khi tin\n\nTỉ lệ cổng đang bận của từng trạm tại một ô giờ của tuần (7 thứ × 24 giờ). Kéo s"
+    },
+    "disabled": {
+      "hash": "#tinh=11&m=2d&f=station:occ&v=102.8702,21.7208,8.30,0,0&t=108",
+      "chart": null,
+      "chartCells": 0,
+      "selectedName": null,
+      "selectedRect": null,
+      "hasSharedAxis": false,
+      "hasMetricDefinition": false,
+      "hasOverloadDisclaimer": true,
+      "hasTimezoneDisclosure": false,
+      "hasRegionMode": false,
+      "hasStationMode": true,
+      "hasCoverage": false,
+      "hasMissingLegend": false,
+      "hasExtremaReadout": false,
+      "horizontalOverflow": false,
+      "badContrast": [],
+      "tooSmall": [
+        {
+          "label": "Bậc",
+          "x": 68,
+          "y": 666.5,
+          "w": 34.1,
+          "h": 20,
+          "visible": true
+        },
+        {
+          "label": "Gradient",
+          "x": 106.1,
+          "y": 666.5,
+          "w": 57.5,
+          "h": 20,
+          "visible": true
+        }
+      ],
+      "bodyExcerpt": "ĐB\n/\nÔ có dân số bằng 0\n= 0 người\nCổng mạnh nhất ≥ 61 kW\nCổng mạnh nhất ≤ 22 kW\nChưa rõ công suất cổng\nTỔNG QUAN\nÔ H3\n12.175\nTrạm\n39\nCổng\n209\nCông suất\n6,7 MW\nLENS\ngóc nhìn phân tích\nCẦU\nai cần sạc\nCUNG\nđã có gì\nTIẾP CẬN\nđi xa ở đâu\nSỬ DỤNG\nbận lúc nào\nCƠ HỘI\nkhoảng trống ưu tiên\nCÂU HỎI\nSỬ DỤNG\nBảy hồ sơ ngày · tỉ lệ cổng bận\n\nDữ liệu vận hành chưa khả dụng\n\ndưới nửa số trạm của tỉnh có `util` đọc được — lớp mức sử dụng là suy đoán, không phải quan sát\n\nNhịp trạm tại giờ đang xem\nTRẠM\n\n%, cổng bận ÷ cổng lắp đặt tại giờ đang xem · dưới 1 h quan sát thì không tô\n\nBậc\nGradient\nTÍN HIỆU\nmàu trên bản đồ nghĩa là gì\nđang dựng thang màu cho trạm…\nĐơn vị và cách chia bậc ▸\nGIỚI HẠN\nđọc trước khi tin\n\nTỉ lệ cổng đang bận của từng trạm tại một ô giờ của tuần (7 thứ × 24 giờ). Kéo scrubber ở đáy để đổi giờ. Màu đậm nghĩa là TỈ LỆ CỔNG BẬN CAO HƠN — không phải “quá tải”. Trạm chưa quan sát đủ ở giờ đó vẽ CHẤM RỖNG, không tô bậc nhạt — “chưa biết” không được đọc thành “vắng khách”.\n\nĐI TIẾP\ntừ cả tập sang một đối tượng\n\nBấm một ô H3 hoặc một xã trên bản đồ để mở bằng chứng.\n\nRanh giới xã\nTrạm sạc\nNGUỒN\nxuất 2026-08-21\n▸\n© CARTO, © OpenStreetMap contributors"
+    },
+    "story": {
+      "hash": "#s=nhip-tuan&m=2d",
+      "chart": null,
+      "chartCells": 0,
+      "selectedName": null,
+      "selectedRect": null,
+      "hasSharedAxis": false,
+      "hasMetricDefinition": false,
+      "hasOverloadDisclaimer": false,
+      "hasTimezoneDisclosure": true,
+      "hasRegionMode": false,
+      "hasStationMode": false,
+      "hasCoverage": false,
+      "hasMissingLegend": false,
+      "hasExtremaReadout": false,
+      "horizontalOverflow": false,
+      "badContrast": [],
+      "tooSmall": [
+        {
+          "label": "Bản đồ✕",
+          "x": 376.5,
+          "y": 13,
+          "w": 47.5,
+          "h": 14,
+          "visible": true
+        },
+        {
+          "label": "LUẬN ĐIỂM A: Cầu không trải đều",
+          "x": 72,
+          "y": 38,
+          "w": 45.1,
+          "h": 6,
+          "visible": true
+        },
+        {
+          "label": "LUẬN ĐIỂM B: Cung không đi theo cầu",
+          "x": 123.1,
+          "y": 38,
+          "w": 45.2,
+          "h": 6,
+          "visible": true
+        },
+        {
+          "label": "LUẬN ĐIỂM C: Thước đo phải theo mạng đường",
+          "x": 174.3,
+          "y": 38,
+          "w": 45.1,
+          "h": 6,
+          "visible": true
+        },
+        {
+          "label": "LUẬN ĐIỂM D: Những người ngoài bán kính",
+          "x": 225.4,
+          "y": 38,
+          "w": 45.1,
+          "h": 6,
+          "visible": true
+        },
+        {
+          "label": "LUẬN ĐIỂM E: Nhịp của một tuần",
+          "x": 276.6,
+          "y": 38,
+          "w": 45.1,
+          "h": 8,
+          "visible": true
+        },
+        {
+          "label": "LUẬN ĐIỂM F: Con số lớn nhất là một quyết định",
+          "x": 327.7,
+          "y": 38,
+          "w": 45.1,
+          "h": 6,
+          "visible": true
+        },
+        {
+          "label": "CẢNH KẾT: Những điều ta không biết",
+          "x": 378.9,
+          "y": 38,
+          "w": 45.1,
+          "h": 6,
+          "visible": true
+        }
+      ],
+      "bodyExcerpt": "HN\nCÂU CHUYỆN\n5 / 7\nBản đồ\n✕\n←\nTrước\nNhịp của một tuần\nTiếp\n→\nLUẬN ĐIỂM A\n1/7\nCầu không trải đều\nmặt độ cầu\nlát cắt phân vị trên\nlát cắt phân vị đỉnh\nđang đo phân bố dân trên diện tích…\n\nĐường cong trên là Lorenz: ô lưới xếp theo mật độ giảm dần, rồi cộng dồn cả diện tích lẫn dân số. Đường thẳng nhạt là hình dạng mà một địa bàn trải đều sẽ có. Khoảng cách giữa hai đường chính là sự dồn lại.\n\nDiện tích ở đây là phần nằm trong ranh giới tỉnh/thành (area_km2 × area_frac), không phải diện tích hình học của ô. Dân số của ô biên chỉ tính phần trong ranh giới, nên mẫu số phải khớp — nếu không, ô biên được gán một phần diện tích mà dân của nó không ở trong đó, và đường cong sẽ nói địa bàn trải đều hơn thực tế.\n\nLUẬN ĐIỂM B\n2/7\nCung không đi theo cầu\ncổng trên 10k dân\nđường cong cung\nđang đo cung theo ô và theo xã…\nPhường Bạch Mai\nXã đông dân nhất trong gói này mà không có một cổng sạc công cộng nào. Không phải ít hơn — là không có.\n129.571dân\n0cổng\n0cổng/10k dân\nPhường Tây Mỗ\nĐầu kia của cùng một thang: xã mang số cổng lớn nhất trong gói.\n46.894dân\n1.082cổng\n231cổng/10k dân\n49,16×trung vị\ntrung vị 126 xã\n4,69 cổng/10k dân\n\nHai con số trên là số của LỚP XÃ (commune.geojson), không phải tổng các ô lưới trong xã. Hai đơn vị đọc ấy có thể lệch nhau đáng kể ở cùng một xã, nên trộn chúng trong một câu là dựng một sự thật thứ ba không tồn tại. Cảnh về bán kính phục vụ đọc theo đơn vị Ô, và nó nói ra điều đó ở ngay chỗ ấy.\n\nĐây là một tỉ số, và tỉ số với mẫu số nhỏ thì vọt: một xã ít dân có vài trạm lớn sẽ lên rất cao mà không có nghĩa là nó được phục vụ tốt hơn. Đó là lý do phải đọc kèm cột dân số. Thêm một cảnh báo về mẫu số: dân số của xã neo theo số công bố toàn quốc, mà tổng ấy cao hơn thực tế và cao không đều giữa các tỉnh — nên mọi con số “trên đầu người” ở đây thừa hưởng sai lệ"
+    }
+  },
+  "failures": [],
+  "keyboard": {
+    "before": {
+      "hash": "#tinh=01&m=2d&f=station:occ&v=105.6545,20.9735,9.30,0,0&t=51",
+      "label": "Thứ Tư, ô giờ 3; 11% cổng bận, 758,6 trên 6.893 cổng; coverage cổng 89%, 564 trạm đóng góp"
+    },
+    "after": {
+      "hash": "#tinh=01&m=2d&f=station:occ&v=105.6545,20.9735,9.30,0,0&t=52",
+      "label": "Thứ Tư, ô giờ 4; 13,4% cổng bận, 999,1 trên 7.444 cổng; coverage cổng 96%, 632 trạm đóng góp",
+      "pressed": "true"
+    }
+  },
+  "encoding": {
+    "dow": 2,
+    "hour": 4,
+    "pct": 0.134,
+    "expectedY": 84.78,
+    "actualY": 84.77896823268834,
+    "dyPx": -0.01,
+    "expectedX": 77.5,
+    "actualX": 77.5,
+    "dxPx": 0,
+    "pathPoints": 336,
+    "outOfBand": 0
+  },
+  "performance": {
+    "elapsedMs": 16776.9,
+    "resourceDelta": 0,
+    "longTasks": 0,
+    "maxLongTaskMs": 0,
+    "distinctValues": 168,
+    "commitP50Ms": 0.2,
+    "commitP95Ms": 0.3,
+    "frameP50Ms": 96.3,
+    "frameP95Ms": 103.9,
+    "finalValue": "52",
+    "hash": "#tinh=01&m=2d&f=station:occ&v=105.6545,20.9735,9.30,0,0&t=52"
+  }
+}

@@ -19,6 +19,7 @@ import {
   gradientAvailability,
   scaleColors,
   seriesColorForTheme,
+  utilizationScale,
   type NumericScale,
 } from "../src/viz/palette.ts";
 import { themeFor, themeOfLens } from "../src/viz/theme.ts";
@@ -39,11 +40,10 @@ function code(relPath: string): string {
 test("Acceptance 1: Single color path — cell fill equals colorFor(v, scale, 'utilization') in both modes", () => {
   const occField = FIELD_BY_ID.get(STATION_OCC_FIELD)!;
   const contract = scaleContractOf(occField);
+  // Từ bản redesign lens Sử dụng, thang của trường này KHÔNG còn dựng bằng `buildScale`:
+  // nó là hằng tuyệt đối `[0,1]` (`utilizationScale`, spec §12.2). Đường màu thì không đổi.
   const sampleValues = [0, 0.1, 0.2, 0.25, 0.35, 0.5, 0.8, 1.0];
-  const binnedScale = buildScale("numeric", sampleValues, null, undefined, {
-    contract,
-    requestedMode: "binned",
-  }) as NumericScale;
+  const binnedScale = utilizationScale(sampleValues);
   const gradientScale = applyScaleMode(binnedScale, contract, "gradient", true) as NumericScale;
 
   for (const modeScale of [binnedScale, gradientScale]) {
@@ -59,12 +59,17 @@ test("Acceptance 1: Single color path — cell fill equals colorFor(v, scale, 'u
     }
   }
 
-  // Source inspection: Heatmap168 and MiniHeatmap must route through colorFor and never use rampFor
-  const heatmapSrc = code("ui/Heatmap168.tsx");
-  assert.match(heatmapSrc, /colorFor\(/, "Heatmap168 must call colorFor");
-  assert.doesNotMatch(heatmapSrc, /rampFor\(/, "Heatmap168 must not call rampFor");
-  assert.doesNotMatch(heatmapSrc, /classOf\(/, "Heatmap168 must not call classOf");
+  // Biểu đồ CHÍNH của lens nay mã hoá bằng VỊ TRÍ, nên nó không được có đường màu nào —
+  // đó là hình thức mạnh nhất của "một đường vào duy nhất": không có đường thứ hai để lệch.
+  const dayProfiles = code("ui/UtilizationDayProfiles.tsx");
+  assert.doesNotMatch(dayProfiles, /colorFor\(|rampFor\(|classOf\(|scaleColors\(/,
+    "UtilizationDayProfiles đọc giá trị bằng độ cao, không được gọi hàm thang màu nào");
+  // Bám vào KHAI BÁO KIỂU, không vào từ "Scale": `code()` ở file này không bóc chú thích,
+  // và chú thích của chính component giải thích vì sao nó không cần thang.
+  assert.doesNotMatch(dayProfiles, /scale\s*[?:]\s*Scale/, "…và không được nhận prop thang nào");
 
+  // Hai người tiêu thụ màu còn lại — bằng chứng tầng TRẠM và lớp vùng của bản đồ — vẫn phải
+  // đi qua `colorFor` và chỉ `colorFor`.
   const miniHeatmapSrc = code("ui/MiniHeatmap.tsx");
   assert.match(miniHeatmapSrc, /colorFor\(/, "MiniHeatmap must call colorFor");
   assert.doesNotMatch(miniHeatmapSrc, /rampFor\(/, "MiniHeatmap must not call rampFor");
@@ -126,10 +131,7 @@ test("Acceptance 3: Mode propagation without new state — gate and n=0 rules go
   const emptyApplied = applyScaleMode(emptyBase, contract, "gradient", true) as NumericScale;
   assert.equal(emptyApplied.mode, "binned");
 
-  // Component APIs: Heatmap168 and MiniHeatmap must accept scale: Scale | null and NO mode prop
-  const heatmapSrc = code("ui/Heatmap168.tsx");
-  assert.doesNotMatch(heatmapSrc, /scaleMode|mode\s*:\s*ScaleMode/, "Heatmap168 must not accept a separate mode prop");
-
+  // Component APIs: MiniHeatmap accepts `scale: Scale | null` and NO mode prop.
   const miniHeatmapSrc = code("ui/MiniHeatmap.tsx");
   assert.doesNotMatch(miniHeatmapSrc, /scaleMode|mode\s*:\s*ScaleMode/, "MiniHeatmap must not accept a separate mode prop");
 });
@@ -168,14 +170,17 @@ test("Acceptance 4: Shared object identity — one applyScaleMode call site for 
   const callSites = appSrc.match(/applyScaleMode\(\s*occClassing/g) ?? [];
   assert.equal(callSites.length, 1, "chỉ được MỘT chỗ gọi applyScaleMode cho occClassing");
 
-  // Nhánh `station:occ` của `scale` trả thẳng `utilizationScale` — không dựng thang thứ hai.
+  // Nhánh `station:occ` của `scale` trả thẳng `occFieldScale` — không dựng thang thứ hai.
+  // (Biến đổi tên từ `utilizationScale` ở bản redesign: `utilizationScale` nay là HÀM dựng
+  // thang tuyệt đối ở `viz/palette.ts`, và một `const` trùng tên sẽ che nó trong cả file.)
   assert.match(
     appSrc,
-    /meta\.id === STATION_OCC_FIELD\s*\?\s*utilizationScale/,
-    "thang của bản đồ ở trường station:occ phải LÀ utilizationScale, không phải một bản dựng lại",
+    /meta\.id === STATION_OCC_FIELD\s*\?\s*occFieldScale/,
+    "thang của bản đồ ở trường station:occ phải LÀ occFieldScale, không phải một bản dựng lại",
   );
-  assert.match(appSrc, /utilizationScale=\{utilizationScale\}/, "dock nhận cùng biến");
-  assert.match(appSrc, /occScale=\{utilizationScale\}/, "panel bằng chứng nhận cùng biến");
+  assert.match(appSrc, /occScale=\{occFieldScale\}/, "panel bằng chứng nhận cùng biến");
+  // Biểu đồ chính KHÔNG còn nhận thang nào: nó không mã hoá giá trị bằng màu (§12.1).
+  assert.doesNotMatch(appSrc, /utilizationScale=\{/, "cột đọc không còn nhận thang cho biểu đồ");
 
   // Và không còn snapshot nào chen vào giữa: `setScaleSnapshot` không được chạm station:occ.
   assert.doesNotMatch(
@@ -264,12 +269,21 @@ test("Acceptance 5a: Toggle isolation — bốn chart độc lập không có đ
     assert.doesNotMatch(src, /scale\s*[?:]\s*Scale/, `${file}: không được nhận prop scale`);
   }
 
-  // Router chỉ đưa `scale` vào đúng nhánh heatmap — bốn nhánh kia không thấy thang.
+  // Router KHÔNG còn đưa `scale` vào nhánh nào. Người nhận duy nhất trước đây là
+  // `Heatmap168`; biểu đồ chính của lens Sử dụng nay đọc giá trị bằng vị trí (§12.1), nên
+  // toàn bộ khe biểu đồ chính không còn chạm hệ thang màu.
   const router = code("components/atlas/PrimaryLensChart.tsx");
-  for (const tag of ["PopulationHistogram", "PowerTierBreakdown", "AccessCurve", "OpportunityCommuneRankBars"]) {
+  for (const tag of [
+    "PopulationHistogram",
+    "PowerTierBreakdown",
+    "AccessCurve",
+    "OpportunityCommuneRankBars",
+    "UtilizationDayProfiles",
+  ]) {
     assert.doesNotMatch(router, new RegExp(`<${tag}\\b[^>]*\\bscale=`), `${tag} không được nhận scale`);
   }
-  assert.match(router, /<Heatmap168[\s\S]{0,160}scale=\{scale\}/, "chỉ heatmap nhận thang");
+  assert.doesNotMatch(router, /scale=\{/, "router không truyền thang cho bất kỳ biểu đồ nào");
+  assert.doesNotMatch(router, /scale\s*[?:]\s*Scale/, "…và không còn khai một prop thang nào");
 });
 
 test("Acceptance 5b: model của bốn chart độc lập là hàm thuần trên dữ liệu", () => {
@@ -369,9 +383,8 @@ test("Acceptance 7: Identity token registry — không module biểu đồ nào 
     // CR 4.2: scatter bằng chứng nhận `theme` qua prop từ `LensChartController` — cùng luật
     // §C2 với năm biểu đồ chính, dù nó không phải một biểu đồ chính.
     "ui/Scatter.tsx",
-    "ui/HourProfile.tsx",
+    "ui/UtilizationDayProfiles.tsx",
     "ui/SupplyLorenz.tsx",
-    "ui/Heatmap168.tsx",
     "ui/MiniHeatmap.tsx",
     "story/LorenzChart.tsx",
   ];
@@ -419,13 +432,23 @@ test("Acceptance 7: Identity token registry — không module biểu đồ nào 
 
 // ── Test 8: Raw Readout Pin ──────────────────────────────────────────────────
 
-test("Acceptance 8: Raw readout pin — heatmap readout & aria format raw percentages, no transformed/LUT indices surface", () => {
-  const heatmapSrc = code("ui/Heatmap168.tsx");
+test("Acceptance 8: Raw readout pin — dòng đọc số và AT in phần trăm THÔ, không lộ chỉ số LUT", () => {
+  const src = code("ui/UtilizationDayProfiles.tsx");
 
-  // Readout formats cell.value * 100
-  assert.match(heatmapSrc, /hoverCell\.value\s*\*\s*100/, "Hover tooltip must compute percent directly from raw value * 100");
-  assert.match(heatmapSrc, /cell\.value\s*\*\s*100/, "Aria label must compute percent directly from raw value * 100");
+  // Phần trăm tính thẳng từ giá trị thô, không đi qua bất kỳ phép biến đổi trình bày nào.
+  assert.match(src, /v\s*\*\s*100/, "phần trăm phải là raw × 100");
+  assert.doesNotMatch(src, /sequentialPosition|colorPosition|LUT/,
+    "không được lộ vị trí trên LUT trong dòng người đọc");
 
-  // Must not expose internal LUT index or transformation
-  assert.doesNotMatch(heatmapSrc, /sequentialPosition|colorPosition|LUT/, "Heatmap168 must not expose LUT or position in user-facing readout");
+  // Tử số và mẫu số phải CÙNG có mặt: một số `%` đứng một mình không kiểm được (§14.1).
+  assert.match(src, /busyPortsAvg/, "dòng đọc số phải in tử số");
+  assert.match(src, /observedPorts/, "…và mẫu số");
+  assert.match(src, /portCoverage/, "…và coverage");
+
+  // §22.17: không được KHẲNG ĐỊNH quá tải. Chữ "quá tải" vẫn được phép xuất hiện — nhưng
+  // chỉ trong câu PHỦ ĐỊNH, và câu phủ định ấy là bắt buộc chứ không tuỳ chọn: người xem
+  // thấy một thang đậm dần sẽ tự đọc ra "quá tải" nếu không có gì chặn lại.
+  assert.match(src, /không phải\s*[“"]?quá tải/i, "phải có câu bác bỏ cách đọc 'quá tải'");
+  assert.doesNotMatch(src, /(đang|bị)\s+quá tải|thiếu tải|thiếu năng lực/i,
+    "không được khẳng định quá tải/thiếu tải ở bất kỳ đâu");
 });

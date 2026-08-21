@@ -2,25 +2,30 @@
  * Phase 4 — Primary Lens Chart Router (PHASE4_VISUALIZATION.md §0.2, §5.1).
  *
  * Exhaustive switcher rendering exactly one primary chart for each Lens.
+ *
+ * **Router này không còn nhận `Scale`.** Người nhận duy nhất trước đây là `Heatmap168`, và
+ * biểu đồ chính của lens Sử dụng nay mã hoá giá trị bằng VỊ TRÍ chứ không bằng màu
+ * (`UX_UTILIZATION_VISUALIZATION_SPEC` §12.1). Bỏ prop đi thay vì để nó `null`: một prop
+ * không ai đọc là một lời mời cho biểu đồ thứ sáu lén dựng một thang màu thứ hai.
  */
 
 import type { PrimaryChartId } from "../../viz/chart-contracts";
 import type { ChartIntentSink } from "../../state/analysis-events";
-import type { Scale } from "../../viz/palette";
 import type { AnalysisTheme } from "../../viz/theme";
+import type { OccTimezoneState } from "../../viz/occ-time";
+import { OCC_TZ_UNKNOWN } from "../../viz/occ-time";
 import type {
   DemandHistogramModel,
   SupplyPowerTierModel,
   AccessCurveModel,
-  UtilizationHeatmapModel,
+  UtilizationWeekModel,
   OpportunityCommuneRankModel,
 } from "../../viz/chart-models";
 
 import { PopulationHistogram } from "../../ui/PopulationHistogram";
 import { PowerTierBreakdown } from "../../ui/PowerTierBreakdown";
 import { AccessCurve } from "../../ui/AccessCurve";
-import { Heatmap168 } from "../../ui/Heatmap168";
-import { HourProfile } from "../../ui/HourProfile";
+import { UtilizationDayProfiles } from "../../ui/UtilizationDayProfiles";
 import { OpportunityCommuneRankBars } from "../../ui/OpportunityCommuneRankBars";
 
 export function PrimaryLensChart({
@@ -31,7 +36,7 @@ export function PrimaryLensChart({
   utilizationModel,
   opportunityModel,
   t = 0,
-  scale = null,
+  timezone = OCC_TZ_UNKNOWN,
   theme,
   sink,
 }: {
@@ -39,10 +44,15 @@ export function PrimaryLensChart({
   demandModel?: DemandHistogramModel;
   supplyModel?: SupplyPowerTierModel;
   accessModel?: AccessCurveModel;
-  utilizationModel?: UtilizationHeatmapModel;
+  utilizationModel?: UtilizationWeekModel;
   opportunityModel?: OpportunityCommuneRankModel;
   t?: number;
-  scale?: Scale | null;
+  /**
+   * Trục giờ được phép gọi là gì (§16). Mặc định `unknown` chứ không phải một múi giờ:
+   * mặc định phải là trạng thái KHÔNG khẳng định gì, nếu không một chỗ gọi quên truyền
+   * prop sẽ âm thầm in nhãn đồng hồ mà manifest chưa hề công bố.
+   */
+  timezone?: OccTimezoneState;
   /** Mực của lens — đến từ registry qua `LensChartController`, không module nào tự gõ. */
   theme: AnalysisTheme;
   sink: ChartIntentSink;
@@ -63,26 +73,19 @@ export function PrimaryLensChart({
         <AccessCurve model={accessModel} theme={theme} />
       ) : null;
 
-    case "utilization-week-heatmap":
+    // MỘT biểu đồ, không phải hai. Cặp `Heatmap168 + HourProfile` cũ tồn tại vì tấm nhiệt
+    // đồ không đọc được nhịp ngày, nên hồ sơ 24 giờ được thêm vào để nói phần ấy bằng ĐỘ
+    // CAO. Bảy hồ sơ ngày nói cả hai điều bằng cùng một kênh, nên cái thứ hai không còn
+    // việc gì — và §23.4 cấm để hai biểu đồ chính cùng tồn tại sau rollout.
+    case "utilization-day-profiles":
       return utilizationModel ? (
-        <div className="space-y-2">
-          <Heatmap168
-            cells={utilizationModel.cells}
-            scale={scale}
-            theme={theme}
-            t={t}
-            onTimeIntent={sink.onTimeIntent}
-            disabledReason={utilizationModel.disabledReason}
-          />
-          {!utilizationModel.disabledReason && (
-            <HourProfile
-              cells={utilizationModel.cells}
-              theme={theme}
-              t={t}
-              onT={sink.onTimeIntent ?? (() => {})}
-            />
-          )}
-        </div>
+        <UtilizationDayProfiles
+          model={utilizationModel}
+          theme={theme}
+          t={t}
+          timezone={timezone}
+          onTimeIntent={sink.onTimeIntent}
+        />
       ) : null;
 
     case "opportunity-commune-rank":

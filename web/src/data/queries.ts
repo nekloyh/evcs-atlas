@@ -839,6 +839,14 @@ export interface StationPoint {
    * phạm vi, nên chỗ nào đọc nó phải hiểu "ngoài phạm vi", không phải "chưa biết".
    */
   communeName?: string | null;
+  /**
+   * Ô H3 r8 của trạm — membership của chế độ "Vùng tải" (spec §11.2).
+   *
+   * `null` khi gói không phát cột. Đó KHÔNG phải lỗi: `stationCellR8()` dựng lại nó từ
+   * `lat`/`lng`, và phép dựng lại khớp cột 710/710 trên gói `p/01`. Cột được ưu tiên vì
+   * nó là bản do thượng nguồn gán, không phải bản ta suy ra.
+   */
+  h3?: string | null;
 }
 
 let stationCache: Promise<StationPoint[]> | null = null;
@@ -856,7 +864,7 @@ export function fetchStations(): Promise<StationPoint[]> {
     const t = await query(
       `SELECT station_id, station_code, lat, lng, scope, op_status, access,
               n_ports, current_type, power_kw_max_port, power_kw_site,
-              name, address, operator, commune_name
+              name, address, operator, commune_name, h3_r8
        FROM read_parquet('${STATIONS}')
        WHERE lat IS NOT NULL AND lng IS NOT NULL
        ORDER BY station_code`,
@@ -876,6 +884,9 @@ export function fetchStations(): Promise<StationPoint[]> {
     const addresses = t.getChild("address")!;
     const operators = t.getChild("operator")!;
     const communeNames = t.getChild("commune_name")!;
+    // Ô r8 của trạm — membership của chế độ "Vùng tải" (§11.2 quy tắc 1). Cùng MỘT truy
+    // vấn, thêm một cột: lớp vùng không được phép phát truy vấn thứ hai (spec §18.1).
+    const h3s = t.getChild("h3_r8");
 
     /** Arrow trả `null` và `undefined` lẫn lộn; đưa cả hai về `null`, không về `""`. */
     const text = (col: { get(i: number): unknown }, i: number): string | null => {
@@ -909,6 +920,7 @@ export function fetchStations(): Promise<StationPoint[]> {
         address: text(addresses, i),
         operator: text(operators, i),
         communeName: text(communeNames, i),
+        h3: h3s ? text(h3s, i) : null,
       };
     }
     return out;

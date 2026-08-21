@@ -20,6 +20,8 @@ import {
 import type { Manifest } from "../../data/manifest";
 import type { StationOccupancy } from "../../data/occupancy";
 import { stationSeries } from "../../viz/occ";
+import { regionMembersAt, regionReadoutOf, type UtilRegionIndex } from "../../viz/util-regions";
+import { OCC_TZ_UNKNOWN, type OccTimezoneState } from "../../viz/occ-time";
 import type { Scale } from "../../viz/palette";
 import { lensOfField, type FieldMeta } from "../../fields";
 import type {
@@ -27,6 +29,7 @@ import type {
   StationViewModel,
   H3CellViewModel,
   CommuneViewModel,
+  UtilRegionViewModel,
   InspectorStatus,
 } from "./inspector-types";
 
@@ -40,6 +43,10 @@ export interface InspectorLoaderProps {
   occScale: Scale | null;
   cells: GridCell[];
   scale: Scale | null;
+  /** Chỉ mục vùng tải, dựng ở App. Vắng ⇒ Inspector vùng báo "chưa dựng xong". */
+  utilRegions?: UtilRegionIndex | null;
+  /** Trục giờ được phép gọi là gì (§16). Mặc định: chưa công bố. */
+  timezone?: OccTimezoneState;
 }
 
 export function useInspectorLoader({
@@ -52,6 +59,8 @@ export function useInspectorLoader({
   occScale,
   cells,
   scale,
+  utilRegions = null,
+  timezone = OCC_TZ_UNKNOWN,
 }: InspectorLoaderProps): InspectorRoute | null {
   const loadedDatasetId = manifest?.province?.province_code ?? DEFAULT_DATASET_ID;
   const datasetName = manifest?.province?.province_name ?? "Hà Nội";
@@ -200,6 +209,7 @@ export function useInspectorLoader({
       series,
       occScale,
       t,
+      timezone,
       activeField: field,
       activeLens,
       manifest,
@@ -246,6 +256,58 @@ export function useInspectorLoader({
       selection,
       model,
     };
+  }
+
+  // ── VÙNG TẢI ───────────────────────────────────────────────────────────────
+  //
+  // KHÔNG có `useEffect` và không có truy vấn: mọi số đọc từ chỉ mục đã precompute. Đó là
+  // lý do đổi `t` với một vùng đang chọn phát **0 truy vấn** và giữ nguyên geometry đang
+  // chọn — hai thứ spec §14.2 và §18.2 đòi, và cả hai ở đây là hệ quả của kiến trúc chứ
+  // không phải của một phép tối ưu nào.
+  if (selection.kind === "util-region") {
+    const isDatasetMatch = selection.datasetId === loadedDatasetId;
+    const readout =
+      isDatasetMatch && utilRegions
+        ? regionReadoutOf(utilRegions, selection.resolution, selection.id, t)
+        : null;
+    const members =
+      isDatasetMatch && utilRegions && occupancy
+        ? regionMembersAt(utilRegions, selection.resolution, selection.id, t, occupancy.profiles)
+        : { contributing: [], silent: [] };
+
+    const nameOf = (s: number) => occupancy?.stations[s];
+    const model: UtilRegionViewModel = {
+      kind: "util-region",
+      id: selection.id,
+      resolution: selection.resolution,
+      datasetId: selection.datasetId,
+      datasetName,
+      status: !isDatasetMatch
+        ? "not-found"
+        : !utilRegions || !occupancy
+          ? "loading"
+          : readout
+            ? "ready"
+            : "not-found",
+      readout,
+      contributing: members.contributing.flatMap((c) => {
+        const st = nameOf(c.station);
+        return st ? [{ id: st.id, code: st.code, occ: c.occ, ports: c.ports, rate: c.rate }] : [];
+      }),
+      silent: members.silent.flatMap((s) => {
+        const st = nameOf(s);
+        if (!st) return [];
+        const ports = occupancy?.profiles.nPorts[s];
+        return [{ id: st.id, code: st.code, ports: ports !== undefined && Number.isFinite(ports) ? ports : null }];
+      }),
+      t,
+      timezone,
+      occScale,
+      activeField: field,
+      activeLens,
+      manifest,
+    };
+    return { selection, model };
   }
 
   if (selection.kind === "commune") {

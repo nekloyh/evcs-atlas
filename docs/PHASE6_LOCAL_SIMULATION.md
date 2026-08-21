@@ -1,6 +1,8 @@
 # Phase 6 — Local Station Simulation Specification
 
-Status: **PHASE 6 SPEC READY**
+Status: **PHASE 6 SPEC READY** — §1, §2, §4, §5 còn hiệu lực nguyên vẹn.
+**§3 (UI OUTPUT CONTRACT) đã bị `docs/UX_SIMULATION_REDESIGN_SPEC.md` THAY THẾ** từ
+21/8/2026. Xem §3.0 ngay dưới đầu §3 để biết chính xác phần nào của §3 còn dùng được.
 
 Scope: a single hypothetical station placed by the user on the map of the loaded province
 package, and the **heuristic, geometry-only** Before/After picture of the nearest-station
@@ -336,6 +338,30 @@ interface SimulationResult {
 ---
 
 ## 3. UI OUTPUT CONTRACT
+
+### 3.0 Trạng thái của §3 sau đợt UX redesign (21/8/2026)
+
+`docs/UX_SIMULATION_REDESIGN_SPEC.md` thay thế phần **trình bày** của §3. Section number ở
+đây KHÔNG được đánh lại và KHÔNG được xoá — `web/src/simulation/*.ts` và
+`web/test/simulation.test.ts` còn trỏ tới §1.5, §1.6, §1.8, §1.9, §1.10, §2.2, §2.3, §3.1.
+
+| Tiểu mục | Trạng thái | Nguồn hiện hành |
+|---|---|---|
+| §3.1 Placement in the shell | **còn hiệu lực** cho vị trí trong `EvidenceCard`, luật một-tiêu-điểm, lớp bản đồ và `sim=` trong hash | + UX §14 cho vòng đời PLACING/REPLACING, khoá kết quả và tiêu điểm |
+| §3.2 Panel structure | **BỊ THAY THẾ** — thứ tự sáu khối cũ đổi sang mười khối outcome-first | UX §8.1 |
+| §3.3 Language rules | **còn hiệu lực** — danh sách từ cấm và luật `~` không đổi | + UX §6.2 (danh sách dài hơn), §7.1 (nhãn xuất xứ tiếng Việt) |
+| §3.4 Disclaimer copy | **BỊ THAY THẾ** — banner và popover cũ đổi sang copy deck có trạng thái | UX §10 |
+
+Ba điều KHÔNG đổi, và đợt redesign không được phép chạm tới:
+
+1. **Thuật toán §1 nguyên vẹn** — bán kính 5 km, `d̂`/`d̂⁺`, phân lớp `IMPROVES`/`UNCERTAIN`,
+   quy ước null §1.6, cách gộp After §1.8, replay rule §1.9. Property test T1–T23 giữ nguyên.
+2. **Xuất xứ giữ đúng tư cách** — Trước là `CALCULATED`, Sau là `ESTIMATED`, sàng lọc là
+   `RULE`. Chỉ **nhãn hiển thị** của `RULE` đổi từ `RULE` sang `QUY TẮC` (UX §7.1); khoá
+   trong `SimTag` không đổi.
+3. **Không có claim mới** — redesign không thêm một trường, một phép gộp hay một câu nào mà
+   dữ liệu không đỡ được. Nó lấy dữ liệu ĐÃ CÓ (`commune_name`, trạm gần nhất của lượt
+   replay) đưa vào view-model, không thêm truy vấn và không đổi pipeline.
 
 ### 3.1 Placement in the shell
 

@@ -63,6 +63,10 @@ import { EvidenceCard } from "./components/atlas/EvidenceCard";
 import { AppShell } from "./components/atlas/AppShell";
 import { MapWorkspace, ModeSwitch, Workspace } from "./components/atlas/Workspace";
 import { allOccValues, occCountAt, occCoverage, stationOccAt } from "./viz/occ";
+import { utilizationScale } from "./viz/palette";
+import { buildUtilRegions } from "./viz/util-regions";
+import { occTimezoneOf } from "./viz/occ-time";
+import { memoizeByReference } from "./viz/chart-models";
 import {
   applyScaleMode,
   buildScale,
@@ -219,6 +223,7 @@ export default function App() {
           dataMode: s.dataMode,
           nationalMode: s.nationalMode,
           t: s.t,
+          utilRepresentation: s.utilRepresentation,
           filter: s.filter.active,
           candidate: sim.candidate,
         };
@@ -297,26 +302,56 @@ export default function App() {
   // Chỉ công bố rows và scale khi cả hai thuộc cùng field. Trong lúc truy vấn field mới,
   // snapshot cũ bị che thay vì ghép metadata mới với giá trị/ngưỡng cũ trong một frame.
   /**
-   * Chia bậc của `station:occ` — tính MỘT LẦN trên cả 168 giờ, không theo từng giờ.
+   * Thang của `station:occ` — **TUYỆT ĐỐI `[0,1]`, dựng cứng, không chia bậc theo dữ liệu.**
    *
-   * Đây là quyết định quan trọng nhất của trường này (xem `allOccValues`): chia bậc theo
-   * giờ thì màu đổi nghĩa 4 lần mỗi giây khi scrubber chạy, và hai giờ không so được với
-   * nhau. Cùng lý do §1b loại `HeatmapLayer`, chỉ khác trục.
+   * Đây là thay đổi lớn nhất của bản redesign lens Sử dụng
+   * (`docs/UX_UTILIZATION_VISUALIZATION_SPEC.md` §12.2), và nó thay một quyết định cũ đã
+   * đúng-một-nửa. Bản cũ chia bậc phân vị trên toàn bộ 168 giờ × trạm: điều đó giữ được
+   * luật quan trọng nhất — **thang không đổi khi scrubber chạy** — nhưng nó vẫn để thang
+   * đổi nghĩa giữa hai TỈNH. Đo được: cùng thuật toán cho Hà Nội ngưỡng bậc 4 ở 25,8% còn
+   * Lâm Đồng ở 10%, nên một vùng 20% là "giữa thang" ở tỉnh này và "gần đỉnh" ở tỉnh kia.
    *
-   * Đứng ở đây, TRƯỚC `scale`, vì từ CR 4.1 nó là nguồn DUY NHẤT của thang trường này: bản
-   * đồ, dock và panel đều nhận đúng object mà `utilizationScale` trả về.
+   * Với chế độ `Vùng tải` — nơi câu hỏi đúng là *"vùng nào có tỉ lệ cổng bận cao hơn"* —
+   * một thang chỉ so được bên trong một gói thì không trả lời được câu hỏi ấy. Nên
+   * `utilizationScale()` chốt cứng bảy khoảng và miền `[0,1]`; `allOccValues` vẫn được
+   * dùng, nhưng CHỈ để đếm cho chú giải, không để đặt ngưỡng.
+   *
+   * Đứng ở đây, TRƯỚC `scale`, vì nó là nguồn DUY NHẤT của thang trường này: bản đồ, lớp
+   * vùng H3 và mini-heatmap của panel đều nhận đúng object mà `utilizationScale` trả về.
    */
   const occClassing = useMemo(
-    () => {
-      const occ = FIELD_BY_ID.get(STATION_OCC_FIELD);
-      return occupancy && occ ? buildFieldScale(occ, allOccValues(occupancy.profiles)) : null;
-    },
+    () => (occupancy ? utilizationScale(allOccValues(occupancy.profiles)) : null),
     [occupancy],
   );
 
+  /**
+   * Chỉ mục VÙNG TẢI — membership H3 + thống kê đủ cho 3 mức × 168 giờ.
+   *
+   * **Dựng MỘT LẦN cho mỗi gói, và chỉ khi lens Sử dụng đang mở.** Hai ràng buộc riêng:
+   *
+   *   · *một lần cho mỗi gói* — `memoizeByReference` khoá theo tham chiếu `occupancy`, nên
+   *     bật/tắt qua lại giữa các lens không dựng lại. Một `useMemo` với `needsRegions`
+   *     trong deps sẽ dựng lại mỗi lần rời lens rồi quay về, tức trả đúng cái giá mà cả
+   *     phép precompute này tồn tại để tránh (spec §18.1).
+   *   · *chỉ khi cần* — quét 168 × n trạm là việc thật; gói đang mở có thể được nạp vì một
+   *     TRẠM đang được chọn ở lens khác, và ở đó không ai vẽ vùng nào.
+   *
+   * Ở App chứ không ở MapView vì Inspector vùng đọc cùng chỉ mục này: hai bản dựng là hai
+   * object, và khi đó "tooltip và panel nói cùng một số" lại là một lời hứa.
+   */
+  // Trục giờ được phép gọi là gì — MỘT chỗ phân giải, ba chỗ đọc (biểu đồ, bản đồ, panel).
+  const occTimezone = useMemo(() => occTimezoneOf(manifest?.snapshots), [manifest?.snapshots]);
+
+  const buildRegions = useRef(memoizeByReference(buildUtilRegions)).current;
+  const needsUtilRegions = lensOfField(meta.id) === "utilization";
+  const utilRegions = occupancy && needsUtilRegions ? buildRegions(occupancy) : null;
+
   const occGradientGate = gradientAvailability("utilization", false);
   const occContract = scaleContractOf(FIELD_BY_ID.get(STATION_OCC_FIELD)!);
-  const utilizationScale = useMemo(
+  // Tên khác hàm dựng `utilizationScale()` ở `viz/palette.ts` một cách CỐ Ý: `const` cùng
+  // tên sẽ che hàm ấy trong cả thân component và đẩy lời gọi ở `occClassing` ngay trên vào
+  // vùng chết của khai báo — một `ReferenceError` lúc chạy mà trình biên dịch không chặn.
+  const occFieldScale = useMemo(
     () => occClassing
       ? applyScaleMode(occClassing, occContract, requestedScaleMode, occGradientGate.allowed)
       : null,
@@ -337,11 +372,11 @@ export default function App() {
     // (`{...scale, mode}`), và khi đó "miền lệch nhau là bất khả biểu diễn" chỉ còn là một
     // lời hứa chứ không phải một tính chất của mã.
     () => meta.id === STATION_OCC_FIELD
-      ? utilizationScale
+      ? occFieldScale
       : baseScale
         ? applyScaleMode(baseScale, scaleContractOf(meta), requestedScaleMode, gradientGate.allowed)
         : null,
-    [meta, utilizationScale, baseScale, requestedScaleMode, gradientGate.allowed],
+    [meta, occFieldScale, baseScale, requestedScaleMode, gradientGate.allowed],
   );
 
   // Đặt trong thân render, ngay sau `scale`: đây là chỗ DUY NHẤT biết cả chế độ yêu cầu
@@ -753,7 +788,7 @@ export default function App() {
   const mapSurface = (
     <MapWorkspace
       readColumn={scene
-        ? <StoryColumn pkg={storyPkg} occScale={utilizationScale} />
+        ? <StoryColumn pkg={storyPkg} />
         : <AtlasReadColumn
             field={meta}
             scale={scale}
@@ -767,7 +802,7 @@ export default function App() {
             stations={stations}
             cells={cells}
             occupancy={occupancy}
-            utilizationScale={utilizationScale}
+            occTimezone={occTimezone}
             utilizationUnavailableReason={occupancyUnavailable?.reason}
             drawnCount={meta.id === STATION_OCC_FIELD ? occDrawnCount : null}
             presetStats={presetStats}
@@ -788,6 +823,8 @@ export default function App() {
             routes={routes}
             poi={poi}
             occupancy={occupancy}
+            utilRegions={utilRegions}
+            occTimezone={occTimezone}
           />
           {!scene && analysisFilter && (
             <div className="pointer-events-none absolute left-2 top-2 z-10 flex">
@@ -804,7 +841,9 @@ export default function App() {
               communes={communes}
               poi={poi}
               occupancy={occupancy}
-              occScale={utilizationScale}
+              occScale={occFieldScale}
+              utilRegions={utilRegions}
+              occTimezone={occTimezone}
               roads={roads}
               roadsLoading={roadsLoading}
               cells={cells}
@@ -820,23 +859,30 @@ export default function App() {
   const candidate = useSimulationStore((s) => s.candidate);
   const placementMode = useSimulationStore((s) => s.placementMode);
   const setPlacementMode = useSimulationStore((s) => s.setPlacementMode);
-  const clearCandidate = useSimulationStore((s) => s.clearCandidate);
   // F2/F11 — toggle chỉ TỒN TẠI khi gói đang mở có hiệu chuẩn hợp lệ (spec: "Toggle
   // hidden", không phải "toggle báo lỗi"). Toàn quốc/proxy không bao giờ có calibration
   // (loader không nhận mã tỉnh) nên cùng một cổng che cả F11.
   const simFeatureOn = useSimulationStore((s) => Boolean(s.calibration?.valid));
 
-  // Esc thoát chế độ ĐẶT khi chưa có ứng viên. Khi đã có ứng viên/lỗi thì EvidenceCard
-  // sở hữu Esc (§8) — hai cổng rời nhau vì `setCandidate` đã tắt placementMode.
+  // UX §14.1 — Esc thuộc về chế độ ĐẶT/ĐỔI trước, thẻ bằng chứng sau.
+  //
+  //   PLACING   + Esc ⇒ IDLE.
+  //   REPLACING + Esc ⇒ GIỮ NGUYÊN ứng viên và kết quả hiện tại.
+  //
+  // Nghe ở pha CAPTURE và `preventDefault`: listener của EvidenceCard cũng nằm trên
+  // `window`, và `preventDefault` một mình không chặn nó — nhưng cổng của nó là
+  // `shouldHandleInspectorEscape`, thứ từ chối sự kiện đã bị preventDefault. Không có
+  // thứ tự này thì một phím Esc trong lúc ĐỔI vị trí vừa thoát chế độ đổi vừa xoá luôn
+  // ứng viên mà nó đáng lẽ phải giữ.
   useEffect(() => {
     if (!placementMode) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
+      if (e.key !== "Escape" || e.defaultPrevented) return;
       e.preventDefault();
       useSimulationStore.getState().setPlacementMode(false);
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
   }, [placementMode]);
 
   return (
@@ -857,13 +903,15 @@ export default function App() {
         overlayControls={<LayersTab manifest={manifest} />}
         placementMode={placementMode}
         candidateActive={Boolean(candidate)}
+        // UX §10.1 — khi đã có ứng viên, nút này vào chế độ ĐỔI VỊ TRÍ; nó KHÔNG xoá.
+        // Xoá chỉ có đúng một đường, là nút mang nhãn "Xóa vị trí giả định" trong panel:
+        // một nút mà cùng lúc "đặt" và "xoá" tuỳ trạng thái là một nút không đọc được
+        // trước khi bấm.
         onTogglePlacement={
           simFeatureOn
             ? () => {
                 if (placementMode) {
                   setPlacementMode(false);
-                } else if (candidate) {
-                  clearCandidate();
                 } else {
                   useStore.getState().selectCell(null);
                   setPlacementMode(true);
@@ -873,7 +921,7 @@ export default function App() {
         }
       />
     }>
-      <Workspace error={error} bottom={scrubberVisible ? <Scrubber field={field} /> : undefined}>
+      <Workspace error={error} bottom={scrubberVisible ? <Scrubber field={field} timezone={occTimezone} /> : undefined}>
         <ModeSwitch
           mode={activeNavMode === "national" ? "map" : activeNavMode}
           map={mapSurface}

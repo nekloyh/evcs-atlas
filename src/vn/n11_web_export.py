@@ -28,8 +28,10 @@ màn hình trắng. ``manifest.available_columns`` liệt kê cột THẬT SỰ 
 from __future__ import annotations
 
 import json
+import re
 import shutil
 from datetime import UTC, datetime
+from pathlib import Path
 
 import pandas as pd
 import pyarrow as pa
@@ -57,6 +59,47 @@ SNAPSHOT_DATES = {
     "osm_pbf": "2026-07-28",
     "stations_canonical": "2026-07-29",
 }
+
+
+# Múi giờ mà THƯỢNG NGUỒN đã dùng để bucket 168 ô giờ — tên IANA hợp lệ, hoặc `UTC`.
+#
+# Chỉ dùng để KIỂM cái đọc được từ nguồn. Không có danh sách trắng nào ở đây, và không có
+# giá trị mặc định: nếu nguồn không nói thì manifest không nói.
+_IANA_TZ_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_+-]*(?:/[A-Za-z0-9_+-]+){1,2}$")
+
+
+def _occupancy_hour_tz(src: Path) -> str | None:
+    """Múi giờ của trục `dow`/`hour`, ĐỌC TỪ NGUỒN — `None` khi nguồn chưa công bố.
+
+    ── Vì sao trường này tồn tại, và vì sao nó THƯỜNG là `None` ───────────────────────
+
+    `station_occupancy_profile_168h` mang `dow`/`hour` đã bucket ở thượng nguồn
+    (`aGiang-evcs`), và **không cột nào, không khoá metadata nào của file ấy nói nó bucket
+    theo múi giờ nào**. `window_start_utc`/`window_end_utc` là UTC, nhưng cửa sổ không nói
+    gì về trục: một pipeline hoàn toàn có thể ghi cửa sổ bằng UTC rồi bucket giờ bằng giờ
+    địa phương.
+
+    Hệ quả đo được: đỉnh của Hà Nội rơi vào ô `t = 167`. Đọc theo giờ địa phương đó là
+    23:00 và đường cong hợp lý; đọc theo UTC đó là 06:00 sáng và câu chuyện khác hẳn. Web
+    vì thế gọi trục là "ô giờ 0…23" và công bố rằng múi giờ chưa biết
+    (`web/src/viz/occ-time.ts`).
+
+    Hàm này là chỗ DUY NHẤT trường ấy có thể được sinh ra, và nó chỉ sinh khi nguồn nói.
+    **Không hard-code `Asia/Ho_Chi_Minh` ở đây và không suy từ cửa sổ UTC** — cả hai đều là
+    đoán, và đoán ở tầng dữ liệu thì web không có cách nào biết mà công bố.
+    """
+    meta = pq.ParquetFile(src / "station_occupancy_profile_168h.parquet").schema_arrow.metadata
+    if not meta:
+        return None
+    raw = meta.get(b"occupancy_hour_tz")
+    if raw is None:
+        return None
+    tz = raw.decode("utf-8").strip()
+    if tz == "UTC" or _IANA_TZ_RE.match(tz):
+        return tz
+    # Giá trị lạ bị BỎ, không được truyền tiếp: một chuỗi hỏng trong manifest sẽ khiến web
+    # hoặc ném lỗi lúc render, hoặc in một nhãn đồng hồ sai — cả hai tệ hơn "chưa công bố".
+    return None
 
 
 def _display_date(iso: str) -> str:
@@ -1076,6 +1119,7 @@ def export_province(code: str) -> dict:
         if len(occ_tbl)
         else None
     )
+    occ_hour_tz = _occupancy_hour_tz(src)
 
     pv = pq.read_table(paths.ADMIN / "provinces.parquet").to_pandas()
     prow = pv[pv.province_code == code].iloc[0]
@@ -1211,6 +1255,10 @@ def export_province(code: str) -> dict:
             "vnsdi_valid_from": admin.VINTAGE["valid_from"],
             "osm_pbf": _display_date(SNAPSHOT_DATES["osm_pbf"]),
             "stations_canonical": _display_date(SNAPSHOT_DATES["stations_canonical"]),
+            # Khoá TUỲ CHỌN: chỉ có mặt khi nguồn công bố. Vắng khoá là hợp đồng, không
+            # phải thiếu sót — web đọc nó thành "múi giờ chưa được công bố" và gọi trục là
+            # ô giờ. Xem `_occupancy_hour_tz`.
+            **({"occupancy_hour_tz": occ_hour_tz} if occ_hour_tz else {}),
         },
     }
     (d / "manifest.json").write_text(

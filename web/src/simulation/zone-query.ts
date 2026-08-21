@@ -45,8 +45,10 @@ export async function fetchZoneCells(candidate: {
 }): Promise<GridCellSimInput[]> {
   await registerParquet(GRID);
   const t = await query(
+    // `commune_name` đi CÙNG truy vấn này, không thêm một lượt đọc nào (UX §16.1): tên xã
+    // là thứ panel gọi vị trí bằng, và nó đã nằm sẵn trên mỗi hàng lưới (`docs/COT.md` #9).
     `SELECT h3_r8, lat, lng, population, pop_source, dist_station_network_m,
-            detour_ratio, evidence_grade_distance, commune_code
+            detour_ratio, evidence_grade_distance, commune_code, commune_name
      FROM read_parquet('${GRID}')
      WHERE lat BETWEEN ${candidate.lat - BBOX_DEG} AND ${candidate.lat + BBOX_DEG}
        AND lng BETWEEN ${candidate.lng - BBOX_DEG} AND ${candidate.lng + BBOX_DEG}`,
@@ -61,6 +63,7 @@ export async function fetchZoneCells(candidate: {
   const detour = t.getChild("detour_ratio")!;
   const grade = t.getChild("evidence_grade_distance")!;
   const commune = t.getChild("commune_code")!;
+  const communeName = t.getChild("commune_name")!;
 
   const rows: GridCellSimInput[] = new Array(t.numRows);
   for (let r = 0; r < t.numRows; r++) {
@@ -74,6 +77,10 @@ export async function fetchZoneCells(candidate: {
       detour_ratio: toNum(detour.get(r)),
       evidence_grade_distance: toStr(grade.get(r)),
       commune_code: toStr(commune.get(r)),
+      // `toStr` giữ null NGUYÊN VẸN — không `?? "Ô H3"`, không chuỗi rỗng thành tên. Thiếu
+      // tên là một sự thật của hàng đó, và §7.5 xử lý nó bằng cách bỏ hàng ra khỏi danh
+      // sách địa danh chứ không bịa một nhãn.
+      commune_name: toStr(communeName.get(r)),
     };
   }
   return rows;

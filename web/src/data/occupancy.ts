@@ -28,6 +28,8 @@ export interface StationRow {
   inScope: boolean;
   /** `op_status` thô — vào kênh NÉT ở §4d-3a, không vào màu. */
   opStatus: string;
+  /** Ô H3 r8 do thượng nguồn gán; `null` khi gói không phát cột. Xem `stationCellR8()`. */
+  h3?: string | null;
 }
 
 export interface StationOccupancy {
@@ -67,6 +69,7 @@ export function fetchOccupancy(): Promise<StationOccupancy> {
         lng: source.lng,
         inScope: source.inScope,
         opStatus: source.opStatus,
+        h3: source.h3 ?? null,
       };
       if (code) index.set(code, i);
       const p = source.nPorts;

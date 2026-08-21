@@ -1,0 +1,3062 @@
+{
+  "url": "http://127.0.0.1:4173/#tinh=01&f=population&m=2d&sim=21.05239,105.61395",
+  "browser": "Chrome/151.0.7922.137",
+  "viewports": {
+    "1280x800": {
+      "href": "http://127.0.0.1:4173/#tinh=01&m=2d&f=population&v=105.6545,20.9735,9.10,0,0&sim=21.05239,105.61395",
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "dpr": 1
+      },
+      "document": {
+        "scrollWidth": 1280,
+        "scrollHeight": 800,
+        "offenders": [
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1049,
+              "y": 1198,
+              "width": 264,
+              "height": 14,
+              "right": 1313,
+              "bottom": 1212
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1141,
+              "y": 1198,
+              "width": 172,
+              "height": 14,
+              "right": 1313,
+              "bottom": 1212
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1059,
+              "y": 1252,
+              "width": 264,
+              "height": 14,
+              "right": 1323,
+              "bottom": 1266
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1151,
+              "y": 1252,
+              "width": 172,
+              "height": 14,
+              "right": 1323,
+              "bottom": 1266
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1052,
+              "y": 1307,
+              "width": 270,
+              "height": 14,
+              "right": 1323,
+              "bottom": 1321
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1151,
+              "y": 1307,
+              "width": 172,
+              "height": 14,
+              "right": 1323,
+              "bottom": 1321
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1056,
+              "y": 1362,
+              "width": 271,
+              "height": 14,
+              "right": 1327,
+              "bottom": 1376
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1156,
+              "y": 1362,
+              "width": 172,
+              "height": 14,
+              "right": 1327,
+              "bottom": 1376
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1060,
+              "y": 1416,
+              "width": 268,
+              "height": 14,
+              "right": 1328,
+              "bottom": 1430
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1156,
+              "y": 1416,
+              "width": 172,
+              "height": 14,
+              "right": 1328,
+              "bottom": 1430
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1063,
+              "y": 1471,
+              "width": 270,
+              "height": 14,
+              "right": 1333,
+              "bottom": 1485
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1162,
+              "y": 1471,
+              "width": 172,
+              "height": 14,
+              "right": 1333,
+              "bottom": 1485
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1057,
+              "y": 1526,
+              "width": 271,
+              "height": 14,
+              "right": 1328,
+              "bottom": 1540
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1156,
+              "y": 1526,
+              "width": 172,
+              "height": 14,
+              "right": 1328,
+              "bottom": 1540
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1055,
+              "y": 1580,
+              "width": 271,
+              "height": 14,
+              "right": 1327,
+              "bottom": 1594
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1155,
+              "y": 1580,
+              "width": 172,
+              "height": 14,
+              "right": 1327,
+              "bottom": 1594
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1060,
+              "y": 1635,
+              "width": 272,
+              "height": 14,
+              "right": 1331,
+              "bottom": 1649
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1160,
+              "y": 1635,
+              "width": 172,
+              "height": 14,
+              "right": 1331,
+              "bottom": 1649
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1060,
+              "y": 1690,
+              "width": 271,
+              "height": 14,
+              "right": 1331,
+              "bottom": 1704
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1160,
+              "y": 1690,
+              "width": 172,
+              "height": 14,
+              "right": 1331,
+              "bottom": 1704
+            }
+          }
+        ]
+      },
+      "panel": {
+        "rect": {
+          "x": 928,
+          "y": 12,
+          "width": 340,
+          "height": 600,
+          "right": 1268,
+          "bottom": 612
+        },
+        "style": {
+          "background": "oklab(0.981556 -0.00070259 0.00255078 / 0.92)",
+          "color": "rgb(11, 11, 11)",
+          "fontFamily": "\"Be Vietnam Pro\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+          "fontSize": "16px",
+          "lineHeight": "24px",
+          "borderColor": "oklab(0.999994 0.0000455677 0.0000200868 / 0.6)",
+          "borderRadius": "10px",
+          "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0 0 0 / 0.06) 0px 0px 0px 1px, rgba(15, 23, 42, 0.04) 0px 1px 2px 0px, rgba(15, 23, 42, 0.1) 0px 8px 24px -6px, rgba(15, 23, 42, 0.08) 0px 20px 48px -12px"
+        },
+        "scrollHeight": 1425,
+        "clientHeight": 598,
+        "scrollWidth": 328,
+        "clientWidth": 328,
+        "scrollTop": 0,
+        "text": "MÔ PHỎNG TRẠM GIẢ ĐỊNH (21.0524, 105.6140)\nXoá trạm\n\nMÔ PHỎNG HÌNH HỌC — không phải định tuyến. Khoảng cách \"sau\" là ước lượng từ đường chim bay nhân hệ số đi vòng đo tại chỗ, trong bán kính 5 km. Không dự báo nhu cầu, mức sử dụng hay doanh thu.\n\nSÀNG LỌC L6\nRULE\nĐỀ XUẤT\nBiên khoảng cách: +1125 m so với ngưỡng (XA)\n\nĐầu ra của một RULE, không phải số đo — cơ sở khoảng cách: đường chim bay.\n\nTRUNG VỊ CỰ LY THEO DÂN SỐ (BÁN KÍNH 5 KM)\nTRƯỚC [TÍNH TOÁN]\n1,7 km\nSAU [ƯỚC LƯỢNG]\n~1,4 km\nTHAY ĐỔI [ƯỚC LƯỢNG]\n~ −337 m\nKhoảng cách\tTrước [Tính]\tSau [Ước]\tΔ dân số [Ước]\n≤ 1 km\t36.355\t~45.319\t+8.965\n1 – 2 km\t86.440\t~104.167\t+17.727\n2 – 5 km\t76.023\t~49.528\t−26.495\n> 5 km\t284\t~87\t−197\nÔ cải thiện rõ rệt (cận trên p90 < cự ly cũ):\n12 ô · ~31.746 người\nThêm 6 ô · ~2.947 người có thể cải thiện, trong biên sai số\n(giữ cự ly cũ)\n5 Ô XA TRẠM NHẤT CÓ CẢI THIỆN\nƯỚC LƯỢNG\nÔ H3\tTrước [Tính]\tSau [Ước]\n88415dd237fffff\t5,7 km\t~3,1 km\n88415dd235fffff\t5,1 km\t~2,8 km\n88415dd231fffff\t4,8 km\t975 m – ~2,6 km\n88415dd23dfffff\t4,5 km\t950 m – ~2,5 km\n88415dd233fffff\t4,3 km\t~2,5 km\nTRẠM HIỆN HỮU LÂN CẬN (≤ 5 KM)\n13 trạm\nNhượng Quyền Tư Nhân Phan Văn Hợi\n1 cổng · 30 kW· mức sử dụng 0% (2026-06-29 → 2026-07-29)\n3,1 km\nNhượng quyền Luxury - Công ty Go Tat Việt Nam\n8 cổng · 360 kW· mức sử dụng 0% (2026-06-29 → 2026-07-29)\n3,1 km\nBưu cục cấp 1 Bình Phú\n2 cổng · 60 kW· mức sử dụng 33% (2026-06-29 → 2026-07-29)\n3,4 km\nNhượng quyền DIMEC Quân Minh\n6 cổng · 180 kW· mức sử dụng 54% (2026-06-29 → 2026-07-29)\n3,5 km\nNQ VinaCharger HKD Sơn Nhàn\n6 cổng · 300 kW· mức sử dụng 41% (2026-06-29 → 2026-07-29)\n3,6 km\nNQ GW Cty Bình Tuấn\n10 cổng · 307 kW· mức sử dụng 23% (2026-06-29 → 2026-07-29)\n3,7 km\nNhượng quyền GW Công ty Gỗ Việt\n4 cổng · 180 kW· mức sử dụng 43% (2026-06-29 → 2026-07-29)\n3,8 km\nNhượng quyền Hộ kinh doanh Đỗ Văn Hậu\n6 cổng · 127 kW· mức sử dụng 43% (2026-06-29 → 2026-07-29)\n4,5 km\nCửa hàng xăng dầu Đại Thuận\n6 cổng · 300 kW· mức sử dụng 44% (2026-06-29 → 2026-07-29)\n4,6 km\nNQ CÔNG TY TNHH THƯƠNG MẠI VÀ DỊCH VỤ THĂNG THẮNG\n4 cổng · 240 kW· mức sử dụng 48% (2026-06-29 → 2026-07-29)\n4,6 km\nCÔNG TY CỔ PHẦN SẢN XUẤT THƯƠNG MẠI BAO BÌ THẮNG LỢI\n8 cổng · 134 kW· mức sử dụng 10% (2026-06-29 → 2026-07-29)\n4,7 km\nCÔNG TY TNHH KHÍ CÔNG NGHIỆP ĐAN PHƯỢNG\n4 cổng · 67 kW· mức sử dụng 17% (2026-06-29 → 2026-07-29)\n4,7 km\nNQ HỘ KINH DOANH NGUYỄN ĐỨC THIỆN\n10 cổng · 483.5 kW· mức sử dụng 35% (2026-06-29 → 2026-07-29)\n4,9 km\nBán kính mô phỏng: 5.000 m · Hiệu chuẩn v1\nCách tính & giới hạn",
+        "headings": [
+          {
+            "tag": "h3",
+            "text": "Mô phỏng trạm giả định (21.0524, 105.6140)",
+            "style": {
+              "background": "rgba(0, 0, 0, 0)",
+              "color": "oklch(0.968 0.007 247.896)",
+              "fontFamily": "\"Be Vietnam Pro\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+              "fontSize": "12px",
+              "lineHeight": "16px",
+              "borderColor": "oklch(0.968 0.007 247.896)",
+              "borderRadius": "0px",
+              "boxShadow": "none"
+            }
+          }
+        ],
+        "controls": [
+          {
+            "tag": "button",
+            "text": "Xoá trạm",
+            "aria": null,
+            "expanded": null
+          },
+          {
+            "tag": "button",
+            "text": "Cách tính & giới hạn",
+            "aria": null,
+            "expanded": null
+          }
+        ],
+        "monos": [
+          "RULE",
+          "TRƯỚC [TÍNH TOÁN]",
+          "[TÍNH TOÁN]",
+          "SAU [ƯỚC LƯỢNG]",
+          "[ƯỚC LƯỢNG]",
+          "THAY ĐỔI [ƯỚC LƯỢNG]",
+          "[ƯỚC LƯỢNG]",
+          "≤ 1 km",
+          "+8.965",
+          "1 – 2 km",
+          "+17.727",
+          "2 – 5 km",
+          "−26.495",
+          "> 5 km",
+          "−197",
+          "ƯỚC LƯỢNG",
+          "88415dd237fffff",
+          "5,7 km",
+          "~3,1 km",
+          "88415dd235fffff",
+          "5,1 km",
+          "~2,8 km",
+          "88415dd231fffff",
+          "4,8 km",
+          "975 m – ~2,6 km",
+          "88415dd23dfffff",
+          "4,5 km",
+          "950 m – ~2,5 km",
+          "88415dd233fffff",
+          "4,3 km"
+        ],
+        "slateClasses": [
+          "border-slate-700",
+          "text-slate-100",
+          "text-slate-400",
+          "hover:text-slate-200",
+          "bg-slate-800",
+          "hover:bg-slate-700",
+          "bg-slate-800/60",
+          "bg-slate-700",
+          "text-slate-300",
+          "text-slate-500",
+          "bg-slate-900/80",
+          "border-slate-700/50",
+          "text-slate-200",
+          "divide-slate-800",
+          "border-slate-700/60",
+          "bg-slate-900/60",
+          "border-slate-800"
+        ],
+        "textColors": [
+          "oklch(0.968 0.007 247.896)",
+          "oklch(0.704 0.04 256.788)",
+          "oklch(0.882 0.059 254.128)",
+          "oklch(0.869 0.022 252.894)",
+          "oklch(0.845 0.143 164.978)",
+          "oklch(0.554 0.046 257.417)",
+          "oklch(0.789 0.154 211.53)",
+          "oklch(0.828 0.189 84.429)",
+          "oklch(0.879 0.169 91.605)",
+          "oklch(0.765 0.177 163.223)",
+          "oklab(0.828 0.0183479 0.188107 / 0.9)",
+          "oklch(0.865 0.127 207.078)"
+        ],
+        "visibleContrast": [
+          {
+            "tag": "h3",
+            "text": "Mô phỏng trạm giả định ( 21.0524 , 105.6140 )",
+            "color": "oklch(0.968 0.007 247.896)",
+            "background": [
+              248,
+              248,
+              247,
+              1
+            ],
+            "contrast": 1.03,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "p",
+            "text": "Đầu ra của một RULE, không phải số đo — cơ sở khoảng cách: đường chim bay.",
+            "color": "oklch(0.554 0.046 257.417)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.14,
+            "fontSize": "11px"
+          },
+          {
+            "tag": "span",
+            "text": "Sàng lọc L6",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "Trung vị cự ly theo dân số (bán kính 5 km)",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Khoảng cách",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Trước [ Tính ]",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Sau [ Ước ]",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Δ dân số [ Ước ]",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "p",
+            "text": "Khoảng cách \"sau\" là ước lượng từ đường chim bay nhân hệ số đi vòng đo tại chỗ, trong bán kính 5 km. Không dự báo nhu cầ",
+            "color": "oklch(0.882 0.059 254.128)",
+            "background": [
+              158,
+              164,
+              182,
+              1
+            ],
+            "contrast": 1.76,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "strong",
+            "text": "MÔ PHỎNG HÌNH HỌC — không phải định tuyến.",
+            "color": "oklch(0.882 0.059 254.128)",
+            "background": [
+              158,
+              164,
+              182,
+              1
+            ],
+            "contrast": 1.76,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "strong",
+            "text": "+1125 m",
+            "color": "oklch(0.765 0.177 163.223)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.17,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "Biên khoảng cách: so với ngưỡng ( XA )",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "div",
+            "text": "TRƯỚC",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              35,
+              42,
+              61,
+              1
+            ],
+            "contrast": 5.4,
+            "fontSize": "10px"
+          },
+          {
+            "tag": "div",
+            "text": "SAU",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              35,
+              42,
+              61,
+              1
+            ],
+            "contrast": 5.4,
+            "fontSize": "10px"
+          },
+          {
+            "tag": "div",
+            "text": "THAY ĐỔI",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              35,
+              42,
+              61,
+              1
+            ],
+            "contrast": 5.4,
+            "fontSize": "10px"
+          },
+          {
+            "tag": "span",
+            "text": "ĐỀ XUẤT",
+            "color": "oklch(0.845 0.143 164.978)",
+            "background": [
+              23,
+              88,
+              74,
+              1
+            ],
+            "contrast": 5.44,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "button",
+            "text": "Xoá trạm",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              29,
+              41,
+              61,
+              1
+            ],
+            "contrast": 5.56,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "RULE",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              49,
+              65,
+              88,
+              1
+            ],
+            "contrast": 6.97,
+            "fontSize": "10px"
+          },
+          {
+            "tag": "div",
+            "text": "~ −337 m",
+            "color": "oklch(0.765 0.177 163.223)",
+            "background": [
+              35,
+              42,
+              61,
+              1
+            ],
+            "contrast": 7.33,
+            "fontSize": "16px"
+          },
+          {
+            "tag": "span",
+            "text": "[ TÍNH TOÁN ]",
+            "color": "oklch(0.789 0.154 211.53)",
+            "background": [
+              35,
+              42,
+              61,
+              1
+            ],
+            "contrast": 7.86,
+            "fontSize": "10px"
+          },
+          {
+            "tag": "span",
+            "text": "[ ƯỚC LƯỢNG ]",
+            "color": "oklch(0.828 0.189 84.429)",
+            "background": [
+              35,
+              42,
+              61,
+              1
+            ],
+            "contrast": 8.25,
+            "fontSize": "10px"
+          },
+          {
+            "tag": "span",
+            "text": "[ ƯỚC LƯỢNG ]",
+            "color": "oklch(0.828 0.189 84.429)",
+            "background": [
+              35,
+              42,
+              61,
+              1
+            ],
+            "contrast": 8.25,
+            "fontSize": "10px"
+          },
+          {
+            "tag": "div",
+            "text": "~1,4 km",
+            "color": "oklch(0.879 0.169 91.605)",
+            "background": [
+              35,
+              42,
+              61,
+              1
+            ],
+            "contrast": 9.82,
+            "fontSize": "16px"
+          },
+          {
+            "tag": "div",
+            "text": "1,7 km",
+            "color": "oklch(0.929 0.013 255.508)",
+            "background": [
+              35,
+              42,
+              61,
+              1
+            ],
+            "contrast": 11.53,
+            "fontSize": "16px"
+          }
+        ]
+      },
+      "map": {
+        "rect": {
+          "x": 376,
+          "y": 0,
+          "width": 904,
+          "height": 800,
+          "right": 1280,
+          "bottom": 800
+        }
+      },
+      "activeElement": {
+        "tag": "body",
+        "aria": null,
+        "text": "HN/10% ô đông dân nhất4.450–46.232 ngườiÔ có dân số bằng 0= 0 ngườiCổng mạnh nhấ"
+      }
+    },
+    "1440x900": {
+      "href": "http://127.0.0.1:4173/#tinh=01&m=2d&f=population&v=105.6545,20.9735,9.30,0,0&sim=21.05239,105.61395",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "dpr": 1
+      },
+      "document": {
+        "scrollWidth": 1440,
+        "scrollHeight": 900,
+        "offenders": [
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1179,
+              "y": 1113,
+              "width": 264,
+              "height": 14,
+              "right": 1443,
+              "bottom": 1127
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1271,
+              "y": 1113,
+              "width": 172,
+              "height": 14,
+              "right": 1443,
+              "bottom": 1127
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1172,
+              "y": 1168,
+              "width": 270,
+              "height": 14,
+              "right": 1443,
+              "bottom": 1182
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1271,
+              "y": 1168,
+              "width": 172,
+              "height": 14,
+              "right": 1443,
+              "bottom": 1182
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1176,
+              "y": 1222,
+              "width": 271,
+              "height": 14,
+              "right": 1447,
+              "bottom": 1236
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1276,
+              "y": 1222,
+              "width": 172,
+              "height": 14,
+              "right": 1447,
+              "bottom": 1236
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1180,
+              "y": 1277,
+              "width": 268,
+              "height": 14,
+              "right": 1448,
+              "bottom": 1291
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1276,
+              "y": 1277,
+              "width": 172,
+              "height": 14,
+              "right": 1448,
+              "bottom": 1291
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1183,
+              "y": 1332,
+              "width": 270,
+              "height": 14,
+              "right": 1453,
+              "bottom": 1346
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1282,
+              "y": 1332,
+              "width": 172,
+              "height": 14,
+              "right": 1453,
+              "bottom": 1346
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1177,
+              "y": 1386,
+              "width": 271,
+              "height": 14,
+              "right": 1448,
+              "bottom": 1400
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1276,
+              "y": 1386,
+              "width": 172,
+              "height": 14,
+              "right": 1448,
+              "bottom": 1400
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1175,
+              "y": 1441,
+              "width": 271,
+              "height": 14,
+              "right": 1447,
+              "bottom": 1455
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1275,
+              "y": 1441,
+              "width": 172,
+              "height": 14,
+              "right": 1447,
+              "bottom": 1455
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1180,
+              "y": 1496,
+              "width": 272,
+              "height": 14,
+              "right": 1451,
+              "bottom": 1510
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1280,
+              "y": 1496,
+              "width": 172,
+              "height": 14,
+              "right": 1451,
+              "bottom": 1510
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1180,
+              "y": 1550,
+              "width": 271,
+              "height": 14,
+              "right": 1451,
+              "bottom": 1564
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1280,
+              "y": 1550,
+              "width": 172,
+              "height": 14,
+              "right": 1451,
+              "bottom": 1564
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1176,
+              "y": 1605,
+              "width": 268,
+              "height": 14,
+              "right": 1444,
+              "bottom": 1619
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1273,
+              "y": 1605,
+              "width": 172,
+              "height": 14,
+              "right": 1444,
+              "bottom": 1619
+            }
+          }
+        ]
+      },
+      "panel": {
+        "rect": {
+          "x": 1048,
+          "y": 12,
+          "width": 380,
+          "height": 675,
+          "right": 1428,
+          "bottom": 687
+        },
+        "style": {
+          "background": "oklab(0.981556 -0.00070259 0.00255078 / 0.92)",
+          "color": "rgb(11, 11, 11)",
+          "fontFamily": "\"Be Vietnam Pro\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+          "fontSize": "16px",
+          "lineHeight": "24px",
+          "borderColor": "oklab(0.999994 0.0000455677 0.0000200868 / 0.6)",
+          "borderRadius": "10px",
+          "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0 0 0 / 0.06) 0px 0px 0px 1px, rgba(15, 23, 42, 0.04) 0px 1px 2px 0px, rgba(15, 23, 42, 0.1) 0px 8px 24px -6px, rgba(15, 23, 42, 0.08) 0px 20px 48px -12px"
+        },
+        "scrollHeight": 1286,
+        "clientHeight": 673,
+        "scrollWidth": 368,
+        "clientWidth": 368,
+        "scrollTop": 0,
+        "text": "MÔ PHỎNG TRẠM GIẢ ĐỊNH (21.0524, 105.6140)\nXoá trạm\n\nMÔ PHỎNG HÌNH HỌC — không phải định tuyến. Khoảng cách \"sau\" là ước lượng từ đường chim bay nhân hệ số đi vòng đo tại chỗ, trong bán kính 5 km. Không dự báo nhu cầu, mức sử dụng hay doanh thu.\n\nSÀNG LỌC L6\nRULE\nĐỀ XUẤT\nBiên khoảng cách: +1125 m so với ngưỡng (XA)\n\nĐầu ra của một RULE, không phải số đo — cơ sở khoảng cách: đường chim bay.\n\nTRUNG VỊ CỰ LY THEO DÂN SỐ (BÁN KÍNH 5 KM)\nTRƯỚC [TÍNH TOÁN]\n1,7 km\nSAU [ƯỚC LƯỢNG]\n~1,4 km\nTHAY ĐỔI [ƯỚC LƯỢNG]\n~ −337 m\nKhoảng cách\tTrước [Tính]\tSau [Ước]\tΔ dân số [Ước]\n≤ 1 km\t36.355\t~45.319\t+8.965\n1 – 2 km\t86.440\t~104.167\t+17.727\n2 – 5 km\t76.023\t~49.528\t−26.495\n> 5 km\t284\t~87\t−197\nÔ cải thiện rõ rệt (cận trên p90 < cự ly cũ):\n12 ô · ~31.746 người\nThêm 6 ô · ~2.947 người có thể cải thiện, trong biên sai số\n(giữ cự ly cũ)\n5 Ô XA TRẠM NHẤT CÓ CẢI THIỆN\nƯỚC LƯỢNG\nÔ H3\tTrước [Tính]\tSau [Ước]\n88415dd237fffff\t5,7 km\t~3,1 km\n88415dd235fffff\t5,1 km\t~2,8 km\n88415dd231fffff\t4,8 km\t975 m – ~2,6 km\n88415dd23dfffff\t4,5 km\t950 m – ~2,5 km\n88415dd233fffff\t4,3 km\t~2,5 km\nTRẠM HIỆN HỮU LÂN CẬN (≤ 5 KM)\n13 trạm\nNhượng Quyền Tư Nhân Phan Văn Hợi\n1 cổng · 30 kW· mức sử dụng 0% (2026-06-29 → 2026-07-29)\n3,1 km\nNhượng quyền Luxury - Công ty Go Tat Việt Nam\n8 cổng · 360 kW· mức sử dụng 0% (2026-06-29 → 2026-07-29)\n3,1 km\nBưu cục cấp 1 Bình Phú\n2 cổng · 60 kW· mức sử dụng 33% (2026-06-29 → 2026-07-29)\n3,4 km\nNhượng quyền DIMEC Quân Minh\n6 cổng · 180 kW· mức sử dụng 54% (2026-06-29 → 2026-07-29)\n3,5 km\nNQ VinaCharger HKD Sơn Nhàn\n6 cổng · 300 kW· mức sử dụng 41% (2026-06-29 → 2026-07-29)\n3,6 km\nNQ GW Cty Bình Tuấn\n10 cổng · 307 kW· mức sử dụng 23% (2026-06-29 → 2026-07-29)\n3,7 km\nNhượng quyền GW Công ty Gỗ Việt\n4 cổng · 180 kW· mức sử dụng 43% (2026-06-29 → 2026-07-29)\n3,8 km\nNhượng quyền Hộ kinh doanh Đỗ Văn Hậu\n6 cổng · 127 kW· mức sử dụng 43% (2026-06-29 → 2026-07-29)\n4,5 km\nCửa hàng xăng dầu Đại Thuận\n6 cổng · 300 kW· mức sử dụng 44% (2026-06-29 → 2026-07-29)\n4,6 km\nNQ CÔNG TY TNHH THƯƠNG MẠI VÀ DỊCH VỤ THĂNG THẮNG\n4 cổng · 240 kW· mức sử dụng 48% (2026-06-29 → 2026-07-29)\n4,6 km\nCÔNG TY CỔ PHẦN SẢN XUẤT THƯƠNG MẠI BAO BÌ THẮNG LỢI\n8 cổng · 134 kW· mức sử dụng 10% (2026-06-29 → 2026-07-29)\n4,7 km\nCÔNG TY TNHH KHÍ CÔNG NGHIỆP ĐAN PHƯỢNG\n4 cổng · 67 kW· mức sử dụng 17% (2026-06-29 → 2026-07-29)\n4,7 km\nNQ HỘ KINH DOANH NGUYỄN ĐỨC THIỆN\n10 cổng · 483.5 kW· mức sử dụng 35% (2026-06-29 → 2026-07-29)\n4,9 km\nBán kính mô phỏng: 5.000 m · Hiệu chuẩn v1\nCách tính & giới hạn",
+        "headings": [
+          {
+            "tag": "h3",
+            "text": "Mô phỏng trạm giả định (21.0524, 105.6140)",
+            "style": {
+              "background": "rgba(0, 0, 0, 0)",
+              "color": "oklch(0.968 0.007 247.896)",
+              "fontFamily": "\"Be Vietnam Pro\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+              "fontSize": "12px",
+              "lineHeight": "16px",
+              "borderColor": "oklch(0.968 0.007 247.896)",
+              "borderRadius": "0px",
+              "boxShadow": "none"
+            }
+          }
+        ],
+        "controls": [
+          {
+            "tag": "button",
+            "text": "Xoá trạm",
+            "aria": null,
+            "expanded": null
+          },
+          {
+            "tag": "button",
+            "text": "Cách tính & giới hạn",
+            "aria": null,
+            "expanded": null
+          }
+        ],
+        "monos": [
+          "RULE",
+          "TRƯỚC [TÍNH TOÁN]",
+          "[TÍNH TOÁN]",
+          "SAU [ƯỚC LƯỢNG]",
+          "[ƯỚC LƯỢNG]",
+          "THAY ĐỔI [ƯỚC LƯỢNG]",
+          "[ƯỚC LƯỢNG]",
+          "≤ 1 km",
+          "+8.965",
+          "1 – 2 km",
+          "+17.727",
+          "2 – 5 km",
+          "−26.495",
+          "> 5 km",
+          "−197",
+          "ƯỚC LƯỢNG",
+          "88415dd237fffff",
+          "5,7 km",
+          "~3,1 km",
+          "88415dd235fffff",
+          "5,1 km",
+          "~2,8 km",
+          "88415dd231fffff",
+          "4,8 km",
+          "975 m – ~2,6 km",
+          "88415dd23dfffff",
+          "4,5 km",
+          "950 m – ~2,5 km",
+          "88415dd233fffff",
+          "4,3 km"
+        ],
+        "slateClasses": [
+          "border-slate-700",
+          "text-slate-100",
+          "text-slate-400",
+          "hover:text-slate-200",
+          "bg-slate-800",
+          "hover:bg-slate-700",
+          "bg-slate-800/60",
+          "bg-slate-700",
+          "text-slate-300",
+          "text-slate-500",
+          "bg-slate-900/80",
+          "border-slate-700/50",
+          "text-slate-200",
+          "divide-slate-800",
+          "border-slate-700/60",
+          "bg-slate-900/60",
+          "border-slate-800"
+        ],
+        "textColors": [
+          "oklch(0.968 0.007 247.896)",
+          "oklch(0.704 0.04 256.788)",
+          "oklch(0.882 0.059 254.128)",
+          "oklch(0.869 0.022 252.894)",
+          "oklch(0.845 0.143 164.978)",
+          "oklch(0.554 0.046 257.417)",
+          "oklch(0.789 0.154 211.53)",
+          "oklch(0.828 0.189 84.429)",
+          "oklch(0.879 0.169 91.605)",
+          "oklch(0.765 0.177 163.223)",
+          "oklab(0.828 0.0183479 0.188107 / 0.9)",
+          "oklch(0.865 0.127 207.078)"
+        ],
+        "visibleContrast": [
+          {
+            "tag": "h3",
+            "text": "Mô phỏng trạm giả định ( 21.0524 , 105.6140 )",
+            "color": "oklch(0.968 0.007 247.896)",
+            "background": [
+              248,
+              248,
+              247,
+              1
+            ],
+            "contrast": 1.03,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "p",
+            "text": "Đầu ra của một RULE, không phải số đo — cơ sở khoảng cách: đường chim bay.",
+            "color": "oklch(0.554 0.046 257.417)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.14,
+            "fontSize": "11px"
+          },
+          {
+            "tag": "span",
+            "text": "Sàng lọc L6",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "Trung vị cự ly theo dân số (bán kính 5 km)",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Khoảng cách",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Trước [ Tính ]",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Sau [ Ước ]",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Δ dân số [ Ước ]",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "+17.727",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "−26.495",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "−197",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "Ô cải thiện rõ rệt (cận trên p90 < cự ly cũ):",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "p",
+            "text": "Khoảng cách \"sau\" là ước lượng từ đường chim bay nhân hệ số đi vòng đo tại chỗ, trong bán kính 5 km. Không dự báo nhu cầ",
+            "color": "oklch(0.882 0.059 254.128)",
+            "background": [
+              158,
+              164,
+              182,
+              1
+            ],
+            "contrast": 1.76,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "strong",
+            "text": "MÔ PHỎNG HÌNH HỌC — không phải định tuyến.",
+            "color": "oklch(0.882 0.059 254.128)",
+            "background": [
+              158,
+              164,
+              182,
+              1
+            ],
+            "contrast": 1.76,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "strong",
+            "text": "+1125 m",
+            "color": "oklch(0.765 0.177 163.223)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.17,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "+8.965",
+            "color": "oklch(0.765 0.177 163.223)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.17,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "12 ô · ~ 31.746 người",
+            "color": "oklch(0.845 0.143 164.978)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.76,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "Biên khoảng cách: so với ngưỡng ( XA )",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "≤ 1 km",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "36.355",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "1 – 2 km",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "86.440",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "2 – 5 km",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "76.023",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "> 5 km",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "284",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "~ 45.319",
+            "color": "oklch(0.879 0.169 91.605)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.9,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "~ 104.167",
+            "color": "oklch(0.879 0.169 91.605)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.9,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "~ 49.528",
+            "color": "oklch(0.879 0.169 91.605)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.9,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "~ 87",
+            "color": "oklch(0.879 0.169 91.605)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.9,
+            "fontSize": "12px"
+          }
+        ]
+      },
+      "map": {
+        "rect": {
+          "x": 396,
+          "y": 0,
+          "width": 1044,
+          "height": 900,
+          "right": 1440,
+          "bottom": 900
+        }
+      },
+      "activeElement": {
+        "tag": "body",
+        "aria": null,
+        "text": "HN/10% ô đông dân nhất4.450–46.232 ngườiÔ có dân số bằng 0= 0 ngườiCổng mạnh nhấ"
+      }
+    },
+    "1600x1000": {
+      "href": "http://127.0.0.1:4173/#tinh=01&m=2d&f=population&v=105.6545,20.9735,9.40,0,0&sim=21.05239,105.61395",
+      "viewport": {
+        "width": 1600,
+        "height": 1000,
+        "dpr": 1
+      },
+      "document": {
+        "scrollWidth": 1600,
+        "scrollHeight": 1000,
+        "offenders": [
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1339,
+              "y": 1113,
+              "width": 264,
+              "height": 14,
+              "right": 1603,
+              "bottom": 1127
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1431,
+              "y": 1113,
+              "width": 172,
+              "height": 14,
+              "right": 1603,
+              "bottom": 1127
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1332,
+              "y": 1168,
+              "width": 270,
+              "height": 14,
+              "right": 1603,
+              "bottom": 1182
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1431,
+              "y": 1168,
+              "width": 172,
+              "height": 14,
+              "right": 1603,
+              "bottom": 1182
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1336,
+              "y": 1222,
+              "width": 271,
+              "height": 14,
+              "right": 1607,
+              "bottom": 1236
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1436,
+              "y": 1222,
+              "width": 172,
+              "height": 14,
+              "right": 1607,
+              "bottom": 1236
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1340,
+              "y": 1277,
+              "width": 268,
+              "height": 14,
+              "right": 1608,
+              "bottom": 1291
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1436,
+              "y": 1277,
+              "width": 172,
+              "height": 14,
+              "right": 1608,
+              "bottom": 1291
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1343,
+              "y": 1332,
+              "width": 270,
+              "height": 14,
+              "right": 1613,
+              "bottom": 1346
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1442,
+              "y": 1332,
+              "width": 172,
+              "height": 14,
+              "right": 1613,
+              "bottom": 1346
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1337,
+              "y": 1386,
+              "width": 271,
+              "height": 14,
+              "right": 1608,
+              "bottom": 1400
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1436,
+              "y": 1386,
+              "width": 172,
+              "height": 14,
+              "right": 1608,
+              "bottom": 1400
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1335,
+              "y": 1441,
+              "width": 271,
+              "height": 14,
+              "right": 1607,
+              "bottom": 1455
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1435,
+              "y": 1441,
+              "width": 172,
+              "height": 14,
+              "right": 1607,
+              "bottom": 1455
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1340,
+              "y": 1496,
+              "width": 272,
+              "height": 14,
+              "right": 1611,
+              "bottom": 1510
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1440,
+              "y": 1496,
+              "width": 172,
+              "height": 14,
+              "right": 1611,
+              "bottom": 1510
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1340,
+              "y": 1550,
+              "width": 271,
+              "height": 14,
+              "right": 1611,
+              "bottom": 1564
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1440,
+              "y": 1550,
+              "width": 172,
+              "height": 14,
+              "right": 1611,
+              "bottom": 1564
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1336,
+              "y": 1605,
+              "width": 268,
+              "height": 14,
+              "right": 1604,
+              "bottom": 1619
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1433,
+              "y": 1605,
+              "width": 172,
+              "height": 14,
+              "right": 1604,
+              "bottom": 1619
+            }
+          }
+        ]
+      },
+      "panel": {
+        "rect": {
+          "x": 1208,
+          "y": 12,
+          "width": 380,
+          "height": 750,
+          "right": 1588,
+          "bottom": 762
+        },
+        "style": {
+          "background": "oklab(0.981556 -0.00070259 0.00255078 / 0.92)",
+          "color": "rgb(11, 11, 11)",
+          "fontFamily": "\"Be Vietnam Pro\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+          "fontSize": "16px",
+          "lineHeight": "24px",
+          "borderColor": "oklab(0.999994 0.0000455677 0.0000200868 / 0.6)",
+          "borderRadius": "10px",
+          "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0 0 0 / 0.06) 0px 0px 0px 1px, rgba(15, 23, 42, 0.04) 0px 1px 2px 0px, rgba(15, 23, 42, 0.1) 0px 8px 24px -6px, rgba(15, 23, 42, 0.08) 0px 20px 48px -12px"
+        },
+        "scrollHeight": 1286,
+        "clientHeight": 748,
+        "scrollWidth": 368,
+        "clientWidth": 368,
+        "scrollTop": 0,
+        "text": "MÔ PHỎNG TRẠM GIẢ ĐỊNH (21.0524, 105.6140)\nXoá trạm\n\nMÔ PHỎNG HÌNH HỌC — không phải định tuyến. Khoảng cách \"sau\" là ước lượng từ đường chim bay nhân hệ số đi vòng đo tại chỗ, trong bán kính 5 km. Không dự báo nhu cầu, mức sử dụng hay doanh thu.\n\nSÀNG LỌC L6\nRULE\nĐỀ XUẤT\nBiên khoảng cách: +1125 m so với ngưỡng (XA)\n\nĐầu ra của một RULE, không phải số đo — cơ sở khoảng cách: đường chim bay.\n\nTRUNG VỊ CỰ LY THEO DÂN SỐ (BÁN KÍNH 5 KM)\nTRƯỚC [TÍNH TOÁN]\n1,7 km\nSAU [ƯỚC LƯỢNG]\n~1,4 km\nTHAY ĐỔI [ƯỚC LƯỢNG]\n~ −337 m\nKhoảng cách\tTrước [Tính]\tSau [Ước]\tΔ dân số [Ước]\n≤ 1 km\t36.355\t~45.319\t+8.965\n1 – 2 km\t86.440\t~104.167\t+17.727\n2 – 5 km\t76.023\t~49.528\t−26.495\n> 5 km\t284\t~87\t−197\nÔ cải thiện rõ rệt (cận trên p90 < cự ly cũ):\n12 ô · ~31.746 người\nThêm 6 ô · ~2.947 người có thể cải thiện, trong biên sai số\n(giữ cự ly cũ)\n5 Ô XA TRẠM NHẤT CÓ CẢI THIỆN\nƯỚC LƯỢNG\nÔ H3\tTrước [Tính]\tSau [Ước]\n88415dd237fffff\t5,7 km\t~3,1 km\n88415dd235fffff\t5,1 km\t~2,8 km\n88415dd231fffff\t4,8 km\t975 m – ~2,6 km\n88415dd23dfffff\t4,5 km\t950 m – ~2,5 km\n88415dd233fffff\t4,3 km\t~2,5 km\nTRẠM HIỆN HỮU LÂN CẬN (≤ 5 KM)\n13 trạm\nNhượng Quyền Tư Nhân Phan Văn Hợi\n1 cổng · 30 kW· mức sử dụng 0% (2026-06-29 → 2026-07-29)\n3,1 km\nNhượng quyền Luxury - Công ty Go Tat Việt Nam\n8 cổng · 360 kW· mức sử dụng 0% (2026-06-29 → 2026-07-29)\n3,1 km\nBưu cục cấp 1 Bình Phú\n2 cổng · 60 kW· mức sử dụng 33% (2026-06-29 → 2026-07-29)\n3,4 km\nNhượng quyền DIMEC Quân Minh\n6 cổng · 180 kW· mức sử dụng 54% (2026-06-29 → 2026-07-29)\n3,5 km\nNQ VinaCharger HKD Sơn Nhàn\n6 cổng · 300 kW· mức sử dụng 41% (2026-06-29 → 2026-07-29)\n3,6 km\nNQ GW Cty Bình Tuấn\n10 cổng · 307 kW· mức sử dụng 23% (2026-06-29 → 2026-07-29)\n3,7 km\nNhượng quyền GW Công ty Gỗ Việt\n4 cổng · 180 kW· mức sử dụng 43% (2026-06-29 → 2026-07-29)\n3,8 km\nNhượng quyền Hộ kinh doanh Đỗ Văn Hậu\n6 cổng · 127 kW· mức sử dụng 43% (2026-06-29 → 2026-07-29)\n4,5 km\nCửa hàng xăng dầu Đại Thuận\n6 cổng · 300 kW· mức sử dụng 44% (2026-06-29 → 2026-07-29)\n4,6 km\nNQ CÔNG TY TNHH THƯƠNG MẠI VÀ DỊCH VỤ THĂNG THẮNG\n4 cổng · 240 kW· mức sử dụng 48% (2026-06-29 → 2026-07-29)\n4,6 km\nCÔNG TY CỔ PHẦN SẢN XUẤT THƯƠNG MẠI BAO BÌ THẮNG LỢI\n8 cổng · 134 kW· mức sử dụng 10% (2026-06-29 → 2026-07-29)\n4,7 km\nCÔNG TY TNHH KHÍ CÔNG NGHIỆP ĐAN PHƯỢNG\n4 cổng · 67 kW· mức sử dụng 17% (2026-06-29 → 2026-07-29)\n4,7 km\nNQ HỘ KINH DOANH NGUYỄN ĐỨC THIỆN\n10 cổng · 483.5 kW· mức sử dụng 35% (2026-06-29 → 2026-07-29)\n4,9 km\nBán kính mô phỏng: 5.000 m · Hiệu chuẩn v1\nCách tính & giới hạn",
+        "headings": [
+          {
+            "tag": "h3",
+            "text": "Mô phỏng trạm giả định (21.0524, 105.6140)",
+            "style": {
+              "background": "rgba(0, 0, 0, 0)",
+              "color": "oklch(0.968 0.007 247.896)",
+              "fontFamily": "\"Be Vietnam Pro\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+              "fontSize": "12px",
+              "lineHeight": "16px",
+              "borderColor": "oklch(0.968 0.007 247.896)",
+              "borderRadius": "0px",
+              "boxShadow": "none"
+            }
+          }
+        ],
+        "controls": [
+          {
+            "tag": "button",
+            "text": "Xoá trạm",
+            "aria": null,
+            "expanded": null
+          },
+          {
+            "tag": "button",
+            "text": "Cách tính & giới hạn",
+            "aria": null,
+            "expanded": null
+          }
+        ],
+        "monos": [
+          "RULE",
+          "TRƯỚC [TÍNH TOÁN]",
+          "[TÍNH TOÁN]",
+          "SAU [ƯỚC LƯỢNG]",
+          "[ƯỚC LƯỢNG]",
+          "THAY ĐỔI [ƯỚC LƯỢNG]",
+          "[ƯỚC LƯỢNG]",
+          "≤ 1 km",
+          "+8.965",
+          "1 – 2 km",
+          "+17.727",
+          "2 – 5 km",
+          "−26.495",
+          "> 5 km",
+          "−197",
+          "ƯỚC LƯỢNG",
+          "88415dd237fffff",
+          "5,7 km",
+          "~3,1 km",
+          "88415dd235fffff",
+          "5,1 km",
+          "~2,8 km",
+          "88415dd231fffff",
+          "4,8 km",
+          "975 m – ~2,6 km",
+          "88415dd23dfffff",
+          "4,5 km",
+          "950 m – ~2,5 km",
+          "88415dd233fffff",
+          "4,3 km"
+        ],
+        "slateClasses": [
+          "border-slate-700",
+          "text-slate-100",
+          "text-slate-400",
+          "hover:text-slate-200",
+          "bg-slate-800",
+          "hover:bg-slate-700",
+          "bg-slate-800/60",
+          "bg-slate-700",
+          "text-slate-300",
+          "text-slate-500",
+          "bg-slate-900/80",
+          "border-slate-700/50",
+          "text-slate-200",
+          "divide-slate-800",
+          "border-slate-700/60",
+          "bg-slate-900/60",
+          "border-slate-800"
+        ],
+        "textColors": [
+          "oklch(0.968 0.007 247.896)",
+          "oklch(0.704 0.04 256.788)",
+          "oklch(0.882 0.059 254.128)",
+          "oklch(0.869 0.022 252.894)",
+          "oklch(0.845 0.143 164.978)",
+          "oklch(0.554 0.046 257.417)",
+          "oklch(0.789 0.154 211.53)",
+          "oklch(0.828 0.189 84.429)",
+          "oklch(0.879 0.169 91.605)",
+          "oklch(0.765 0.177 163.223)",
+          "oklab(0.828 0.0183479 0.188107 / 0.9)",
+          "oklch(0.865 0.127 207.078)"
+        ],
+        "visibleContrast": [
+          {
+            "tag": "h3",
+            "text": "Mô phỏng trạm giả định ( 21.0524 , 105.6140 )",
+            "color": "oklch(0.968 0.007 247.896)",
+            "background": [
+              248,
+              248,
+              247,
+              1
+            ],
+            "contrast": 1.03,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "p",
+            "text": "Đầu ra của một RULE, không phải số đo — cơ sở khoảng cách: đường chim bay.",
+            "color": "oklch(0.554 0.046 257.417)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.14,
+            "fontSize": "11px"
+          },
+          {
+            "tag": "span",
+            "text": "Sàng lọc L6",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "Trung vị cự ly theo dân số (bán kính 5 km)",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Khoảng cách",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Trước [ Tính ]",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Sau [ Ước ]",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Δ dân số [ Ước ]",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "+17.727",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "−26.495",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "−197",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "Ô cải thiện rõ rệt (cận trên p90 < cự ly cũ):",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "p",
+            "text": "Khoảng cách \"sau\" là ước lượng từ đường chim bay nhân hệ số đi vòng đo tại chỗ, trong bán kính 5 km. Không dự báo nhu cầ",
+            "color": "oklch(0.882 0.059 254.128)",
+            "background": [
+              158,
+              164,
+              182,
+              1
+            ],
+            "contrast": 1.76,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "strong",
+            "text": "MÔ PHỎNG HÌNH HỌC — không phải định tuyến.",
+            "color": "oklch(0.882 0.059 254.128)",
+            "background": [
+              158,
+              164,
+              182,
+              1
+            ],
+            "contrast": 1.76,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "strong",
+            "text": "+1125 m",
+            "color": "oklch(0.765 0.177 163.223)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.17,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "+8.965",
+            "color": "oklch(0.765 0.177 163.223)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.17,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "Thêm 6 ô · ~ 2.947 người có thể cải thiện, trong biên sai số",
+            "color": "oklab(0.828 0.0183479 0.188107 / 0.9)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.24,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "(giữ cự ly cũ)",
+            "color": "oklab(0.828 0.0183479 0.188107 / 0.9)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.24,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "12 ô · ~ 31.746 người",
+            "color": "oklch(0.845 0.143 164.978)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.76,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "Biên khoảng cách: so với ngưỡng ( XA )",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "≤ 1 km",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "36.355",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "1 – 2 km",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "86.440",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "2 – 5 km",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "76.023",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "> 5 km",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "284",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "~ 45.319",
+            "color": "oklch(0.879 0.169 91.605)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.9,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "~ 104.167",
+            "color": "oklch(0.879 0.169 91.605)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.9,
+            "fontSize": "12px"
+          }
+        ]
+      },
+      "map": {
+        "rect": {
+          "x": 396,
+          "y": 0,
+          "width": 1204,
+          "height": 1000,
+          "right": 1600,
+          "bottom": 1000
+        }
+      },
+      "activeElement": {
+        "tag": "body",
+        "aria": null,
+        "text": "HN/10% ô đông dân nhất4.450–46.232 ngườiÔ có dân số bằng 0= 0 ngườiCổng mạnh nhấ"
+      }
+    }
+  },
+  "method_disclosure": {
+    "focused": true,
+    "ariaExpanded": null,
+    "panelText": "/\n10% ô đông dân nhất\n4.450–46.232 người\nÔ có dân số bằng 0\n= 0 người\nCổng mạnh nhất ≥ 61 kW\nCổng mạnh nhất ≤ 22 kW\nChưa rõ công suất cổng\nTỔNG QUAN\nÔ H3\n4.400\nTrạm\n710\nCổng\n7.785\nCông suất\n232,8 MW\nLENS\ngóc nhìn phân tích\nCẦU\nai cần sạc\nCUNG\nđã có gì\nTIẾP CẬN\nđi xa ở đâu\nSỬ DỤNG\nbận lúc nào\nCƠ HỘI\nkhoảng trống ưu tiên\nCÂU HỎI\nDân số\nH3\n\nngười, trên ô ~0,74 km²\n\nBậc\nGradient\n\ncùng dân số, khác dạng hình · điểm nhìn 2D\n\nÔ H3\nĐỒNG MỨC\nBẢN ĐỒ NHIỆT\nCẦU × CUNG\nĐỒNG MỨC + TRẠM\nTÍN HIỆU\nmàu trên bản đồ nghĩa là gì\n0\n0,1\n0,2\n0,6\n1\n1,8\n3,4\n→ 46,2\nnghìn người\n▲ 44 ô vượt trần · lớn nhất 46,2\nđọc thô · ô ~10 px\nĐơn vị và cách chia bậc ▸\nCẦU\nPhân bố dân số ô H3\nsố ô\nDân số trên ô H3 · người\ntrung vị\n=0\n1\n10\n100\n1k\n10k\n46,2k\n517\n0\n0\n0\n1\n2\n3\n6\n10\n16\n26\n43\n68\n109\n174\n278\n443\n706\n1,1k\n1,8k\n2,8k\n4,5k\n7,2k\n11,5k\n18,3k\n29,1k\n–\n0\n1\n2\n3\n6\n10\n16\n26\n43\n68\n109\n174\n278\n443\n706\n1,1k\n1,8k\n2,8k\n4,5k\n7,2k\n11,5k\n18,3k\n29,1k\n46,2k\nLọc\nkéo ngang để lọc khoảng dân số · bấm ô 0 để chỉ xem ô không dân\nGIỚI HẠN\nđọc trước khi tin\n\nPhân bổ dasymetric: bề mặt WorldPop 2025 neo theo số dân công bố của từng xã VNSDI.\n\n4.400/4.400 ô có giá trị — không ô nào khuyết.\n\nĐI TIẾP\ntừ cả tập sang một đối tượng\n\nBấm một ô H3 hoặc một xã trên bản đồ để mở bằng chứng.\n\nRanh giới xã\nTrạm sạc\nNGUỒN\nxuất 2026-08-21\n▸",
+    "afterClick": {
+      "href": "http://127.0.0.1:4173/#tinh=01&m=2d&f=population&v=105.6545,20.9735,9.40,0,0&sim=21.05239,105.61395",
+      "viewport": {
+        "width": 1600,
+        "height": 1000,
+        "dpr": 1
+      },
+      "document": {
+        "scrollWidth": 1600,
+        "scrollHeight": 1000,
+        "offenders": [
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1339,
+              "y": 575,
+              "width": 264,
+              "height": 14,
+              "right": 1603,
+              "bottom": 589
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1431,
+              "y": 575,
+              "width": 172,
+              "height": 14,
+              "right": 1603,
+              "bottom": 589
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1332,
+              "y": 630,
+              "width": 270,
+              "height": 14,
+              "right": 1603,
+              "bottom": 644
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1431,
+              "y": 630,
+              "width": 172,
+              "height": 14,
+              "right": 1603,
+              "bottom": 644
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1336,
+              "y": 684,
+              "width": 271,
+              "height": 14,
+              "right": 1607,
+              "bottom": 698
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1436,
+              "y": 684,
+              "width": 172,
+              "height": 14,
+              "right": 1607,
+              "bottom": 698
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1340,
+              "y": 739,
+              "width": 268,
+              "height": 14,
+              "right": 1608,
+              "bottom": 753
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1436,
+              "y": 739,
+              "width": 172,
+              "height": 14,
+              "right": 1608,
+              "bottom": 753
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1343,
+              "y": 794,
+              "width": 270,
+              "height": 14,
+              "right": 1613,
+              "bottom": 808
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1442,
+              "y": 794,
+              "width": 172,
+              "height": 14,
+              "right": 1613,
+              "bottom": 808
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1337,
+              "y": 848,
+              "width": 271,
+              "height": 14,
+              "right": 1608,
+              "bottom": 862
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1436,
+              "y": 848,
+              "width": 172,
+              "height": 14,
+              "right": 1608,
+              "bottom": 862
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1335,
+              "y": 903,
+              "width": 271,
+              "height": 14,
+              "right": 1607,
+              "bottom": 917
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1435,
+              "y": 903,
+              "width": 172,
+              "height": 14,
+              "right": 1607,
+              "bottom": 917
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1340,
+              "y": 958,
+              "width": 272,
+              "height": 14,
+              "right": 1611,
+              "bottom": 972
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1440,
+              "y": 958,
+              "width": 172,
+              "height": 14,
+              "right": 1611,
+              "bottom": 972
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1340,
+              "y": 1012,
+              "width": 271,
+              "height": 14,
+              "right": 1611,
+              "bottom": 1026
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1440,
+              "y": 1012,
+              "width": 172,
+              "height": 14,
+              "right": 1611,
+              "bottom": 1026
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "ml-1.5 text-cyan-300",
+            "rect": {
+              "x": 1336,
+              "y": 1067,
+              "width": 268,
+              "height": 14,
+              "right": 1604,
+              "bottom": 1081
+            }
+          },
+          {
+            "tag": "span",
+            "cls": "text-slate-500",
+            "rect": {
+              "x": 1433,
+              "y": 1067,
+              "width": 172,
+              "height": 14,
+              "right": 1604,
+              "bottom": 1081
+            }
+          }
+        ]
+      },
+      "panel": {
+        "rect": {
+          "x": 1208,
+          "y": 12,
+          "width": 380,
+          "height": 750,
+          "right": 1588,
+          "bottom": 762
+        },
+        "style": {
+          "background": "oklab(0.981556 -0.00070259 0.00255078 / 0.92)",
+          "color": "rgb(11, 11, 11)",
+          "fontFamily": "\"Be Vietnam Pro\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+          "fontSize": "16px",
+          "lineHeight": "24px",
+          "borderColor": "oklab(0.999994 0.0000455677 0.0000200868 / 0.6)",
+          "borderRadius": "10px",
+          "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0 0 0 / 0.06) 0px 0px 0px 1px, rgba(15, 23, 42, 0.04) 0px 1px 2px 0px, rgba(15, 23, 42, 0.1) 0px 8px 24px -6px, rgba(15, 23, 42, 0.08) 0px 20px 48px -12px"
+        },
+        "scrollHeight": 1659,
+        "clientHeight": 748,
+        "scrollWidth": 368,
+        "clientWidth": 368,
+        "scrollTop": 538,
+        "text": "MÔ PHỎNG TRẠM GIẢ ĐỊNH (21.0524, 105.6140)\nXoá trạm\n\nMÔ PHỎNG HÌNH HỌC — không phải định tuyến. Khoảng cách \"sau\" là ước lượng từ đường chim bay nhân hệ số đi vòng đo tại chỗ, trong bán kính 5 km. Không dự báo nhu cầu, mức sử dụng hay doanh thu.\n\nSÀNG LỌC L6\nRULE\nĐỀ XUẤT\nBiên khoảng cách: +1125 m so với ngưỡng (XA)\n\nĐầu ra của một RULE, không phải số đo — cơ sở khoảng cách: đường chim bay.\n\nTRUNG VỊ CỰ LY THEO DÂN SỐ (BÁN KÍNH 5 KM)\nTRƯỚC [TÍNH TOÁN]\n1,7 km\nSAU [ƯỚC LƯỢNG]\n~1,4 km\nTHAY ĐỔI [ƯỚC LƯỢNG]\n~ −337 m\nKhoảng cách\tTrước [Tính]\tSau [Ước]\tΔ dân số [Ước]\n≤ 1 km\t36.355\t~45.319\t+8.965\n1 – 2 km\t86.440\t~104.167\t+17.727\n2 – 5 km\t76.023\t~49.528\t−26.495\n> 5 km\t284\t~87\t−197\nÔ cải thiện rõ rệt (cận trên p90 < cự ly cũ):\n12 ô · ~31.746 người\nThêm 6 ô · ~2.947 người có thể cải thiện, trong biên sai số\n(giữ cự ly cũ)\n5 Ô XA TRẠM NHẤT CÓ CẢI THIỆN\nƯỚC LƯỢNG\nÔ H3\tTrước [Tính]\tSau [Ước]\n88415dd237fffff\t5,7 km\t~3,1 km\n88415dd235fffff\t5,1 km\t~2,8 km\n88415dd231fffff\t4,8 km\t975 m – ~2,6 km\n88415dd23dfffff\t4,5 km\t950 m – ~2,5 km\n88415dd233fffff\t4,3 km\t~2,5 km\nTRẠM HIỆN HỮU LÂN CẬN (≤ 5 KM)\n13 trạm\nNhượng Quyền Tư Nhân Phan Văn Hợi\n1 cổng · 30 kW· mức sử dụng 0% (2026-06-29 → 2026-07-29)\n3,1 km\nNhượng quyền Luxury - Công ty Go Tat Việt Nam\n8 cổng · 360 kW· mức sử dụng 0% (2026-06-29 → 2026-07-29)\n3,1 km\nBưu cục cấp 1 Bình Phú\n2 cổng · 60 kW· mức sử dụng 33% (2026-06-29 → 2026-07-29)\n3,4 km\nNhượng quyền DIMEC Quân Minh\n6 cổng · 180 kW· mức sử dụng 54% (2026-06-29 → 2026-07-29)\n3,5 km\nNQ VinaCharger HKD Sơn Nhàn\n6 cổng · 300 kW· mức sử dụng 41% (2026-06-29 → 2026-07-29)\n3,6 km\nNQ GW Cty Bình Tuấn\n10 cổng · 307 kW· mức sử dụng 23% (2026-06-29 → 2026-07-29)\n3,7 km\nNhượng quyền GW Công ty Gỗ Việt\n4 cổng · 180 kW· mức sử dụng 43% (2026-06-29 → 2026-07-29)\n3,8 km\nNhượng quyền Hộ kinh doanh Đỗ Văn Hậu\n6 cổng · 127 kW· mức sử dụng 43% (2026-06-29 → 2026-07-29)\n4,5 km\nCửa hàng xăng dầu Đại Thuận\n6 cổng · 300 kW· mức sử dụng 44% (2026-06-29 → 2026-07-29)\n4,6 km\nNQ CÔNG TY TNHH THƯƠNG MẠI VÀ DỊCH VỤ THĂNG THẮNG\n4 cổng · 240 kW· mức sử dụng 48% (2026-06-29 → 2026-07-29)\n4,6 km\nCÔNG TY CỔ PHẦN SẢN XUẤT THƯƠNG MẠI BAO BÌ THẮNG LỢI\n8 cổng · 134 kW· mức sử dụng 10% (2026-06-29 → 2026-07-29)\n4,7 km\nCÔNG TY TNHH KHÍ CÔNG NGHIỆP ĐAN PHƯỢNG\n4 cổng · 67 kW· mức sử dụng 17% (2026-06-29 → 2026-07-29)\n4,7 km\nNQ HỘ KINH DOANH NGUYỄN ĐỨC THIỆN\n10 cổng · 483.5 kW· mức sử dụng 35% (2026-06-29 → 2026-07-29)\n4,9 km\nBán kính mô phỏng: 5.000 m · Hiệu chuẩn v1\nCách tính & giới hạn\n\nCách tính: với mỗi ô trong bán kính 5 km, khoảng cách tới trạm giả định được ước lượng bằng đường chim bay × hệ số đi vòng (chọn theo dải khoảng cách và láng giềng của ô, hiệu chuẩn riêng cho tỉnh này). Kiểm chứng trên 4.310 ô của tỉnh: 66 % nằm trong ±20 %; cận trên giữ mức vượt ≈ 9,7 %. Dưới 1 km sai số lớn hơn nên chỉ hiển thị khoảng, không hiển thị một con số. Ô hiện không tới được theo mạng đường thì không ước lượng được và được đếm riêng.\n\nDữ liệu trạm chốt ngày 2026-08-21; mạng trạm đổi thì kết quả đổi. Mức sử dụng đo trong cửa sổ 30 ngày, gần như toàn bộ thuộc một nhà vận hành. Bộ dữ liệu không chứa cơ sở để ước lượng: giảm tải trạm hiện có · mức sử dụng tương lai · doanh thu · nhu cầu xe điện tương lai — bảng này cố ý không hiển thị chúng. Kết quả SÀNG LỌC là đầu ra của một quy tắc chính sách, không phải một số đo.",
+        "headings": [
+          {
+            "tag": "h3",
+            "text": "Mô phỏng trạm giả định (21.0524, 105.6140)",
+            "style": {
+              "background": "rgba(0, 0, 0, 0)",
+              "color": "oklch(0.968 0.007 247.896)",
+              "fontFamily": "\"Be Vietnam Pro\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+              "fontSize": "12px",
+              "lineHeight": "16px",
+              "borderColor": "oklch(0.968 0.007 247.896)",
+              "borderRadius": "0px",
+              "boxShadow": "none"
+            }
+          }
+        ],
+        "controls": [
+          {
+            "tag": "button",
+            "text": "Xoá trạm",
+            "aria": null,
+            "expanded": null
+          },
+          {
+            "tag": "button",
+            "text": "Cách tính & giới hạn",
+            "aria": null,
+            "expanded": null
+          }
+        ],
+        "monos": [
+          "RULE",
+          "TRƯỚC [TÍNH TOÁN]",
+          "[TÍNH TOÁN]",
+          "SAU [ƯỚC LƯỢNG]",
+          "[ƯỚC LƯỢNG]",
+          "THAY ĐỔI [ƯỚC LƯỢNG]",
+          "[ƯỚC LƯỢNG]",
+          "≤ 1 km",
+          "+8.965",
+          "1 – 2 km",
+          "+17.727",
+          "2 – 5 km",
+          "−26.495",
+          "> 5 km",
+          "−197",
+          "ƯỚC LƯỢNG",
+          "88415dd237fffff",
+          "5,7 km",
+          "~3,1 km",
+          "88415dd235fffff",
+          "5,1 km",
+          "~2,8 km",
+          "88415dd231fffff",
+          "4,8 km",
+          "975 m – ~2,6 km",
+          "88415dd23dfffff",
+          "4,5 km",
+          "950 m – ~2,5 km",
+          "88415dd233fffff",
+          "4,3 km"
+        ],
+        "slateClasses": [
+          "border-slate-700",
+          "text-slate-100",
+          "text-slate-400",
+          "hover:text-slate-200",
+          "bg-slate-800",
+          "hover:bg-slate-700",
+          "bg-slate-800/60",
+          "bg-slate-700",
+          "text-slate-300",
+          "text-slate-500",
+          "bg-slate-900/80",
+          "border-slate-700/50",
+          "text-slate-200",
+          "divide-slate-800",
+          "border-slate-700/60",
+          "bg-slate-900/60",
+          "border-slate-800",
+          "bg-slate-900"
+        ],
+        "textColors": [
+          "oklch(0.968 0.007 247.896)",
+          "oklch(0.704 0.04 256.788)",
+          "oklch(0.882 0.059 254.128)",
+          "oklch(0.869 0.022 252.894)",
+          "oklch(0.845 0.143 164.978)",
+          "oklch(0.554 0.046 257.417)",
+          "oklch(0.789 0.154 211.53)",
+          "oklch(0.828 0.189 84.429)",
+          "oklch(0.879 0.169 91.605)",
+          "oklch(0.765 0.177 163.223)",
+          "oklab(0.828 0.0183479 0.188107 / 0.9)",
+          "oklch(0.865 0.127 207.078)"
+        ],
+        "visibleContrast": [
+          {
+            "tag": "th",
+            "text": "Khoảng cách",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Trước [ Tính ]",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Sau [ Ước ]",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Δ dân số [ Ước ]",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "+17.727",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "−26.495",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "−197",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "Ô cải thiện rõ rệt (cận trên p90 < cự ly cũ):",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "5 ô xa trạm nhất có cải thiện",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Ô H3",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Trước [ Tính ]",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "th",
+            "text": "Sau [ Ước ]",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "88415dd237fffff",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "11px"
+          },
+          {
+            "tag": "td",
+            "text": "88415dd235fffff",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "11px"
+          },
+          {
+            "tag": "td",
+            "text": "88415dd231fffff",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "11px"
+          },
+          {
+            "tag": "td",
+            "text": "88415dd23dfffff",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "11px"
+          },
+          {
+            "tag": "td",
+            "text": "88415dd233fffff",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "11px"
+          },
+          {
+            "tag": "span",
+            "text": "Trạm hiện hữu lân cận (≤ 5 km)",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "13 trạm",
+            "color": "oklch(0.704 0.04 256.788)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 1.6,
+            "fontSize": "10px"
+          },
+          {
+            "tag": "td",
+            "text": "+8.965",
+            "color": "oklch(0.765 0.177 163.223)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.17,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "( 2026-06-29 → 2026-07-29 )",
+            "color": "oklch(0.554 0.046 257.417)",
+            "background": [
+              55,
+              64,
+              80,
+              1
+            ],
+            "contrast": 2.2,
+            "fontSize": "11px"
+          },
+          {
+            "tag": "span",
+            "text": "( 2026-06-29 → 2026-07-29 )",
+            "color": "oklch(0.554 0.046 257.417)",
+            "background": [
+              55,
+              64,
+              80,
+              1
+            ],
+            "contrast": 2.2,
+            "fontSize": "11px"
+          },
+          {
+            "tag": "span",
+            "text": "( 2026-06-29 → 2026-07-29 )",
+            "color": "oklch(0.554 0.046 257.417)",
+            "background": [
+              55,
+              64,
+              80,
+              1
+            ],
+            "contrast": 2.2,
+            "fontSize": "11px"
+          },
+          {
+            "tag": "span",
+            "text": "( 2026-06-29 → 2026-07-29 )",
+            "color": "oklch(0.554 0.046 257.417)",
+            "background": [
+              55,
+              64,
+              80,
+              1
+            ],
+            "contrast": 2.2,
+            "fontSize": "11px"
+          },
+          {
+            "tag": "span",
+            "text": "( 2026-06-29 → 2026-07-29 )",
+            "color": "oklch(0.554 0.046 257.417)",
+            "background": [
+              55,
+              64,
+              80,
+              1
+            ],
+            "contrast": 2.2,
+            "fontSize": "11px"
+          },
+          {
+            "tag": "span",
+            "text": "Thêm 6 ô · ~ 2.947 người có thể cải thiện, trong biên sai số",
+            "color": "oklab(0.828 0.0183479 0.188107 / 0.9)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.24,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "(giữ cự ly cũ)",
+            "color": "oklab(0.828 0.0183479 0.188107 / 0.9)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.24,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "span",
+            "text": "ƯỚC LƯỢNG",
+            "color": "oklch(0.828 0.189 84.429)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.44,
+            "fontSize": "10px"
+          },
+          {
+            "tag": "span",
+            "text": "12 ô · ~ 31.746 người",
+            "color": "oklch(0.845 0.143 164.978)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.76,
+            "fontSize": "12px"
+          },
+          {
+            "tag": "td",
+            "text": "≤ 1 km",
+            "color": "oklch(0.869 0.022 252.894)",
+            "background": [
+              116,
+              124,
+              136,
+              1
+            ],
+            "contrast": 2.82,
+            "fontSize": "12px"
+          }
+        ]
+      },
+      "map": {
+        "rect": {
+          "x": 396,
+          "y": 0,
+          "width": 1204,
+          "height": 1000,
+          "right": 1600,
+          "bottom": 1000
+        }
+      },
+      "activeElement": {
+        "tag": "button",
+        "aria": null,
+        "text": "Cách tính & giới hạn"
+      }
+    }
+  }
+}

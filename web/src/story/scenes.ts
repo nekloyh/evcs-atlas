@@ -867,7 +867,7 @@ export const SCENES: readonly SceneSpec[] = [
     layers: ["stations", "station_status"],
     subjects: [{ kind: "province" }],
     select: { kind: "none" },
-    chart: { kind: "primary", id: "utilization-week-heatmap" },
+    chart: { kind: "primary", id: "utilization-day-profiles" },
     requires: {
       gridColumns: ["util_cell"],
       files: ["station_occupancy_profile_168h.parquet"],

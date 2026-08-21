@@ -153,98 +153,176 @@ export function occCountAt(p: OccProfiles, t: number): { present: number; missin
 }
 
 /**
- * Một ô của heatmap 168h toàn thành phố.
+ * Một station-hour ĐỦ ĐIỀU KIỆN gộp — cửa DUY NHẤT của mọi phép gộp lens Sử dụng.
  *
- * `observedH` là `observed_h` trung bình có trọng số cổng trên **toàn bộ cổng lắp đặt**,
- * kể cả cổng của trạm chưa từng báo cáo (chúng đóng góp 0 giờ). Đó là cùng một đại lượng,
- * cùng đơn vị và cùng ngưỡng với tầng trạm — một khái niệm, một ngưỡng.
+ * Trước bản này ba chỗ chép lại cùng bộ điều kiện (`observed_h`, `n_ports`, finite, IN):
+ * `cityProfile` ở đây, `buildUtilizationWeekHeatmap` ở `chart-models.ts`, và vòng lặp
+ * trong `shapeDayProfiles`. Ba bản chép của một luật là ba chỗ để chúng trôi khỏi nhau —
+ * và một trong ba đã trôi thật: `shapeDayProfiles` **không** kiểm `inScope`, nên trạm
+ * BUFFER lọt vào mẫu số của small multiples (UX_UTILIZATION_VISUALIZATION_SPEC §22.5).
+ *
+ * Nay chỉ còn một cửa. Nó trả `null` ở đúng những chỗ `stationOccAt` trả `null`, cộng
+ * thêm một chỗ: trạm ngoài phạm vi IN. Cả hai thành phần thô — `occ` (tử số cộng được)
+ * và `ports` (mẫu số cộng được) — đi kèm, vì **ratio-of-sums cần hai số hạng, không cần
+ * tỉ lệ đã chia**. Trả về tỉ lệ rồi nhân ngược lại mẫu số là đường đi vòng qua một phép
+ * chia không cần thiết, và nó chỉ đúng khi mẫu số không đổi.
  */
-export interface CityHour {
-  t: number;
-  /** `Σ occ / Σ n_ports` trên các trạm ĐỦ quan sát; `null` khi không trạm nào đủ */
-  value: number | null;
+export interface EligibleStationHour {
+  /** `stationOccAt` = `occ / n_ports`. Có mặt cho tầng TRẠM; tầng gộp không dùng nó. */
+  rate: number;
+  /** `occ` — số cổng bận trung bình. Tử số THÔ, cộng được. */
+  occ: number;
+  /** `n_ports` — số cổng lắp đặt. Mẫu số THÔ, cộng được. */
+  ports: number;
   observedH: number;
-  /** số trạm đóng góp vào ô này */
-  nStations: number;
+}
+
+export function eligibleStationHour(
+  p: OccProfiles,
+  s: number,
+  t: number,
+): EligibleStationHour | null {
+  if (!p.inScope[s]) return null;
+  const rate = stationOccAt(p, s, t);
+  if (rate === null) return null;
+  const i = s * HOURS_IN_WEEK + t;
+  return { rate, occ: p.occ[i]!, ports: p.nPorts[s]!, observedH: p.observed[i]! };
 }
 
 /**
- * Hồ sơ 168h của CẢ THÀNH PHỐ — trung bình có trọng số cổng (§3d).
+ * Tổng bất biến theo giờ của MỘT nhóm trạm — mẫu số của coverage (spec §7.3).
  *
- * Tử số và mẫu số chỉ cộng trên **trạm đủ quan sát**: gộp một trạm chưa báo cáo vào với
- * `occ = 0` là khẳng định "trạm đó rảnh", đúng cái ràng buộc 1 cấm. Hệ quả trung thực là
- * mẫu số đổi theo giờ — và `observedH` chính là chỗ nói ra điều đó, nên nó được tính trên
- * **toàn bộ** cổng chứ không chỉ cổng đã quan sát.
+ * `installedPorts` cộng trên MỌI trạm IN có `n_ports` hữu hạn dương, kể cả trạm chưa từng
+ * báo cáo giờ nào. Đó là chủ ý: coverage hỏi *"bao nhiêu phần của cái đã lắp đang được
+ * quan sát"*, nên mẫu số phải là cái đã lắp, không phải cái đang quan sát. Dùng mẫu số
+ * theo giờ ở cả hai vế sẽ cho coverage 100% ở mọi giờ và không nói gì.
  */
-export function cityProfile(p: OccProfiles): CityHour[] {
-  let portsAll = 0;
-  for (let s = 0; s < p.n; s++) {
-    if (!p.inScope[s]) continue;
-    const v = p.nPorts[s]!;
-    if (Number.isFinite(v)) portsAll += v;
-  }
+export interface OccGroupTotals {
+  /** `all_installed_ports` — cổng lắp đặt biết được của cả nhóm. */
+  installedPorts: number;
+  /** `all_stations` — số trạm IN trong nhóm, kể cả trạm khuyết `n_ports`. */
+  stations: number;
+  /** Trạm IN khuyết/không dương `n_ports` — không vào mẫu số cổng, vẫn vào mẫu số trạm. */
+  stationsWithoutPorts: number;
+}
 
-  const out: CityHour[] = new Array(HOURS_IN_WEEK);
-  for (let t = 0; t < HOURS_IN_WEEK; t++) {
-    let occSum = 0;
-    let portSum = 0;
-    let obsSum = 0;
-    let nStations = 0;
-    for (let s = 0; s < p.n; s++) {
-      if (!p.inScope[s]) continue;
-      const ports = p.nPorts[s]!;
-      if (!Number.isFinite(ports) || ports <= 0) continue;
-      const i = s * HOURS_IN_WEEK + t;
-      const obs = p.observed[i]!;
-      if (!Number.isFinite(obs)) continue;
-      obsSum += obs * ports;
-      if (obs < OBSERVED_H_MIN) continue;
-      const occ = p.occ[i]!;
-      if (!Number.isFinite(occ)) continue;
-      occSum += occ;
-      portSum += ports;
-      nStations++;
-    }
-    out[t] = {
-      t,
-      value: portSum > 0 ? occSum / portSum : null,
-      observedH: portsAll > 0 ? obsSum / portsAll : 0,
-      nStations,
-    };
-  }
+/**
+ * Thống kê ĐỦ của một nhóm tại một giờ — spec §7.2.
+ *
+ * "Đủ" theo nghĩa thống kê: bốn số này đủ để dựng lại utilization, coverage cổng, coverage
+ * trạm và giờ quan sát/cổng mà không cần quay lại từng station-hour. Đó là điều kiện để
+ * scrub 4 lần/giây chỉ là một phép tra mảng.
+ */
+export interface OccSufficientStats {
+  /** `Σ occ` trên các trạm đủ gate — số cổng bận TRUNG BÌNH QUAN SÁT, cộng được. */
+  busyPortsAvg: number;
+  /** `Σ n_ports` trên **chính** các trạm ấy. Mẫu số của utilization. */
+  observedPorts: number;
+  /** `|E(g,t)|` — số trạm đóng góp. */
+  contributingStations: number;
+  /** `Σ observed_h × n_ports` trên mọi trạm IN có `n_ports` hữu hạn dương của nhóm. */
+  observedHourPorts: number;
+}
+
+export function emptyOccStats(): OccSufficientStats {
+  return { busyPortsAvg: 0, observedPorts: 0, contributingStations: 0, observedHourPorts: 0 };
+}
+
+/**
+ * `utilization(g,t) = Σocc / Σn_ports`, hoặc `null` khi mẫu số bằng 0.
+ *
+ * `null` chứ KHÔNG phải 0, và đây là chỗ duy nhất phép chia ấy được viết. "Không trạm nào
+ * đủ quan sát" và "mọi trạm đều rảnh" là hai câu khác nhau; trả 0 cho câu thứ nhất là nói
+ * câu thứ hai.
+ */
+export function utilizationOf(stats: OccSufficientStats): number | null {
+  return stats.observedPorts > 0 ? stats.busyPortsAvg / stats.observedPorts : null;
+}
+
+/** Chỉ số của mọi trạm IN — tập nền của mọi phép gộp toàn tỉnh. */
+export function inScopeIndices(p: OccProfiles): number[] {
+  const out: number[] = [];
+  for (let s = 0; s < p.n; s++) if (p.inScope[s]) out.push(s);
   return out;
 }
 
-/**
- * Câu đơn vị của heatmap — §4d-3b đòi ngưỡng phải IN RA.
- *
- * Nó cũng nói ra khi luật vân xám **không nổ trên dữ liệu này**: ở tầng thành phố
- * `observed_h` có trọng số chạy 2,04–3,89 h, luôn trên ngưỡng. Im lặng ở đó thì một ô vân
- * không bao giờ xuất hiện trở thành một lời hứa suông trong chú giải.
- */
-export function heatmapUnitSentence(cells: CityHour[]): string {
-  const thin = cells.filter((c) => c.observedH < OBSERVED_H_MIN).length;
-  const base =
-    `nhịp trạm toàn thành phố · cổng bận ÷ cổng lắp đặt, trọng số cổng · ` +
-    `ô dưới ${OBSERVED_H_MIN} h quan sát vẽ vân xám`;
-  const head =
-    thin > 0 ? `${base} (${thin} ô)` : `${base} — không ô nào ở tầng thành phố rơi vào đó`;
-
-  // Dải giá trị THẬT của tầng thành phố, in ra vì heatmap dùng CHUNG thang với chấm trạm
-  // và vì thế chỉ tiêu vài bậc trong 7. Không nói ra thì một hình gần như đồng màu đọc
-  // thành "biểu đồ hỏng"; nói ra thì nó đọc thành đúng thứ nó là — gộp 939 trạm lại thì
-  // thành phố không bao giờ đầy, dù từng trạm thì có. Đổi thang riêng cho nó sẽ rẻ hơn về
-  // tương phản nhưng đắt hơn nhiều về nghĩa: cùng một màu cam sẽ nói hai điều khác nhau ở
-  // hai chỗ trên cùng một màn hình.
-  const vals = cells.map((c) => c.value).filter((v): v is number => v !== null);
-  if (vals.length === 0) return head;
-  const lo = Math.min(...vals);
-  const hi = Math.max(...vals);
-  return `${head}. Cả thành phố chỉ chạy ${pctShort(lo)}–${pctShort(hi)} — cùng thang với chấm trạm trên bản đồ, nên nó tiêu ít bậc.`;
+/** Tổng bất biến của một nhóm trạm (mặc định: cả tỉnh). */
+export function occGroupTotals(p: OccProfiles, members?: readonly number[]): OccGroupTotals {
+  const list = members ?? inScopeIndices(p);
+  let installedPorts = 0;
+  let stations = 0;
+  let stationsWithoutPorts = 0;
+  for (const s of list) {
+    if (!p.inScope[s]) continue;
+    stations++;
+    const ports = p.nPorts[s];
+    if (ports !== undefined && Number.isFinite(ports) && ports > 0) installedPorts += ports;
+    else stationsWithoutPorts++;
+  }
+  return { installedPorts, stations, stationsWithoutPorts };
 }
 
-const pctShort = (v: number) =>
-  `${(v * 100).toLocaleString("vi-VN", { maximumFractionDigits: 0 })}%`;
+/**
+ * Cộng thống kê đủ của một nhóm tại giờ `t`.
+ *
+ * `observedHourPorts` cộng trên tập RỘNG HƠN tập đóng góp: một trạm có `observed_h = 0,3`
+ * không vào tử/mẫu số utilization nhưng vẫn kéo giờ-quan-sát-trung-bình của nhóm xuống,
+ * và đó chính là thứ con số ấy tồn tại để nói. Trạm không có dòng nào (`NaN`) đóng góp 0
+ * giờ — vẫn ở mẫu số, đúng như spec §7.3 nói.
+ */
+export function occStatsAt(
+  p: OccProfiles,
+  members: readonly number[],
+  t: number,
+): OccSufficientStats {
+  let busyPortsAvg = 0;
+  let observedPorts = 0;
+  let contributingStations = 0;
+  let observedHourPorts = 0;
+  for (const s of members) {
+    if (!p.inScope[s]) continue;
+    const ports = p.nPorts[s];
+    if (ports === undefined || !Number.isFinite(ports) || ports <= 0) continue;
+    const obs = p.observed[s * HOURS_IN_WEEK + t];
+    if (obs !== undefined && Number.isFinite(obs)) observedHourPorts += obs * ports;
+    const e = eligibleStationHour(p, s, t);
+    if (!e) continue;
+    busyPortsAvg += e.occ;
+    observedPorts += e.ports;
+    contributingStations++;
+  }
+  return { busyPortsAvg, observedPorts, contributingStations, observedHourPorts };
+}
+
+/**
+ * Coverage TOÀN TỈNH tại một giờ — dòng bắt buộc của chú giải (spec §12.3).
+ *
+ * Tách khỏi `occCountAt` chứ không mở rộng nó, và vì một lý do đã được §4.6 của spec chốt:
+ * **coverage theo TRẠM và coverage theo CỔNG trả lời hai câu khác nhau**, và ở Hà Nội
+ * chúng lệch nhau thật — trung vị 96,48% theo trạm nhưng 99,74% theo cổng, vì trạm khuyết
+ * quan sát nghiêng về phía trạm nhỏ. In một con số rồi gọi nó là "coverage" là chọn hộ
+ * người đọc câu hỏi nào đáng quan tâm.
+ *
+ * `occCountAt` vẫn ở lại: nó đếm CHẤM ĐANG VẼ cho swatch chấm rỗng, một câu thứ ba.
+ */
+export interface OccProvinceCoverage {
+  observedPorts: number;
+  installedPorts: number;
+  contributingStations: number;
+  allStations: number;
+}
+
+export function occProvinceCoverageAt(p: OccProfiles, t: number): OccProvinceCoverage {
+  const members = inScopeIndices(p);
+  const totals = occGroupTotals(p, members);
+  const stats = occStatsAt(p, members, t);
+  return {
+    observedPorts: stats.observedPorts,
+    installedPorts: totals.installedPorts,
+    contributingStations: stats.contributingStations,
+    allStations: totals.stations,
+  };
+}
 
 // ── Hồ sơ ngày theo `shape_class` — small multiples của §3f-5, M4.2 ───────────
 
@@ -260,12 +338,16 @@ export interface ShapeProfile {
  * Hồ sơ NGÀY (24 giờ) của từng `shape_class` — §3f-5.
  *
  * **Trọng số theo cổng, không phải trung bình các tỉ lệ trạm.** `Σocc / Σn_ports` là cùng
- * một đại lượng mà `cityProfile` và chấm trạm dùng, nên năm đường này so được với heatmap
- * thành phố ngay trên cùng màn hình. Trung bình các tỉ lệ thì một trạm 2 cổng nặng bằng
- * một trạm 30 cổng, và `DEM_TROI` (34 trạm) sẽ bị vài trạm nhỏ lái đi.
+ * một đại lượng mà biểu đồ chính và chấm trạm dùng, nên năm đường này so được với hồ sơ
+ * ngày ngay trên cùng màn hình. Trung bình các tỉ lệ thì một trạm 2 cổng nặng bằng một
+ * trạm 30 cổng, và `DEM_TROI` (34 trạm) sẽ bị vài trạm nhỏ lái đi.
  *
  * `null` khi không trạm nào của dạng đó đủ quan sát ở giờ đó — KHÔNG phải 0. Sparkline vẽ
  * đứt đoạn ở đó; nối liền qua nó là bịa một giá trị (ràng buộc 1 trên chiều thời gian).
+ *
+ * **IN-only từ bản redesign 21/8/2026.** Vòng lặp cũ gọi thẳng `stationOccAt`, thứ KHÔNG
+ * kiểm `inScope` — nên một trạm BUFFER có `shape_class` vẫn vào cả tử số lẫn mẫu số của
+ * small multiples. Nay nó đi qua `eligibleStationHour`, cửa duy nhất, và cửa ấy kiểm.
  */
 export function shapeDayProfiles(
   p: OccProfiles,
@@ -273,6 +355,7 @@ export function shapeDayProfiles(
 ): ShapeProfile[] {
   const acc = new Map<string, { occ: Float64Array; ports: Float64Array; n: number }>();
   for (let s = 0; s < p.n; s++) {
+    if (!p.inScope[s]) continue;
     const cls = classOfStation(s);
     if (cls === null) continue;
     const ports = p.nPorts[s]!;
@@ -284,13 +367,14 @@ export function shapeDayProfiles(
     }
     a.n++;
     for (let t = 0; t < HOURS_IN_WEEK; t++) {
-      // Đi qua đúng `stationOccAt` để ba đường "không biết" và ngưỡng `observed_h` giống
-      // hệt bản đồ. Nhân lại `ports` để về `occ` thô — mẫu số phải cộng được.
-      const v = stationOccAt(p, s, t);
-      if (v === null) continue;
+      // Cùng cửa với bản đồ và biểu đồ chính. Cộng `e.occ` THÔ, không nhân ngược tỉ lệ:
+      // tử số và mẫu số phải là hai số hạng cộng được, không phải một tỉ số đã chia rồi
+      // khôi phục.
+      const e = eligibleStationHour(p, s, t);
+      if (!e) continue;
       const h = t % 24;
-      a.occ[h]! += v * ports;
-      a.ports[h]! += ports;
+      a.occ[h]! += e.occ;
+      a.ports[h]! += e.ports;
     }
   }
 
@@ -304,92 +388,4 @@ export function shapeDayProfiles(
     // một kênh vị trí, và cho nó mang "dạng nào phổ biến hơn" rẻ hơn là cho nó mang chữ cái
     // đầu của một hằng số tiếng Việt không dấu.
     .sort((x, y) => y.nStations - x.nStations);
-}
-
-// ── Hồ sơ biên 24 giờ — mục 10 của nghiệm thu, dựng cùng M4.1/M4.2 ────────────
-
-/**
- * Một giờ trong ngày, gộp trên cả 7 thứ — §3d, khối "hồ sơ biên" thêm sau M4.
- *
- * ── Bài toán mà cái này giải, và vì sao nó KHÔNG phải "đổi thang cho heatmap" ─────────
- *
- * Heatmap 168h dùng **chung phép chia bậc** với chấm trạm (§8a) để một ô heatmap và một
- * chấm trên bản đồ cùng màu thì cùng nghĩa. Nhưng tầng thành phố chỉ chạy 11%–36% của thang
- * ấy — gộp 939 trạm lại thì thành phố không bao giờ đầy, dù từng trạm thì có — nên heatmap
- * tiêu 2–3 bậc trong 7 và trông gần như đồng màu.
- *
- * Hai cách sửa, và một cách sai:
- *   · **SAI:** cấp cho heatmap một thang riêng. Rẻ về tương phản, đắt về nghĩa — cùng một
- *     màu cam sẽ nói hai điều khác nhau ở hai chỗ trên cùng một màn hình.
- *   · **ĐÚNG:** giữ nguyên màu, chuyển biến thiên sang một **kênh khác đang trống**. Kênh
- *     VỊ TRÍ chưa dùng, và nó là kênh mạnh nhất trong bảng xếp hạng của Cleveland–McGill —
- *     một chênh lệch 11%→36% không đọc nổi bằng độ đậm thì đọc rất rõ bằng độ cao.
- *
- * Đây là **cùng một lập luận** mà cả app đã dùng cho danh tính overlay (§4d: hình học và
- * chất liệu, không phải hue) và cho trạng thái trạm (§4d-3a: nét, không phải màu) — khi một
- * kênh đã bị trưng dụng cho một nghĩa, thứ cần nói thêm phải tìm kênh khác, không được
- * giành lại kênh cũ.
- */
-export interface HourBand {
-  hour: number;
-  /** trung bình của 7 giá trị thứ tại giờ này; `null` khi không thứ nào đo được */
-  mid: number | null;
-  /** thấp nhất / cao nhất trong 7 thứ — dải này chính là "cuối tuần khác ngày thường" */
-  lo: number | null;
-  hi: number | null;
-  /** số thứ có giá trị — dưới 7 thì dải hẹp lại vì THIẾU, không phải vì đều */
-  n: number;
-}
-
-/**
- * Gộp 168 ô giờ thành 24 cột — trung bình + dải min–max trên 7 thứ.
- *
- * Trung bình **không có trọng số**: bảy giá trị đầu vào đều đã là `Σocc / Σn_ports` trên
- * cùng một tập trạm, nên chúng cùng đơn vị và cùng mẫu số về mặt khái niệm. Trọng số theo
- * số trạm đóng góp sẽ làm giờ đêm (ít trạm đủ quan sát) nhẹ đi — tức làm hình đẹp lên bằng
- * cách giấu đúng phần dữ liệu mỏng.
- *
- * Ô `value === null` **không vào trung bình và không kéo dải xuống**: "không đo được" khác
- * "bằng 0" — ràng buộc 1, y như trên bản đồ. `n` là chỗ nói ra điều đó.
- */
-export function hourProfile(cells: readonly { t: number; value: number | null }[]): HourBand[] {
-  const out: HourBand[] = new Array(24);
-  for (let h = 0; h < 24; h++) out[h] = { hour: h, mid: null, lo: null, hi: null, n: 0 };
-  const sum = new Float64Array(24);
-  for (const c of cells) {
-    if (c.value === null) continue;
-    const h = c.t % 24;
-    const b = out[h]!;
-    sum[h]! += c.value;
-    b.n++;
-    if (b.lo === null || c.value < b.lo) b.lo = c.value;
-    if (b.hi === null || c.value > b.hi) b.hi = c.value;
-  }
-  for (let h = 0; h < 24; h++) {
-    const b = out[h]!;
-    if (b.n > 0) b.mid = sum[h]! / b.n;
-  }
-  return out;
-}
-
-/**
- * Câu đơn vị của hồ sơ biên — nói ra CHÍNH cái mà hình này thêm vào so với heatmap.
- *
- * Nó phải nói ra tỉ số đỉnh/đáy: đó là con số mà mắt vừa đọc được từ độ cao và **không**
- * đọc được từ màu, tức là lý do tồn tại của hình này ở dạng một câu.
- */
-export function hourProfileSentence(bands: HourBand[]): string {
-  const mids = bands.filter((b) => b.mid !== null);
-  if (mids.length === 0) return "chưa đủ dữ liệu để dựng hồ sơ 24 giờ.";
-  const peak = mids.reduce((a, b) => (b.mid! > a.mid! ? b : a));
-  const trough = mids.reduce((a, b) => (b.mid! < a.mid! ? b : a));
-  const ratio = trough.mid! > 0 ? peak.mid! / trough.mid! : null;
-  const spread = bands.reduce((m, b) => Math.max(m, b.hi !== null && b.lo !== null ? b.hi - b.lo : 0), 0);
-  return (
-    `trung bình 7 thứ theo giờ, dải là thấp nhất–cao nhất trong tuần · ` +
-    `đỉnh ${peak.hour}h ${pctShort(peak.mid!)} ↔ đáy ${trough.hour}h ${pctShort(trough.mid!)}` +
-    (ratio ? ` (${ratio.toLocaleString("vi-VN", { maximumFractionDigits: 1 })}×)` : "") +
-    `. Cùng thang màu ⇒ heatmap trên tiêu ít bậc; nhịp ngày đọc ở đây bằng ĐỘ CAO, ` +
-    `không bằng độ đậm. Chênh lệch giữa các thứ tại một giờ tối đa ${pctShort(spread)}.`
-  );
 }

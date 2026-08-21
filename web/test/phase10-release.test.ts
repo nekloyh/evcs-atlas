@@ -236,18 +236,45 @@ test("AT10-7b: không panel vi-VN nào còn gọi toFixed trên số đọc đư
   //  · `toFixed(5)` — toạ độ lat/lng in bằng mono, quy ước kỹ thuật (`docs/COT.md`).
   //  · `d +=` — dữ liệu đường SVG; dấu phẩy ở đó là dấu phân tách toán tử của chính cú
   //    pháp path, nên bản địa hoá nó sẽ vẽ ra hình sai chứ không phải đọc sai.
-  const allowed = (line: string) => /toFixed\(5\)/.test(line) || /^\s*d \+=/.test(line);
+  //  · `width:`/`height:` trong `style` — cùng loại với SVG path: CSS chỉ nhận dấu chấm,
+  //    và một `width: 12,5%` không phải đọc sai mà là KHÔNG VẼ RA GÌ. Số ấy không bao giờ
+  //    tới mắt người đọc dưới dạng chữ; số để đọc nằm ở bảng bên dưới hình.
+  const allowed = (line: string) =>
+    /toFixed\(5\)/.test(line) ||
+    /^\s*d \+=/.test(line) ||
+    /^\s*(width|height|left|top):\s*`/.test(line);
   for (const rel of [
     "ui/CellPanel.tsx",
     "ui/CommunePanel.tsx",
     "ui/DataMode.tsx",
     "national/NationalApp.tsx",
+    // Panel mô phỏng vào cổng này từ đợt UX redesign: ảnh baseline 21/8 còn in
+    // `483.5 kW` — một số đọc được, ở một panel vi-VN, mà quét cũ không với tới.
+    "ui/SimulationPanel.tsx",
+    "ui/SimulationDistribution.tsx",
+    "simulation/presenter.ts",
   ]) {
     const bad = code(rel)
       .split("\n")
       .filter((line) => /\.toFixed\(\d\)/.test(line) && !allowed(line))
       .map((line) => line.trim());
     assert.deepEqual(bad, [], `${rel} còn ${bad.length} chỗ toFixed đọc thành dấu chấm`);
+  }
+});
+
+test("AT10-7c: panel mô phỏng in mọi số đọc được qua locale vi-VN", () => {
+  // Cổng ĐỌC MÃ NGUỒN, bổ sung cho phép kiểm giá trị ở `simulation-panel.test.ts`: nó
+  // chặn một `String(n)`/nối chuỗi trần lẻn trở lại vào JSX, thứ mà test giá trị không
+  // thấy nếu người viết thêm một nhánh render mới.
+  for (const rel of [
+    "ui/SimulationPanel.tsx",
+    "ui/SimulationDistribution.tsx",
+    "simulation/presenter.ts",
+  ]) {
+    const src = code(rel);
+    for (const call of src.match(/toLocaleString\([^)]*\)/g) ?? []) {
+      assert.match(call, /"vi-VN"/, `${rel}: ${call} thiếu locale`);
+    }
   }
 });
 

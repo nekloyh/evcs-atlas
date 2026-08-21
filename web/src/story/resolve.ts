@@ -29,7 +29,7 @@ import {
   buildOpportunityCommuneRank,
   buildSpatialStructureModel,
   buildSupplyPowerTierBreakdown,
-  buildUtilizationWeekHeatmap,
+  buildUtilizationWeekModel,
   type SpatialStructureModel,
 } from "../viz/chart-models";
 import { areaShareForPop, lorenz, popShareForArea, type DemandCell, type Lorenz } from "../viz/lorenz";
@@ -404,14 +404,14 @@ export function buildStoryModels(pkg: StoryPackage): StoryModels {
   // ── Nhịp tuần ──────────────────────────────────────────────────────────────
   let util: Bag | null = null;
   if (pkg.occupancy) {
-    const heat = buildUtilizationWeekHeatmap(pkg.occupancy);
-    const rated = heat.cells.filter((c) => c.value !== null);
+    const heat = buildUtilizationWeekModel(pkg.occupancy);
+    const rated = heat.cells.filter((c) => c.utilization !== null);
     if (rated.length > 0) {
       let peak = rated[0]!;
       let trough = rated[0]!;
       for (const c of rated) {
-        if (c.value! > peak.value!) peak = c;
-        if (c.value! < trough.value!) trough = c;
+        if (c.utilization! > peak.utilization!) peak = c;
+        if (c.utilization! < trough.utilization!) trough = c;
       }
       const nInScope = pkg.occupancy.stations.filter((s) => s.inScope).length;
       // Số trạm CÓ hồ sơ: đếm trạm trong phạm vi có ít nhất một giờ quan sát được. Đây là
@@ -432,17 +432,17 @@ export function buildStoryModels(pkg: StoryPackage): StoryModels {
       }
       util = {
         model: heat,
-        peak: peak.value,
-        trough: trough.value,
+        peak: peak.utilization,
+        trough: trough.utilization,
         peakT: peak.t,
         troughT: trough.t,
-        ratio: trough.value! > 0 ? peak.value! / trough.value! : null,
-        weekMean: rated.reduce((s, c) => s + c.value!, 0) / rated.length,
+        ratio: trough.utilization! > 0 ? peak.utilization! / trough.utilization! : null,
+        weekMean: rated.reduce((s, c) => s + c.utilization!, 0) / rated.length,
         nRatedHours: rated.length,
         nBelowFloor: countBelowFloor(pkg.occupancy),
         nStationsWithProfile: withProfile,
         shareStationsWithProfile: nInScope > 0 ? withProfile / nInScope : null,
-        installedPorts: heat.allInInstalledPorts,
+        installedPorts: heat.allInstalledPorts,
         nInScope,
       };
     }

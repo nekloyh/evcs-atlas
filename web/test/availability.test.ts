@@ -106,11 +106,11 @@ test("field dẫn xuất của TRẠM kiểm tra dependency thật, không kiể
 });
 
 // --- bậc hỏng thứ ba: lớp có cột nhưng đọc không được --------------------
-test("lớp không đọc được thì TẮT cả trường lẫn scrubber", () => {
+test("lớp không đọc được thì giữ shell Sử dụng để nói lý do, nhưng tắt data fields/scrubber", () => {
   setAvailableColumns({});
   setUnusableLayers(["occupancy"]);
   assert.ok(!layerUsable("occupancy"));
-  assert.ok(!fieldAvailable(f(STATION_OCC_FIELD)));
+  assert.ok(fieldAvailable(f(STATION_OCC_FIELD)), "shell lens phải mở được để render disabled reason");
   assert.ok(!fieldAvailable(f("util_cell")));
 });
 

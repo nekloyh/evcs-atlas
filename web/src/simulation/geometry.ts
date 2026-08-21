@@ -5,7 +5,41 @@
  * Reference: docs/PHASE6_LOCAL_SIMULATION.md §0.2, §1.3
  */
 
+import { cellToBoundary, isValidCell } from "h3-js";
+
 export const EARTH_RADIUS_M = 6371008.8;
+
+/**
+ * UX §14.4 — hộp bao của một nhóm ô H3, để đưa bản đồ tới đúng khu vực đang trỏ.
+ *
+ * Dùng ĐƯỜNG BAO của ô chứ không dùng tâm: một nhóm một ô có hộp bao rỗng nếu chỉ lấy tâm,
+ * và phép fit sẽ rơi về mức phóng tối đa. Trả `null` khi không có ô nào tra được — không
+ * có hộp bao thì không có lệnh camera nào để phát, và im lặng ở đây đúng hơn một cú nhảy.
+ */
+export function simulationAreaBbox(
+  h3s: readonly string[],
+): [number, number, number, number] | null {
+  let w = Infinity;
+  let s = Infinity;
+  let e = -Infinity;
+  let n = -Infinity;
+  for (const h of h3s) {
+    // `isValidCell` chứ không phải `try/catch`: `cellToBoundary` KHÔNG ném cho một chuỗi
+    // bất kỳ — nó trả về một đa giác vô nghĩa (đo được: một chuỗi tiếng Việt cho hộp bao
+    // lng −34,8…145,6). Một `catch` ở đây trông như đã gác mà thật ra chưa gác gì.
+    if (!isValidCell(h)) continue;
+    const ring = cellToBoundary(h, true) as number[][];
+    for (const pt of ring) {
+      const lng = pt[0]!;
+      const lat = pt[1]!;
+      if (lng < w) w = lng;
+      if (lng > e) e = lng;
+      if (lat < s) s = lat;
+      if (lat > n) n = lat;
+    }
+  }
+  return Number.isFinite(w) && Number.isFinite(s) ? [w, s, e, n] : null;
+}
 
 /**
  * Great-circle distance between two WGS84 points using the Haversine formula.
@@ -103,7 +137,11 @@ export function isPointInGeoJson(
     }
     return false;
   }
-  if (geojson.type === "Feature") {
+  // Một object CÓ `geometry` là một feature, kể cả khi nó không khai `type: "Feature"`.
+  // Kiểu `CommuneFeature` của `admissions.ts` khai đúng hình dạng ấy (`{properties,
+  // geometry}`), nên nhánh chỉ-nhận-`type` cũ trả `false` LẶNG cho chính cái kiểu mà API
+  // này công bố — PIP trượt, rơi thẳng xuống fallback theo mã ô, và không ai thấy.
+  if (geojson.type === "Feature" || geojson.geometry) {
     return isPointInGeometry(pt, geojson.geometry);
   }
   return isPointInGeometry(pt, geojson);

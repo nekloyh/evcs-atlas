@@ -8,7 +8,6 @@ import { BeatBody, renderClaim } from "./StorySurface";
 import { beatOf, renderableScenes, storyContext, type SceneId } from "./scenes";
 import type { ResolveContext, StoryPackage } from "./resolve";
 import type { ClaimTemplate } from "./spec";
-import type { Scale } from "../viz/palette";
 import { Para } from "./parts";
 
 /**
@@ -26,7 +25,6 @@ import { Para } from "./parts";
  */
 export function StoryColumn({
   pkg,
-  occScale,
 }: {
   pkg: StoryPackage;
   /**
@@ -38,7 +36,6 @@ export function StoryColumn({
    * một quyết định MÃ HOÁ. Trộn hai thứ thì `resolve.ts` — nơi được viết để không biết gì
    * về màu — sẽ phải mang một kiểu của `viz/`.
    */
-  occScale: Scale | null;
 }) {
   const scene = useStore((s) => s.scene);
   const beatId = useStore((s) => s.beat);
@@ -283,7 +280,7 @@ export function StoryColumn({
                 </div>
               )}
 
-              <BeatBody beat={beat} ctx={storyContext(s.id)} occScale={occScale} loading={pendingLabel(s.id, pkg)} />
+              <BeatBody beat={beat} ctx={storyContext(s.id)} loading={pendingLabel(s.id, pkg)} />
             </div>
           </section>
         );

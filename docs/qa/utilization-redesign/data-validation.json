@@ -1,0 +1,104 @@
+{
+  "method": "IN + n_ports>0 + observed_h>=1 + finite occ; aggregate=sum(occ)/sum(n_ports)",
+  "packages": [
+    {
+      "package": "01",
+      "occupancy_usable": true,
+      "disabled_reason": null,
+      "timezone": null,
+      "in_stations": 710,
+      "installed_ports_known": 7785,
+      "stations_missing_ports": 19,
+      "eligible_station_hours": 112843,
+      "rejected_observed_floor": 2046,
+      "rejected_missing_ports": 1896,
+      "buffer_profile_rows_excluded": 0,
+      "valid_aggregate_hours": 168,
+      "peak": {
+        "t": 167,
+        "ratio": 0.36183822044359504
+      },
+      "trough": {
+        "t": 51,
+        "ratio": 0.1100590656032278
+      },
+      "missing_heavy": {
+        "t": 75,
+        "contributing_stations": 522,
+        "observed_ports": 6342,
+        "port_coverage": 0.8146435452793834
+      },
+      "known_zero_station_hour": {
+        "station_id": "vn-c-hno0001",
+        "t": 51,
+        "h3_r8": "88415ca52dfffff"
+      }
+    },
+    {
+      "package": "68",
+      "occupancy_usable": true,
+      "disabled_reason": null,
+      "timezone": null,
+      "in_stations": 237,
+      "installed_ports_known": 2358,
+      "stations_missing_ports": 1,
+      "eligible_station_hours": 36048,
+      "rejected_observed_floor": 2248,
+      "rejected_missing_ports": 0,
+      "buffer_profile_rows_excluded": 0,
+      "valid_aggregate_hours": 168,
+      "peak": {
+        "t": 159,
+        "ratio": 0.13885423513391926
+      },
+      "trough": {
+        "t": 27,
+        "ratio": 0.0227755015324495
+      },
+      "missing_heavy": {
+        "t": 99,
+        "contributing_stations": 93,
+        "observed_ports": 957,
+        "port_coverage": 0.405852417302799
+      },
+      "known_zero_station_hour": {
+        "station_id": "vn-c-bth0005",
+        "t": 30,
+        "h3_r8": "8865b696d7fffff"
+      }
+    },
+    {
+      "package": "11",
+      "occupancy_usable": false,
+      "disabled_reason": "dưới nửa số trạm của tỉnh có `util` đọc được — lớp mức sử dụng là suy đoán, không phải quan sát",
+      "timezone": null,
+      "in_stations": 39,
+      "installed_ports_known": 209,
+      "stations_missing_ports": 1,
+      "eligible_station_hours": 2397,
+      "rejected_observed_floor": 1810,
+      "rejected_missing_ports": 0,
+      "buffer_profile_rows_excluded": 0,
+      "valid_aggregate_hours": 121,
+      "peak": {
+        "t": 108,
+        "ratio": 0.5
+      },
+      "trough": {
+        "t": 31,
+        "ratio": 0.0
+      },
+      "missing_heavy": {
+        "t": 0,
+        "contributing_stations": 0,
+        "observed_ports": 0,
+        "port_coverage": 0.0
+      },
+      "known_zero_station_hour": {
+        "station_id": "vn-c-dbi0002",
+        "t": 8,
+        "h3_r8": "8840649967fffff"
+      }
+    }
+  ]
+}

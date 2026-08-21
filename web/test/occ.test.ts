@@ -15,10 +15,12 @@ import { HOURS_IN_WEEK, tOf } from "../src/state/types.ts";
 import {
   OBSERVED_H_MIN,
   allOccValues,
-  cityProfile,
   occCountAt,
   occCoverage,
+  occGroupTotals,
+  occStatsAt,
   stationOccAt,
+  utilizationOf,
   type OccProfiles,
 } from "../src/viz/occ.ts";
 
@@ -126,42 +128,46 @@ test("`occCountAt` đếm theo GIỜ, `occCoverage` đếm theo TUẦN — hai c
   assert.deepEqual(occCoverage(p), { present: 2, total: 3 }, "hai trạm có ít nhất một giờ");
 });
 
-// ══ Heatmap toàn thành phố ═══════════════════════════════════════════════════
+// ══ Gộp toàn tỉnh ════════════════════════════════════════════════════════════
+//
+// `cityProfile` đã bị XOÁ ở bản redesign lens Sử dụng: nó là bản chép thứ ba của cùng một
+// phép gộp (`buildUtilizationWeekHeatmap` và `shapeDayProfiles` là hai bản kia), và nó
+// không còn người gọi nào trong `src/`. Các luật nó từng canh không mất — chúng chuyển
+// sang `occStatsAt`/`utilizationOf`, cửa duy nhất mà cả ba đường bây giờ đi qua. Bộ test
+// tầng GỘP đầy đủ ở `utilization-model.test.ts`; phần dưới giữ đúng bốn luật cũ.
 
-test("thành phố cộng theo TRỌNG SỐ CỔNG, không phải trung bình các tỉ lệ", () => {
-  // Một trạm 100 cổng nói nhiều hơn một trạm 2 cổng về nhịp của cả thành phố.
+test("tỉnh cộng theo TRỌNG SỐ CỔNG, không phải trung bình các tỉ lệ", () => {
+  // Một trạm 100 cổng nói nhiều hơn một trạm 2 cổng về nhịp của cả tỉnh.
   const p = make(2, [100, 2]);
   put(p, 0, 0, 50, 5); // 0,5
   put(p, 1, 0, 2, 5); // 1,0
-  const c = cityProfile(p)[0]!;
-  assert.equal(c.value, 52 / 102, "Σocc / Σports, không phải (0,5 + 1,0)/2");
-  assert.equal(c.nStations, 2);
+  const stats = occStatsAt(p, [0, 1], 0);
+  assert.equal(utilizationOf(stats), 52 / 102, "Σocc / Σports, không phải (0,5 + 1,0)/2");
+  assert.equal(stats.contributingStations, 2);
 });
 
 test("trạm dưới ngưỡng KHÔNG vào tử số lẫn mẫu số — gộp nó với occ=0 là nói dối", () => {
   const p = make(2, [10, 10]);
   put(p, 0, 0, 5, 5);
   put(p, 1, 0, 0, 0.1); // chưa quan sát đủ
-  const c = cityProfile(p)[0]!;
-  assert.equal(c.value, 0.5, "mẫu số chỉ gồm cổng ĐÃ quan sát đủ");
-  assert.equal(c.nStations, 1);
+  const stats = occStatsAt(p, [0, 1], 0);
+  assert.equal(utilizationOf(stats), 0.5, "mẫu số chỉ gồm cổng ĐÃ quan sát đủ");
+  assert.equal(stats.contributingStations, 1);
 });
 
-test("không trạm nào đủ quan sát ⇒ ô thành phố là null, không phải 0", () => {
+test("không trạm nào đủ quan sát ⇒ giá trị gộp là null, không phải 0", () => {
   const p = make(1, [10]);
   put(p, 0, 0, 3, 0.2);
-  assert.equal(cityProfile(p)[0]!.value, null);
+  assert.equal(utilizationOf(occStatsAt(p, [0], 0)), null);
 });
 
-test("`observedH` của ô thành phố tính trên TOÀN BỘ cổng lắp đặt", () => {
+test("giờ-quan-sát tính trên TOÀN BỘ cổng lắp đặt", () => {
   // Kể cả cổng của trạm chưa từng báo cáo (chúng đóng góp 0 giờ) — đó chính là chỗ nói ra
-  // rằng mẫu số của ô này nhỏ hơn cả thành phố.
+  // rằng mẫu số của ô này nhỏ hơn cả tỉnh.
   const p = make(2, [10, 30]);
   put(p, 0, 0, 5, 4); // chỉ trạm 10 cổng có quan sát
-  const c = cityProfile(p)[0]!;
-  assert.equal(c.observedH, (4 * 10) / 40, "1 h — dưới ngưỡng thì ô này vẽ vân xám");
-});
-
-test("hồ sơ thành phố luôn đủ 168 ô, kể cả khi không có dữ liệu", () => {
-  assert.equal(cityProfile(make(1, [10])).length, HOURS_IN_WEEK);
+  const totals = occGroupTotals(p, [0, 1]);
+  const stats = occStatsAt(p, [0, 1], 0);
+  assert.equal(totals.installedPorts, 40);
+  assert.equal(stats.observedHourPorts / totals.installedPorts, (4 * 10) / 40, "1 h — dưới ngưỡng");
 });

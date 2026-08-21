@@ -903,6 +903,70 @@ quyền điều khiển với nó.
 
 ---
 
+## 14bis. Thẻ MÔ PHỎNG — cùng một mặt nổi, không phải một hệ riêng
+
+Đợt 21/8/2026 (`docs/UX_SIMULATION_REDESIGN_SPEC.md`). Bốn quyết định, và cả bốn đều là
+**bỏ** một biến thể chứ không thêm một hệ.
+
+**14bis-a. Cùng hợp đồng bề mặt với thẻ BẰNG CHỨNG.** `w-[320px] max-h-[60%]`, từ 1440 là
+`w-[340px]` — đúng §3h, không phải một biến thể riêng. Bản cũ dùng 340/380 px và
+`max-h-[75%]`: rộng hơn 20–40 px và cao hơn **15 điểm phần trăm**, nên nó vừa che thêm bản
+đồ vừa đọc thành một tấm có nhịp riêng. Đo lại sau khi sửa: **320×480 px trên bản đồ 800 px
+= đúng 60,0%**.
+
+**14bis-b. Vỏ sáng thì nội dung phải sáng.** Panel cũ có 18 lớp `slate-*` cộng
+emerald/amber/rose/cyan và nhiều nền tối bán trong suốt, lồng trong `AtlasSurface` NỀN SÁNG.
+Hệ quả đo được trên **nền đã composite**, không phải ước lượng: tiêu đề **1,03:1**, dòng
+qualifier 1,14:1, nhãn tiết 1,60:1, disclaimer 1,76:1 — cả bốn dưới cổng 4,5:1 của §4e.
+Không phải khác khẩu vị: đó là chữ không đọc được. Nay panel chỉ dùng `bg-panel`/`bg-basemap`,
+`text-ink`/`ink-2`/`ink-muted`, `border-hairline` và thang chữ sáu vai trò; witness đo
+**0/197 chuỗi dưới 4,5:1**.
+
+**14bis-c. Thứ tự đọc là OUTCOME-FIRST, và đó là một phép đo chứ không phải khẩu vị.** Ở
+1280×800 fold của panel là 426 px. Bản cũ đặt câu "bao nhiêu người/ô cải thiện" SAU trung vị
+và một bảng bốn dải, nên đúng câu trả lời chính nằm dưới fold. Thứ tự nay: danh tính →
+outcome theo NGƯỜI → phần chưa kết luận → sàng lọc khoảng cách → phân bố Trước/Sau → khu vực
+→ cần kiểm tra tiếp → ba disclosure. Witness khoá: outcome và toàn bộ thẻ sàng lọc phải nằm
+trong khung nhìn đầu tiên ở cả ba viewport.
+
+**14bis-d. Ba KPI + bảng đổi thành HAI DẢI cùng mẫu số.** Ba ô Before/Sau/Δ và bảng bốn hàng
+lặp cùng một tập số mà không nêu ra sự dịch chuyển; người đọc phải tự biến bảng thành câu.
+Nay là hai thanh xếp chồng dùng **đúng cùng một mẫu số** (tổng dân của tập ô có nền so sánh),
+bốn bậc lấy từ ramp tuần tự `accessibility` đã đăng ký — **không một hex mới nào** — cộng một
+câu dịch nghĩa trung vị ("50% dân số… không quá X") và bảng số đầy đủ trong disclosure.
+NO_BASELINE/EXCLUDED nằm NGOÀI thanh và được nói riêng: kéo "không biết" vào một dải cự ly là
+biến nó thành một câu trả lời.
+
+**Hai thứ KHÔNG đổi.** Thuật toán mô phỏng (Phase 6 §1) không bị chạm; và xuất xứ giữ đúng tư
+cách — Trước `TÍNH TOÁN`, Sau `ƯỚC LƯỢNG`, sàng lọc `QUY TẮC`, một tag mỗi tiết chứ không lặp
+ở từng cột như bản cũ.
+
+**Điều chỉnh QA vòng 2.1 (21/8/2026).** Panel mô phỏng giữ bề rộng 320/340 px nhưng được
+nới trần dọc từ 60% lên 72% trên desktop theo chỉ dẫn QA; thẻ BẰNG CHỨNG vẫn giữ hợp đồng
+60%. V1/V2 dùng lớp phủ nhẹ từ ramp đã đăng ký, V4 dùng ramp `utilization` và tách chú giải
+khỏi segmented bar. Không có hex/ramp mới; icon + chữ + số vẫn là encoding chính.
+
+**14bis-e. QA typography & màu vòng 2.1b (21/8/2026) — sắc thuộc về PHÁN QUYẾT, không thuộc
+về ô số.** Ba việc, đo trên ảnh render 1920×1080/1200 (chi tiết + số đo ở
+`docs/UX_SIMULATION_DECISION_CONTEXT_SPEC.md` §14bis):
+
+1. **Ba vai trò chữ tách khỏi một `.eyebrow`.** Tiêu đề tiết, nhãn ô hero và tag xuất xứ đo
+   được **cùng một** `10px/600/0,8px/#6f6d68`. Nay: tiêu đề 600·0,08em·`ink-2` · nhãn ô hero
+   giữ `.eyebrow` · tag xuất xứ 500·0,06em·`ink-muted`. Không cỡ chữ nào tăng.
+2. **Một ramp cho một phán quyết, ba bậc cho ba vai trò** (nét = bậc 4, wash = **cùng** bậc 4
+   ở 9%, chữ + icon = bậc 6). Bản trước lấy nét bậc 4 + wash bậc 2: ở `demand` hai bậc lệch
+   21° hue, nên KHÔNG ĐẠT là nét ĐỎ trên nền CAM. `KHÔNG KẾT LUẬN ĐƯỢC` và **hai ô hero**
+   bỏ hẳn sắc — ô hero từng mượn sắc ĐẠT, nên một vị trí KHÔNG ĐẠT dựng ô xanh lá "0 người"
+   dưới banner đỏ. Phân cấp ô hero nay: đặc/mực = đã đo · đứt/mực mờ = trong biên sai số.
+3. **Nhịp cột và ngắt dòng.** Chú giải dải + dòng Δ dùng chung một lưới bốn cột neo vào thân
+   bar (trước lệch tới 124 px); số và đơn vị không còn bị chẻ qua hai dòng; hai ô hero dùng
+   chung một strut nên dòng ghi chú trùng nhau (trước lệch 4 px).
+
+Tương phản sau đợt: **0/523 chuỗi dưới 4,5:1**, thấp nhất 4,64:1 (`ink-muted` trên
+`bg-basemap`), đo trên nền đã composite ở cả năm viewport.
+
+---
+
 ## 15. P1 Demand — năm representation thử nghiệm
 
 `hex` · `density` · `intensity` · `bivariate` · `hybrid`.
@@ -989,3 +1053,77 @@ in "3 nhóm/trục".
 >
 > Việc này **không** chữa chuyện bivariate cần cả hai trục có cấu trúc không gian, mà cung
 > thì không (Moran I = 0,19). Đó là việc của bước sau.
+
+---
+
+## 16. Lens SỬ DỤNG — bảy hồ sơ ngày + Vùng tải
+
+Nguồn sự thật: [`docs/UX_UTILIZATION_VISUALIZATION_SPEC.md`](../docs/UX_UTILIZATION_VISUALIZATION_SPEC.md)
+(audit 21/8/2026). Mục này ghi **hợp đồng đang chạy** và nói rõ nó thay phần nào ở trên;
+không mục nào ở trên bị xoá hay đánh số lại.
+
+### 16a. Nó thay gì
+
+| Đã bị thay | Bằng | Vì sao |
+|---|---|---|
+| `Heatmap168` + `HourProfile` (§13c-1, §3e) | `UtilizationDayProfiles` — 7 hàng × 24 ô, step-line, trục **tuyệt đối 0–100%** | 168 ô gộp của Hà Nội chỉ chiếm 11,0–36,2% của thang; trough→peak chỉ ΔE **13,08**, và aggregate chỉ chạm **3/7 bậc** suốt tuần. Nhịp thì có thật (**25,18 điểm %**, 3,29×) — sai ở KÊNH, không ở dữ liệu. |
+| Thang phân vị theo gói (`buildFieldScale(allOccValues)`) | `utilizationScale()` — bảy khoảng **tuyệt đối** `0·5·10·20·35·55·75%`, biến đổi `sqrt` | Phân vị đứng yên trong một phiên nhưng đổi nghĩa giữa hai TỈNH: bậc 4 ở Hà Nội là 25,8%, ở Lâm Đồng là 10%. Vùng tải hỏi "vùng nào bận hơn", và câu ấy không trả lời được bằng một thang chỉ so được trong một gói. |
+| Chấm trạm là đơn vị đọc duy nhất | Mặc định **Vùng tải** (H3 r6/r7/r8 theo zoom), chấm trạm ở `z ≥ 13` | Ở z8 Hà Nội **98,45%** trạm bị chấm khác che, z10 còn 72,68%. Mắt đọc ra mật độ trạm, không đọc ra tỉ lệ cổng bận. |
+| Nhãn đồng hồ (`T2 08:00`, `đêm/sáng/trưa/tối`) | **Ô giờ 0…23** + câu công bố | Ba manifest đang ship chưa phát `snapshots.occupancy_hour_tz`. Đỉnh `t=167` đọc theo giờ địa phương là 23:00, theo UTC là 06:00 — hai câu chuyện khác hẳn. |
+
+**Pixel màu của lens này ĐỔI so với bản trước.** Đó là migration có chủ ý (spec §23.3):
+`sc=g|binned` vẫn parse, giá trị thô và chú giải giữ nguyên nghĩa, nhưng ngưỡng phân vị cũ
+**không** được tái sử dụng âm thầm.
+
+### 16b. Một cửa cho mọi phép gộp
+
+Mọi station-hour đi qua **`eligibleStationHour()`** (`viz/occ.ts`) → `stationOccAt()`.
+Trước đó cùng bộ điều kiện được chép ở ba chỗ, và một bản đã trôi: `shapeDayProfiles`
+không kiểm `inScope`, nên trạm BUFFER lọt vào mẫu số của small multiples. Nay:
+
+```text
+utilization(g,t) = Σ occ(s,t) / Σ n_ports(s)   trên s ∈ IN, đủ gate
+```
+
+**Ratio-of-sums, không có fallback.** Trung bình các tỉ lệ lệch tới 4,18 điểm % ở Hà Nội,
+4,45 ở Lâm Đồng, và **đổi dấu** ở Điện Biên. `null` khi mẫu số bằng 0 — không bao giờ là 0.
+
+Coverage đi thành **hai** số (cổng và trạm), vì chúng trả lời hai câu và ở Hà Nội chúng
+lệch thật: trung vị 96,48% theo trạm nhưng 99,74% theo cổng.
+
+### 16c. Ba kênh, ba nghĩa — không chồng lấn
+
+| Trạng thái | Ký hiệu | KHÔNG dùng |
+|---|---|---|
+| có giá trị | fill theo thang tuyệt đối | — |
+| không contributor ở ô giờ này | **vân xám 45°** — cùng chất liệu với ô null của lưới | một bậc màu nhạt |
+| coverage cổng < 50% | **nét đứt** quanh vùng, fill giữ nguyên | opacity (sẽ làm vùng dữ liệu mỏng trông như vùng tải THẤP) |
+| đang chọn | hai lượt nét `SELECT_PASSES` | — |
+
+Ngưỡng 50% là **sàn cảnh báo** kế thừa data-health, không phải giấy chứng nhận: phần trên
+nó tuyệt đối không được gọi là "đủ coverage" (spec §24-3). **40% của sàng lọc không có vị
+trí nào trên thang này.**
+
+### 16d. Ngôn ngữ
+
+Màu đậm = **tỉ lệ cổng bận cao hơn**. Bộ dữ liệu không có hàng đợi, thời gian chờ, SLA hay
+ngưỡng năng lực theo vùng/giờ, nên **không chỗ nào được nói "quá tải"** — chữ ấy chỉ xuất
+hiện trong câu phủ định, và `utilization-surface.test.ts` khoá luật đó bằng cách bắt mọi
+lần nhắc phải nằm trong tầm phủ của một phủ định.
+
+### 16e. Sai khác CÓ CHỦ Ý so với wireframe của spec
+
+§19.1 vẽ segmented control `[Vùng tải] [Trạm]` ở góc phải **bản đồ**. Bản chạy đặt nó
+trong **cột đọc**, đúng khe mà `DemandModes` đã chiếm: cùng một loại điều khiển ("cùng dữ
+liệu, khác dạng hình") thì phải ở cùng một chỗ, và §3 chốt chrome dán vào cạnh chứ không
+nổi trên bản đồ.
+
+### 16f. Vòng đời — vì sao scrub không tốn gì
+
+Membership H3 và thống kê đủ (`Σocc`, `Σn_ports`, contributors, observed-hour) được
+**precompute một lần cho mỗi gói** ở 3 mức × 168 giờ (`buildUtilRegions`, nhớ theo tham
+chiếu gói). Đổi `t` chỉ là một phép tra mảng. Đo trên gói `p/01`, 168 bước scrub thật:
+**0 request mới · 0 long task · commit p95 0,3 ms**
+(`docs/qa/utilization-redesign/witness-report.json`).
+
+`t` được đăng ký ở LÁ (`UtilizationLegendNote`), không ở `App` và không ở cột đọc.

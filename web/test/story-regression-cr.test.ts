@@ -9,8 +9,14 @@
  *
  * **RF-2 — một khe hình có trục mà không có ô là một lời nói dối.** `Heatmap168` thoát sớm
  * khi `scale` vắng, nhưng vẫn render nhãn trục và 168 nút. Cảnh 5 vì thế khẳng định 3,29×
- * bằng một khung trống. Test buộc cảnh nhận CHÍNH thang mà bản đồ dùng, và buộc khe trống
- * hẳn khi chưa có thang.
+ * bằng một khung trống.
+ *
+ * RF-2 nay được đóng bằng KIẾN TRÚC chứ không bằng một cổng ở `FigureSlot`
+ * (`UX_UTILIZATION_VISUALIZATION_SPEC` §23.4): hình của cảnh 5 là
+ * `UtilizationDayProfiles`, thứ mã hoá giá trị bằng VỊ TRÍ. Nó không có thang màu để mà
+ * thiếu, nên chế độ hỏng "có trục, không có ô" không còn biểu diễn được. Ba test dưới đây
+ * đổi từ *"cảnh phải mượn đúng thang"* sang *"cảnh không được có thang nào để mượn"* — và
+ * giữ nguyên luật gốc: điều kiện vẽ là CÓ DỮ LIỆU, không phải có thang.
  */
 
 import { test } from "node:test";
@@ -116,31 +122,31 @@ test("RF-1 chỗ áp ghim là một phép ĐỌC, không phải một phép ghi"
 
 // ══ RF-2 ═════════════════════════════════════════════════════════════════════
 
-test("RF-2 cảnh nhận CHÍNH thang mà bản đồ dùng, không dựng bản thứ hai", () => {
+test("RF-2 cảnh KHÔNG dựng và KHÔNG mượn thang màu nào nữa", () => {
   const app = src("App.tsx");
-  assert.match(app, /<StoryColumn pkg=\{storyPkg\} occScale=\{utilizationScale\} \/>/,
-    "cảnh là người dùng thứ TƯ của `utilizationScale`");
+  assert.match(app, /<StoryColumn pkg=\{storyPkg\} \/>/,
+    "cảnh không còn nhận thang: hình của nó không mã hoá giá trị bằng màu");
   const surface = src("story/StorySurface.tsx");
   assert.doesNotMatch(surface, /buildScale|applyScaleMode|scaleContractOf/,
-    "story/ không được tự dựng thang — mượn, không rẽ nhánh");
+    "story/ không được tự dựng thang");
+  assert.doesNotMatch(surface, /occScale/, "và không còn một thang nào chảy qua nó");
 });
 
-test("RF-2 khe nhiệt đồ trống HẲN khi chưa có thang, không ra khung có trục", () => {
+test("RF-2 điều kiện vẽ của khe hình là CÓ DỮ LIỆU, không phải có thang", () => {
   const surface = src("story/StorySurface.tsx");
-  assert.doesNotMatch(surface, /scale=\{null\}/, "không được truyền thang rỗng cho Heatmap168");
-  assert.match(surface, /heat && heat\.cells\.length > 0 && occScale \?/,
-    "thiếu thang ⇒ khe trống, cùng luật với thiếu model");
-  assert.match(surface, /scale=\{occScale\}/);
+  assert.doesNotMatch(surface, /scale=\{null\}/, "không được truyền một thang rỗng");
+  assert.match(surface, /model && model\.cells\.length > 0 \?/,
+    "không có ô nào ⇒ khe trống hẳn, cùng luật với thiếu model");
 });
 
-test("RF-2 phép thử vẫn CẦN, vì `Heatmap168` vẫn thoát sớm khi thang vắng", () => {
-  // Nếu ngày nào đó component tự lo được thang rỗng thì test này gãy, và người sửa sẽ đọc
-  // được vì sao cổng ở `FigureSlot` từng tồn tại trước khi gỡ nó.
-  assert.match(
-    src("ui/Heatmap168.tsx"),
-    /if \(!el \|\| !scale \|\| cells\.length === 0\) return;/,
-    "thang vắng ⇒ không ô nào được tô",
-  );
+test("RF-2 chế độ hỏng cũ nay BẤT KHẢ BIỂU DIỄN, không chỉ bị canh", () => {
+  const chart = src("ui/UtilizationDayProfiles.tsx");
+  // Không nhận thang ⇒ không có nhánh "thang vắng" ⇒ không thể ra một khung có trục mà
+  // không có dữ liệu. Nếu ngày nào đó biểu đồ chính lại nhận `Scale`, test này gãy và
+  // người sửa đọc được vì sao cổng ở `FigureSlot` từng phải tồn tại.
+  assert.doesNotMatch(chart, /scale\s*[?:]\s*Scale/, "biểu đồ chính không được nhận thang màu");
+  assert.match(chart, /if \(model\.cells\.length === 0\) return null;/,
+    "không có ô nào ⇒ không render gì, kể cả trục");
 });
 
 // ══ CG-1(B) ══════════════════════════════════════════════════════════════════

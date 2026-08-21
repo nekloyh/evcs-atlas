@@ -21,7 +21,7 @@ một lần checkout sạch, và "nhớ mở server trước" là đúng cái b�
 | `at10-4-national-3d.png` | AT10-4: dưới `prefers-reduced-motion: reduce` app gọi `jumpTo({pitch:50})`; mặc định gọi `easeTo({pitch:50})` |
 | `at10-6-scrubber-end.png` | AT10-6: track focus được, 11 → 14 sau 3×→, Home → `T2 00:00`, ← từ Home quay vòng về `CN 23:00` (167), End → 167 |
 | — (chỉ số) | AT10-9: `main[aria-label="Không gian bản đồ chính"]` tồn tại, `tabIndex=-1`, nhận được focus |
-| `at10-10-w{760,900,1024,1280,1600}.png` | AT10-10: `scrollWidth == viewport` và 0 phần tử tràn ở cả năm bề rộng |
+| `at10-10-{route}-w{760,900,1024,1280,1600}.png` | AT10-10: `scrollWidth == viewport` và 0 phần tử tràn ở cả năm bề rộng |
 
 ## Hai phép đo đã bị chính số đo BÁC, và cái thay chúng
 

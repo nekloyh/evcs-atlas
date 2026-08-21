@@ -16,6 +16,8 @@ import { DOW_FULL, dowOf, hourOf } from "../state/types";
 import { baseUnitPhrase } from "../units";
 import { isAbnormal } from "../viz/station-status";
 import type { Scale } from "../viz/palette";
+import { OCC_TZ_UNKNOWN, hourBucketLabel, occTimezoneDisclosure, type OccTimezoneState } from "../viz/occ-time";
+import { UTIL_LOW_COVERAGE, type UtilRegionReadout } from "../viz/util-regions";
 
 export interface TooltipContext {
   object: unknown;
@@ -25,6 +27,11 @@ export interface TooltipContext {
   scale: Scale | null;
   stations?: StationPoint[];
   communes?: CommuneCollection | null;
+  /**
+   * Trục giờ được phép gọi là gì (§16). Mặc định `unknown`: một chỗ gọi quên truyền prop
+   * phải rơi về trạng thái KHÔNG khẳng định gì, không phải rơi về một nhãn đồng hồ.
+   */
+  timezone?: OccTimezoneState;
 }
 
 function fmtNum(v: unknown, maxDigits = 1): string {
@@ -76,6 +83,46 @@ export function getMapTooltip(ctx: TooltipContext): { text: string } | null {
 
   const lens = field?.lens ?? (field?.id ? lensOfField(field.id) : null);
   const layer = layerId ?? "";
+  const timezone = ctx.timezone ?? OCC_TZ_UNKNOWN;
+  const hourPhrase = hourBucketLabel(hourOf(t), timezone);
+  const tzNote = occTimezoneDisclosure(timezone);
+
+  // ── 0. VÙNG TẢI (lens Sử dụng) ─────────────────────────────────────────────
+  //
+  // Hợp đồng §14.1: **không bao giờ in một số `%` mà thiếu tử số và mẫu số.** Một tỉ lệ
+  // vùng không kiểm được nếu người đọc không thấy nó gộp từ bao nhiêu cổng của bao nhiêu
+  // trạm — và ở một cell chỉ có 1 trạm thì con số ấy là nhịp của một trạm, không phải của
+  // một vùng. Dòng `n/N` là chỗ duy nhất nói ra điều đó.
+  if (layer.startsWith("util-region")) {
+    const r = object as UtilRegionReadout;
+    const lines: string[] = [
+      `Vùng H3 r${r.resolution} · ${r.h3.slice(0, 6)}…`,
+      r.utilization === null
+        ? "Không có trạm nào đủ quan sát ở ô giờ này"
+        : `${fmtPct(r.utilization)} cổng bận${r.utilization > 1 ? " ⚠ vượt mẫu số" : ""}`,
+    ];
+    if (r.utilization !== null) {
+      lines.push(
+        `${fmtNum(r.busyPortsAvg)} / ${fmtNum(r.observedPorts, 0)} cổng bận trung bình · ` +
+          `${r.contributingStations}/${r.stations} trạm đóng góp`,
+      );
+    }
+    lines.push(
+      `Coverage: ${fmtNum(r.observedPorts, 0)}/${fmtNum(r.installedPorts, 0)} cổng ` +
+        `(${r.portCoverage === null ? "—" : fmtPct(r.portCoverage)}) · ` +
+        `${r.contributingStations}/${r.stations} trạm ` +
+        `(${r.stationCoverage === null ? "—" : fmtPct(r.stationCoverage)})`,
+    );
+    if (r.portCoverage !== null && r.portCoverage < UTIL_LOW_COVERAGE) {
+      lines.push(`⚠ Coverage cổng dưới ${Math.round(UTIL_LOW_COVERAGE * 100)}% — nét đứt`);
+    }
+    lines.push(`Quan sát: ${fmtNum(r.observedHoursPerPort)} giờ/cổng · ${hourPhrase}`);
+    if (tzNote) lines.push(tzNote);
+    // Câu này KHÔNG tuỳ chọn (§4, §22.10): một thang đậm dần tự nó gợi ra "quá tải", và
+    // dữ liệu này — không hàng đợi, không thời gian chờ, không SLA — không nói được điều đó.
+    lines.push("Màu đậm = tỉ lệ cổng bận cao hơn, không phải chỉ báo quá tải");
+    return { text: lines.join("\n") };
+  }
 
   // ── 1. Charging Stations ───────────────────────────────────────────────────
   if (
@@ -100,14 +147,17 @@ export function getMapTooltip(ctx: TooltipContext): { text: string } | null {
     const lines: string[] = [name];
 
     if (lens === "utilization") {
-      const dow = dowOf(t);
-      const hour = hourOf(t);
+      // `${hour}h` cũ là một CLAIM VỀ ĐỒNG HỒ, và manifest chưa công bố múi giờ nào để đỡ
+      // nó (§16, §24-1). Cùng một ô giờ đọc theo giờ địa phương là 23:00, đọc theo UTC là
+      // 06:00 — hai câu chuyện khác hẳn nhau. `hourBucketLabel` in nhãn đồng hồ CHỈ KHI
+      // `snapshots.occupancy_hour_tz` có mặt và hợp lệ.
       const occVal = s.value;
       const occText =
         occVal !== null && occVal !== undefined
-          ? `Tải đo lúc ${DOW_FULL[dow]} ${hour}h: ${fmtPct(occVal)}`
-          : `Tải đo lúc ${DOW_FULL[dow]} ${hour}h: Chưa đủ quan sát`;
+          ? `Tỉ lệ cổng bận · ${DOW_FULL[dowOf(t)]} ${hourPhrase}: ${fmtPct(occVal)}`
+          : `Tỉ lệ cổng bận · ${DOW_FULL[dowOf(t)]} ${hourPhrase}: Chưa đủ quan sát`;
       lines.push(occText, `${ports} · ${power || "kW chưa khai"}`.trim(), statusNote);
+      if (tzNote) lines.push(tzNote);
     } else if (lens === "supply") {
       lines.push(
         `Quy mô: ${ports}${power ? ` · ${power}` : ""}`,

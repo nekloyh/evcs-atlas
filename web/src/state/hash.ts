@@ -34,9 +34,12 @@ import { NATIONAL, PROVINCE, PROVINCE_KEY } from "../data/province";
 import { parseSceneRef, serializeSceneRef } from "../story/scenes";
 import { parseFilter, serializeFilter } from "./filter";
 import {
+  DEFAULT_UTIL_REPRESENTATION,
   HOURS_IN_WEEK,
   MODES,
   OVERLAY_IDS,
+  UTIL_REPRESENTATION_WIRE,
+  parseUtilRepresentation,
   type HashState,
   type Mode,
   type OverlayId,
@@ -112,6 +115,13 @@ export function parseHash(hash: string): Partial<HashState> {
   // link tới cảnh ghi đè vĩnh viễn sở thích ấy: vào câu chuyện rồi ra bản đồ thì dải liên tục
   // biến mất mà không ai bấm gì (RF-1). Chỗ áp ghim là `effectiveScaleModeOf`, đọc chứ không ghi.
   if (!scene) out.scaleMode = p.get("sc") === "g" ? "gradient" : "binned";
+
+  // `ur` — đơn vị đọc không gian của lens Sử dụng. Giá trị lạ rơi về mặc định, cùng luật
+  // với `sc` ngay trên: một khoá hỏng không được biến thành một chế độ thứ ba.
+  if (!scene) {
+    const ur = parseUtilRepresentation(p.get("ur"));
+    if (ur) out.utilRepresentation = ur;
+  }
 
   // Khoá `c` mang MỘT đối tượng: ô (`h3_r8`), trạm (`station:<id>`), hoặc xã (`commune:<mã 5 số>`).
   // Chỉ kiểm HÌNH DẠNG; đối tượng không có thật bị bỏ khi truy vấn trả rỗng.
@@ -199,7 +209,10 @@ export function parseHash(hash: string): Partial<HashState> {
   // Regex trước Number(): `Number("")` là 0, nên `sim=,` mà thiếu bước này sẽ đặt trạm
   // ở (0,0) giữa vịnh Guinea thay vì bị bỏ như F9 yêu cầu.
   const simRaw = p.get("sim");
-  if (simRaw) {
+  // Một hash không được khôi phục đồng thời đối tượng thật và ứng viên giả định. Khi chuỗi
+  // ngoài hệ thống chứa cả hai, `c` thắng: đó là nhánh có danh tính rõ và cùng precedence
+  // với serializer bên dưới. App không phải chờ một effect sau render mới dọn state lai.
+  if (simRaw && !out.cell && !out.selection) {
     const parts = simRaw.split(",");
     if (parts.length === 2 && parts.every((v) => /^-?\d+(\.\d+)?$/.test(v))) {
       const lat = Number(parts[0]);
@@ -270,13 +283,21 @@ export function serializeHash(s: HashState, prev = ""): string {
     // (§3d-1), nên trong một cảnh chúng không ghi. Ngoài cảnh thì chỉ ghi khi KHÁC mặc
     // định, cùng khuôn "không ghi trạng thái mặc định" của `l` rỗng và `p=1`.
     if (s.t !== 0) p.set("t", String(s.t));
+    // Chỉ ghi khi KHÁC mặc định — cùng khuôn "không ghi trạng thái mặc định" của `l` rỗng
+    // và `p=1`. Nhờ đó một link ở chế độ Vùng tải trông y hệt link trước khi có khoá này.
+    if (s.utilRepresentation && s.utilRepresentation !== DEFAULT_UTIL_REPRESENTATION) {
+      p.set("ur", UTIL_REPRESENTATION_WIRE[s.utilRepresentation]);
+    }
     const fb = serializeFilter(s.filter);
     if (fb) p.set("b", fb);
   }
   const serializedSel = s.selection ? serializeEntitySelection(s.selection) : s.cell;
-  if (serializedSel) p.set("c", serializedSel);
-
-  if (s.candidate) {
+  if (serializedSel) {
+    p.set("c", serializedSel);
+  } else if (s.candidate) {
+    // Selection thật và candidate là hai nhánh loại trừ. Trong trạng thái chuyển tiếp mà
+    // hai store chưa kịp hội tụ, selection là tương tác mới hơn (đặt candidate đã xoá
+    // selection đồng bộ ở MapView), nên chiều RA chỉ ghi `c`, tuyệt đối không ghi cả hai.
     p.set("sim", `${s.candidate.lat.toFixed(5)},${s.candidate.lng.toFixed(5)}`);
   }
 

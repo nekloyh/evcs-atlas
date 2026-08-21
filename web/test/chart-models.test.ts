@@ -5,7 +5,7 @@ import {
   buildDemandPopulationHistogram,
   buildSupplyPowerTierBreakdown,
   buildAccessPopulationCurve,
-  buildUtilizationWeekHeatmap,
+  buildUtilizationWeekModel,
   buildOpportunityCommuneRank,
   buildSpatialStructureModel,
   type OpportunityCommuneRow,
@@ -170,7 +170,7 @@ test("buildAccessPopulationCurve computes curve points and 2 km reference metric
   assert.equal(model.points[2]!.shareOfAllPop, 0.6);
 });
 
-test("buildUtilizationWeekHeatmap computes 168 cells with inScope masking", () => {
+test("buildUtilizationWeekModel computes 168 cells with inScope masking", () => {
   // 2 stations, 1 inScope and 1 buffer
   const n = 2;
   const occ = new Float32Array(n * 168).fill(2); // 2 occupied ports
@@ -186,14 +186,15 @@ test("buildUtilizationWeekHeatmap computes 168 cells with inScope masking", () =
     n,
   };
 
-  const model = buildUtilizationWeekHeatmap(profiles);
+  const model = buildUtilizationWeekModel(profiles);
   assert.equal(model.cells.length, 168);
-  assert.equal(model.allInInstalledPorts, 4);
+  assert.equal(model.days.length, 7);
+  assert.equal(model.allInstalledPorts, 4);
 
   // Station 0 occ=2, nPorts=4 -> utilization rate = 2/4 = 0.5 (50%)
-  assert.equal(model.cells[0]!.value, 0.5);
+  assert.equal(model.cells[0]!.utilization, 0.5);
   assert.equal(model.cells[0]!.contributingStations, 1);
-  assert.equal(model.cells[0]!.contributingPorts, 4);
+  assert.equal(model.cells[0]!.observedPorts, 4);
 });
 
 test("buildOpportunityCommuneRank ranks by lower bound and handles competition ties", () => {

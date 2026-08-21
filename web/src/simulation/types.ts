@@ -16,14 +16,17 @@ export type SimTag = "CALCULATED" | "ESTIMATED" | "RULE";
 export const SIM_TAG_LABEL: Record<SimTag, string> = {
   CALCULATED: "TÍNH TOÁN",
   ESTIMATED: "ƯỚC LƯỢNG",
-  RULE: "RULE",
+  // `RULE` là tên của XUẤT XỨ trong kiểu, không phải một từ để in ra: UX §7.1 cấm chữ
+  // "RULE" trên màn hình vì người đọc tiếng Việt không có neo nào cho nó. Nhãn đổi, khoá
+  // cấu trúc giữ nguyên — engine vẫn gắn `tag: "RULE"`.
+  RULE: "QUY TẮC",
 };
 
 /** Dạng ngắn cho đầu cột bảng. */
 export const SIM_TAG_SHORT: Record<SimTag, string> = {
   CALCULATED: "Tính",
   ESTIMATED: "Ước",
-  RULE: "Rule",
+  RULE: "Quy tắc",
 };
 
 export type ScreeningDecision = "DE_XUAT" | "DE_XUAT_NEU_CO_DC" | "TU_CHOI" | null;
@@ -63,6 +66,53 @@ export interface CandidatePoint {
   lng: number;
 }
 
+/**
+ * UX §7.4 — địa danh của chính vị trí giả định. KHÔNG có geocoder mới: `commune_name` đã
+ * đi cùng lưới và `commune.geojson` đã nạp, nên đây chỉ là dữ liệu sẵn có được đưa vào
+ * view-model. `communeName` đã mang sẵn tiền tố loại đơn vị ("Xã Tây Phương") — UI KHÔNG
+ * được ghép thêm một tiền tố nữa.
+ */
+export interface CandidateContext {
+  communeCode: string | null;
+  communeName: string | null;
+  communeKind: CommuneKind | null;
+  provinceName: string | null;
+}
+
+/**
+ * UX §7.4, §12.2 — mọi con số mà thẻ sàng lọc phải in ra, lấy từ đúng lượt replay rule mà
+ * engine đã chạy. Không có phép tính mới: `distanceM`/`marginM` là chính đầu vào và đầu ra
+ * của `replayScreening`, `thresholdM` là hằng chính sách theo `kind`.
+ */
+export interface ScreeningEvidence {
+  distanceM: number | null;
+  thresholdM: number | null;
+  marginM: number | null;
+  kind: CommuneKind | null;
+  nearestStationCode: string | null;
+  nearestStationName: string | null;
+  /** `null` = không có phép đo đủ điều kiện. KHÔNG BAO GIỜ đổ về 0 — §13.1. */
+  nearestUtil: number | null;
+  nearestUtilReportable: boolean;
+  nearestGrade: string | null;
+  nearestHighLoad: boolean;
+  highLoadEvaluable: boolean;
+  exceptionFloorM: 500;
+  highLoadThreshold: 0.4;
+}
+
+/**
+ * UX §7.4 — gộp ô kết quả theo xã/phường. `h3s` chỉ để bản đồ khoanh vùng; nó KHÔNG được
+ * dùng làm nhãn chính (§7.5: không có "Vùng 1", không hiện H3 thay tên).
+ */
+export interface SimulationAreaSummary {
+  communeCode: string;
+  communeName: string;
+  improved: { cells: number; population: number };
+  uncertain: { cells: number; population: number };
+  h3s: string[];
+}
+
 export interface SimCellResult {
   h3: string;
   e: number;
@@ -98,6 +148,8 @@ export interface SimulationResult {
     /** `null` = không xác định được loại xã (PIP trượt VÀ ô không tra được commune) — §1.9. */
     kind: CommuneKind | null;
     highLoadEvaluable: boolean;
+    /** UX §12.2 — số để in ra; `marginM`/`kind` ở trên là cùng một sự thật, đã có test parity. */
+    evidence: ScreeningEvidence;
   };
   before: {
     /** xuất xứ cấu trúc — gộp từ cột CÔNG BỐ (Dijkstra n07), là đại lượng TÍNH TOÁN */
@@ -117,6 +169,15 @@ export interface SimulationResult {
     uncertain: { cells: number; population: number };
   };
   cells: SimCellResult[];
+  candidateContext: CandidateContext;
+  /**
+   * UX §7.5 — chỉ nhóm có tên ĐÁNG TIN mới vào `named`; ô thiếu tên vẫn ở mọi tổng toàn
+   * vùng và chỉ được nói riêng qua `missingName`. Không có nhãn tự đặt.
+   */
+  areas: {
+    named: SimulationAreaSummary[];
+    missingName: { cells: number; population: number };
+  };
   context: {
     stationsWithin5km: ContextStation[];
   };
@@ -137,6 +198,8 @@ export interface AdmissionCheckSuccess {
   ok: true;
   candidateCell: string;
   communeKind: CommuneKind | null;
+  communeCode: string | null;
+  communeName: string | null;
 }
 
 export interface AdmissionCheckFailure {

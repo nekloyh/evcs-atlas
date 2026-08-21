@@ -20,9 +20,9 @@ import {
 } from "./filter";
 import { readHash, resolveHashField, type HashApplyContext } from "./hash";
 import { type EntitySelection, parseEntitySelection, serializeEntitySelection } from "./selection";
-import type { AppNavMode, BasemapStyle, DemandRepresentation, HashState, Mode, OverlayId, View } from "./types";
+import type { AppNavMode, BasemapStyle, DemandRepresentation, HashState, Mode, OverlayId, UtilRepresentation, View } from "./types";
 import type { ScaleMode } from "../viz/palette";
-import { defaultRepresentationFor, representationFits } from "./types";
+import { DEFAULT_UTIL_REPRESENTATION, defaultRepresentationFor, representationFits } from "./types";
 
 export type { AppNavMode, BasemapStyle, Mode, OverlayId, ReadingUnit, View } from "./types";
 export type { EntitySelection, DatasetId, StationId, H3R8, CommuneCode } from "./selection";
@@ -97,6 +97,13 @@ export interface AppState {
 
   /** Vị trí scrubber — khoá `t`, 0–167 (§3e). `t = dow × 24 + hour`, `dow = 0` là Thứ Hai. */
   t: number;
+  /**
+   * Đơn vị đọc không gian của lens Sử dụng — `Vùng tải` hay `Trạm` (spec §11.1).
+   *
+   * Ở store chứ không ở `useState` của `MapView` vì nó phải sống trong hash: một link tới
+   * "xem từng trạm ở khu này" mà mở ra chế độ vùng là một link không giữ được điều nó hứa.
+   */
+  utilRepresentation: UtilRepresentation;
   /**
    * Scrubber có đang chạy không.
    *
@@ -176,6 +183,7 @@ export interface AppState {
   applyPreset: (preset: QuickPreset, resolved: AnalysisFilter | null) => void;
   flyTo: (v: View, select?: string | null) => void;
   /** Đặt giờ scrubber. Ngoài cửa sổ brush thì bị kéo vào — §3e. */
+  setUtilRepresentation: (r: UtilRepresentation) => void;
   setT: (t: number) => void;
   /** Một bước play. Lặp VÔ HẠN, và lặp trong cửa sổ nếu có (§3e). */
   stepT: () => void;
@@ -318,6 +326,8 @@ export const useStore = create<AppState>((set) => ({
   // Scrubber mở ở giờ 0 (Thứ Hai 0h) khi hash không nói gì. Play KHÔNG tự chạy: một link
   // là ảnh chụp, và một bản đồ tự động thay đổi ngay khi mở là thứ người nhận không yêu cầu.
   t: clampT(boot.t ?? 0),
+  // Hash cũ không có khoá `ur` ⇒ `Vùng tải`, đúng mặc định của spec §23.2.
+  utilRepresentation: boot.utilRepresentation ?? DEFAULT_UTIL_REPRESENTATION,
   playing: false,
   // Chỉ đọc dưới 1024 px, nơi cột là sheet phủ — xem khai báo ở trên.
   readColumnOpen: false,
@@ -506,6 +516,7 @@ export const useStore = create<AppState>((set) => ({
       return { view: v, selection, contextSelection: selection ? null : contextSelectionOf(select) };
     }),
 
+  setUtilRepresentation: (utilRepresentation) => set({ utilRepresentation }),
   setT: (t) => set({ t: clampT(t) }),
   // Lặp VÔ HẠN qua 168 giờ của tuần (§3e).
   stepT: () => set((s) => ({ t: (s.t + 1) % 168 })),
@@ -586,6 +597,9 @@ export const useStore = create<AppState>((set) => ({
         beat: null,
         field,
         scaleMode: h.scaleMode ?? "binned",
+        // Khoá `ur` vắng ⇒ `Vùng tải`. Hash cũ đang lưu hành không có nó, và mở chúng ra ở
+        // chế độ mặc định là đúng hợp đồng migration của spec §23.2.
+        utilRepresentation: h.utilRepresentation ?? DEFAULT_UTIL_REPRESENTATION,
         filter: applyFilterIntent(s.filter, nextFilter),
         mode: h.mode ?? "2d",
         // Cùng luật với boot: `m=3d` không kèm `v` mở ra đã nghiêng 50 (§2b).

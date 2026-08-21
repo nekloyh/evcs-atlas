@@ -198,7 +198,63 @@ test("getMapTooltip formats metrics correctly according to the active Lens", () 
   });
   assert.ok(occTooltip?.text.includes("Trạm Lotte Tây Hồ"));
   assert.ok(occTooltip?.text.includes("75,0%"));
-  assert.ok(occTooltip?.text.includes("Thứ Ba 14h"));
+  // THỨ vẫn in ra — `dow` là một chỉ số của dữ liệu và `docs/COT.md` chốt `dow = 0` là Thứ
+  // Hai, nên nó không phải một suy đoán. GIỜ thì có: `14h` là một claim về đồng hồ, và ba
+  // manifest đang ship đều chưa phát `snapshots.occupancy_hour_tz`. Dưới giờ địa phương
+  // đỉnh của Hà Nội rơi vào 23:00; dưới UTC nó rơi vào 06:00 — hai câu chuyện khác hẳn
+  // nhau, và không có gì trong kho nói được cái nào đúng (spec §16, §24-1).
+  assert.ok(occTooltip?.text.includes("Thứ Ba"), "thứ vẫn đọc được từ dữ liệu");
+  assert.ok(occTooltip?.text.includes("ô giờ 14"), "giờ là Ô GIỜ khi múi giờ chưa công bố");
+  assert.doesNotMatch(occTooltip!.text, /Thứ Ba 14h|14:00/, "không được in nhãn đồng hồ");
+  assert.ok(
+    occTooltip?.text.includes("Múi giờ của profile chưa được công bố"),
+    "và phải NÓI RA vì sao nó không in giờ",
+  );
+
+  // 4b. Cùng ô giờ ấy, nhưng manifest ĐÃ công bố múi giờ ⇒ nhãn đồng hồ được phép.
+  const occTooltipTz = getMapTooltip({
+    object: { id: "ST202", name: "Trạm Lotte Tây Hồ", nPorts: 8, powerKwSite: 120, value: 0.75, opStatus: "OPERATIONAL" },
+    layerId: "station-value",
+    field: occField,
+    t: 38,
+    scale: dummyScale,
+    timezone: { kind: "declared", tz: "Asia/Ho_Chi_Minh" },
+  });
+  assert.ok(occTooltipTz?.text.includes("14:00 · Asia/Ho_Chi_Minh"));
+  assert.ok(!occTooltipTz?.text.includes("chưa được công bố"), "đã công bố thì không công bố nữa");
+
+  // 4c. VÙNG TẢI — §14.1: không bao giờ in một `%` mà thiếu tử số và mẫu số.
+  const regionTooltip = getMapTooltip({
+    object: {
+      h3: "871eb0800ffffff",
+      resolution: 7,
+      lat: 21,
+      lng: 105.8,
+      utilization: 12.4 / 47,
+      busyPortsAvg: 12.4,
+      observedPorts: 47,
+      contributingStations: 6,
+      installedPorts: 55,
+      stations: 8,
+      portCoverage: 47 / 55,
+      stationCoverage: 6 / 8,
+      observedHoursPerPort: 3.6,
+    },
+    layerId: "util-region-r7-value",
+    field: occField,
+    t: 38,
+    scale: dummyScale,
+  });
+  assert.ok(regionTooltip?.text.includes("Vùng H3 r7"));
+  assert.ok(regionTooltip?.text.includes("26,4% cổng bận"), "tỉ lệ");
+  assert.ok(regionTooltip?.text.includes("12,4 / 47 cổng"), "tử số VÀ mẫu số");
+  assert.ok(regionTooltip?.text.includes("6/8 trạm đóng góp"), "n/N trạm");
+  assert.ok(regionTooltip?.text.includes("47/55 cổng"), "coverage cổng có cả hai vế");
+  assert.ok(regionTooltip?.text.includes("3,6 giờ/cổng"), "giờ quan sát trên mỗi cổng");
+  assert.ok(
+    regionTooltip?.text.includes("không phải chỉ báo quá tải"),
+    "câu bác bỏ 'quá tải' là bắt buộc, không tuỳ chọn",
+  );
 
   // 5. Opportunity Lens - base-rule margin keeps its signed distance unit
   const opportunityField = FIELD_BY_ID.get("screen_margin_m")!;
